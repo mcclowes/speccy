@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.docusaurus/
+.DS_Store
+coverage/
+*.log
+apps/macos/.build/
+apps/macos/Speccy.app/
+

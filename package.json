@@ -1,0 +1,21 @@
+{
+  "name": "speccy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An elegant OpenAPI reference renderer for the web, macOS, and Docusaurus.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev -w @speccy/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
