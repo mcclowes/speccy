@@ -8,11 +8,11 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @speccy/renderer && npm run build -w @speccy/docusaurus && npm run build -w @speccy/web && npm run build -w @speccy/docusaurus-demo",
     "build:mac": "bash apps/macos/scripts/build-app.sh",
     "dev": "npm run dev -w @speccy/web",
-    "test": "npm run test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @speccy/renderer && npm run test -w @speccy/docusaurus && npm run test -w @speccy/web",
+    "typecheck": "npm run typecheck -w @speccy/renderer && npm run typecheck -w @speccy/docusaurus && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo",
     "check": "npm run typecheck && npm test && npm run build"
   },
   "engines": {

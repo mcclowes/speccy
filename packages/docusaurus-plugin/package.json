@@ -15,11 +15,11 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.js"
     },
-    "./styles.css": "@speccy/renderer/styles.css"
+    "./styles.css": "./dist/styles.css"
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external @speccy/renderer",
+    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external @speccy/renderer && cp ../renderer/dist/styles.css dist/styles.css",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
