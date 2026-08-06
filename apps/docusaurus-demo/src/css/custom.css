@@ -1,0 +1,6 @@
+:root { --ifm-color-primary: #6d5dfc; --ifm-font-family-base: Manrope, system-ui, sans-serif; }
+.demo-home { max-width: 820px; margin: 0 auto; padding: 16vh 28px; }
+.demo-home > span { color: var(--ifm-color-primary); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.demo-home h1 { margin: 20px 0; font-size: clamp(3rem, 8vw, 6.5rem); line-height: .95; letter-spacing: -.06em; }
+.demo-home p { max-width: 580px; color: var(--ifm-color-emphasis-700); font-size: 1.15rem; line-height: 1.7; }
+

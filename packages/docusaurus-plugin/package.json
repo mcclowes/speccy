@@ -1,0 +1,45 @@
+{
+  "name": "@speccy/docusaurus",
+  "version": "0.1.0",
+  "description": "Render elegant OpenAPI reference pages in Docusaurus.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./styles.css": "@speccy/renderer/styles.css"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external @speccy/renderer",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@speccy/renderer": "*"
+  },
+  "peerDependencies": {
+    "@docusaurus/core": ">=3.0.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "^3.8.1",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

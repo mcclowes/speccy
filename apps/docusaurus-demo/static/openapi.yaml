@@ -1,0 +1,61 @@
+openapi: 3.1.0
+info:
+  title: Orchard API
+  version: 1.0.0
+  description: A compact example used to verify Speccy inside a real Docusaurus build.
+servers:
+  - url: https://api.orchard.example/v1
+tags:
+  - name: Fruit
+    description: Inspect and manage the orchard's harvest.
+paths:
+  /fruit:
+    get:
+      tags: [Fruit]
+      operationId: listFruit
+      summary: List fruit
+      parameters:
+        - name: season
+          in: query
+          description: Only return fruit harvested in this season.
+          schema:
+            type: string
+            enum: [spring, summer, autumn, winter]
+      responses:
+        '200':
+          description: Fruit currently in the orchard.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fruit'
+    post:
+      tags: [Fruit]
+      operationId: addFruit
+      summary: Add fruit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fruit'
+      responses:
+        '201':
+          description: The fruit was added.
+components:
+  schemas:
+    Fruit:
+      type: object
+      required: [name, variety]
+      properties:
+        name:
+          type: string
+          example: Apple
+        variety:
+          type: string
+          example: Discovery
+        pickedAt:
+          type: string
+          format: date-time
+
