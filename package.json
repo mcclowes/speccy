@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:mac": "bash apps/macos/scripts/build-app.sh",
     "dev": "npm run dev -w @speccy/web",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -18,4 +19,3 @@
     "node": ">=20"
   }
 }
-

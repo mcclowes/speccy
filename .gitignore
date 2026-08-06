@@ -7,4 +7,5 @@ coverage/
 *.log
 apps/macos/.build/
 apps/macos/Speccy.app/
-
+apps/macos/Sources/SpeccyMac/Resources/Web/*
+!apps/macos/Sources/SpeccyMac/Resources/Web/.gitkeep

@@ -12,6 +12,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Speccy, type OpenAPIDocument } from '@speccy/renderer';
 import { SAMPLE_SPEC } from './sample';
 
+declare global {
+  interface Window {
+    speccyLoadSpec?: (source: string, name?: string) => void;
+  }
+}
+
 type Theme = 'light' | 'dark' | 'system';
 
 function Mark() {
@@ -33,6 +39,11 @@ export function App() {
   useEffect(() => {
     const initialUrl = new URLSearchParams(window.location.search).get('url');
     if (initialUrl) void loadUrl(initialUrl);
+  }, []);
+
+  useEffect(() => {
+    window.speccyLoadSpec = (nextSource, name) => applySource(nextSource, name ?? 'Opened spec');
+    return () => { delete window.speccyLoadSpec; };
   }, []);
 
   function applySource(next: string, name = 'Pasted spec') {
@@ -103,4 +114,3 @@ export function App() {
     </div>
   );
 }
-
