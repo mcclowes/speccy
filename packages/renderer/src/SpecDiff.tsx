@@ -74,12 +74,88 @@ function formatValue(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
-function ChangeValue({ label, value }: { label: string; value: unknown }) {
-  if (value === undefined) return null;
+interface DiffRow {
+  before?: { number: number; text: string; changed: boolean };
+  after?: { number: number; text: string; changed: boolean };
+}
+
+/** Aligns changed line ranges around their longest common subsequence. */
+export function createSideBySideDiff(before: unknown, after: unknown): DiffRow[] {
+  const beforeLines = before === undefined ? [] : formatValue(before).split('\n');
+  const afterLines = after === undefined ? [] : formatValue(after).split('\n');
+  const lengths = Array.from({ length: beforeLines.length + 1 }, () => Array(afterLines.length + 1).fill(0) as number[]);
+
+  for (let left = beforeLines.length - 1; left >= 0; left -= 1) {
+    for (let right = afterLines.length - 1; right >= 0; right -= 1) {
+      lengths[left]![right] = beforeLines[left] === afterLines[right]
+        ? lengths[left + 1]![right + 1]! + 1
+        : Math.max(lengths[left + 1]![right]!, lengths[left]![right + 1]!);
+    }
+  }
+
+  const matches: Array<[number, number]> = [];
+  let left = 0;
+  let right = 0;
+  while (left < beforeLines.length && right < afterLines.length) {
+    if (beforeLines[left] === afterLines[right]) {
+      matches.push([left, right]);
+      left += 1;
+      right += 1;
+    } else if (lengths[left + 1]![right]! >= lengths[left]![right + 1]!) {
+      left += 1;
+    } else {
+      right += 1;
+    }
+  }
+
+  const rows: DiffRow[] = [];
+  let beforeStart = 0;
+  let afterStart = 0;
+  for (const [beforeMatch, afterMatch] of [...matches, [beforeLines.length, afterLines.length] as [number, number]]) {
+    const changedCount = Math.max(beforeMatch - beforeStart, afterMatch - afterStart);
+    for (let offset = 0; offset < changedCount; offset += 1) {
+      const beforeIndex = beforeStart + offset;
+      const afterIndex = afterStart + offset;
+      rows.push({
+        before: beforeIndex < beforeMatch ? { number: beforeIndex + 1, text: beforeLines[beforeIndex]!, changed: true } : undefined,
+        after: afterIndex < afterMatch ? { number: afterIndex + 1, text: afterLines[afterIndex]!, changed: true } : undefined,
+      });
+    }
+    if (beforeMatch < beforeLines.length && afterMatch < afterLines.length) {
+      rows.push({
+        before: { number: beforeMatch + 1, text: beforeLines[beforeMatch]!, changed: false },
+        after: { number: afterMatch + 1, text: afterLines[afterMatch]!, changed: false },
+      });
+    }
+    beforeStart = beforeMatch + 1;
+    afterStart = afterMatch + 1;
+  }
+  return rows;
+}
+
+function DiffLine({ side, line }: { side: 'before' | 'after'; line?: NonNullable<DiffRow['before']> }) {
   return (
-    <div className="sp-diff-value">
-      <strong>{label}</strong>
-      <pre>{formatValue(value)}</pre>
+    <div className={['sp-diff-line', line?.changed && `is-${side}`, !line && 'is-empty'].filter(Boolean).join(' ')}>
+      <span className="sp-diff-line-number">{line?.number}</span>
+      <span className="sp-diff-line-marker" aria-hidden="true">{line?.changed ? (side === 'before' ? '−' : '+') : ' '}</span>
+      <code>{line?.text ?? ' '}</code>
+    </div>
+  );
+}
+
+function ChangeValues({ before, after }: Pick<ApiChange, 'before' | 'after'>) {
+  if (before === undefined && after === undefined) return null;
+  const rows = createSideBySideDiff(before, after);
+  return (
+    <div className="sp-diff-values">
+      <div className="sp-diff-value-heading">Before</div>
+      <div className="sp-diff-value-heading">After</div>
+      <div className="sp-diff-code" aria-label="Before value">
+        {rows.map((row, index) => <DiffLine key={index} side="before" line={row.before} />)}
+      </div>
+      <div className="sp-diff-code" aria-label="After value">
+        {rows.map((row, index) => <DiffLine key={index} side="after" line={row.after} />)}
+      </div>
     </div>
   );
 }
@@ -102,10 +178,7 @@ function ChangeCard({ change, href }: { change: ApiChange; href?: string }) {
         <summary>{href ? <a href={href}>{body}</a> : body}</summary>
         <div className="sp-diff-change-body">
           <code className="sp-diff-location">{change.location.join(' › ')}</code>
-          <div className="sp-diff-values">
-            <ChangeValue label="Before" value={change.before} />
-            <ChangeValue label="After" value={change.after} />
-          </div>
+          <ChangeValues before={change.before} after={change.after} />
         </div>
       </details>
     </article>

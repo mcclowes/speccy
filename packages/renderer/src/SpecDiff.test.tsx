@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SpecDiff, type DiffReport } from './SpecDiff';
+import { createSideBySideDiff, SpecDiff, type DiffReport } from './SpecDiff';
 
 afterEach(cleanup);
 
@@ -65,6 +65,30 @@ describe('SpecDiff', () => {
     fireEvent.click(screen.getByText('Added optional query parameter status'));
     expect(screen.getByText('After')).toBeInTheDocument();
     expect(screen.getByText(/"required": false/)).toBeInTheDocument();
+  });
+
+  it('aligns unchanged lines and highlights removals and additions', () => {
+    expect(createSideBySideDiff(
+      'alpha\nremoved\nshared',
+      'alpha\nshared\nadded',
+    )).toEqual([
+      {
+        before: { number: 1, text: 'alpha', changed: false },
+        after: { number: 1, text: 'alpha', changed: false },
+      },
+      {
+        before: { number: 2, text: 'removed', changed: true },
+        after: undefined,
+      },
+      {
+        before: { number: 3, text: 'shared', changed: false },
+        after: { number: 2, text: 'shared', changed: false },
+      },
+      {
+        before: undefined,
+        after: { number: 3, text: 'added', changed: true },
+      },
+    ]);
   });
 
   it('shows an empty state when the selected filter has no matches', () => {
