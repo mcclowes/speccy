@@ -7,8 +7,8 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: [
-      { find: /^@speccy\/renderer\/styles\.css$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/styles.css', import.meta.url)) },
-      { find: /^@speccy\/renderer$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/index.ts', import.meta.url)) },
+      { find: /^speccy-renderer\/styles\.css$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/styles.css', import.meta.url)) },
+      { find: /^speccy-renderer$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/index.ts', import.meta.url)) },
     ],
   },
   build: {
