@@ -182,7 +182,7 @@ related:
 .sp-endpoint-layout.is-webhook { grid-template-columns: minmax(0, 1fr); }
 .sp-endpoint-main { min-width: 0; }
 .sp-endpoint-section { margin: 0 0 46px; }
-.sp-endpoint-section > h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 18px; font-size: 23px; line-height: 1.2; letter-spacing: -0.03em; }
+.sp-endpoint-section > h2 { margin: 0 0 18px; font-size: 23px; line-height: 1.2; letter-spacing: -0.03em; }
 .sp-endpoint-responses { margin-top: 32px; }
 .sp-response-tabs-row { display: flex; align-items: center; gap: 24px; min-width: 0; border-bottom: 1px solid var(--sp-line); }
 .sp-response-tabs-row > h2 { flex: 0 0 auto; margin: 0; padding: 13px 0; font-size: 18px; letter-spacing: -0.025em; }
@@ -251,7 +251,7 @@ related:
 .sp-secret-field button { position: absolute; top: 50%; right: 5px; display: grid; width: 28px; height: 28px; padding: 0; place-items: center; color: var(--sp-muted); background: transparent; border: 0; border-radius: 5px; cursor: pointer; transform: translateY(-50%); }
 .sp-secret-field button svg { width: 15px; height: 15px; }
 .sp-secret-field button:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
-.sp-field textarea { width: 100%; min-height: 64px; overflow-y: hidden; resize: none; padding: 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; line-height: 1.55; }
+.sp-field textarea { width: 100%; min-height: 120px; resize: vertical; padding: 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; line-height: 1.55; }
 .sp-field input:focus, .sp-field textarea:focus { border-color: color-mix(in srgb, var(--sp-accent) 65%, var(--sp-line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent) 12%, transparent); }
 .sp-rail-card h3 small { margin-left: 5px; color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400; }
 .sp-auth-method { margin-bottom: 14px; }
