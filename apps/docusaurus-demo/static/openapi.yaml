@@ -12,6 +12,7 @@ paths:
   /fruit:
     get:
       tags: [Fruit]
+      x-tagSubgroup: Browse
       operationId: listFruit
       summary: List fruit
       parameters:
@@ -32,6 +33,7 @@ paths:
                   $ref: '#/components/schemas/Fruit'
     post:
       tags: [Fruit]
+      x-tagSubgroup: Manage
       operationId: addFruit
       summary: Add fruit
       requestBody:

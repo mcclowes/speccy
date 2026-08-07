@@ -71,6 +71,7 @@ export interface PathItem extends Partial<Record<HttpMethod, Operation>> {
 
 export interface Operation {
   tags?: string[];
+  'x-tagSubgroup'?: string;
   summary?: string;
   description?: string;
   operationId?: string;

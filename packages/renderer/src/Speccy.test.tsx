@@ -560,6 +560,29 @@ describe('Speccy navigation', () => {
     expect(navigation.queryByRole('button', { name: 'Internal' })).not.toBeInTheDocument();
   });
 
+  it('groups operations within a tag using x-tagSubgroup', () => {
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Subgrouped API' },
+      tags: [{ name: 'Payments' }],
+      paths: {
+        '/payments': { post: { tags: ['Payments'], summary: 'Create payment', 'x-tagSubgroup': 'Payment lifecycle' } },
+        '/payments/{paymentId}': { get: { tags: ['Payments'], summary: 'Get payment', 'x-tagSubgroup': 'Payment lifecycle' } },
+        '/payments/{paymentId}/events': { get: { tags: ['Payments'], summary: 'List payment events', 'x-tagSubgroup': 'Reconciliation' } },
+        '/payments/{paymentId}/archive': { post: { tags: ['Payments'], summary: 'Archive payment' } },
+      },
+    }} showThemeToggle={false} />);
+
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    fireEvent.click(navigation.getByRole('button', { name: 'Payments' }));
+
+    expect(navigation.getByRole('heading', { name: 'Payment lifecycle' })).toBeInTheDocument();
+    expect(navigation.getByRole('heading', { name: 'Reconciliation' })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /Create payment/ })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /Get payment/ })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /List payment events/ })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /Archive payment/ })).toBeInTheDocument();
+  });
+
   it('restores authorization and parameter values', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const securedSpec = {

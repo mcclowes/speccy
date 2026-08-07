@@ -25,6 +25,26 @@ x-tagGroups:
 
 Tags omitted from every group still appear in the sidebar.
 
+## Tag subgroups
+
+Use Speccy’s `x-tagSubgroup` extension on an operation to organize related paths within a tag:
+
+```yaml
+paths:
+  /payments:
+    post:
+      tags: [Payments]
+      x-tagSubgroup: Payment lifecycle
+      summary: Create a payment
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      x-tagSubgroup: Payment lifecycle
+      summary: Get a payment
+```
+
+Operations with the same tag and `x-tagSubgroup` value appear beneath a shared sidebar heading. Operations without `x-tagSubgroup` remain directly beneath the tag.
+
 ## Longer tag introductions
 
 Standard `description` works well for a short summary. Use `x-longDescription` for setup steps or broader guidance on the tag overview page:
