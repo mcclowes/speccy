@@ -232,8 +232,8 @@
 .sp-schema { min-width: 0; padding: 9px 0; }
 .sp-schema-object > summary { display: flex; align-items: center; gap: 7px; width: 100%; cursor: pointer; list-style: none; }
 .sp-schema-object > summary::-webkit-details-marker { display: none; }
-.sp-schema-object > summary::before { content: '+'; width: 12px; color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 11px; }
-.sp-schema-object[open] > summary::before { content: '−'; }
+.sp-schema-object > summary::before { content: ''; width: 7px; height: 7px; margin-left: 1px; margin-right: 4px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; color: var(--sp-muted); transform: rotate(-45deg); transition: transform 140ms ease; }
+.sp-schema-object[open] > summary::before { transform: rotate(45deg); }
 .sp-schema-object > summary:hover .sp-schema-head { filter: brightness(1.15); }
 .sp-schema-details-toggle { display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; padding: 0; place-items: center; color: var(--sp-muted); background: transparent; border: 0; border-radius: 4px; cursor: pointer; }
 .sp-schema-details-toggle:hover { color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 8%, transparent); }
