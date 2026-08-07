@@ -84,7 +84,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
         onClick={toggleDetails}
       >{headerContents}</button>
     : <div className={`sp-schema-head${name ? ' sp-schema-head-named' : ''}`}>{headerContents}</div>;
-  const fieldDetails = <div className="sp-schema-field-details">
+  const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       {collapseObjects
         ? <CollapsibleMarkdown className="sp-schema-description">{schema.description}</CollapsibleMarkdown>
         : <Markdown className="sp-schema-description">{schema.description}</Markdown>}

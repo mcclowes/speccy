@@ -105,7 +105,7 @@ describe('SchemaView composition', () => {
     expect(screen.queryByText('Unique identifier for the company.')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Show details for id' }));
-    expect(screen.getByText('Unique identifier for the company.')).toBeVisible();
+    expect(screen.getByText('Unique identifier for the company.').closest('.sp-schema-field-details')).toHaveClass('sp-schema-field-details-named');
     expect(screen.getByText('ee2eb431-c0fa-4dc9-93fa-d29781c12bcd')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Hide details for id' })).toHaveAttribute('aria-expanded', 'true');
 

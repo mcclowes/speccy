@@ -251,6 +251,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-details-toggle { display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: var(--sp-muted); }
 .sp-schema-details-toggle > span { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }
 .sp-schema-head[aria-expanded='true'] .sp-schema-details-toggle > span { transform: rotate(225deg); }
+.sp-schema-field-details-named { padding-right: 8px; padding-left: 28px; }
 .sp-schema-properties { margin: 5px 0 0 6px; padding-left: 15px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line)); }
 .sp-type { color: var(--sp-accent); font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-schema .sp-schema-head > .sp-required { overflow: hidden; width: 5px; color: #d24859; font-size: 0; letter-spacing: 0; text-transform: none; }
