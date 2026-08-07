@@ -1,8 +1,12 @@
 {
-  "name": "speccy-docusaurus",
+  "name": "docusaurus-plugin-speccy",
   "version": "0.1.0",
   "description": "Render elegant OpenAPI reference pages in Docusaurus.",
-  "repository": "github:mcclowes/speccy-docusaurus",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcclowes/speccy.git",
+    "directory": "packages/docusaurus-plugin"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

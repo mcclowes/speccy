@@ -5,7 +5,7 @@ description: Render a complete OpenAPI reference inside a React application.
 
 # React renderer
 
-`mcclowes/speccy-renderer` is the shared rendering core. It owns parsing, navigation, search, endpoint pages, request samples, and the request builder.
+`speccy-renderer` is the shared rendering core. It owns parsing, navigation, search, endpoint pages, request samples, and the request builder.
 
 ## Basic use
 

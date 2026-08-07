@@ -6,10 +6,10 @@ The design stays quiet around the content. Color identifies methods, status, req
 
 ## What’s included
 
-- `mcclowes/speccy-renderer` - the shared React renderer
+- `speccy-renderer` - the shared React renderer
 - `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
-- `mcclowes/speccy-docusaurus` - generated reference routes and an embeddable MDX component
-- `mcclowes/create-speccy-reference` - a standalone static reference starter
+- `docusaurus-plugin-speccy` - generated reference routes and an embeddable MDX component
+- `create-speccy-reference` - a standalone static reference starter
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
@@ -65,7 +65,7 @@ tags:
 export default {
   plugins: [
     [
-      'speccy-docusaurus',
+      'docusaurus-plugin-speccy',
       {
         route: '/api',
         spec: './static/openapi.yaml',
@@ -79,7 +79,7 @@ export default {
 Use `specUrl` instead of `spec` to fetch a remote document at build time. For MDX embedding:
 
 ```mdx
-import {OpenAPI} from 'speccy-docusaurus/client';
+import {OpenAPI} from 'docusaurus-plugin-speccy/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} />
@@ -90,7 +90,7 @@ import spec from '@site/static/openapi.json';
 Use the standalone starter when the API reference is the whole site:
 
 ```sh
-npx github:mcclowes/create-speccy-reference my-api-reference
+npm create speccy-reference my-api-reference
 cd my-api-reference
 npm install
 npm run dev

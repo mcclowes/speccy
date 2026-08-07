@@ -3,7 +3,7 @@
 Create a standalone, statically deployable API reference:
 
 ```sh
-npx github:mcclowes/create-speccy-reference my-api-reference
+npm create speccy-reference my-api-reference
 cd my-api-reference
 npm install
 npm run dev

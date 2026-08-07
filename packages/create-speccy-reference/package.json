@@ -2,7 +2,11 @@
   "name": "create-speccy-reference",
   "version": "0.1.0",
   "description": "Create a standalone Speccy API reference site.",
-  "repository": "github:mcclowes/create-speccy-reference",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcclowes/speccy.git",
+    "directory": "packages/create-speccy-reference"
+  },
   "type": "module",
   "bin": {
     "create-speccy-reference": "./index.js"

@@ -12,7 +12,7 @@ Speccy doesn’t need a server. A standalone reference, React app, or Docusaurus
 Create and build a dedicated reference site:
 
 ```sh
-npx github:mcclowes/create-speccy-reference my-api-reference
+npm create speccy-reference my-api-reference
 cd my-api-reference
 npm install
 npm run build

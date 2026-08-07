@@ -3,7 +3,7 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-const installCommand = 'npm install github:mcclowes/speccy-renderer';
+const installCommand = 'npm install speccy-renderer';
 
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
