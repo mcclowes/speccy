@@ -18,7 +18,7 @@ vi.mock('../../../packages/renderer/src/Speccy', () => ({
   },
 }));
 
-describe('source editor', () => {
+describe('web app', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -31,27 +31,12 @@ describe('source editor', () => {
     window.history.replaceState({}, '', '/');
   });
 
-  it('does not rerender the preview while editing a draft', () => {
+  it('keeps opened references read-only', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Edit source' }));
-    const rendersBeforeTyping = previewRender.mock.calls.length;
 
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: '{ "openapi": "3.1.0" }' } });
-
-    expect(previewRender).toHaveBeenCalledTimes(rendersBeforeTyping);
-  });
-
-  it('rerenders the preview when the draft is applied', () => {
-    render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Edit source' }));
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: '{ "openapi": "3.1.0" }' } });
-    const rendersBeforeApply = previewRender.mock.calls.length;
-
-    fireEvent.click(screen.getByRole('button', { name: 'Render changes' }));
-
-    expect(previewRender).toHaveBeenCalledTimes(rendersBeforeApply + 1);
+    expect(screen.queryByRole('button', { name: 'Edit source' })).toBeNull();
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 
   it('returns to the homepage from the studio logo', () => {
@@ -168,7 +153,7 @@ describe('source editor', () => {
     expect(new URLSearchParams(shared.hash.slice(1)).get('source')).toContain('"openapi"');
   });
 
-  it('renders a preview URL without studio navigation or editing controls', () => {
+  it('renders a preview URL without viewer navigation', () => {
     const fragment = new URLSearchParams({ source: '{"openapi":"3.1.0"}', name: 'Catalog API' });
     window.history.replaceState({}, '', `/?preview=1#${fragment}`);
 
@@ -181,6 +166,5 @@ describe('source editor', () => {
     expect(screen.getByRole('button', { name: 'Theme: dark' })).toBeTruthy();
     expect(document.querySelector('.speccy')?.classList.contains('sp-theme-dark')).toBe(true);
     expect(screen.queryByRole('button', { name: 'Speccy home' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Edit source' })).toBeNull();
   });
 });

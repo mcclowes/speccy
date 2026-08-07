@@ -1,9 +1,9 @@
 /**
  * ---
- * purpose: Provides the standalone spec studio with file, URL, paste, theme, and preview controls.
+ * purpose: Provides the standalone API reference viewer with file, URL, paste, theme, and preview controls.
  * related:
  *   - ./sample.ts - Default document used for the first-run preview.
- *   - ./studio.css - Studio chrome and source drawer styling.
+ *   - ./studio.css - Viewer chrome and reference workspace styling.
  *   - ../../../packages/renderer/src/Speccy.tsx - Shared reference view embedded by the studio.
  * ---
  */
@@ -111,21 +111,6 @@ function ShareIcon() {
   return <svg className="studio-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>;
 }
 
-function SourceEditor({ initialSource, onApply }: {
-  initialSource: string;
-  onApply: (source: string) => void;
-}) {
-  const [draft, setDraft] = useState(initialSource);
-
-  return (
-    <aside className="studio-editor">
-      <div className="studio-editor-head"><span>OpenAPI source</span><button type="button" onClick={() => onApply(draft)}>Render changes</button></div>
-      <textarea spellCheck={false} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') onApply(draft); }} />
-      <div className="studio-editor-foot"><span>YAML or JSON</span><span>⌘ Enter to render</span></div>
-    </aside>
-  );
-}
-
 export function App() {
   const [location] = useState(initialLocation);
   const [spec, setSpec] = useState<OpenAPIDocument | string>(() => location.source ?? (location.url ? '' : SAMPLE_SPEC));
@@ -135,7 +120,6 @@ export function App() {
   const [activeId, setActiveId] = useState('');
   const [recents, setRecents] = useState<RecentReference[]>(storedRecents);
   const [theme, setTheme] = useState<Theme>(storedTheme);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
   const [loading, setLoading] = useState(Boolean(location.url));
@@ -215,7 +199,6 @@ export function App() {
   function showHome() {
     setFileName('');
     setActiveId('');
-    setDrawerOpen(false);
     setUrlOpen(false);
   }
 
@@ -379,7 +362,6 @@ export function App() {
           {fileName && <button className="studio-action-share" type="button" onClick={() => void sharePreview()} aria-label="Copy preview link" title={shareMessage || 'Copy preview link'}><ShareIcon /><span className="studio-share-label">Share</span></button>}
           {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
           {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
-          {fileName && <button className="studio-action-source" type="button" onClick={() => setDrawerOpen(!drawerOpen)}><span>{drawerOpen ? 'Close source' : 'Edit source'}</span></button>}
           <button className="studio-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
           <input ref={fileInput} type="file" accept=".yaml,.yml,.json,application/json,text/yaml" hidden onChange={(event) => void loadFile(event.target.files?.[0])} />
         </div>
@@ -396,10 +378,7 @@ export function App() {
       )}
 
       {fileName ? (
-        <div className={`studio-workspace ${drawerOpen ? 'is-editing' : ''}`}>
-          {drawerOpen && (
-            <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName, activeId, null)} />
-          )}
+        <div className="studio-workspace">
           <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype /></div>
         </div>
       ) : (
