@@ -522,7 +522,7 @@ function RequestRail({
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
           <p className="sp-rail-card-description">Use the credential described under Request → Authorization{schemeLabel && `: ${schemeLabel}`}.</p>
-          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredentials({ ...credentials, [schemeName]: event.target.value })} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
+          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} autoComplete="off" data-1p-ignore value={credential} onChange={(event) => setCredentials({ ...credentials, [schemeName]: event.target.value })} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
         </section>
       )}
       {parameters.length > 0 && (

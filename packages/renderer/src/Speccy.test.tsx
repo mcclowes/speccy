@@ -297,6 +297,8 @@ describe('Speccy navigation', () => {
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('api_key=secret+token'));
 
     expect(authorization).toHaveAttribute('type', 'password');
+    expect(authorization).toHaveAttribute('autocomplete', 'off');
+    expect(authorization).toHaveAttribute('data-1p-ignore');
     fireEvent.click(screen.getByRole('button', { name: 'Show authorization' }));
     expect(authorization).toHaveAttribute('type', 'text');
     expect(screen.getByRole('button', { name: 'Hide authorization' })).toHaveAttribute('aria-pressed', 'true');
