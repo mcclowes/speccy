@@ -877,7 +877,7 @@ function NavigationGroup({
     <div ref={groupRef} className="sp-nav-group">
       <button
         type="button"
-        className={`sp-nav-tag ${activeRouteIsWithinGroup ? 'is-active' : ''}`}
+        className={`sp-nav-tag ${tag.icon ? 'has-icon ' : ''}${activeRouteIsWithinGroup ? 'is-active' : ''}`}
         onClick={() => setOpen(!expanded)}
         aria-expanded={expanded}
         aria-controls={operationListId}

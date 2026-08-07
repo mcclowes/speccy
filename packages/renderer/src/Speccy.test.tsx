@@ -185,11 +185,20 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByRole('img', { name: 'Company' })).toHaveLength(2);
 
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
-    fireEvent.click(navigation.getByRole('button', { name: 'Company Companies' }));
+    const iconTag = navigation.getByRole('button', { name: 'Company Companies' });
+    expect(iconTag).toHaveClass('has-icon');
+    fireEvent.click(iconTag);
     fireEvent.click(navigation.getByRole('link', { name: 'Overview' }));
 
     expect(screen.getAllByRole('img', { name: 'Company' })).toHaveLength(2);
     expect(screen.getByRole('heading', { level: 1, name: 'Company Companies' })).toBeInTheDocument();
+  });
+
+  it('marks only navigation tags with icons for taller spacing', () => {
+    render(<Speccy spec={spec} />);
+
+    expect(within(screen.getByRole('navigation', { name: 'API reference' }))
+      .getByRole('button', { name: 'Companies' })).not.toHaveClass('has-icon');
   });
 
   it('opens a tag overview route directly', () => {
