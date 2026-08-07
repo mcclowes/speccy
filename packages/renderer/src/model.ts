@@ -151,6 +151,32 @@ function expandDiscriminatorMappings(node: unknown): unknown {
   return result;
 }
 
+/** Removes objects marked as internal before they can contribute to the public reference model. */
+function removeInternalNodes(node: unknown): unknown {
+  if (Array.isArray(node)) {
+    return node
+      .map(removeInternalNodes)
+      .filter((item) => item !== undefined);
+  }
+  if (!node || typeof node !== 'object') return node;
+
+  const source = node as Record<string, unknown>;
+  if (source['x-internal'] === true) return undefined;
+
+  const literalValueKeys = new Set(['const', 'default', 'enum', 'example', 'value']);
+
+  return Object.fromEntries(
+    Object.entries(source)
+      .map(([key, value]) => [
+        key,
+        literalValueKeys.has(key) || (key.startsWith('x-') && key !== 'x-internal')
+          ? value
+          : removeInternalNodes(value),
+      ] as const)
+      .filter((entry): entry is readonly [string, Exclude<unknown, undefined>] => entry[1] !== undefined),
+  );
+}
+
 function swaggerSchema(parameter: Parameter) {
   return parameter.schema ?? {
     type: parameter.type,
@@ -239,7 +265,8 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
     throw new Error('This does not look like an OpenAPI document. Add an openapi or swagger version.');
   }
 
-  const document = normalizeDocument(resolveRefs(expandDiscriminatorMappings(rawDocument) as OpenAPIDocument));
+  const publicDocument = removeInternalNodes(rawDocument) as OpenAPIDocument;
+  const document = normalizeDocument(resolveRefs(expandDiscriminatorMappings(publicDocument) as OpenAPIDocument));
 
   const declaredTags = new Map(
     (document.tags ?? [])

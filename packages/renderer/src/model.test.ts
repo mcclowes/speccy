@@ -83,6 +83,93 @@ paths:
     expect(model.operations).toHaveLength(3);
   });
 
+  it('hides operations and webhooks marked x-internal', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/pets': {
+          get: { operationId: 'listPets' },
+          post: { operationId: 'createPet', 'x-internal': true },
+        },
+        '/admin': {
+          'x-internal': true,
+          get: { operationId: 'adminDashboard' },
+        },
+      },
+      webhooks: {
+        petCreated: { post: { operationId: 'petCreated', 'x-internal': true } },
+      },
+    });
+
+    expect(model.operations.map(({ id }) => id)).toEqual(['listpets']);
+    expect(model.webhooks).toEqual([]);
+    expect(model.document.paths?.['/admin']).toBeUndefined();
+  });
+
+  it('hides internal parameters, schema properties, and reusable components', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/pets': {
+          get: {
+            operationId: 'listPets',
+            parameters: [
+              { name: 'page', in: 'query', schema: { type: 'integer' } },
+              { name: 'debug', in: 'query', schema: { type: 'boolean' }, 'x-internal': true },
+            ],
+            responses: {
+              '200': {
+                description: 'OK',
+                content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              supportNotes: { type: 'string', 'x-internal': true },
+            },
+          },
+          AdminPet: { type: 'object', 'x-internal': true },
+        },
+      },
+    });
+
+    const operation = model.operations[0]?.operation;
+    const responseSchema = operation?.responses?.['200']?.content?.['application/json']?.schema;
+    expect(operation?.parameters?.map(({ name }) => name)).toEqual(['page']);
+    expect(responseSchema?.properties).toEqual({ name: { type: 'string' } });
+    expect(model.document.components?.schemas?.AdminPet).toBeUndefined();
+  });
+
+  it('preserves x-internal fields inside literal example data', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/status': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': { example: { 'x-internal': true, status: 'visible' } },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(model.operations[0]?.operation.responses?.['200']?.content?.['application/json']?.example)
+      .toEqual({ 'x-internal': true, status: 'visible' });
+  });
+
   it('rejects documents without an OpenAPI version', () => {
     expect(() => createReferenceModel({ paths: {} })).toThrow('openapi or swagger');
   });

@@ -21,6 +21,16 @@ export function ApiReference({spec}) {
 
 `spec` accepts a parsed object or a YAML/JSON string. Configure your host to serve the application shell for URLs beneath `basePath`, including direct links to operations, tags, and reusable components.
 
+Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference and downloadable document. This works for operations, path items, webhooks, parameters, schema properties, and reusable components.
+
+```yaml
+paths:
+  /admin/audit-log:
+    get:
+      x-internal: true
+      summary: Read the audit log
+```
+
 ## Present an API diff
 
 `SpecDiff` presents a normalized semantic diff produced by a tool such as [oasdiff](https://github.com/oasdiff/oasdiff). Run the comparison outside the browser, translate its machine-readable output into a `DiffReport`, then pass the report to the renderer:

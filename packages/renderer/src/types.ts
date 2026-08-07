@@ -17,6 +17,11 @@ export type HttpMethod =
   | 'head'
   | 'trace';
 
+export interface SpecificationExtensions {
+  'x-internal'?: boolean;
+  [key: `x-${string}`]: unknown;
+}
+
 export interface OpenAPIDocument {
   openapi?: string;
   swagger?: string;
@@ -69,7 +74,7 @@ export interface PathItem extends Partial<Record<HttpMethod, Operation>> {
   [key: string]: unknown;
 }
 
-export interface Operation {
+export interface Operation extends SpecificationExtensions {
   tags?: string[];
   'x-tagSubgroup'?: string;
   summary?: string;
@@ -87,7 +92,7 @@ export interface Operation {
 
 export type SecurityRequirement = Record<string, string[]>;
 
-export interface Parameter {
+export interface Parameter extends SpecificationExtensions {
   name?: string;
   in?: string;
   description?: string;
@@ -103,14 +108,14 @@ export interface Parameter {
   $ref?: string;
 }
 
-export interface RequestBody {
+export interface RequestBody extends SpecificationExtensions {
   description?: string;
   required?: boolean;
   content?: Record<string, MediaType>;
   $ref?: string;
 }
 
-export interface ResponseObject {
+export interface ResponseObject extends SpecificationExtensions {
   description?: string;
   headers?: Record<string, HeaderObject>;
   content?: Record<string, MediaType>;
@@ -120,7 +125,7 @@ export interface ResponseObject {
   $ref?: string;
 }
 
-export interface MediaType {
+export interface MediaType extends SpecificationExtensions {
   schema?: SchemaObject;
   example?: unknown;
   examples?: Record<string, ExampleObject>;
@@ -129,7 +134,7 @@ export interface MediaType {
 
 export interface HeaderObject extends Omit<Parameter, 'name' | 'in'> {}
 
-export interface ExampleObject {
+export interface ExampleObject extends SpecificationExtensions {
   summary?: string;
   description?: string;
   value?: unknown;
@@ -137,7 +142,7 @@ export interface ExampleObject {
   $ref?: string;
 }
 
-export interface LinkObject {
+export interface LinkObject extends SpecificationExtensions {
   operationRef?: string;
   operationId?: string;
   parameters?: Record<string, unknown>;
@@ -149,7 +154,7 @@ export interface LinkObject {
 
 export type CallbackObject = Record<string, PathItem> & { $ref?: string };
 
-export interface SecurityScheme {
+export interface SecurityScheme extends SpecificationExtensions {
   type?: string;
   description?: string;
   name?: string;
@@ -172,7 +177,7 @@ export interface OAuthFlow {
   scopes?: Record<string, string>;
 }
 
-export interface SchemaObject {
+export interface SchemaObject extends SpecificationExtensions {
   type?: string;
   format?: string;
   title?: string;
