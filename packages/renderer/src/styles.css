@@ -88,8 +88,8 @@ related:
 .sp-nav-tag-group { margin: 20px 0 26px; }
 .sp-nav-tag-group > .sp-nav-heading { padding: 5px 8px 2px; color: color-mix(in srgb, var(--sp-text) 78%, var(--sp-muted)); font-size: 11px; text-transform: none; }
 .sp-nav-tag-group .sp-nav-group { margin: 4px 0; }
-/* Sticky within .sp-nav-group, so the next section's header pushes it off */
-.sp-nav-tag { position: sticky; top: 0; z-index: 1; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; color: var(--sp-muted); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); border: 0; cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; transition: color 120ms ease, background-color 120ms ease; }
+/* Sticky within .sp-nav-group, so the next section's header pushes it off; -8px offsets .sp-nav-scroll's top padding so rows can't peek above the pinned header */
+.sp-nav-tag { position: sticky; top: -8px; z-index: 1; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; color: var(--sp-muted); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); border: 0; cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; transition: color 120ms ease, background-color 120ms ease; }
 .sp-nav-tag.has-icon { padding-block: 5px; }
 .sp-nav-tag > span:first-child { font-weight: 700; }
 .sp-tag-label, .sp-tag-title { display: flex; align-items: center; gap: 8px; }
