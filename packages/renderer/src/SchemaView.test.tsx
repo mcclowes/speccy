@@ -66,18 +66,15 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('id')).toBeVisible();
   });
 
-  it('collapses long descriptions in response schemas', () => {
+  it('shows full descriptions when response schema details are visible', () => {
     render(<SchemaView collapseObjects schema={{
       type: 'object',
       description: "In Codat, a company represents a business sharing access to their data. Each company can have multiple connections to different data sources.",
       properties: { id: { type: 'string' } },
     }} />);
 
-    const toggle = screen.getByRole('button', { name: 'Show all…' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/In Codat, a company represents/)).toBeVisible();
+    expect(screen.queryByRole('button', { name: /Show all/ })).not.toBeInTheDocument();
   });
 
   it('hides named field details without hiding the field structure', () => {

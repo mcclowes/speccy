@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
-import { CollapsibleMarkdown, Markdown } from './Markdown';
+import { Markdown } from './Markdown';
 import type { MediaType, SchemaObject } from './types';
 
 function schemaLabel(schema?: SchemaObject): string {
@@ -89,9 +89,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
       >{headerContents}</button>
     : <div className={`sp-schema-head${name ? ' sp-schema-head-named' : ''}`}>{headerContents}</div>;
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
-      {collapseObjects
-        ? <CollapsibleMarkdown className="sp-schema-description">{schema.description}</CollapsibleMarkdown>
-        : <Markdown className="sp-schema-description">{schema.description}</Markdown>}
+      <Markdown className="sp-schema-description">{schema.description}</Markdown>
       {constraints.length > 0 && <p className="sp-schema-meta">{constraints.join(' · ')}</p>}
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
       {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta">Example: <code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}

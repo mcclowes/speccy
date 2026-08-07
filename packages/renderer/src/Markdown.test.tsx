@@ -1,26 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { CollapsibleMarkdown, Markdown } from './Markdown';
+import { Markdown } from './Markdown';
 import { Speccy } from './Speccy';
-
-describe('CollapsibleMarkdown', () => {
-  it('only offers to expand long descriptions', () => {
-    const { container, rerender } = render(<CollapsibleMarkdown className="sp-schema-description">Short response.</CollapsibleMarkdown>);
-    expect(container.firstChild).toHaveClass('sp-schema-description');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-
-    rerender(
-      <CollapsibleMarkdown>
-        A connection represents a company's connection to a data source and allows you to synchronize data (pull and/or push) with that source.
-      </CollapsibleMarkdown>,
-    );
-    const toggle = screen.getByRole('button', { name: 'Show all…' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
-  });
-});
 
 describe('Markdown', () => {
   it('renders links, headings, and GitHub-flavored tables', () => {
