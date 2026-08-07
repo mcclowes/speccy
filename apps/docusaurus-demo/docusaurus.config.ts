@@ -2,6 +2,7 @@ import type { Config } from '@docusaurus/types';
 
 const isVercel = process.env.VERCEL === '1';
 const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+const studioUrl = vercelHost ? `https://${vercelHost}` : undefined;
 
 const config: Config = {
   title: 'Speccy',
@@ -12,6 +13,7 @@ const config: Config = {
   projectName: 'speccy',
   favicon: 'favicon.svg',
   onBrokenLinks: 'throw',
+  customFields: { studioUrl },
   plugins: [
     [
       '@mcclowes/speccy-docusaurus',
@@ -38,6 +40,7 @@ const config: Config = {
       items: [
         { to: '/docs/getting-started', label: 'Docs', position: 'right' },
         { to: '/api', label: 'Live example', position: 'right' },
+        ...(studioUrl ? [{ href: studioUrl, label: 'Studio', position: 'right' as const }] : []),
         { href: 'https://github.com/mcclowes/speccy', label: 'GitHub', position: 'right' },
       ],
     },

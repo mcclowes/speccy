@@ -1,10 +1,14 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 const installCommand = 'npm install @mcclowes/speccy-renderer';
 
 export default function Home() {
+  const { siteConfig } = useDocusaurusContext();
+  const studioUrl = siteConfig.customFields?.studioUrl as string | undefined;
+
   return (
     <Layout title="OpenAPI reference docs with room to breathe" description="Speccy turns an OpenAPI document into clean, searchable reference documentation for React and Docusaurus.">
       <main>
@@ -15,7 +19,9 @@ export default function Home() {
             <p>Speccy turns an OpenAPI document into a calm, searchable reference. Drop it into React, publish it with Docusaurus, or use the standalone studio.</p>
             <div className="home-actions">
               <Link className="home-button home-button-primary" to="/docs/getting-started">Get started <span>→</span></Link>
-              <Link className="home-button home-button-secondary" to="/api">View live example</Link>
+              {studioUrl
+                ? <a className="home-button home-button-secondary" href={studioUrl}>Open studio</a>
+                : <Link className="home-button home-button-secondary" to="/api">View live example</Link>}
             </div>
             <div className="home-install"><span>$</span><code>{installCommand}</code></div>
           </div>
@@ -38,7 +44,7 @@ export default function Home() {
           <div className="home-way-grid">
             <Way eyebrow="React" title="Own the whole page" text="Render any parsed object, YAML string, or JSON string inside your app." href="/docs/react-renderer" />
             <Way eyebrow="Docusaurus" title="Publish beside your guides" text="Generate reference routes at build time, or embed a spec directly in MDX." href="/docs/docusaurus" />
-            <Way eyebrow="Studio" title="Inspect before you ship" text="Open, paste, or fetch a spec and see the finished reference immediately." href="/api" />
+            <Way eyebrow="Studio" title="Inspect before you ship" text="Open, paste, or fetch a spec and see the finished reference immediately." href={studioUrl ?? '/api'} />
           </div>
         </section>
 
