@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Markdown } from './Markdown';
 import { Speccy } from './Speccy';
@@ -44,7 +44,13 @@ describe('Markdown', () => {
       },
     }} />);
 
-    for (const name of ['Info', 'Tag', 'Operation', 'Parameter', 'Request', 'Response', 'Schema']) {
+    for (const name of ['Info', 'Tag']) {
+      expect(screen.getByRole('link', { name })).toHaveAttribute('href', `https://example.com/${name.toLowerCase()}`);
+    }
+
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: /Create thing/ }));
+
+    for (const name of ['Operation', 'Parameter', 'Request', 'Response', 'Schema']) {
       expect(screen.getByRole('link', { name })).toHaveAttribute('href', `https://example.com/${name.toLowerCase()}`);
     }
   });

@@ -2,7 +2,10 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.history.replaceState({}, '', '/');
+});
 
 const spec = {
   openapi: '3.1.0',
@@ -15,20 +18,45 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('renders each endpoint on its own route', () => {
+    window.history.replaceState({}, '', '/api');
+    render(<Speccy spec={spec} basePath="/api" />);
+
+    const navigation = screen.getByRole('navigation', { name: 'API reference' });
+    fireEvent.click(within(navigation).getByRole('link', { name: /List companies/ }));
+
+    expect(window.location.pathname).toBe('/api/get-companies');
+    expect(within(navigation).getByRole('link', { name: /List companies/ })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: /GET.*companies.*List companies/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByRole('heading', { name: 'Test API' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '← API overview' }));
+    expect(window.location.pathname).toBe('/api');
+    expect(screen.getByRole('heading', { name: 'Test API' })).toBeInTheDocument();
+  });
+
+  it('opens an endpoint route directly', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={spec} basePath="/api" />);
+
+    expect(screen.getByRole('button', { name: /GET.*companies.*List companies/ })).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('collapses and expands endpoint groups', () => {
     render(<Speccy spec={spec} />);
 
     const toggle = screen.getByRole('button', { name: 'Companies' });
+    const navigation = screen.getByRole('navigation', { name: 'API reference' });
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', { name: /List companies/ })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: /List companies/ })).toBeInTheDocument();
 
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('link', { name: /List companies/ })).not.toBeInTheDocument();
+    expect(within(navigation).queryByRole('link', { name: /List companies/ })).not.toBeInTheDocument();
 
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', { name: /List companies/ })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: /List companies/ })).toBeInTheDocument();
   });
 
   it('reveals matching endpoints while searching', () => {
@@ -40,7 +68,7 @@ describe('Speccy navigation', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Companies' })).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('link', { name: /List companies/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: /List companies/ })).toBeInTheDocument();
   });
 
   it('hides tags when no endpoints match the search', () => {

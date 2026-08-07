@@ -109,7 +109,7 @@ export function App() {
             <div className="studio-editor-foot"><span>YAML or JSON</span><span>⌘ Enter to render</span></div>
           </aside>
         )}
-        <div className="studio-preview"><Speccy spec={spec} theme={theme} logo={<Mark />} /></div>
+        <div className="studio-preview"><Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" /></div>
       </div>
     </div>
   );

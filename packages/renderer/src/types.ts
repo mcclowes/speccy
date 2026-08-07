@@ -116,6 +116,8 @@ export interface SpeccyProps {
   theme?: 'light' | 'dark' | 'system';
   accentColor?: string;
   logo?: React.ReactNode;
+  /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/${operationId}`. */
+  basePath?: string;
   onError?: (error: Error) => void;
 }
 

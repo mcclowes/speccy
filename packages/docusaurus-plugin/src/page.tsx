@@ -12,10 +12,10 @@ import type { OpenAPIDocument, SpeccyProps } from '@speccy/renderer';
 
 interface ReferenceData {
   spec: string | OpenAPIDocument;
+  route: string;
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
 
 export default function SpeccyPage({ reference }: { reference: ReferenceData }) {
-  return <OpenAPI spec={reference.spec} showSidebar {...reference.renderer} />;
+  return <OpenAPI spec={reference.spec} basePath={reference.route} showSidebar {...reference.renderer} />;
 }
-

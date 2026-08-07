@@ -203,14 +203,29 @@ function OperationCard({ item, server, defaultExpanded }: {
   );
 }
 
+function normalizeBasePath(path: string): string {
+  if (!path || path === '/') return '';
+  return `/${path.replace(/^\/+|\/+$/g, '')}`;
+}
+
+function operationHref(basePath: string, operationId: string): string {
+  return `${basePath}/${encodeURIComponent(operationId)}` || '/';
+}
+
 function NavigationGroup({
   name,
   operations,
   searching,
+  basePath,
+  activeOperationId,
+  onNavigate,
 }: {
   name: string;
   operations: OperationModel[];
   searching: boolean;
+  basePath: string;
+  activeOperationId?: string;
+  onNavigate: (operationId?: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   const expanded = searching || open;
@@ -231,7 +246,13 @@ function NavigationGroup({
       {expanded && (
         <div id={operationListId}>
           {operations.map((item) => (
-            <a className="sp-nav-operation" href={`#${item.id}`} key={item.id}><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><span>{item.operation.summary ?? item.path}</span></a>
+            <a
+              className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
+              href={operationHref(basePath, item.id)}
+              aria-current={activeOperationId === item.id ? 'page' : undefined}
+              onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
+              key={item.id}
+            ><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><span>{item.operation.summary ?? item.path}</span></a>
           ))}
         </div>
       )}
@@ -246,11 +267,11 @@ function ErrorState({ error }: { error: Error }) {
 export function Speccy({
   spec,
   className = '',
-  defaultExpanded = false,
   showSidebar = true,
   theme = 'system',
   accentColor = '#6d5dfc',
   logo,
+  basePath: basePathProp = '/',
   onError,
 }: SpeccyProps) {
   const result = useMemo(() => {
@@ -261,10 +282,26 @@ export function Speccy({
     }
   }, [spec]);
   const [query, setQuery] = useState('');
+  const basePath = normalizeBasePath(basePathProp);
+  const operationIdFromPath = () => {
+    if (typeof window === 'undefined') return undefined;
+    const prefix = `${basePath}/`;
+    if (!window.location.pathname.startsWith(prefix)) return undefined;
+    const remainder = window.location.pathname.slice(prefix.length);
+    return remainder && !remainder.includes('/') ? decodeURIComponent(remainder) : undefined;
+  };
+  const [activeOperationId, setActiveOperationId] = useState(operationIdFromPath);
 
   useEffect(() => {
     if (result.error) onError?.(result.error);
   }, [result.error, onError]);
+
+  useEffect(() => {
+    const syncRoute = () => setActiveOperationId(operationIdFromPath());
+    window.addEventListener('popstate', syncRoute);
+    syncRoute();
+    return () => window.removeEventListener('popstate', syncRoute);
+  }, [basePath]);
 
   if (result.error || !result.model) return <ErrorState error={result.error ?? new Error('Unknown rendering error.')} />;
 
@@ -274,13 +311,22 @@ export function Speccy({
   const matches = (item: OperationModel) => !normalizedQuery || [item.path, item.method, item.operation.summary, item.operation.operationId, item.tag]
     .some((value) => value?.toLowerCase().includes(normalizedQuery));
   const hasMatchingOperations = model.operations.some(matches);
+  const activeOperation = model.operations.find((item) => item.id === activeOperationId);
   const style = { '--sp-accent': accentColor } as CSSProperties;
+
+  function navigate(operationId?: string) {
+    const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
+    window.history.pushState({}, '', href);
+    setActiveOperationId(operationId);
+    const content = document.querySelector<HTMLElement>('.sp-content');
+    if (typeof content?.scrollTo === 'function') content.scrollTo({ top: 0 });
+  }
 
   return (
     <div className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
-          <a className="sp-brand" href="#sp-overview">{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
+          <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
           <div className="sp-search">
             <span aria-hidden="true">⌕</span>
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search endpoints" aria-label="Search endpoints" />
@@ -296,30 +342,31 @@ export function Speccy({
             {model.tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
               .filter(({ operations }) => operations.length > 0)
               .map(({ tag, operations }) => (
-                <NavigationGroup name={tag.name} operations={operations} searching={Boolean(normalizedQuery)} key={tag.name} />
+                <NavigationGroup name={tag.name} operations={operations} searching={Boolean(normalizedQuery)} basePath={basePath} activeOperationId={activeOperation?.id} onNavigate={navigate} key={tag.name} />
               ))}
           </div>
         </nav>
       )}
       <main className="sp-content">
-        <header className="sp-hero" id="sp-overview">
+        {!activeOperation && <header className="sp-hero" id="sp-overview">
           <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
           <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
           <Markdown>{model.document.info?.description}</Markdown>
           {server && <div className="sp-server"><span>Base URL</span><code>{server}</code><CopyButton value={server} /></div>}
-        </header>
-        {model.tags.map((tag) => {
+        </header>}
+        {!activeOperation && model.tags.map((tag) => {
           const visible = tag.operations.filter(matches);
           if (visible.length === 0) return null;
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
               <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
-              <div className="sp-operation-list">{visible.map((item) => <OperationCard item={item} server={server} defaultExpanded={defaultExpanded} key={item.id} />)}</div>
+              <div className="sp-operation-list">{visible.map((item) => <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); navigate(item.id); }} key={item.id}><span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><code className="sp-path">{item.path}</code><span>{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span></a>)}</div>
             </section>
           );
         })}
-        {normalizedQuery && !hasMatchingOperations && <div className="sp-empty">No endpoints match “{query}”.</div>}
-        {model.operations.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><div className="sp-tag-kicker">{activeOperation.tag}</div><OperationCard item={activeOperation} server={server} defaultExpanded /></section>}
+        {!activeOperation && normalizedQuery && !hasMatchingOperations && <div className="sp-empty">No endpoints match “{query}”.</div>}
+        {!activeOperation && model.operations.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
       </main>
     </div>
   );

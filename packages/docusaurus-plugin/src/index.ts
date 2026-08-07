@@ -76,11 +76,12 @@ export default function speccyPlugin(
     async contentLoaded({ content, actions }) {
       const dataPath = await actions.createData('speccy-reference.json', JSON.stringify({
         spec: content.spec,
+        route: content.route,
         renderer: content.renderer,
       }));
       actions.addRoute({
         path: content.route,
-        exact: true,
+        exact: false,
         component: fileURLToPath(new URL('./page.js', import.meta.url)),
         modules: { reference: dataPath },
       });
