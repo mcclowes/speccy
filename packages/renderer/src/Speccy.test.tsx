@@ -74,6 +74,19 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
   });
 
+  it('scrolls a directly opened endpoint into the sidebar viewport', () => {
+    const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView);
+    scrollIntoView.mockClear();
+    window.history.replaceState({}, '', '/api/get-companies');
+
+    render(<Speccy spec={spec} basePath="/api" theme="light" />);
+
+    expect(within(screen.getByRole('navigation', { name: 'API reference' }))
+      .getByRole('link', { name: /List companies/ }))
+      .toHaveAttribute('aria-current', 'page');
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+  });
+
   it('dismisses the optional parameter picker from outside clicks and Escape', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={{

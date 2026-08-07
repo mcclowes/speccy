@@ -803,6 +803,7 @@ function NavigationGroup({
   storageKey: string;
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
+  const groupRef = useRef<HTMLDivElement>(null);
   const activeRouteIsWithinGroup = activeTag === tag || operations.some((item) => item.id === activeOperationId);
   const expanded = searching || open;
   const operationListId = `sp-nav-${slugify(tag.name)}`;
@@ -811,8 +812,13 @@ function NavigationGroup({
     if (activeRouteIsWithinGroup) setOpen(true);
   }, [activeRouteIsWithinGroup, setOpen]);
 
+  useEffect(() => {
+    if (!activeRouteIsWithinGroup || !expanded) return;
+    groupRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest' });
+  }, [activeRouteIsWithinGroup, activeOperationId, activeTag, expanded]);
+
   return (
-    <div className="sp-nav-group">
+    <div ref={groupRef} className="sp-nav-group">
       <button
         type="button"
         className={`sp-nav-tag ${activeRouteIsWithinGroup ? 'is-active' : ''}`}
