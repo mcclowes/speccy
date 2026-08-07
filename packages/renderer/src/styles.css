@@ -10,6 +10,7 @@
   --sp-line: #e7e7ec;
   --sp-code: #171820;
   --sp-code-text: #ededf4;
+  color-scheme: light;
   color: var(--sp-text);
   background: var(--sp-bg);
   font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
@@ -23,8 +24,8 @@
 .speccy a { color: inherit; text-decoration: none; }
 .speccy button, .speccy input { font: inherit; }
 .speccy p { margin: 0 0 0.8em; }
-.sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; }
-@media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; } }
+.sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; color-scheme: dark; }
+@media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; color-scheme: dark; } }
 
 .sp-with-sidebar { display: grid; grid-template-columns: 280px minmax(0, 1fr); }
 .sp-sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--sp-line); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); display: flex; flex-direction: column; z-index: 10; }
