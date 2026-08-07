@@ -22,6 +22,7 @@ export type {
 } from './types';
 export type {
   ApiChange,
+  DiffArea,
   DiffKind,
   DiffReport,
   DiffSeverity,

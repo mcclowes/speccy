@@ -12,6 +12,7 @@ import type { HttpMethod } from './types';
 
 export type DiffSeverity = 'breaking' | 'warning' | 'compatible' | 'documentation';
 export type DiffKind = 'added' | 'removed' | 'changed' | 'deprecated';
+export type DiffArea = 'operation' | 'parameters' | 'request-body' | 'response-body' | 'headers' | 'security' | 'documentation';
 
 export interface DiffSpecVersion {
   title?: string;
@@ -33,6 +34,11 @@ export interface ApiChange {
   path?: string;
   operationId?: string;
   tag?: string;
+  scope?: {
+    area: DiffArea;
+    /** Human-readable detail such as "200 · application/json · Loan.status". */
+    label?: string;
+  };
   location: string[];
   message: string;
   before?: unknown;
@@ -63,6 +69,14 @@ const SEVERITIES: Array<{ value: DiffSeverity; label: string }> = [
   { value: 'warning', label: 'Warnings' },
   { value: 'compatible', label: 'Compatible' },
   { value: 'documentation', label: 'Documentation' },
+];
+
+const OPERATION_AREAS: Array<{ value: Exclude<DiffArea, 'operation' | 'documentation'>; label: string }> = [
+  { value: 'parameters', label: 'Parameters' },
+  { value: 'request-body', label: 'Request body' },
+  { value: 'response-body', label: 'Response body' },
+  { value: 'headers', label: 'Headers' },
+  { value: 'security', label: 'Security' },
 ];
 
 function formatVersion(spec: DiffSpecVersion, fallback: string) {
@@ -160,20 +174,36 @@ function ChangeValues({ before, after }: Pick<ApiChange, 'before' | 'after'>) {
   );
 }
 
-function ChangeCard({ change, href }: { change: ApiChange; href?: string }) {
+function inferredArea(change: ApiChange): DiffArea {
+  if (change.scope) return change.scope.area;
+  if (change.severity === 'documentation') return 'documentation';
+  if (change.location.includes('requestBody')) return 'request-body';
+  if (change.location.includes('responses')) return change.location.includes('headers') ? 'headers' : 'response-body';
+  if (change.location.includes('parameters')) return 'parameters';
+  if (change.location.includes('security')) return 'security';
+  return 'operation';
+}
+
+function areaLabel(area: DiffArea) {
+  return OPERATION_AREAS.find(({ value }) => value === area)?.label
+    ?? (area === 'operation' ? 'Entire operation' : 'Documentation');
+}
+
+function ChangeDetails({ change, href }: { change: ApiChange; href?: string }) {
+  const area = inferredArea(change);
   const body = (
     <>
       <div className="sp-diff-change-heading">
         <span className={`sp-diff-kind sp-diff-kind-${change.kind}`}>{change.kind}</span>
-        {change.method && <span className={`sp-method sp-method-${change.method}`}>{change.method}</span>}
-        {change.path && <code className="sp-diff-path">{change.path}</code>}
+        <span className="sp-diff-area">{areaLabel(area)}</span>
+        {change.scope?.label && <span className="sp-diff-scope-detail">{change.scope.label}</span>}
       </div>
       <span className="sp-diff-message">{change.message}</span>
     </>
   );
 
   return (
-    <article className={`sp-diff-change sp-diff-change-${change.severity}`}>
+    <div className={`sp-diff-change-detail sp-diff-change-${change.severity}`}>
       <details>
         <summary>{href ? <a href={href}>{body}</a> : body}</summary>
         <div className="sp-diff-change-body">
@@ -181,6 +211,44 @@ function ChangeCard({ change, href }: { change: ApiChange; href?: string }) {
           <ChangeValues before={change.before} after={change.after} />
         </div>
       </details>
+    </div>
+  );
+}
+
+function OperationChanges({ changes, hrefForChange }: { changes: ApiChange[]; hrefForChange?: SpecDiffProps['hrefForChange'] }) {
+  const first = changes[0]!;
+  const isOperation = Boolean(first.method && first.path);
+  const wholeOperation = changes.some((change) => inferredArea(change) === 'operation');
+  const severities = new Set(changes.map((change) => change.severity));
+  const severity = (['breaking', 'warning', 'compatible', 'documentation'] as DiffSeverity[]).find((value) => severities.has(value))!;
+
+  return (
+    <article className={`sp-diff-operation sp-diff-operation-${severity}`}>
+      <header className="sp-diff-operation-heading">
+        <div>
+          {first.method && <span className={`sp-method sp-method-${first.method}`}>{first.method}</span>}
+          {first.path && <code className="sp-diff-path">{first.path}</code>}
+        </div>
+        <span>{changes.length} {changes.length === 1 ? 'change' : 'changes'} reported</span>
+      </header>
+      {isOperation && !wholeOperation && (
+        <div className="sp-diff-impact" aria-label="Operation impact">
+          {OPERATION_AREAS.map(({ value, label }) => {
+            const affected = changes.filter((change) => inferredArea(change) === value);
+            return (
+              <div className={affected.length ? 'is-affected' : 'is-unchanged'} key={value}>
+                <span>{label}</span>
+                <strong>{affected.length ? `${affected.length} changed` : 'Unchanged'}</strong>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {isOperation && wholeOperation && <div className="sp-diff-whole-operation">The entire operation was {first.kind}.</div>}
+      <div className="sp-diff-change-list">
+        {changes.map((change) => <ChangeDetails key={change.id} change={change} href={hrefForChange?.(change)} />)}
+      </div>
+      {isOperation && !wholeOperation && <p className="sp-diff-operation-note">No other changes were reported for this operation.</p>}
     </article>
   );
 }
@@ -202,10 +270,13 @@ export function SpecDiff({
     ? report.changes
     : report.changes.filter((change) => change.severity === filter);
   const groups = useMemo(() => {
-    const result = new Map<string, ApiChange[]>();
+    const result = new Map<string, Map<string, ApiChange[]>>();
     for (const change of visibleChanges) {
-      const key = change.tag || 'General';
-      result.set(key, [...(result.get(key) ?? []), change]);
+      const tag = change.tag || 'General';
+      const operation = change.method && change.path ? `${change.method}:${change.path}` : `change:${change.id}`;
+      const operations = result.get(tag) ?? new Map<string, ApiChange[]>();
+      operations.set(operation, [...(operations.get(operation) ?? []), change]);
+      result.set(tag, operations);
     }
     return result;
   }, [visibleChanges]);
@@ -244,11 +315,13 @@ export function SpecDiff({
 
       <div className="sp-diff-groups">
         {groups.size === 0 && <p className="sp-diff-empty">No {filter} changes.</p>}
-        {[...groups].map(([group, changes]) => (
+        {[...groups].map(([group, operations]) => (
           <section className="sp-diff-group" key={group}>
             <h2>{group}</h2>
-            <div className="sp-diff-change-list">
-              {changes.map((change) => <ChangeCard key={change.id} change={change} href={hrefForChange?.(change)} />)}
+            <div className="sp-diff-operation-list">
+              {[...operations].map(([operation, changes]) => (
+                <OperationChanges key={operation} changes={changes} hrefForChange={hrefForChange} />
+              ))}
             </div>
           </section>
         ))}

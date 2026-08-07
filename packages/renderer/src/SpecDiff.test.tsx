@@ -25,6 +25,7 @@ const report: DiffReport = {
       method: 'get',
       path: '/companies',
       tag: 'Companies',
+      scope: { area: 'parameters', label: 'Query parameter · status' },
       location: ['paths', '/companies', 'get', 'parameters', 'status'],
       message: 'Added optional query parameter status',
       after: { name: 'status', in: 'query', required: false },
@@ -61,6 +62,11 @@ describe('SpecDiff', () => {
     fireEvent.click(screen.getByRole('button', { name: /Compatible 1/ }));
     expect(screen.getByText('Added optional query parameter status')).toBeInTheDocument();
     expect(screen.queryByText('Removed operation GET /companies/{id}')).not.toBeInTheDocument();
+    expect(screen.getByText('Query parameter · status')).toBeInTheDocument();
+    const impact = screen.getByLabelText('Operation impact');
+    expect(within(impact).getByText('Parameters').parentElement).toHaveTextContent('1 changed');
+    expect(within(impact).getByText('Request body').parentElement).toHaveTextContent('Unchanged');
+    expect(screen.getByText('No other changes were reported for this operation.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Added optional query parameter status'));
     expect(screen.getByText('After')).toBeInTheDocument();
