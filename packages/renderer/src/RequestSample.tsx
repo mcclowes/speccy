@@ -7,7 +7,7 @@
  * ---
  */
 
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { useLocalState } from './useLocalState';
 
@@ -84,13 +84,21 @@ export function RequestSample({ request, copyRequest = request, storageKey, clas
   className?: string;
 }) {
   const [language, setLanguage] = useLocalState<RequestSampleLanguage>(storageKey, 'curl');
+  const languageMenuRef = useRef<HTMLDetailsElement>(null);
   const selected = LANGUAGES.find((item) => item.value === language) ?? LANGUAGES[0]!;
+  useEffect(() => {
+    const closeFromOutside = (event: PointerEvent) => {
+      if (!languageMenuRef.current?.contains(event.target as Node)) languageMenuRef.current?.removeAttribute('open');
+    };
+    document.addEventListener('pointerdown', closeFromOutside);
+    return () => document.removeEventListener('pointerdown', closeFromOutside);
+  }, []);
   const chooseLanguage = (nextLanguage: RequestSampleLanguage, target: HTMLButtonElement) => {
     setLanguage(nextLanguage);
     target.closest('details')?.removeAttribute('open');
   };
   const title = (
-    <details className="sp-sample-language">
+    <details className="sp-sample-language" ref={languageMenuRef}>
       <summary role="button" aria-label="Code sample language" aria-haspopup="listbox"><LanguageIcon language={selected.value} /><span>{selected.label}</span><span className="sp-sample-chevron" /></summary>
       <div className="sp-sample-language-menu" role="listbox" aria-label="Code sample language">
         {LANGUAGES.map((item) => <button type="button" role="option" aria-selected={item.value === selected.value} onClick={(event) => chooseLanguage(item.value, event.currentTarget)} key={item.value}><LanguageIcon language={item.value} /><span>{item.label}</span>{item.value === selected.value && <span className="sp-sample-check">✓</span>}</button>)}

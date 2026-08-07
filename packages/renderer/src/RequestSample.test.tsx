@@ -36,4 +36,14 @@ describe('RequestSample', () => {
     render(<RequestSample request={request} storageKey="test-language" />);
     expect(screen.getByRole('option', { name: /Python/ })).toHaveAttribute('aria-selected', 'true');
   });
+
+  it('closes the language menu when clicking outside it', () => {
+    const { container } = render(<RequestSample request={request} storageKey="test-language" />);
+    const menu = container.querySelector<HTMLDetailsElement>('.sp-sample-language')!;
+    menu.open = true;
+
+    fireEvent.pointerDown(document.body);
+
+    expect(menu.open).toBe(false);
+  });
 });
