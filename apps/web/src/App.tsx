@@ -169,12 +169,10 @@ export function App() {
     setActiveId(id);
     setMessage('');
     setSourceUrl('');
-    setRecents((current) => {
-      const updated = [{ id, name, source: next, openedAt }, ...current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
-      recentsRef.current = updated;
-      storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    const updated = [{ id, name, source: next, openedAt }, ...recentsRef.current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
+    recentsRef.current = updated;
+    storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
+    setRecents(updated);
   }
 
   function openRecent(reference: RecentReference) {
