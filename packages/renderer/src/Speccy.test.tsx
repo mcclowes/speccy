@@ -624,10 +624,10 @@ describe('Speccy navigation', () => {
       openapi: '3.1.0', info: { title: 'Subgrouped API' },
       tags: [{ name: 'Payments' }],
       paths: {
+        '/payments/{paymentId}/archive': { post: { tags: ['Payments'], summary: 'Archive payment' } },
         '/payments': { post: { tags: ['Payments'], summary: 'Create payment', 'x-tagSubgroup': 'Payment lifecycle' } },
         '/payments/{paymentId}': { get: { tags: ['Payments'], summary: 'Get payment', 'x-tagSubgroup': 'Payment lifecycle' } },
         '/payments/{paymentId}/events': { get: { tags: ['Payments'], summary: 'List payment events', 'x-tagSubgroup': 'Reconciliation' } },
-        '/payments/{paymentId}/archive': { post: { tags: ['Payments'], summary: 'Archive payment' } },
       },
     }} showThemeToggle={false} />);
 
@@ -640,6 +640,14 @@ describe('Speccy navigation', () => {
     expect(navigation.getByRole('link', { name: /Get payment/ })).toBeInTheDocument();
     expect(navigation.getByRole('link', { name: /List payment events/ })).toBeInTheDocument();
     expect(navigation.getByRole('link', { name: /Archive payment/ })).toBeInTheDocument();
+
+    const items = [...navigation.getByRole('button', { name: 'Payments' }).nextElementSibling!.children];
+    expect(items.map((item) => item.textContent)).toEqual([
+      'Overview',
+      'Archive paymentPOST',
+      'Payment lifecycleCreate paymentPOSTGet paymentGET',
+      'ReconciliationList payment eventsGET',
+    ]);
   });
 
   it('restores authorization and parameter values', () => {

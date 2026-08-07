@@ -842,14 +842,16 @@ function NavigationGroup({
   const expanded = searching || open;
   const operationListId = `sp-nav-${slugify(tag.name)}`;
   const subgroupedOperations = new Map<string, OperationModel[]>();
-  const ungroupedOperations: OperationModel[] = [];
+  const navigationItems: Array<OperationModel | { subgroup: string; operations: OperationModel[] }> = [];
   for (const item of operations) {
     const subgroup = item.operation['x-tagSubgroup']?.trim();
     if (!subgroup) {
-      ungroupedOperations.push(item);
+      navigationItems.push(item);
       continue;
     }
-    const subgroupOperations = subgroupedOperations.get(subgroup) ?? [];
+    const existingSubgroup = subgroupedOperations.get(subgroup);
+    const subgroupOperations = existingSubgroup ?? [];
+    if (!existingSubgroup) navigationItems.push({ subgroup, operations: subgroupOperations });
     subgroupOperations.push(item);
     subgroupedOperations.set(subgroup, subgroupOperations);
   }
@@ -893,13 +895,12 @@ function NavigationGroup({
             aria-current={activeTag === tag ? 'page' : undefined}
             onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
           >Overview</a>
-          {[...subgroupedOperations].map(([subgroup, subgroupOperations]) => (
-            <section className="sp-nav-subgroup" aria-labelledby={`${operationListId}-${slugify(subgroup)}`} key={subgroup}>
-              <h3 id={`${operationListId}-${slugify(subgroup)}`}>{subgroup}</h3>
-              {subgroupOperations.map(operationLink)}
+          {navigationItems.map((item) => 'subgroup' in item ? (
+            <section className="sp-nav-subgroup" aria-labelledby={`${operationListId}-${slugify(item.subgroup)}`} key={item.subgroup}>
+              <h3 id={`${operationListId}-${slugify(item.subgroup)}`}>{item.subgroup}</h3>
+              {item.operations.map(operationLink)}
             </section>
-          ))}
-          {ungroupedOperations.map(operationLink)}
+          ) : operationLink(item))}
         </div>
       )}
     </div>
