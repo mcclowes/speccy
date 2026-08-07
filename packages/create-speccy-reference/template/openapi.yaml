@@ -1,0 +1,18 @@
+openapi: 3.1.0
+info:
+  title: Library API
+  version: 1.0.0
+  description: Browse and borrow books from the library.
+servers:
+  - url: https://api.example.com
+tags:
+  - name: Books
+paths:
+  /books:
+    get:
+      operationId: listBooks
+      tags: [Books]
+      summary: List books
+      responses:
+        '200':
+          description: Books in the catalogue

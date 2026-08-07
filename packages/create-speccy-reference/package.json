@@ -1,0 +1,34 @@
+{
+  "name": "create-speccy-reference",
+  "version": "0.1.0",
+  "description": "Create a standalone Speccy API reference site.",
+  "type": "module",
+  "bin": {
+    "create-speccy-reference": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "template/gitignore",
+    "template/index.html",
+    "template/netlify.toml",
+    "template/openapi.yaml",
+    "template/package.json",
+    "template/README.md",
+    "template/speccy.config.ts",
+    "template/src",
+    "template/tsconfig.json",
+    "template/vercel.json",
+    "template/vite.config.ts"
+  ],
+  "scripts": {
+    "test": "node --test index.test.js",
+    "build": "node --check index.js && npm run build --prefix template",
+    "typecheck": "node --check index.js && tsc --noEmit -p template/tsconfig.json"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
