@@ -209,6 +209,42 @@ function OperationCard({ item, server, defaultExpanded }: {
   );
 }
 
+function NavigationGroup({
+  name,
+  operations,
+  searching,
+}: {
+  name: string;
+  operations: OperationModel[];
+  searching: boolean;
+}) {
+  const [open, setOpen] = useState(true);
+  const expanded = searching || open;
+  const operationListId = `sp-nav-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+  return (
+    <div className="sp-nav-group">
+      <button
+        type="button"
+        className="sp-nav-tag"
+        onClick={() => setOpen(!expanded)}
+        aria-expanded={expanded}
+        aria-controls={operationListId}
+      >
+        <span>{name}</span>
+        <span className="sp-nav-chevron" aria-hidden="true" />
+      </button>
+      {expanded && (
+        <div id={operationListId}>
+          {operations.map((item) => (
+            <a className="sp-nav-operation" href={`#${item.id}`} key={item.id}><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><span>{item.operation.summary ?? item.path}</span></a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ErrorState({ error }: { error: Error }) {
   return <div className="sp-error" role="alert"><strong>Couldn’t render this spec</strong><p>{error.message}</p></div>;
 }
@@ -252,14 +288,11 @@ export function Speccy({
           <a className="sp-brand" href="#sp-overview">{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
           <label className="sp-search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search endpoints" aria-label="Search endpoints" /></label>
           <div className="sp-nav-scroll">
-            {model.tags.map((tag) => (
-              <div className="sp-nav-group" key={tag.name}>
-                <a className="sp-nav-tag" href={`#tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{tag.name}</a>
-                {tag.operations.filter(matches).map((item) => (
-                  <a className="sp-nav-operation" href={`#${item.id}`} key={item.id}><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><span>{item.operation.summary ?? item.path}</span></a>
-                ))}
-              </div>
-            ))}
+            {model.tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
+              .filter(({ operations }) => operations.length > 0)
+              .map(({ tag, operations }) => (
+                <NavigationGroup name={tag.name} operations={operations} searching={Boolean(normalizedQuery)} key={tag.name} />
+              ))}
           </div>
         </nav>
       )}
@@ -286,4 +319,3 @@ export function Speccy({
     </div>
   );
 }
-
