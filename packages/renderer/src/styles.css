@@ -269,9 +269,10 @@ related:
 .sp-rail-code { padding: 0; color: var(--sp-code-text); background: var(--sp-code); }
 .sp-rail-code .sp-code-title { margin: 0; padding: 11px 14px; border-bottom: 1px solid var(--sp-code-border); }
 .sp-sample-language { position: relative; color: var(--sp-code-text); font: inherit; }
-.sp-sample-language summary { display: flex; align-items: center; gap: 8px; min-width: 120px; padding: 5px 8px; background: var(--sp-code-control); border: 1px solid var(--sp-code-border); border-radius: 6px; cursor: pointer; list-style: none; }
+.sp-sample-language summary { display: flex; align-items: center; gap: 8px; min-width: 120px; padding: 4px 8px; background: var(--sp-code-control); border: 1px solid var(--sp-code-border); border-radius: 6px; cursor: pointer; list-style: none; }
 .sp-sample-language summary::-webkit-details-marker { display: none; }
 .sp-sample-language svg { width: 20px; height: 20px; flex: 0 0 auto; overflow: visible; }
+.sp-sample-language summary svg { width: 18px; height: 18px; }
 .sp-sample-language svg path, .sp-sample-language svg circle { vector-effect: non-scaling-stroke; }
 .sp-sample-language svg path:not([fill]) { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 .sp-sample-language svg text { font: 700 9px/1 sans-serif; }
