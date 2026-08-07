@@ -78,7 +78,7 @@ describe('SchemaView composition', () => {
     }} />);
 
     const root = container.querySelector('details');
-    const nested = root!.querySelector('details');
+    const nested = container.querySelector('.sp-schema-object-shell details');
     expect(root).toHaveAttribute('open');
     expect(screen.getByText('result')).toBeVisible();
     expect(nested).not.toHaveAttribute('open');
@@ -140,5 +140,23 @@ describe('SchemaView composition', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show details for connection' }));
     expect(screen.getByText('The company data connection.')).toBeVisible();
     expect(screen.queryByText('status')).not.toBeVisible();
+  });
+
+  it('shows an object field description before its subfields', () => {
+    render(<SchemaView collapseObjects schema={{
+      type: 'array',
+      items: {
+        type: 'object',
+        description: 'A company returned by the API.',
+        properties: { id: { type: 'string' } },
+      },
+    }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for items' }));
+    fireEvent.click(screen.getByText('items').closest('summary')!);
+
+    const description = screen.getByText('A company returned by the API.');
+    const subfield = screen.getByText('id');
+    expect(description.compareDocumentPosition(subfield) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

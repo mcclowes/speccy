@@ -58,6 +58,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   exampleValue?: unknown;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [structureOpen, setStructureOpen] = useState(!name);
   if (!schema) return null;
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
@@ -137,13 +138,28 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
 
   if (collapseObjects && isObject) {
+    if (name) {
+      return <div className={`${className} sp-schema-object-shell`}>
+        <details
+          className="sp-schema-object sp-schema-object-named"
+          open={structureOpen}
+        >
+          <summary onClick={(event) => {
+            event.preventDefault();
+            setStructureOpen((open) => !open);
+          }}>{header}</summary>
+        </details>
+        {detailsOpen && fieldDetails}
+        <div hidden={!structureOpen}>{structuralBody}</div>
+      </div>;
+    }
+
     return <>
-      <details className={`${className} sp-schema-object${name ? ' sp-schema-object-named' : ''}`} open={!name}>
+      <details className={`${className} sp-schema-object`} open>
         <summary>{header}</summary>
-        {!name && fieldDetails}
+        {fieldDetails}
         {structuralBody}
       </details>
-      {name && detailsOpen && fieldDetails}
     </>;
   }
 
