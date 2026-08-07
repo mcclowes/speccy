@@ -285,14 +285,16 @@ function EndpointResponseBody({ code, response }: { code: string; response: Resp
   const showDescription = response.description?.trim().toLocaleLowerCase() !== statusPhrase?.toLocaleLowerCase();
 
   return <div className="sp-endpoint-response-grid">
-    <div className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}>
-      <div className="sp-response-label"><span className="sp-response-code">{code}</span>{statusPhrase && <strong>{statusPhrase}</strong>}</div>
-      {showDescription && <Markdown>{response.description}</Markdown>}
-    </div>
-    <div className="sp-endpoint-response-detail" role="tabpanel">
-      <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
-      {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
-      {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
+    <div className="sp-response-content">
+      <div className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}>
+        <div className="sp-response-label"><span className="sp-response-code">{code}</span>{statusPhrase && <strong>{statusPhrase}</strong>}</div>
+        {showDescription && <Markdown>{response.description}</Markdown>}
+      </div>
+      <div className="sp-endpoint-response-detail" role="tabpanel">
+        <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
+        {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
+        {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
+      </div>
     </div>
     <ResponseExamplePanel examples={examples} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
   </div>;

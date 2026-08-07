@@ -156,21 +156,22 @@
 .sp-response-tab:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-response-tab[aria-selected='true'] { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
-.sp-response-summary { grid-column: 1; padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 6px; background: var(--sp-surface-soft); }
+.sp-response-content { display: grid; min-width: 0; gap: 12px; }
+.sp-response-summary { padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 6px; background: var(--sp-surface-soft); }
 .sp-response-summary.is-success { border-left-color: #25a878; }
 .sp-response-label { display: flex; align-items: baseline; gap: 8px; color: var(--sp-text); font-size: 12px; }
 .sp-response-label > strong { font-weight: 600; }
 .sp-response-code { color: #d24872; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; }
 .sp-response-summary.is-success .sp-response-code { color: #25a878; }
 .sp-response-summary > .sp-markdown { margin-top: 9px; color: var(--sp-text); font-size: 12px; font-weight: 500; }
-.sp-endpoint-response-detail { grid-column: 1; min-width: 0; }
+.sp-endpoint-response-detail { min-width: 0; }
 .sp-collapsible-markdown { max-width: 680px; }
 .sp-collapsible-markdown.is-collapsible:not(.is-expanded) { position: relative; }
 .sp-collapsible-markdown.is-collapsible:not(.is-expanded) > .sp-markdown { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .sp-collapsible-markdown > button { margin: 3px 0 0; padding: 0; border: 0; color: var(--sp-accent); background: transparent; cursor: pointer; font: inherit; }
 .sp-collapsible-markdown.is-collapsible:not(.is-expanded) > button { position: absolute; right: 0; bottom: 0; margin: 0; padding-left: 14px; background: linear-gradient(to right, transparent, var(--sp-bg) 12px); }
 .sp-collapsible-markdown > button:hover { text-decoration: underline; }
-.sp-response-example { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+.sp-response-example { grid-column: 2; align-self: start; }
 .sp-response-example .sp-code-title > span:first-child { display: flex; min-width: 0; align-items: center; gap: 10px; }
 .sp-example-select { min-width: 0; max-width: 180px; padding: 4px 24px 4px 7px; color: var(--sp-code-text); border: 1px solid var(--sp-code-border); border-radius: 5px; background: var(--sp-code-control); font: inherit; }
 .sp-request-intro .sp-section { margin-top: 0; padding: 20px 22px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface-soft); }

@@ -322,7 +322,7 @@ describe('Speccy navigation', () => {
 
   it('switches between responses in the full-width response section', () => {
     window.history.replaceState({}, '', '/api/get-company');
-    render(<Speccy spec={{
+    const { container } = render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Test API' },
       paths: { '/companies/{companyId}': { get: {
         summary: 'Get company', operationId: 'get-company',
@@ -340,6 +340,8 @@ describe('Speccy navigation', () => {
     }} basePath="/api" />);
 
     expect(screen.getByRole('tab', { name: '200' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel').parentElement).toHaveClass('sp-response-content');
+    expect(container.querySelector('.sp-response-summary')?.parentElement).toHaveClass('sp-response-content');
     expect(screen.getByRole('combobox', { name: 'Response example' })).toHaveValue('0');
     expect(screen.queryByText('The current company state.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show details for state' }));
