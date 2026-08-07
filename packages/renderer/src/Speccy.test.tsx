@@ -19,6 +19,26 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('links to all endpoints above the first tag', () => {
+    window.history.replaceState({}, '', '/api/tags/companies');
+    render(<Speccy spec={spec} basePath="/api" />);
+
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    const allEndpoints = navigation.getByRole('link', { name: 'All endpoints' });
+    const firstTag = navigation.getByRole('button', { name: 'Companies' });
+
+    expect(allEndpoints.compareDocumentPosition(firstTag) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(firstTag).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(allEndpoints);
+
+    expect(window.location.pathname).toBe('/api');
+    expect(allEndpoints).toHaveAttribute('aria-current', 'page');
+    expect(firstTag).toHaveAttribute('aria-expanded', 'true');
+    expect(navigation.getByRole('link', { name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Test API' })).toBeInTheDocument();
+  });
+
   it('renders each endpoint on its own route', () => {
     window.history.replaceState({}, '', '/api');
     render(<Speccy spec={spec} basePath="/api" />);
