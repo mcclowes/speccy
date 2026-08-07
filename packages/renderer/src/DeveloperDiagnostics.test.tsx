@@ -31,6 +31,12 @@ describe('developer diagnostics layout', () => {
     expect(css).toMatch(/\.sp-diagnostics-drawer \{[^}]*overflow-x: hidden;/);
   });
 
+  it('keeps finding cards tall enough to show their content', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(/\.sp-diagnostics-list \{[^}]*grid-auto-rows: max-content;/);
+  });
+
   it('floats contextual findings above the API health trigger', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 
