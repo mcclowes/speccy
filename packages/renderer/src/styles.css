@@ -57,11 +57,12 @@
 .sp-search-empty { padding: 42px 20px; color: var(--sp-muted); text-align: center; }
 .sp-search-help { display: flex; gap: 18px; padding: 9px 13px; color: var(--sp-muted); background: var(--sp-surface-soft); border-top: 1px solid var(--sp-line); font-size: 9px; }
 .sp-search-help span { display: flex; align-items: center; gap: 4px; }
-.sp-nav-scroll { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; padding: 8px 12px 32px; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.sp-nav-scroll { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; padding: 8px 12px 32px; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: transparent transparent; transition: scrollbar-color 140ms ease; }
 .sp-sidebar:hover .sp-nav-scroll { scrollbar-color: var(--sp-muted) transparent; }
 .sp-nav-scroll::-webkit-scrollbar { width: 8px; }
 .sp-nav-scroll::-webkit-scrollbar-track, .sp-nav-scroll::-webkit-scrollbar-thumb { background: transparent; }
-.sp-sidebar:hover .sp-nav-scroll::-webkit-scrollbar-thumb { background: var(--sp-muted); border-radius: 999px; }
+.sp-nav-scroll::-webkit-scrollbar-thumb { transition: background-color 140ms ease; }
+.sp-sidebar:hover .sp-nav-scroll::-webkit-scrollbar-thumb { background-color: var(--sp-muted); border-radius: 999px; }
 .sp-nav-empty { display: grid; gap: 5px; padding: 28px 12px; color: var(--sp-muted); text-align: center; }
 .sp-nav-empty strong { color: var(--sp-text); font-size: 12px; }
 .sp-nav-empty span { font-size: 11px; }
