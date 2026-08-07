@@ -518,12 +518,6 @@ function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: (
 
   useEffect(() => setActiveIndex(0), [normalizedQuery]);
 
-  useEffect(() => {
-    const activeResult = matches[activeIndex];
-    if (!activeResult) return;
-    document.getElementById(`sp-search-result-${activeResult.id}`)?.scrollIntoView?.({ block: 'nearest' });
-  }, [activeIndex, normalizedQuery]);
-
   function select(result?: SearchResult) {
     if (!result) return;
     result.navigate();

@@ -320,21 +320,6 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('textbox', { name: 'Search API reference' })).toHaveFocus();
   });
 
-  it('scrolls the active result into view during keyboard navigation', () => {
-    const originalScrollIntoView = Element.prototype.scrollIntoView;
-    const scrollIntoView = vi.fn();
-    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
-    render(<Speccy spec={spec} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Search API reference' }));
-    scrollIntoView.mockClear();
-
-    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Search API reference' }), { key: 'ArrowDown' });
-    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: originalScrollIntoView });
-
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
-    expect(screen.getByRole('option', { name: /Companies/ })).toHaveAttribute('aria-selected', 'true');
-  });
-
   it('shows an empty search state and closes with Escape', () => {
     render(<Speccy spec={spec} />);
     fireEvent.click(screen.getByRole('button', { name: 'Search API reference' }));
