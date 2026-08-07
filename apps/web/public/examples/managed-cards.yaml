@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Managed cards
+  version: 1.0.0
+paths:
+  /managed-cards:
+    post:
+      summary: Create a managed card
+      operationId: createManagedCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedCardRequest"
+      responses:
+        "200":
+          description: Managed card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedCard"
+components:
+  schemas:
+    ManagedCard:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+      discriminator:
+        propertyName: mode
+        mapping:
+          PREPAID_MODE: "#/components/schemas/PrepaidModeCard"
+          DEBIT_MODE: "#/components/schemas/DebitModeCard"
+    DebitModeCard:
+      allOf:
+        - $ref: "#/components/schemas/ManagedCard"
+        - type: object
+          required: [parentManagedAccountId]
+          properties:
+            parentManagedAccountId:
+              type: string
+            availableToSpend:
+              type: array
+              items:
+                type: number
+    PrepaidModeCard:
+      allOf:
+        - $ref: "#/components/schemas/ManagedCard"
+        - type: object
+          properties:
+            balances:
+              $ref: "#/components/schemas/ManagedInstrumentBalance"
+    ManagedInstrumentBalance:
+      type: object
+      properties:
+        available:
+          type: number
+        actual:
+          type: number
+    ManagedCardRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+      discriminator:
+        propertyName: mode
+        mapping:
+          PREPAID_MODE: "#/components/schemas/PrepaidModeCardRequest"
+          DEBIT_MODE: "#/components/schemas/DebitModeCardRequest"
+    PrepaidModeCardRequest:
+      allOf:
+        - $ref: "#/components/schemas/ManagedCardRequest"
+        - type: object
+          required: [currency]
+          properties:
+            currency:
+              type: string
+    DebitModeCardRequest:
+      allOf:
+        - $ref: "#/components/schemas/ManagedCardRequest"
+        - type: object
+          required: [parentManagedAccountId]
+          properties:
+            parentManagedAccountId:
+              type: string
