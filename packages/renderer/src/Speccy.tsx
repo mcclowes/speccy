@@ -17,6 +17,7 @@ import {
   useState,
 } from 'react';
 import { CodeBlock, CopyButton } from './CodeBlock';
+import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
 import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
@@ -452,7 +453,7 @@ function RequestRail({
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
           <p className="sp-rail-card-description">Enter the credential described under Request → Security{schemeLabel && `: ${schemeLabel}`}.</p>
-          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}>{credentialVisible ? 'Hide' : 'Show'}</button></div></label>
+          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
         </section>
       )}
       {parameters.length > 0 && (
