@@ -9,7 +9,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Speccy, type OpenAPIDocument } from '@speccy/renderer';
+import type { OpenAPIDocument } from '@speccy/renderer';
+import { Speccy } from '../../../packages/renderer/src/Speccy';
 import { SAMPLE_SPEC } from './sample';
 
 declare global {
