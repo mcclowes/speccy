@@ -48,7 +48,11 @@ describe('Speccy navigation', () => {
   it('opens a tag overview from an explicit navigation item', () => {
     render(<Speccy spec={{
       ...spec,
-      tags: [{ name: 'Companies', description: 'Create and manage companies.' }],
+      tags: [{
+        name: 'Companies',
+        description: 'Create and manage companies.',
+        'x-longDescription': 'Use **connections** to synchronize company data.\n\n## Before you begin\n\nCreate a company first.',
+      }],
     }} basePath="/api" />);
 
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
@@ -61,6 +65,8 @@ describe('Speccy navigation', () => {
     expect(navigation.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('heading', { level: 1, name: 'Companies' })).toBeInTheDocument();
     expect(screen.getByText('Create and manage companies.')).toBeInTheDocument();
+    expect(screen.getByText('connections').tagName).toBe('STRONG');
+    expect(screen.getByRole('heading', { level: 2, name: 'Before you begin' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Operations' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /List companies.*GET.*companies/ })).toBeInTheDocument();
   });
@@ -312,6 +318,21 @@ describe('Speccy navigation', () => {
 
     expect(screen.getByRole('dialog', { name: 'Search API reference' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Search API reference' })).toHaveFocus();
+  });
+
+  it('scrolls the active result into view during keyboard navigation', () => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+    render(<Speccy spec={spec} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Search API reference' }));
+    scrollIntoView.mockClear();
+
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Search API reference' }), { key: 'ArrowDown' });
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: originalScrollIntoView });
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(screen.getByRole('option', { name: /Companies/ })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('shows an empty search state and closes with Escape', () => {

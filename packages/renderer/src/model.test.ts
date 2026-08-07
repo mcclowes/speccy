@@ -16,7 +16,7 @@ describe('createReferenceModel', () => {
   it('groups operations by tag and gives duplicate IDs a stable suffix', () => {
     const model = createReferenceModel({
       openapi: '3.1.0',
-      tags: [{ name: 'Pets', description: 'Pet things' }],
+      tags: [{ name: 'Pets', description: 'Pet things', 'x-longDescription': 'Everything you need to manage pets.' }],
       paths: {
         '/pets': {
           get: { tags: ['Pets'], operationId: 'listPets' },
@@ -27,6 +27,7 @@ describe('createReferenceModel', () => {
 
     expect(model.tags[0]?.name).toBe('Pets');
     expect(model.tags[0]?.description).toBe('Pet things');
+    expect(model.tags[0]?.longDescription).toBe('Everything you need to manage pets.');
     expect(model.operations.map(({ id }) => id)).toEqual(['listpets', 'listpets-2']);
   });
 

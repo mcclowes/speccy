@@ -114,6 +114,7 @@
 .sp-tag-overview-intro { position: sticky; top: 68px; }
 .sp-tag-overview-intro h1 { margin: 0 0 18px; font-size: clamp(32px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.045em; }
 .sp-tag-overview-intro > .sp-markdown { font-size: 15px; line-height: 1.75; }
+.sp-tag-overview-intro > .sp-tag-long-description { margin-top: 28px; }
 .sp-tag-overview-operations h2 { margin: 8px 0 18px; font-size: 14px; line-height: 1.2; }
 .sp-tag-overview .sp-operation-link { min-height: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; padding: 18px; }
 .sp-tag-overview .sp-operation-link-summary { font-size: 13px; }

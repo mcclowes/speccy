@@ -518,6 +518,12 @@ function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: (
 
   useEffect(() => setActiveIndex(0), [normalizedQuery]);
 
+  useEffect(() => {
+    const activeResult = matches[activeIndex];
+    if (!activeResult) return;
+    document.getElementById(`sp-search-result-${activeResult.id}`)?.scrollIntoView?.({ block: 'nearest' });
+  }, [activeIndex, normalizedQuery]);
+
   function select(result?: SearchResult) {
     if (!result) return;
     result.navigate();
@@ -682,6 +688,7 @@ function TagOverview({ tag, operations, basePath, onNavigate }: {
       <div className="sp-tag-overview-intro">
         <h1>{tag.name}</h1>
         <Markdown>{tag.description}</Markdown>
+        <Markdown className="sp-tag-long-description">{tag.longDescription}</Markdown>
       </div>
       <div className="sp-tag-overview-operations">
         <h2>Operations</h2>
@@ -804,7 +811,7 @@ export function Speccy({
     ...model.tags.map((tag) => ({
       id: `tag-${tagSlug(tag)}`, group: 'Tags' as const, label: tag.name,
       detail: `${tag.operations.length} endpoint${tag.operations.length === 1 ? '' : 's'}`,
-      terms: [tag.name, tag.description ?? ''], navigate: () => navigateTag(tag),
+      terms: [tag.name, tag.description ?? '', tag.longDescription ?? ''], navigate: () => navigateTag(tag),
     })),
     ...[...model.operations, ...model.webhooks].map((item) => ({
       id: `operation-${item.id}`, group: 'Endpoints' as const,

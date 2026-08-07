@@ -34,6 +34,7 @@ export interface OperationModel {
 export interface TagModel {
   name: string;
   description?: string;
+  longDescription?: string;
   operations: OperationModel[];
 }
 
@@ -199,8 +200,8 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
 
   const declaredTags = new Map(
     (document.tags ?? [])
-      .filter((tag): tag is { name: string; description?: string } => Boolean(tag.name))
-      .map((tag) => [tag.name, tag.description]),
+      .filter((tag): tag is { name: string; description?: string; 'x-longDescription'?: string } => Boolean(tag.name))
+      .map((tag) => [tag.name, tag]),
   );
   const operations: OperationModel[] = [];
   const usedIds = new Map<string, number>();
@@ -245,7 +246,8 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   let tags: TagModel[] = tagNames
     .map((name) => ({
       name,
-      description: declaredTags.get(name),
+      description: declaredTags.get(name)?.description,
+      longDescription: declaredTags.get(name)?.['x-longDescription'],
       operations: taggedOperations.filter((operation) => operation.tag === name),
     }))
     .filter((tag) => tag.operations.length > 0);
