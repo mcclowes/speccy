@@ -189,9 +189,9 @@ export function App() {
           </label>
         ) : <div className="studio-document">Your API references</div>}
         <div className="studio-actions">
-          {fileName && <button type="button" onClick={() => setUrlOpen(!urlOpen)}>Load URL</button>}
-          {fileName && <button type="button" onClick={() => fileInput.current?.click()}>Open file</button>}
-          {fileName && <button type="button" onClick={() => setDrawerOpen(!drawerOpen)}>{drawerOpen ? 'Close source' : 'Edit source'}</button>}
+          {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
+          {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
+          {fileName && <button className="studio-action-source" type="button" onClick={() => setDrawerOpen(!drawerOpen)}><span>{drawerOpen ? 'Close source' : 'Edit source'}</span></button>}
           <button className="studio-theme" type="button" onClick={() => setTheme(theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system')} aria-label={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
           <input ref={fileInput} type="file" accept=".yaml,.yml,.json,application/json,text/yaml" hidden onChange={(event) => void loadFile(event.target.files?.[0])} />
         </div>
