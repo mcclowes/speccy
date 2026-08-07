@@ -47,6 +47,25 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
   });
 
+  it('labels responses with their standard HTTP status phrase without repeating the description', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      ...spec,
+      paths: { '/companies': { get: {
+        summary: 'List companies',
+        responses: {
+          200: { description: 'OK' },
+          412: { description: 'The company data has changed since it was last read.' },
+        },
+      } } },
+    }} basePath="/api" />);
+
+    expect(screen.getByText('OK')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: '412' }));
+    expect(screen.getByText('Precondition Failed')).toBeInTheDocument();
+    expect(screen.getByText('The company data has changed since it was last read.')).toBeInTheDocument();
+  });
+
   it('opens a tag overview from an explicit navigation item', () => {
     render(<Speccy spec={{
       ...spec,

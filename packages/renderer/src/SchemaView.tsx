@@ -116,7 +116,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
 
   if (collapseObjects && isObject) {
     return <>
-      <details className={`${className} sp-schema-object`} open={!name}>
+      <details className={`${className} sp-schema-object${name ? ' sp-schema-object-named' : ''}`} open={!name}>
         <summary>{header}</summary>
         {!name && fieldDetails}
         {structuralBody}
