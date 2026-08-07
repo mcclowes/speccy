@@ -28,12 +28,12 @@ describe('RequestSample', () => {
 
   it('switches language and persists the choice', () => {
     const { unmount } = render(<RequestSample request={request} storageKey="test-language" />);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Code sample language' }), { target: { value: 'python' } });
+    fireEvent.click(screen.getByRole('option', { name: 'Python' }));
     expect(screen.getByText(/requests\.post/)).toBeInTheDocument();
     expect(window.localStorage.getItem('test-language')).toBe('"python"');
 
     unmount();
     render(<RequestSample request={request} storageKey="test-language" />);
-    expect(screen.getByRole('combobox', { name: 'Code sample language' })).toHaveValue('python');
+    expect(screen.getByRole('option', { name: /Python/ })).toHaveAttribute('aria-selected', 'true');
   });
 });
