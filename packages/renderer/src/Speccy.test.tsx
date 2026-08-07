@@ -83,6 +83,7 @@ describe('Speccy navigation', () => {
   it('shows tagged webhooks under their tag and untagged webhooks under Other webhooks', () => {
     render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Webhook API' }, paths: {},
+      'x-tagGroups': [{ name: 'Core API', tags: ['Companies'] }],
       webhooks: {
         companyUpdated: { post: { tags: ['Companies'], summary: 'Company updated' } },
         systemReady: { post: { summary: 'System ready' } },

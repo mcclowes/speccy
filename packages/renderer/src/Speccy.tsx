@@ -778,6 +778,8 @@ export function Speccy({
 
   const model = result.model;
   const server = model.document.servers?.[0]?.url ?? '';
+  const groupedTagNames = new Set(model.tagGroups.flatMap((group) => group.tags.map((tag) => tag.name)));
+  const ungroupedTags = model.tags.filter((tag) => !groupedTagNames.has(tag.name));
   const activeReference = activeRoute?.startsWith('reference/') ? activeRoute.slice('reference/'.length) as ReferenceKey : undefined;
   const activeTagSlug = activeRoute?.startsWith('tags/') ? activeRoute.slice('tags/'.length) : undefined;
   const activeTag = activeTagSlug ? model.tags.find((tag) => tagSlug(tag) === activeTagSlug) : undefined;
@@ -846,14 +848,14 @@ export function Speccy({
             <button ref={fullSearchButton} type="button" className="sp-full-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Open full search"><kbd>⌘K</kbd></button>
           </div>
           <div className="sp-nav-scroll">
-            {model.tagGroups.length > 0 ? model.tagGroups.map((group) => {
+            {model.tagGroups.length > 0 ? <>{model.tagGroups.map((group) => {
               const visibleTags = group.tags.filter((tag) => tag.operations.some(matchesFilter));
               if (visibleTags.length === 0) return null;
               return <section className="sp-nav-tag-group" aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`} key={group.name}>
                 <h2 className="sp-nav-heading" id={`sp-nav-tag-group-${slugify(group.name)}`}>{group.name}</h2>
                 <NavigationTags tags={visibleTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
               </section>;
-            }) : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
+            })}<NavigationTags tags={ungroupedTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} /></> : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
             {normalizedFilter && filteredOperationCount === 0 && <div className="sp-nav-empty"><strong>No matching endpoints</strong><span>Try a path, method, or operation name.</span></div>}
             {!normalizedFilter && <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />}
           </div>

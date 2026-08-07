@@ -262,7 +262,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   }));
   if (configuredTagGroups.length > 0) {
     const groupedTagNames = new Set(configuredTagGroups.flatMap((group) => group.tags ?? []));
-    tags = tags.filter((tag) => groupedTagNames.has(tag.name));
+    tags = tags.filter((tag) => groupedTagNames.has(tag.name) || tag.name === 'Other webhooks');
   }
 
   return { document, tags, tagGroups, operations, webhooks };
