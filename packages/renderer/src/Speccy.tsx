@@ -264,7 +264,7 @@ function EndpointResponseBody({ response }: { response: ResponseObject }) {
   const activeExample = examples[activeIndex];
 
   return <div className="sp-endpoint-response-grid">
-    <Markdown>{response.description}</Markdown>
+    <div className="sp-response-summary"><Markdown>{response.description}</Markdown></div>
     <div className="sp-endpoint-response-detail" role="tabpanel">
       <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
       {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
