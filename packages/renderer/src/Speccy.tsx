@@ -125,8 +125,8 @@ function ResponseView({ code, response }: { code: string; response: ResponseObje
       {open && (
         <div className="sp-response-body">
           <Markdown>{response.description}</Markdown>
-          <MediaContent content={response.content} collapseObjects />
           {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
+          <MediaContent content={response.content} collapseObjects />
           {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
         </div>
       )}
@@ -336,8 +336,8 @@ function EndpointResponseBody({ code, response }: { code: string; response: Resp
         {showDescription && <Markdown>{response.description}</Markdown>}
       </div>
       <div className="sp-endpoint-response-detail" role="tabpanel">
-        <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
         {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
+        <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
         {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
       </div>
     </div>

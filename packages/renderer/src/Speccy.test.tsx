@@ -439,21 +439,28 @@ describe('Speccy navigation', () => {
       paths: { '/companies/{companyId}': { get: {
         summary: 'Get company', operationId: 'get-company',
         responses: {
-          '200': { description: 'Company found', content: { 'application/json': {
-            schema: { type: 'object', properties: { state: { type: 'string', description: 'The current company state.' } }, example: { state: 'generic' } },
-            examples: {
-              found: { summary: 'Found company', value: { state: 'found' } },
-              cached: { summary: 'Cached company', value: { state: 'cached' } },
-            },
-          } } },
+          '200': {
+            description: 'Company found',
+            headers: { 'request-ref': { description: 'A request identifier.', schema: { type: 'string' } } },
+            content: { 'application/json': {
+              schema: { type: 'object', properties: { state: { type: 'string', description: 'The current company state.' } }, example: { state: 'generic' } },
+              examples: {
+                found: { summary: 'Found company', value: { state: 'found' } },
+                cached: { summary: 'Cached company', value: { state: 'cached' } },
+              },
+            } },
+          },
           '404': { description: 'Company missing', content: { 'application/json': { example: { state: 'missing' } } } },
         },
       } } },
-    }} basePath="/api" />);
+    }} basePath="/api" showThemeToggle={false} />);
 
     expect(screen.getByRole('tab', { name: '200' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tabpanel').parentElement).toHaveClass('sp-response-content');
     expect(container.querySelector('.sp-response-summary')?.parentElement).toHaveClass('sp-response-content');
+    const headers = screen.getByText('Headers').closest('.sp-detail-list');
+    const responseBody = container.querySelector('.sp-media-list');
+    expect(headers?.compareDocumentPosition(responseBody!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(screen.getByRole('combobox', { name: 'Response example' })).toHaveValue('0');
     expect(screen.queryByText('The current company state.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show details for state' }));
