@@ -7,6 +7,12 @@ description: Render a complete OpenAPI reference inside a React application.
 
 `speccy-renderer` is the shared rendering core. It owns parsing, navigation, search, endpoint pages, request samples, and the request builder.
 
+Install it from [npm](https://www.npmjs.com/package/speccy-renderer):
+
+```sh
+npm install speccy-renderer
+```
+
 ## Basic use
 
 ```tsx

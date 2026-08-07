@@ -1,6 +1,6 @@
 # Create a Speccy reference
 
-Create a standalone, statically deployable API reference:
+Create a standalone, statically deployable API reference with [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference):
 
 ```sh
 npm create speccy-reference my-api-reference

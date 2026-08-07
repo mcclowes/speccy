@@ -6,10 +6,10 @@ The design stays quiet around the content. Color identifies methods, status, req
 
 ## What’s included
 
-- `speccy-renderer` - the shared React renderer
+- [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer) - the shared React renderer
 - `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
-- `docusaurus-plugin-speccy` - generated reference routes and an embeddable MDX component
-- `create-speccy-reference` - a standalone static reference starter
+- [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy) - generated reference routes and an embeddable MDX component
+- [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference) - a standalone static reference starter
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
@@ -35,6 +35,10 @@ The build runs the renderer and web builds, embeds the resulting assets, runs th
 
 ## Use the React renderer
 
+```sh
+npm install speccy-renderer
+```
+
 ```tsx
 import {Speccy} from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
@@ -59,6 +63,10 @@ tags:
 `url` accepts any image URL supported by the browser. Keep `alt` empty when the icon is purely decorative.
 
 ## Use the Docusaurus plugin
+
+```sh
+npm install docusaurus-plugin-speccy speccy-renderer
+```
 
 ```ts
 // docusaurus.config.ts

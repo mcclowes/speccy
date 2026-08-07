@@ -12,9 +12,9 @@ Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference docum
 
 | What you’re building | Start with |
 | --- | --- |
-| A reference inside a React application | `speccy-renderer` |
-| A reference alongside guides in Docusaurus | `docusaurus-plugin-speccy` |
-| A dedicated public API reference | `create-speccy-reference` |
+| A reference inside a React application | [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer) |
+| A reference alongside guides in Docusaurus | [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy) |
+| A dedicated public API reference | [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference) |
 
 The Speccy Studio is for opening and reviewing specifications. It isn’t the production hosting shell.
 

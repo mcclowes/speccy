@@ -1,6 +1,6 @@
 # Speccy for Docusaurus
 
-Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a full reference route from a local file, a remote URL, or an inline document. The same renderer can be embedded in MDX.
+Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a full reference route from a local file, a remote URL, or an inline document. The same renderer can be embedded in MDX. The package is published as [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy).
 
 ## Install
 
