@@ -79,4 +79,36 @@ describe('SchemaView composition', () => {
     fireEvent.click(toggle);
     expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
   });
+
+  it('hides named field details without hiding the field structure', () => {
+    render(<SchemaView collapseObjects schema={{
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          format: 'uuid',
+          description: 'Unique identifier for the company.',
+          example: 'ee2eb431-c0fa-4dc9-93fa-d29781c12bcd',
+        },
+        connection: {
+          type: 'object',
+          description: 'The company data connection.',
+          properties: { status: { type: 'string' } },
+        },
+      },
+    }} />);
+
+    expect(screen.getByText('id')).toBeVisible();
+    expect(screen.getByText('connection')).toBeVisible();
+    expect(screen.queryByText('Unique identifier for the company.')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for id' }));
+    expect(screen.getByText('Unique identifier for the company.')).toBeVisible();
+    expect(screen.getByText('ee2eb431-c0fa-4dc9-93fa-d29781c12bcd')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Hide details for id' })).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for connection' }));
+    expect(screen.getByText('The company data connection.')).toBeVisible();
+    expect(screen.queryByText('status')).not.toBeVisible();
+  });
 });

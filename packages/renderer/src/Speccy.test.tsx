@@ -280,6 +280,8 @@ describe('Speccy navigation', () => {
 
     expect(screen.getByRole('tab', { name: '200' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('combobox', { name: 'Response example' })).toHaveValue('0');
+    expect(screen.queryByText('The current company state.')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for state' }));
     expect(screen.getByText('The current company state.')).toBeInTheDocument();
     expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent === 'Example: found')).toBeInTheDocument();
     expect(screen.getByText(/"found"/)).toBeInTheDocument();

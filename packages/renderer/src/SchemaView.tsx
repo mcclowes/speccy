@@ -7,6 +7,7 @@
  * ---
  */
 
+import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { CollapsibleMarkdown, Markdown } from './Markdown';
 import type { MediaType, SchemaObject } from './types';
@@ -37,6 +38,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   showExample?: boolean;
   exampleValue?: unknown;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   if (!schema) return null;
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
@@ -49,6 +51,19 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     schema.maxLength !== undefined && `max length ${schema.maxLength}`,
     schema.pattern && `pattern ${schema.pattern}`,
   ].filter(Boolean);
+  const hasFieldDetails = Boolean(name && (
+    schema.description
+    || constraints.length > 0
+    || schema.default !== undefined
+    || (exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object'))
+    || (exampleValue === undefined && showExample && schema.example !== undefined)
+  ));
+
+  const toggleDetails = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDetailsOpen((open) => !open);
+  };
 
   const header = (
     <div className="sp-schema-head">
@@ -59,9 +74,16 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
         {schema.writeOnly && <span className="sp-qualifier">write only</span>}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
+        {hasFieldDetails && <button
+          type="button"
+          className="sp-schema-details-toggle"
+          aria-expanded={detailsOpen}
+          aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
+          onClick={toggleDetails}
+        ><span aria-hidden="true" /></button>}
     </div>
   );
-  const body = <>
+  const fieldDetails = <div className="sp-schema-field-details">
       {collapseObjects
         ? <CollapsibleMarkdown className="sp-schema-description">{schema.description}</CollapsibleMarkdown>
         : <Markdown className="sp-schema-description">{schema.description}</Markdown>}
@@ -69,6 +91,8 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
       {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta">Example: <code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}
       {exampleValue === undefined && showExample && schema.example !== undefined && <><div className="sp-schema-meta">Example</div><JsonValue value={schema.example} /></>}
+  </div>;
+  const structuralBody = <>
       {Object.entries(properties).length > 0 && <div className="sp-schema-properties">{Object.entries(properties).map(([propertyName, property]) => (
         <SchemaView key={propertyName} name={propertyName} schema={property} required={schema.required?.includes(propertyName)} depth={depth + 1} collapseObjects={collapseObjects} showExample={showExample} exampleValue={exampleValue && typeof exampleValue === 'object' && !Array.isArray(exampleValue) ? (exampleValue as Record<string, unknown>)[propertyName] : undefined} />
       ))}</div>}
@@ -91,13 +115,21 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
 
   if (collapseObjects && isObject) {
-    return <details className={`${className} sp-schema-object`} open={!name}><summary>{header}</summary>{body}</details>;
+    return <>
+      <details className={`${className} sp-schema-object`} open={!name}>
+        <summary>{header}</summary>
+        {!name && fieldDetails}
+        {structuralBody}
+      </details>
+      {name && detailsOpen && fieldDetails}
+    </>;
   }
 
   return (
     <div className={className}>
       {header}
-      {body}
+      {(!name || detailsOpen) && fieldDetails}
+      {structuralBody}
     </div>
   );
 }
