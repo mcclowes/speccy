@@ -404,6 +404,22 @@ describe('Speccy navigation', () => {
     expect(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: /List companies/ })).toBeInTheDocument();
   });
 
+  it('allows the active endpoint group to be collapsed', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={spec} basePath="/api" />);
+
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    const toggle = navigation.getByRole('button', { name: 'Companies' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(navigation.getByRole('link', { name: /List companies/ })).toHaveAttribute('aria-current', 'page');
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(navigation.queryByRole('link', { name: /List companies/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
+  });
+
   it('renders Redocly tag groups above their tags', () => {
     render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Grouped API' },

@@ -724,7 +724,7 @@ function NavigationGroup({
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
   const activeRouteIsWithinGroup = activeTag === tag || operations.some((item) => item.id === activeOperationId);
-  const expanded = searching || open || activeRouteIsWithinGroup;
+  const expanded = searching || open;
   const operationListId = `sp-nav-${slugify(tag.name)}`;
 
   useEffect(() => {
