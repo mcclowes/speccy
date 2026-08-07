@@ -554,7 +554,7 @@ function RequestRail({
       {parameters.length > 0 && (
         <section className="sp-rail-card">
           <div className="sp-parameter-card-header">
-            <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+            <h3>Parameters</h3>
             {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
               <button type="button" className="sp-add-optional-parameter" aria-label="Add optional parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Optional</button>
               {optionalPickerOpen && <div className="sp-optional-parameter-menu">
