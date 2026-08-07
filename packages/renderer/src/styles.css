@@ -89,14 +89,14 @@ related:
 .sp-nav-tag-group > .sp-nav-heading { padding: 5px 8px 2px; color: color-mix(in srgb, var(--sp-text) 78%, var(--sp-muted)); font-size: 11px; text-transform: none; }
 .sp-nav-tag-group .sp-nav-group { margin: 4px 0; }
 /* Sticky within .sp-nav-group, so the next section's header pushes it off; -8px offsets .sp-nav-scroll's top padding so rows can't peek above the pinned header */
-.sp-nav-tag { position: sticky; top: -8px; z-index: 1; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; color: var(--sp-muted); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); border: 0; cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; transition: color 120ms ease, background-color 120ms ease; }
+.sp-nav-tag { position: sticky; top: -8px; z-index: 1; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; color: color-mix(in srgb, var(--sp-text) 82%, var(--sp-muted)); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); border: 0; cursor: pointer; font-size: 11px; font-weight: 600; line-height: 1.45; text-align: left; transition: color 120ms ease, background-color 120ms ease; }
 .sp-nav-tag.has-icon { padding-block: 5px; }
-.sp-nav-tag > span:first-child { font-weight: 700; }
+.sp-nav-tag > span:first-child { font-weight: inherit; }
 .sp-tag-label, .sp-tag-title { display: flex; align-items: center; gap: 8px; }
 .sp-tag-icon { width: 1em; height: 1em; flex: none; object-fit: contain; }
 .sp-nav-tag .sp-tag-icon { width: 14px; height: 14px; }
 .sp-nav-tag:hover { color: var(--sp-text); }
-.sp-nav-tag.is-active { color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 7px; }
+.sp-nav-tag.is-active { color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 7px; font-weight: 700; }
 .sp-nav-chevron { width: 6px; height: 6px; margin-right: 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }
 .sp-nav-tag[aria-expanded='false'] .sp-nav-chevron { transform: rotate(-45deg); }
 .sp-nav-operation { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 7px; font-size: 11px; color: var(--sp-text); transition: color 120ms ease, background-color 120ms ease; }
