@@ -42,4 +42,16 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('button', { name: 'Companies' })).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('link', { name: /List companies/ })).toBeInTheDocument();
   });
+
+  it('hides tags when no endpoints match the search', () => {
+    render(<Speccy spec={spec} />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search endpoints' }), {
+      target: { value: 'no such endpoint' },
+    });
+
+    expect(screen.queryByRole('button', { name: 'Companies' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Companies' })).not.toBeInTheDocument();
+    expect(screen.getByText('No endpoints match “no such endpoint”.')).toBeInTheDocument();
+  });
 });
