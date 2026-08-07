@@ -68,8 +68,8 @@ describe('SchemaView composition', () => {
     expect(screen.queryByText('items')).not.toBeInTheDocument();
   });
 
-  it('shows enum values in field details instead of the type summary', () => {
-    render(<SchemaView name="industry" schema={{
+  it('shows enum values as inline code in field details instead of the type summary', () => {
+    const { container } = render(<SchemaView name="industry" schema={{
       title: 'Industry',
       type: 'string',
       enum: ['ACCOUNTING', 'AUDIT', 'FINANCE'],
@@ -83,6 +83,8 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('ACCOUNTING')).toBeVisible();
     expect(screen.getByText('AUDIT')).toBeVisible();
     expect(screen.getByText('FINANCE')).toBeVisible();
+    expect(container.querySelector('.sp-schema-enum')).toHaveTextContent('Enum:ACCOUNTINGAUDITFINANCE');
+    expect(container.querySelectorAll('.sp-schema-enum code')).toHaveLength(3);
   });
 
   it('marks deprecated field rows for subdued styling', () => {

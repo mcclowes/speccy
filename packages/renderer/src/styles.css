@@ -433,6 +433,8 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-properties { display: grid; gap: 8px; margin: 9px 0 0 4px; padding-left: 17px; border-left: 1px solid var(--sp-line); }
 .sp-type { color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-schema-meta code { color: var(--sp-text); }
+.sp-schema-enum { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+.sp-schema-enum code { padding: 1px 4px; border-radius: 4px; background: var(--sp-surface-soft); font-size: 10px; }
 .sp-schema-constraints { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
 .sp-schema-constraint { display: inline-flex; align-items: baseline; gap: 5px; }
 .sp-schema-constraint + .sp-schema-constraint::before { content: '·'; margin-right: 4px; color: color-mix(in srgb, var(--sp-muted) 55%, transparent); }

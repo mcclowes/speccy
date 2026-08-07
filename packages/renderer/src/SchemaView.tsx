@@ -113,7 +113,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     : <div className={headerClassName}>{headerContents}</div>;
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       <Markdown className="sp-schema-description">{schema.description}</Markdown>
-      {enumValues && <p className="sp-schema-meta">Enum: {enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>).reduce<React.ReactNode[]>((values, value, index) => index === 0 ? [value] : [...values, ' | ', value], [])}</p>}
+      {enumValues && <p className="sp-schema-meta sp-schema-enum"><span>Enum:</span>{enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>)}</p>}
       {constraints.length > 0 && <p className="sp-schema-meta sp-schema-constraints">{constraints.map((constraint) => <span className="sp-schema-constraint" key={constraint.label}><span>{constraint.label}</span> <code>{constraint.value}</code></span>)}</p>}
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
       {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta sp-schema-example"><span>Example</span><code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}
