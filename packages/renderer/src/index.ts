@@ -17,4 +17,5 @@ export type {
   SecurityRequirement,
   SecurityScheme,
   SpeccyProps,
+  SpeccyRoute,
 } from './types';

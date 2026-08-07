@@ -9,10 +9,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { OpenAPIDocument } from '@speccy/renderer';
+import type { OpenAPIDocument, SpeccyRoute } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
 import { bundleFragmentedSpec } from '../../../packages/renderer/src/fragmentedSpec';
 import { SAMPLE_SPEC } from './sample';
+import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 
 declare global {
   interface Window {
@@ -27,6 +28,7 @@ type RecentReference = {
   id: string;
   name: string;
   source: string;
+  sourceUrl?: string;
   openedAt: number;
 };
 
@@ -139,15 +141,50 @@ export function App() {
   const [loading, setLoading] = useState(Boolean(location.url));
   const [message, setMessage] = useState('');
   const [shareMessage, setShareMessage] = useState('');
+  const [route, setRoute] = useState<StudioRoute>(() => parseStudioRoute(window.location));
   const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
+  const restoredInitialRoute = useRef(false);
 
   useEffect(() => {
-    const initialUrl = location.url ?? (!location.preview ? url : '');
-    if (initialUrl) {
-      setUrl(initialUrl);
-      void loadUrl(initialUrl);
+    if (location.preview) {
+      const initialUrl = location.url ?? '';
+      if (initialUrl) {
+        setUrl(initialUrl);
+        void loadUrl(initialUrl, undefined, { page: 'overview' }, false);
+      }
+      return;
     }
+
+    const restoreLocation = () => {
+      const nextRoute = parseStudioRoute(window.location);
+      setRoute(nextRoute);
+      if (nextRoute.page === 'home') {
+        showHome();
+        return;
+      }
+      if (nextRoute.page === 'open') {
+        void loadUrl(nextRoute.url, undefined, { page: 'overview' }, 'replace');
+        return;
+      }
+
+      const reference = recentsRef.current.find((item) => item.id === nextRoute.referenceId);
+      if (reference) {
+        displayReference(reference);
+      } else if (nextRoute.sourceUrl) {
+        void loadUrl(nextRoute.sourceUrl, nextRoute.referenceId, nextRoute.referenceRoute, 'replace');
+      } else {
+        showHome();
+        setMessage('That reference is only available on the device where it was opened.');
+      }
+    };
+
+    window.addEventListener('popstate', restoreLocation);
+    if (!restoredInitialRoute.current) {
+      restoredInitialRoute.current = true;
+      restoreLocation();
+    }
+    return () => window.removeEventListener('popstate', restoreLocation);
   }, []);
 
   useEffect(() => {
@@ -167,26 +204,56 @@ export function App() {
     return () => { delete window.speccyLoadSpecBundle; };
   }, []);
 
-  function applySource(next: string, name = 'Pasted spec', existingId?: string) {
+  function setBrowserRoute(nextRoute: StudioRoute, mode: 'push' | 'replace' = 'push') {
+    const href = nextRoute.page === 'reference'
+      ? referenceHref(nextRoute.referenceId, nextRoute.referenceRoute, nextRoute.sourceUrl)
+      : '/';
+    window.history[mode === 'push' ? 'pushState' : 'replaceState']({}, '', href);
+    setRoute(nextRoute);
+  }
+
+  function showHome() {
+    setFileName('');
+    setActiveId('');
+    setDrawerOpen(false);
+    setUrlOpen(false);
+  }
+
+  function displayReference(reference: RecentReference) {
+    setSource(reference.source);
+    setSpec(reference.source);
+    setFileName(reference.name);
+    setSourceUrl(reference.sourceUrl ?? '');
+    setActiveId(reference.id);
+    setMessage('');
+  }
+
+  function applySource(
+    next: string,
+    name = 'Pasted spec',
+    existingId?: string,
+    nextSourceUrl?: string | null,
+    referenceRoute: SpeccyRoute = { page: 'overview' },
+    historyMode: 'push' | 'replace' | false = 'push',
+  ) {
     const existing = existingId
       ? recentsRef.current.find((item) => item.id === existingId)
       : recentsRef.current.find((item) => item.name === name && item.source === next);
     const openedAt = existing?.openedAt ?? Date.now();
     const id = existing?.id ?? existingId ?? referenceId(name, openedAt);
-    setSource(next);
-    setSpec(next);
-    setFileName(name);
-    setActiveId(id);
-    setMessage('');
-    setSourceUrl('');
-    const updated = [{ id, name, source: next, openedAt }, ...recentsRef.current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
+    const reference = { id, name, source: next, sourceUrl: nextSourceUrl === null ? undefined : nextSourceUrl ?? existing?.sourceUrl, openedAt };
+    displayReference(reference);
+    const updated = [reference, ...recentsRef.current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
     recentsRef.current = updated;
     storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
     setRecents(updated);
+    if (historyMode) {
+      setBrowserRoute({ page: 'reference', referenceId: id, referenceRoute, sourceUrl: reference.sourceUrl }, historyMode);
+    }
   }
 
   function openRecent(reference: RecentReference) {
-    applySource(reference.source, reference.name, reference.id);
+    applySource(reference.source, reference.name, reference.id, reference.sourceUrl);
   }
 
   function openSample() {
@@ -194,10 +261,8 @@ export function App() {
   }
 
   function goHome() {
-    setFileName('');
-    setActiveId('');
-    setDrawerOpen(false);
-    setUrlOpen(false);
+    showHome();
+    setBrowserRoute({ page: 'home' });
   }
 
   async function loadFile(file?: File) {
@@ -205,21 +270,29 @@ export function App() {
     applySource(await file.text(), file.name);
   }
 
-  async function loadUrl(nextUrl: string) {
+  async function loadUrl(
+    nextUrl: string,
+    existingId?: string,
+    referenceRoute: SpeccyRoute = { page: 'overview' },
+    historyMode: 'push' | 'replace' | false = 'push',
+  ) {
     if (!nextUrl.trim()) return;
     setLoading(true);
     setMessage('');
     try {
       const response = await fetch(nextUrl);
       if (!response.ok) throw new Error(`The server returned ${response.status}.`);
-      applySource(await response.text(), new URL(nextUrl).pathname.split('/').pop() || nextUrl);
-      setSourceUrl(nextUrl);
+      applySource(
+        await response.text(),
+        new URL(nextUrl).pathname.split('/').pop() || nextUrl,
+        existingId,
+        nextUrl,
+        referenceRoute,
+        historyMode,
+      );
       setUrl(nextUrl);
       storeItem(URL_STORAGE_KEY, nextUrl);
       setUrlOpen(false);
-      const location = new URL(window.location.href);
-      location.searchParams.set('url', nextUrl);
-      window.history.replaceState({}, '', location);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Couldn’t load that URL.');
     } finally {
@@ -227,8 +300,30 @@ export function App() {
     }
   }
 
+  const referenceRoute = route.page === 'reference' && (route.referenceId === activeId || location.preview)
+    ? route.referenceRoute
+    : { page: 'overview' } satisfies SpeccyRoute;
+
+  function rendererHref(nextRoute: SpeccyRoute) {
+    if (!location.preview) return referenceHref(activeId, nextRoute, sourceUrl || undefined);
+    const target = new URL(referenceHref('preview', nextRoute), window.location.origin);
+    target.searchParams.set('preview', '1');
+    if (sourceUrl) target.searchParams.set('url', sourceUrl);
+    else target.hash = new URLSearchParams({ source, name: fileName || 'API reference' }).toString();
+    return `${target.pathname}${target.search}${target.hash}`;
+  }
+
+  function navigateRenderer(nextRoute: SpeccyRoute) {
+    if (location.preview) {
+      window.history.pushState({}, '', rendererHref(nextRoute));
+      setRoute({ page: 'reference', referenceId: 'preview', referenceRoute: nextRoute });
+      return;
+    }
+    setBrowserRoute({ page: 'reference', referenceId: activeId, referenceRoute: nextRoute, sourceUrl: sourceUrl || undefined });
+  }
+
   function previewUrl() {
-    const preview = new URL(window.location.href);
+    const preview = new URL(referenceHref('preview', { page: 'overview' }), window.location.origin);
     preview.search = '';
     preview.hash = '';
     preview.searchParams.set('preview', '1');
@@ -259,7 +354,7 @@ export function App() {
     return (
       <main className={`studio studio-preview-only studio-${theme}`}>
         <button className="studio-preview-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`} title={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
-        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} showThemeToggle={false} basePath="" parameterPrototype />}
+        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype />}
       </main>
     );
   }
@@ -303,9 +398,9 @@ export function App() {
       {fileName ? (
         <div className={`studio-workspace ${drawerOpen ? 'is-editing' : ''}`}>
           {drawerOpen && (
-            <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName, activeId)} />
+            <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName, activeId, null)} />
           )}
-          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} basePath="" parameterPrototype /></div>
+          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype /></div>
         </div>
       ) : (
         <main className="studio-home">

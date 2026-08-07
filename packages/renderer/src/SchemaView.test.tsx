@@ -22,13 +22,13 @@ describe('SchemaView composition', () => {
     }} />);
 
     expect(screen.getByRole('combobox', { name: 'Example payload' })).toHaveValue('0');
-    expect(screen.getByText(/"reference": "new reference"/)).toBeInTheDocument();
-    expect(screen.queryByText(/"name": "New name"/)).not.toBeInTheDocument();
+    expect(screen.getByRole('code').textContent).toContain('"reference": "new reference"');
+    expect(screen.getByRole('code').textContent).not.toContain('"name": "New name"');
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Example payload' }), { target: { value: '1' } });
 
-    expect(screen.getByText(/"name": "New name"/)).toBeInTheDocument();
-    expect(screen.queryByText(/"reference": "new reference"/)).not.toBeInTheDocument();
+    expect(screen.getByRole('code').textContent).toContain('"name": "New name"');
+    expect(screen.getByRole('code').textContent).not.toContain('"reference": "new reference"');
   });
 
   it('shows a schema title alongside its type', () => {

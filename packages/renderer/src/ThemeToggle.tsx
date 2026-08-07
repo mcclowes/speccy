@@ -10,7 +10,7 @@ function SunIcon() {
 
 export function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (theme: Theme) => void }) {
   const currentTheme = theme === 'system'
-    ? typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    ? typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     : theme;
   const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
   return (

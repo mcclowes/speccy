@@ -201,6 +201,12 @@ export interface SchemaObject {
   [key: string]: unknown;
 }
 
+export type SpeccyRoute =
+  | { page: 'overview' }
+  | { page: 'operation'; operationId: string }
+  | { page: 'tag'; tag: string }
+  | { page: 'reference'; section: string };
+
 export interface SpeccyProps {
   spec: OpenAPIDocument | string;
   className?: string;
@@ -213,6 +219,12 @@ export interface SpeccyProps {
   logo?: React.ReactNode;
   /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/${operationId}`. */
   basePath?: string;
+  /** Current route when navigation is controlled by the host application. */
+  route?: SpeccyRoute;
+  /** Handles navigation in controlled mode instead of writing to browser history. */
+  onNavigate?: (route: SpeccyRoute) => void;
+  /** Creates link targets in controlled mode. */
+  hrefForRoute?: (route: SpeccyRoute) => string;
   onError?: (error: Error) => void;
   /** PROTOTYPE: separates required parameters from optional parameters added on demand. */
   parameterPrototype?: boolean;

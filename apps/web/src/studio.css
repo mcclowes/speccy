@@ -23,7 +23,7 @@ body { overflow: hidden; background: #fbfbfd; }
 .studio-actions .studio-theme { width: 31px; padding-inline: 0; font-size: 15px; }
 .studio-action-share { display: inline-flex; align-items: center; gap: 6px; }
 .studio-share-icon { width: 13px; height: 13px; }
-.studio-preview-only { height: 100%; color: var(--studio-text); background: #fbfbfd; }
+.studio-preview-only { height: 100%; overflow-y: auto; color: var(--studio-text); background: #fbfbfd; }
 .studio-preview-only.studio-dark { background: #111217; }
 .studio-preview-only > .speccy { min-height: 100vh; }
 .studio-preview-theme { position: fixed; top: 14px; right: 14px; z-index: 40; width: 34px; height: 34px; padding: 0; color: var(--studio-muted); border: 1px solid var(--studio-line); border-radius: 9px; background: var(--studio-bar); box-shadow: 0 5px 18px rgba(20,20,28,.12); backdrop-filter: blur(14px); cursor: pointer; font: 16px Manrope, sans-serif; }

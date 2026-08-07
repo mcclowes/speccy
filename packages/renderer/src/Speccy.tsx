@@ -34,6 +34,7 @@ import type {
   SecurityRequirement,
   SecurityScheme,
   SpeccyProps,
+  SpeccyRoute,
 } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';
@@ -411,6 +412,7 @@ function RequestRail({
   const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
   const [optionalPickerQuery, setOptionalPickerQuery] = useState('');
   const optionalPickerRef = useRef<HTMLDivElement>(null);
+  const bodyInputRef = useRef<HTMLTextAreaElement>(null);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const [body, setBody] = useState(() => requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]));
   const [result, setResult] = useState<{ status?: number; statusText?: string; body?: string; error?: string }>();
@@ -434,6 +436,13 @@ function RequestRail({
     const key = `${parameter.in}-${parameter.name}`;
     return !selectedOptionalParameters.includes(key) && (!optionalPickerQuery.trim() || parameter.name?.toLowerCase().includes(optionalPickerQuery.trim().toLowerCase()));
   });
+
+  useEffect(() => {
+    const input = bodyInputRef.current;
+    if (!input) return;
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  }, [body]);
 
   useEffect(() => {
     if (!optionalPickerOpen) return;
@@ -563,7 +572,7 @@ function RequestRail({
       {bodyMedia && item.method !== 'get' && item.method !== 'head' && (
         <section className="sp-rail-card">
           <h3>Body <small>{contentType}</small></h3>
-          <label className="sp-field"><span>Request body</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={contentType === 'application/json' ? '{}' : 'Request body'} /></label>
+          <label className="sp-field"><span>Request body</span><textarea ref={bodyInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={contentType === 'application/json' ? '{}' : 'Request body'} /></label>
         </section>
       )}
       <RequestSample
@@ -687,6 +696,20 @@ function referenceHref(basePath: string, key: ReferenceKey): string {
   return `${basePath}/reference/${encodeURIComponent(slug)}`;
 }
 
+function legacyHrefForRoute(basePath: string, route: SpeccyRoute): string {
+  if (route.page === 'operation') return operationHref(basePath, route.operationId);
+  if (route.page === 'tag') return `${basePath}/tags/${encodeURIComponent(route.tag)}`;
+  if (route.page === 'reference') return referenceHref(basePath, route.section as ReferenceKey);
+  return basePath || '/';
+}
+
+function routeKey(route: SpeccyRoute): string | undefined {
+  if (route.page === 'operation') return route.operationId;
+  if (route.page === 'tag') return `tags/${route.tag}`;
+  if (route.page === 'reference') return `reference/${route.section}`;
+  return undefined;
+}
+
 function isReferenceKey(value: string): value is ReferenceKey {
   return value === 'webhooks' || REFERENCE_GROUPS.some(([key]) => key === value);
 }
@@ -796,21 +819,21 @@ function NavigationGroup({
   tag,
   operations,
   searching,
-  basePath,
   activeTag,
   activeOperationId,
   onNavigate,
   onNavigateTag,
+  hrefForRoute,
   storageKey,
 }: {
   tag: TagModel;
   operations: OperationModel[];
   searching: boolean;
-  basePath: string;
   activeTag?: TagModel;
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
+  hrefForRoute: (route: SpeccyRoute) => string;
   storageKey: string;
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
@@ -834,7 +857,7 @@ function NavigationGroup({
   const operationLink = (item: OperationModel) => (
     <a
       className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
-      href={operationHref(basePath, item.id)}
+      href={hrefForRoute({ page: 'operation', operationId: item.id })}
       aria-current={activeOperationId === item.id ? 'page' : undefined}
       onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
       key={item.id}
@@ -866,7 +889,7 @@ function NavigationGroup({
         <div id={operationListId}>
           <a
             className={`sp-nav-operation sp-nav-overview ${activeTag === tag ? 'is-active' : ''}`}
-            href={tagHref(basePath, tag)}
+            href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
             aria-current={activeTag === tag ? 'page' : undefined}
             onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
           >Overview</a>
@@ -887,37 +910,37 @@ function NavigationTags({
   tags,
   matches,
   searching,
-  basePath,
   activeTag,
   activeOperationId,
   onNavigate,
   onNavigateTag,
+  hrefForRoute,
   storageScope,
 }: {
   tags: TagModel[];
   matches: (item: OperationModel) => boolean;
   searching: boolean;
-  basePath: string;
   activeTag?: TagModel;
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
+  hrefForRoute: (route: SpeccyRoute) => string;
   storageScope: string;
 }) {
   return <>{tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
     .filter(({ operations }) => operations.length > 0)
     .map(({ tag, operations }) => (
-      <NavigationGroup tag={tag} operations={operations} searching={searching} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperationId} onNavigate={onNavigate} onNavigateTag={onNavigateTag} storageKey={`${storageScope}:navigation:${tag.name}`} key={tag.name} />
+      <NavigationGroup tag={tag} operations={operations} searching={searching} activeTag={activeTag} activeOperationId={activeOperationId} onNavigate={onNavigate} onNavigateTag={onNavigateTag} hrefForRoute={hrefForRoute} storageKey={`${storageScope}:navigation:${tag.name}`} key={tag.name} />
     ))}</>;
 }
 
-function OperationLink({ item, basePath, onNavigate }: {
+function OperationLink({ item, onNavigate, hrefForRoute }: {
   item: OperationModel;
-  basePath: string;
   onNavigate: (operationId: string) => void;
+  hrefForRoute: (route: SpeccyRoute) => string;
 }) {
   return (
-    <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}>
+    <a className="sp-operation-link" href={hrefForRoute({ page: 'operation', operationId: item.id })} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}>
       <span className="sp-operation-link-summary">{operationTitle(item)}</span>
       <span className="sp-operation-link-address">
         <OperationBadge item={item} />
@@ -932,11 +955,11 @@ function TagIcon({ tag }: { tag: TagModel }) {
   return <img className="sp-tag-icon" src={tag.icon.url} alt={tag.icon.alt ?? ''} />;
 }
 
-function TagOverview({ tag, operations, basePath, onNavigate }: {
+function TagOverview({ tag, operations, onNavigate, hrefForRoute }: {
   tag: TagModel;
   operations: OperationModel[];
-  basePath: string;
   onNavigate: (operationId: string) => void;
+  hrefForRoute: (route: SpeccyRoute) => string;
 }) {
   return (
     <section className="sp-tag-overview">
@@ -948,7 +971,7 @@ function TagOverview({ tag, operations, basePath, onNavigate }: {
       <div className="sp-tag-overview-operations">
         <h2>Operations</h2>
         <div className="sp-operation-list">{operations.map((item) => (
-          <OperationLink item={item} basePath={basePath} onNavigate={onNavigate} key={item.id} />
+          <OperationLink item={item} onNavigate={onNavigate} hrefForRoute={hrefForRoute} key={item.id} />
         ))}</div>
       </div>
     </section>
@@ -969,6 +992,9 @@ export function Speccy({
   accentColor = '#6d5dfc',
   logo,
   basePath: basePathProp = '/',
+  route,
+  onNavigate,
+  hrefForRoute: controlledHrefForRoute,
   onError,
   parameterPrototype,
 }: SpeccyProps) {
@@ -998,18 +1024,21 @@ export function Speccy({
     if (segment === 'tags' && value) return `tags/${value}`;
     return !value ? segment : undefined;
   };
-  const [activeRoute, setActiveRoute] = useState(routeFromPath);
+  const [internalRoute, setInternalRoute] = useState(routeFromPath);
+  const activeRoute = route ? routeKey(route) : internalRoute;
+  const hrefForRoute = (nextRoute: SpeccyRoute) => controlledHrefForRoute?.(nextRoute) ?? legacyHrefForRoute(basePath, nextRoute);
 
   useEffect(() => {
     if (result.error) onError?.(result.error);
   }, [result.error, onError]);
 
   useEffect(() => {
-    const syncRoute = () => setActiveRoute(routeFromPath());
+    if (route) return;
+    const syncRoute = () => setInternalRoute(routeFromPath());
     window.addEventListener('popstate', syncRoute);
     syncRoute();
     return () => window.removeEventListener('popstate', syncRoute);
-  }, [basePath]);
+  }, [basePath, route]);
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -1048,21 +1077,32 @@ export function Speccy({
   const filteredOperationCount = [...model.operations, ...model.webhooks].filter(matchesFilter).length;
 
   function navigate(operationId?: string) {
-    const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
-    window.history.pushState({}, '', href);
-    setActiveRoute(operationId);
+    const nextRoute: SpeccyRoute = operationId ? { page: 'operation', operationId } : { page: 'overview' };
+    if (onNavigate) onNavigate(nextRoute);
+    else {
+      window.history.pushState({}, '', hrefForRoute(nextRoute));
+      setInternalRoute(routeKey(nextRoute));
+    }
     rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   function navigateTag(tag: TagModel) {
-    window.history.pushState({}, '', tagHref(basePath, tag));
-    setActiveRoute(`tags/${tagSlug(tag)}`);
+    const nextRoute: SpeccyRoute = { page: 'tag', tag: tagSlug(tag) };
+    if (onNavigate) onNavigate(nextRoute);
+    else {
+      window.history.pushState({}, '', hrefForRoute(nextRoute));
+      setInternalRoute(routeKey(nextRoute));
+    }
     rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   function navigateReference(key: ReferenceKey) {
-    window.history.pushState({}, '', referenceHref(basePath, key));
-    setActiveRoute(`reference/${key}`);
+    const nextRoute: SpeccyRoute = { page: 'reference', section: key };
+    if (onNavigate) onNavigate(nextRoute);
+    else {
+      window.history.pushState({}, '', hrefForRoute(nextRoute));
+      setInternalRoute(routeKey(nextRoute));
+    }
     rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
@@ -1092,11 +1132,11 @@ export function Speccy({
       {showThemeToggle && <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />}
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
-          <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo}<span>{model.document.info?.title ?? 'API reference'}</span></a>
+          <a className="sp-brand" href={hrefForRoute({ page: 'overview' })} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo}<span>{model.document.info?.title ?? 'API reference'}</span></a>
           <div className="sp-nav-scroll">
             <a
               className={`sp-nav-operation sp-nav-overview ${!activeRoute ? 'is-active' : ''}`}
-              href={basePath || '/'}
+              href={hrefForRoute({ page: 'overview' })}
               aria-current={!activeRoute ? 'page' : undefined}
               onClick={(event) => { event.preventDefault(); navigate(); }}
             >All endpoints</a>
@@ -1105,11 +1145,11 @@ export function Speccy({
               if (visibleTags.length === 0) return null;
               return <section className="sp-nav-tag-group" aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`} key={group.name}>
                 <h2 className="sp-nav-heading" id={`sp-nav-tag-group-${slugify(group.name)}`}>{group.name}</h2>
-                <NavigationTags tags={visibleTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
+                <NavigationTags tags={visibleTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} storageScope={storageScope} />
               </section>;
-            })}<NavigationTags tags={ungroupedTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} /></> : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
+            })}<NavigationTags tags={ungroupedTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} storageScope={storageScope} /></> : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} storageScope={storageScope} />}
             {normalizedFilter && filteredOperationCount === 0 && <div className="sp-nav-empty"><strong>No matching endpoints</strong><span>Try a path, method, or operation name.</span></div>}
-            {!normalizedFilter && <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />}
+            {!normalizedFilter && <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => hrefForRoute({ page: 'reference', section: key })} onNavigate={navigateReference} />}
           </div>
           <div className="sp-sidebar-search">
             <svg className="sp-filter-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1138,11 +1178,11 @@ export function Speccy({
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
               <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2 className="sp-tag-title"><TagIcon tag={tag} />{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
-              <div className="sp-operation-list">{visible.map((item) => <OperationLink item={item} basePath={basePath} onNavigate={navigate} key={item.id} />)}</div>
+              <div className="sp-operation-list">{visible.map((item) => <OperationLink item={item} onNavigate={navigate} hrefForRoute={hrefForRoute} key={item.id} />)}</div>
             </section>
           );
         })}
-        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} basePath={basePath} onNavigate={navigate} />}
+        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
         {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}

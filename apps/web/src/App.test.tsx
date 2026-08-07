@@ -7,9 +7,13 @@ import { App } from './App';
 const { previewRender } = vi.hoisted(() => ({ previewRender: vi.fn() }));
 
 vi.mock('../../../packages/renderer/src/Speccy', () => ({
-  Speccy: () => {
+  Speccy: ({ onNavigate, hrefForRoute }: {
+    onNavigate?: (route: { page: 'operation'; operationId: string }) => void;
+    hrefForRoute?: (route: { page: 'operation'; operationId: string }) => string;
+  }) => {
     previewRender();
-    return <div>Preview</div>;
+    const operation = { page: 'operation' as const, operationId: 'list-companies' };
+    return <div>Preview{onNavigate && <a href={hrefForRoute?.(operation)} onClick={(event) => { event.preventDefault(); onNavigate(operation); }}>Open test operation</a>}</div>;
   },
 }));
 
@@ -17,6 +21,7 @@ describe('source editor', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {
@@ -55,6 +60,36 @@ describe('source editor', () => {
 
     expect(screen.getByRole('heading', { name: 'Pick up where you left off.' })).toBeTruthy();
     expect(screen.getByRole('button', { name: /Luma Library API/ })).toBeTruthy();
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('scopes renderer navigation beneath the active reference', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
+    const referencePath = window.location.pathname;
+
+    fireEvent.click(screen.getByRole('link', { name: 'Open test operation' }));
+
+    expect(referencePath).toMatch(/^\/references\/Luma%20Library%20API-/);
+    expect(window.location.pathname).toBe(`${referencePath}/operations/list-companies`);
+  });
+
+  it('normalizes a remote import and preserves its source across nested routes', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('{"openapi":"3.1.0"}'),
+    }));
+    window.history.replaceState({}, '', '/open?url=https%3A%2F%2Fexample.com%2Fopenapi.yaml');
+
+    render(<App />);
+    await screen.findByText('Preview');
+
+    expect(window.location.pathname).toMatch(/^\/references\/openapi.yaml-/);
+    expect(new URLSearchParams(window.location.search).get('source')).toBe('https://example.com/openapi.yaml');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Open test operation' }));
+    expect(window.location.pathname).toMatch(/\/operations\/list-companies$/);
+    expect(new URLSearchParams(window.location.search).get('source')).toBe('https://example.com/openapi.yaml');
   });
 
   it('opens and switches between recent API references', () => {
