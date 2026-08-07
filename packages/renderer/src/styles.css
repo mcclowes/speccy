@@ -524,9 +524,12 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-diagnostics-summary button { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 7px; padding: 9px 10px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface); cursor: pointer; text-align: left; font-size: 10px; }
 .sp-diagnostics-summary button.is-active { color: var(--sp-text); border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line)); background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface)); }
 .sp-diagnostics-summary strong { color: var(--sp-text); font-size: 16px; }
-.sp-diagnostics-tools { min-width: 0; display: flex; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--sp-line); }
+.sp-diagnostics-tools { min-width: 0; display: grid; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--sp-line); }
 .sp-diagnostics-tools input { min-width: 0; flex: 1; padding: 9px 10px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 8px; outline: none; background: var(--sp-surface); font-size: 11px; }
-.sp-diagnostics-tools button { padding: 7px 9px; color: var(--sp-muted); border: 0; background: transparent; cursor: pointer; font-size: 9px; }
+.sp-diagnostics-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.sp-diagnostics-tools button { padding: 7px 9px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 7px; background: var(--sp-surface); cursor: pointer; font-size: 9px; }
+.sp-diagnostics-tools button:hover { border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line)); }
+.sp-diagnostics-tools button:disabled { cursor: default; opacity: .45; }
 .sp-diagnostics-list { min-width: 0; overflow: hidden auto; display: grid; align-content: start; gap: 10px; padding: 18px 24px 32px; }
 .sp-diagnostic-card { min-width: 0; overflow: hidden; padding: 12px 13px; color: var(--sp-text); border: 1px solid var(--sp-line); border-left: 3px solid #b27b00; border-radius: 8px; background: var(--sp-surface); font-size: 11px; line-height: 1.5; }
 .sp-diagnostic-card.is-issue { border-left-color: #c43d50; }

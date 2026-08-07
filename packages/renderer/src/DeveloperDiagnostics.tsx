@@ -18,6 +18,54 @@ function diagnosticLocation(diagnostic: ApiDiagnostic) {
   return source || 'Document';
 }
 
+function diagnosticText(diagnostic: ApiDiagnostic) {
+  return [
+    `## ${diagnostic.severity.toUpperCase()}: ${diagnostic.message}`,
+    `Rule: ${diagnostic.source}: ${diagnostic.ruleId}`,
+    `Location: ${diagnosticLocation(diagnostic)}`,
+    diagnostic.rationale && `Why: ${diagnostic.rationale}`,
+    diagnostic.suggestion && `Suggested fix: ${diagnostic.suggestion}`,
+  ].filter(Boolean).join('\n');
+}
+
+export function diagnosticsAsText(diagnostics: ApiDiagnostic[]) {
+  const counts = Object.fromEntries((['issue', 'warning', 'suggestion'] as const).map((severity) => [severity, diagnostics.filter((item) => item.severity === severity).length])) as Record<DiagnosticSeverity, number>;
+  const countLabel = (severity: DiagnosticSeverity) => `${counts[severity]} ${severity}${counts[severity] === 1 ? '' : 's'}`;
+  return [
+    '# API health findings',
+    `${countLabel('issue')}, ${countLabel('warning')}, ${countLabel('suggestion')}`,
+    ...diagnostics.map(diagnosticText),
+  ].join('\n\n');
+}
+
+function csvCell(value: string | undefined) {
+  return `"${(value ?? '').replaceAll('"', '""')}"`;
+}
+
+export function diagnosticsAsCsv(diagnostics: ApiDiagnostic[]) {
+  const headings = ['Severity', 'Source', 'Rule', 'Message', 'Rationale', 'Suggested fix', 'Location', 'Path'];
+  const rows = diagnostics.map((diagnostic) => [
+    diagnostic.severity,
+    diagnostic.source,
+    diagnostic.ruleId,
+    diagnostic.message,
+    diagnostic.rationale,
+    diagnostic.suggestion,
+    diagnosticLocation(diagnostic),
+    diagnostic.path.join('.'),
+  ].map(csvCell).join(','));
+  return [headings.map(csvCell).join(','), ...rows].join('\n');
+}
+
+function downloadCsv(diagnostics: ApiDiagnostic[]) {
+  const url = URL.createObjectURL(new Blob([diagnosticsAsCsv(diagnostics)], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'api-health-findings.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function DiagnosticCard({ diagnostic, onIgnore }: { diagnostic: ApiDiagnostic; onIgnore?: (ruleId: string) => void }) {
   return <article className={`sp-diagnostic-card is-${diagnostic.severity}`}>
     <div className="sp-diagnostic-card-head"><span>{diagnostic.severity}</span><code>{diagnostic.source}: {diagnostic.ruleId}</code></div>
@@ -37,11 +85,18 @@ export function DeveloperDiagnostics({ diagnostics, storageScope }: { diagnostic
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
+  const [copied, setCopied] = useState(false);
   const [ignoredRules, setIgnoredRules] = useLocalState<string[]>(`${storageScope}:ignored-diagnostic-rules`, []);
   const visible = useMemo(() => diagnostics.filter((diagnostic) => !ignoredRules.includes(diagnostic.ruleId)), [diagnostics, ignoredRules]);
   const filtered = visible.filter((diagnostic) => (filter === 'all' || diagnostic.severity === filter) && (!query.trim() || `${diagnostic.message} ${diagnostic.ruleId} ${diagnostic.path.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase())));
   const counts = Object.fromEntries((['issue', 'warning', 'suggestion'] as const).map((severity) => [severity, visible.filter((item) => item.severity === severity).length])) as Record<DiagnosticSeverity, number>;
   const ignore = (ruleId: string) => setIgnoredRules([...new Set([...ignoredRules, ruleId])]);
+
+  async function copyAll() {
+    await navigator.clipboard?.writeText(diagnosticsAsText(visible));
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  }
 
   return <>
     <button type="button" className={`sp-diagnostics-trigger ${counts.issue ? 'has-issues' : ''}`} onClick={() => setOpen(true)} aria-label={`API health: ${visible.length} finding${visible.length === 1 ? '' : 's'}`}>
@@ -51,7 +106,14 @@ export function DeveloperDiagnostics({ diagnostics, storageScope }: { diagnostic
       <aside className="sp-diagnostics-drawer" aria-label="API health" aria-modal="true" role="dialog">
         <header><div><span className="sp-eyebrow">Developer view</span><h2>API health</h2><p>Contract checks and design guidance. No opaque score.</p></div><button type="button" onClick={() => setOpen(false)} aria-label="Close API health">×</button></header>
         <div className="sp-diagnostics-summary">{(['issue', 'warning', 'suggestion'] as const).map((severity) => <button type="button" className={filter === severity ? 'is-active' : ''} onClick={() => setFilter(filter === severity ? 'all' : severity)} key={severity}><strong>{counts[severity]}</strong><span>{SEVERITY_LABELS[severity]}</span></button>)}</div>
-        <div className="sp-diagnostics-tools"><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a path, rule, or message" aria-label="Filter API health findings" />{ignoredRules.length > 0 && <button type="button" onClick={() => setIgnoredRules([])}>Restore {ignoredRules.length} ignored rule{ignoredRules.length === 1 ? '' : 's'}</button>}</div>
+        <div className="sp-diagnostics-tools">
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a path, rule, or message" aria-label="Filter API health findings" />
+          <div className="sp-diagnostics-actions">
+            <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>
+            <button type="button" onClick={() => downloadCsv(visible)} disabled={visible.length === 0}>Export CSV</button>
+            {ignoredRules.length > 0 && <button type="button" onClick={() => setIgnoredRules([])}>Restore {ignoredRules.length} ignored rule{ignoredRules.length === 1 ? '' : 's'}</button>}
+          </div>
+        </div>
         <div className="sp-diagnostics-list">{filtered.map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} onIgnore={ignore} key={diagnostic.id} />)}{filtered.length === 0 && <div className="sp-diagnostics-empty"><strong>No matching findings</strong><span>Change the filter or restore ignored rules.</span></div>}</div>
       </aside>
     </div>}

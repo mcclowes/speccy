@@ -1,5 +1,25 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DeveloperDiagnostics, diagnosticsAsCsv, diagnosticsAsText } from './DeveloperDiagnostics';
+import type { ApiDiagnostic } from './diagnostics';
+
+const findings: ApiDiagnostic[] = [{
+  id: 'missing-description',
+  ruleId: 'operation-description',
+  source: 'speccy',
+  severity: 'warning',
+  category: 'documentation',
+  message: 'GET /companies has no description.',
+  rationale: 'Consumers need to know what the operation does.',
+  suggestion: 'Describe the operation.',
+  path: ['paths', '/companies', 'get'],
+}];
+
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+});
 
 describe('developer diagnostics layout', () => {
   it('allows drawer rows and cards to shrink within the viewport', () => {
@@ -9,5 +29,24 @@ describe('developer diagnostics layout', () => {
       expect(css).toMatch(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\{[^}]*min-width: 0;`));
     }
     expect(css).toMatch(/\.sp-diagnostics-drawer \{[^}]*overflow-x: hidden;/);
+  });
+
+  it('formats every finding for copying and CSV export', () => {
+    expect(diagnosticsAsText(findings)).toContain('0 issues, 1 warning, 0 suggestions');
+    expect(diagnosticsAsText(findings)).toContain('Suggested fix: Describe the operation.');
+    expect(diagnosticsAsCsv(findings)).toContain('"Severity","Source","Rule"');
+    expect(diagnosticsAsCsv(findings)).toContain('"paths./companies.get"');
+  });
+
+  it('copies all visible findings as AI-friendly text', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Copy all' }));
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('GET /companies has no description.'));
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
   });
 });
