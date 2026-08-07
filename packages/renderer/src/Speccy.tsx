@@ -279,6 +279,7 @@ export function Speccy({
   const normalizedQuery = query.trim().toLowerCase();
   const matches = (item: OperationModel) => !normalizedQuery || [item.path, item.method, item.operation.summary, item.operation.operationId, item.tag]
     .some((value) => value?.toLowerCase().includes(normalizedQuery));
+  const hasMatchingOperations = model.operations.some(matches);
   const style = { '--sp-accent': accentColor } as CSSProperties;
 
   return (
@@ -292,6 +293,12 @@ export function Speccy({
             {query && <button type="button" className="sp-search-clear" onClick={() => setQuery('')} aria-label="Clear search">×</button>}
           </div>
           <div className="sp-nav-scroll">
+            {normalizedQuery && !hasMatchingOperations && (
+              <div className="sp-nav-empty" role="status">
+                <strong>No endpoints found</strong>
+                <span>Try a different search.</span>
+              </div>
+            )}
             {model.tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
               .filter(({ operations }) => operations.length > 0)
               .map(({ tag, operations }) => (
@@ -317,7 +324,7 @@ export function Speccy({
             </section>
           );
         })}
-        {normalizedQuery && model.operations.every((item) => !matches(item)) && <div className="sp-empty">No endpoints match “{query}”.</div>}
+        {normalizedQuery && !hasMatchingOperations && <div className="sp-empty">No endpoints match “{query}”.</div>}
         {model.operations.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
       </main>
     </div>

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
@@ -52,6 +52,7 @@ describe('Speccy navigation', () => {
 
     expect(screen.queryByRole('button', { name: 'Companies' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Companies' })).not.toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', { name: 'API reference' })).getByText('No endpoints found')).toBeInTheDocument();
     expect(screen.getByText('No endpoints match “no such endpoint”.')).toBeInTheDocument();
   });
 
