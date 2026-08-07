@@ -483,8 +483,8 @@ describe('Speccy navigation', () => {
   });
 
   it('opens quick search and navigates to a matching endpoint', () => {
-    const scrollTo = vi.mocked(window.scrollTo);
-    scrollTo.mockClear();
+    const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView);
+    scrollIntoView.mockClear();
     render(<Speccy spec={spec} />);
     fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
 
@@ -495,7 +495,7 @@ describe('Speccy navigation', () => {
     fireEvent.keyDown(search, { key: 'Enter' });
 
     expect(window.location.pathname).toBe('/get-companies');
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
     expect(screen.queryByRole('dialog', { name: 'Search API reference' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'List companies' })).toBeInTheDocument();
   });

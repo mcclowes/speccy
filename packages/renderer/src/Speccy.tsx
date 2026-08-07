@@ -13,6 +13,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { CodeBlock, CopyButton } from './CodeBlock';
@@ -848,6 +849,7 @@ export function Speccy({
   }, [spec]);
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
@@ -915,19 +917,19 @@ export function Speccy({
     const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
     window.history.pushState({}, '', href);
     setActiveRoute(operationId);
-    window.scrollTo({ top: 0 });
+    rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   function navigateTag(tag: TagModel) {
     window.history.pushState({}, '', tagHref(basePath, tag));
     setActiveRoute(`tags/${tagSlug(tag)}`);
-    window.scrollTo({ top: 0 });
+    rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   function navigateReference(key: ReferenceKey) {
     window.history.pushState({}, '', referenceHref(basePath, key));
     setActiveRoute(`reference/${key}`);
-    window.scrollTo({ top: 0 });
+    rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   const searchResults: SearchResult[] = [
@@ -952,7 +954,7 @@ export function Speccy({
   ];
 
   return (
-    <div className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
+    <div ref={rootRef} className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
