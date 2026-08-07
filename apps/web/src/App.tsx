@@ -11,11 +11,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { OpenAPIDocument } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
+import { bundleFragmentedSpec } from '../../../packages/renderer/src/fragmentedSpec';
 import { SAMPLE_SPEC } from './sample';
 
 declare global {
   interface Window {
     speccyLoadSpec?: (source: string, name?: string) => void;
+    speccyLoadSpecBundle?: (sources: Record<string, string>, entrypoint: string) => void;
   }
 }
 
@@ -155,6 +157,14 @@ export function App() {
   useEffect(() => {
     window.speccyLoadSpec = (nextSource, name) => applySource(nextSource, name ?? 'Opened spec');
     return () => { delete window.speccyLoadSpec; };
+  }, []);
+
+  useEffect(() => {
+    window.speccyLoadSpecBundle = (sources, entrypoint) => {
+      const bundled = bundleFragmentedSpec(sources, entrypoint);
+      applySource(JSON.stringify(bundled, null, 2), entrypoint.split('/').pop() ?? entrypoint);
+    };
+    return () => { delete window.speccyLoadSpecBundle; };
   }, []);
 
   function applySource(next: string, name = 'Pasted spec', existingId?: string) {

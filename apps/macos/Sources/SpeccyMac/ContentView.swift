@@ -74,20 +74,45 @@ struct SpeccyWebView: NSViewRepresentable {
 
         func openDocument() {
             let panel = NSOpenPanel()
-            panel.title = "Open an OpenAPI document"
+            panel.title = "Open an OpenAPI document or folder"
             panel.prompt = "Open"
             panel.allowsMultipleSelection = false
+            panel.canChooseDirectories = true
+            panel.canChooseFiles = true
             panel.allowedContentTypes = Self.supportedTypes
             guard panel.runModal() == .OK, let url = panel.url else { return }
 
             do {
-                let source = try String(contentsOf: url, encoding: .utf8)
-                let sourceJSON = try Self.javascriptString(source)
-                let nameJSON = try Self.javascriptString(url.lastPathComponent)
-                webView?.evaluateJavaScript("window.speccyLoadSpec?.(\(sourceJSON), \(nameJSON))")
+                let bundle = try Self.loadFragments(from: url)
+                let entrypoint = bundle.selectedDirectory ? try chooseEntrypoint(from: bundle.sources) : bundle.entrypoint
+                guard let entrypoint else { return }
+                let sourcesJSON = try Self.javascriptValue(bundle.sources)
+                let entrypointJSON = try Self.javascriptValue(entrypoint)
+                webView?.evaluateJavaScript("window.speccyLoadSpecBundle?.(\(sourcesJSON), \(entrypointJSON))")
             } catch {
                 showError(error)
             }
+        }
+
+        private func chooseEntrypoint(from sources: [String: String]) throws -> String? {
+            let paths = sources.keys.sorted()
+            let candidates = paths.filter { path in
+                guard let source = sources[path] else { return false }
+                return source.contains("openapi:") || source.contains("swagger:") || source.contains("\"openapi\"") || source.contains("\"swagger\"")
+            }
+            let choices = candidates.isEmpty ? paths : candidates
+            guard !choices.isEmpty else { throw FragmentError.noDocuments }
+            if choices.count == 1 { return choices[0] }
+
+            let picker = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 360, height: 26))
+            picker.addItems(withTitles: choices)
+            let alert = NSAlert()
+            alert.messageText = "Choose the entry OpenAPI document"
+            alert.informativeText = "Speccy will resolve references to other YAML and JSON files in this folder."
+            alert.accessoryView = picker
+            alert.addButton(withTitle: "Open")
+            alert.addButton(withTitle: "Cancel")
+            return alert.runModal() == .alertFirstButtonReturn ? choices[picker.indexOfSelectedItem] : nil
         }
 
         func printReference() {
@@ -116,13 +141,59 @@ struct SpeccyWebView: NSViewRepresentable {
             [UTType.json, UTType.yaml, UTType(filenameExtension: "yml")].compactMap { $0 }
         }
 
-        static func javascriptString(_ value: String) throws -> String {
+        static func javascriptValue<T: Encodable>(_ value: T) throws -> String {
             let data = try JSONEncoder().encode(value)
             guard let encoded = String(data: data, encoding: .utf8) else {
                 throw CocoaError(.fileReadInapplicableStringEncoding)
             }
             return encoded
         }
+
+        static func javascriptString(_ value: String) throws -> String {
+            try javascriptValue(value)
+        }
+
+        struct FragmentBundle: Equatable {
+            let sources: [String: String]
+            let entrypoint: String
+            let selectedDirectory: Bool
+        }
+
+        enum FragmentError: LocalizedError {
+            case noDocuments
+
+            var errorDescription: String? {
+                "This folder doesn't contain any YAML or JSON documents."
+            }
+        }
+
+        static func loadFragments(from selectedURL: URL) throws -> FragmentBundle {
+            let selectedDirectory = try selectedURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true
+            let root = (selectedDirectory ? selectedURL : selectedURL.deletingLastPathComponent())
+                .resolvingSymlinksInPath()
+            let keys: [URLResourceKey] = [.isRegularFileKey, .isDirectoryKey, .isHiddenKey]
+            guard let enumerator = FileManager.default.enumerator(
+                at: root,
+                includingPropertiesForKeys: keys,
+                options: [.skipsHiddenFiles, .skipsPackageDescendants]
+            ) else { throw FragmentError.noDocuments }
+
+            var sources: [String: String] = [:]
+            for case let fileURL as URL in enumerator {
+                let values = try fileURL.resourceValues(forKeys: Set(keys))
+                guard values.isRegularFile == true, supportedExtensions.contains(fileURL.pathExtension.lowercased()) else { continue }
+                let resolvedFileURL = fileURL.resolvingSymlinksInPath()
+                let relativePath = String(resolvedFileURL.path.dropFirst(root.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                sources[relativePath] = try String(contentsOf: resolvedFileURL, encoding: .utf8)
+            }
+            guard !sources.isEmpty else { throw FragmentError.noDocuments }
+            let entrypoint = selectedDirectory
+                ? sources.keys.sorted().first!
+                : selectedURL.lastPathComponent
+            return FragmentBundle(sources: sources, entrypoint: entrypoint, selectedDirectory: selectedDirectory)
+        }
+
+        private static let supportedExtensions = Set(["yaml", "yml", "json"])
 
         deinit {
             observers.forEach(NotificationCenter.default.removeObserver)

@@ -11,5 +11,4 @@ open apps/macos/Speccy.app
 
 The build script compiles the shared renderer and web studio, copies their production assets into the Swift package, runs the Swift tests, and creates `Speccy.app`.
 
-Use File → Open OpenAPI document, or press Command-O, to open `.yaml`, `.yml`, or `.json` files. Command-P prints the rendered reference.
-
+Use File → Open OpenAPI document, or press Command-O, to open `.yaml`, `.yml`, or `.json` files. Speccy loads sibling documents so relative `$ref` links work. You can also open a folder, then choose its entry OpenAPI document. Command-P prints the rendered reference.
