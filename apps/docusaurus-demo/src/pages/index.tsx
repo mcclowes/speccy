@@ -2,7 +2,7 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 
-const installCommand = 'npm install @speccy/renderer';
+const installCommand = 'npm install @mcclowes/speccy-renderer';
 
 export default function Home() {
   return (

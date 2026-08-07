@@ -12,7 +12,7 @@ import { createRequire } from 'node:module';
 import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
-import type { OpenAPIDocument, SpeccyProps } from '@speccy/renderer';
+import type { OpenAPIDocument, SpeccyProps } from '@mcclowes/speccy-renderer';
 
 const require = createRequire(import.meta.url);
 
@@ -64,7 +64,7 @@ export default function speccyPlugin(
   return {
     name: 'docusaurus-plugin-speccy',
     getClientModules() {
-      return [require.resolve('@speccy/renderer/styles.css')];
+      return [require.resolve('@mcclowes/speccy-renderer/styles.css')];
     },
     async loadContent() {
       return {

@@ -4,15 +4,15 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
-    "prebuild": "npm run build -w @speccy/renderer && npm run build -w @speccy/docusaurus",
+    "prebuild": "npm run build -w @mcclowes/speccy-renderer && npm run build -w @mcclowes/speccy-docusaurus",
     "build": "docusaurus build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@docusaurus/core": "^3.8.1",
     "@docusaurus/preset-classic": "^3.8.1",
-    "@speccy/docusaurus": "*",
-    "@speccy/renderer": "*",
+    "@mcclowes/speccy-docusaurus": "*",
+    "@mcclowes/speccy-renderer": "*",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.1.1",

@@ -8,7 +8,7 @@ APP_ROOT="$REPOSITORY_ROOT/apps/macos/Speccy.app"
 RESOURCE_BUNDLE="SpeccyMac_SpeccyMac.bundle"
 
 cd "$REPOSITORY_ROOT"
-npm run build -w @speccy/renderer
+npm run build -w @mcclowes/speccy-renderer
 npm run build -w @speccy/web
 
 find "$WEB_RESOURCES" -mindepth 1 ! -name .gitkeep -delete

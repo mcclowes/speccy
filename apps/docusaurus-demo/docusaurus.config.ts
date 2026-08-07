@@ -14,7 +14,7 @@ const config: Config = {
   onBrokenLinks: 'throw',
   plugins: [
     [
-      '@speccy/docusaurus',
+      '@mcclowes/speccy-docusaurus',
       {
         route: isVercel ? '/api' : '/speccy/api',
         spec: './static/openapi.yaml',

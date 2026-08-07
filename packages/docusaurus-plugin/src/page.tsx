@@ -8,7 +8,7 @@
  */
 
 import { OpenAPI } from './client';
-import type { OpenAPIDocument, SpeccyProps } from '@speccy/renderer';
+import type { OpenAPIDocument, SpeccyProps } from '@mcclowes/speccy-renderer';
 
 interface ReferenceData {
   spec: string | OpenAPIDocument;

@@ -12,9 +12,9 @@ Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference docum
 
 | What you’re building | Start with |
 | --- | --- |
-| A reference inside a React application | `@speccy/renderer` |
-| A reference alongside guides in Docusaurus | `@speccy/docusaurus` |
-| A dedicated public API reference | `create-speccy-reference` |
+| A reference inside a React application | `@mcclowes/speccy-renderer` |
+| A reference alongside guides in Docusaurus | `@mcclowes/speccy-docusaurus` |
+| A dedicated public API reference | `@mcclowes/create-speccy-reference` |
 
 The Speccy Studio is for opening and reviewing specifications. It isn’t the production hosting shell.
 
@@ -23,14 +23,14 @@ The Speccy Studio is for opening and reviewing specifications. It isn’t the pr
 Install the renderer:
 
 ```sh
-npm install @speccy/renderer
+npm install @mcclowes/speccy-renderer
 ```
 
 Pass it a parsed OpenAPI object, a YAML string, or a JSON string:
 
 ```tsx
-import {Speccy} from '@speccy/renderer';
-import '@speccy/renderer/styles.css';
+import {Speccy} from '@mcclowes/speccy-renderer';
+import '@mcclowes/speccy-renderer/styles.css';
 
 export function ApiReference({spec}) {
   return <Speccy spec={spec} basePath="/api" />;
@@ -44,7 +44,7 @@ export function ApiReference({spec}) {
 Install the plugin and renderer:
 
 ```sh
-npm install @speccy/docusaurus @speccy/renderer
+npm install @mcclowes/speccy-docusaurus @mcclowes/speccy-renderer
 ```
 
 Add a generated reference route to `docusaurus.config.ts`:
@@ -53,7 +53,7 @@ Add a generated reference route to `docusaurus.config.ts`:
 export default {
   plugins: [
     [
-      '@speccy/docusaurus',
+      '@mcclowes/speccy-docusaurus',
       {
         route: '/api',
         spec: './static/openapi.yaml',
@@ -70,7 +70,7 @@ Run your normal Docusaurus development server. The reference will be available a
 Create a static reference site without adopting Docusaurus:
 
 ```sh
-npm create speccy-reference my-api-reference
+npm create @mcclowes/speccy-reference my-api-reference
 cd my-api-reference
 npm install
 npm run dev

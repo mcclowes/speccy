@@ -4,6 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
+      "@mcclowes/speccy-renderer": ["../../packages/renderer/src/index.ts"],
       "@speccy/renderer": ["../../packages/renderer/src/index.ts"]
     },
     "types": ["vite/client"]

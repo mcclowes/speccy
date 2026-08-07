@@ -1,5 +1,5 @@
 {
-  "name": "@speccy/renderer",
+  "name": "@mcclowes/speccy-renderer",
   "version": "0.1.0",
   "description": "Clean, accessible OpenAPI reference rendering for React.",
   "type": "module",
@@ -14,6 +14,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "files": ["dist"],
+  "publishConfig": { "access": "public" },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --sourcemap --external react --external react-dom && cp src/styles.css dist/styles.css",
     "test": "vitest run",

@@ -5,13 +5,13 @@ description: Render a complete OpenAPI reference inside a React application.
 
 # React renderer
 
-`@speccy/renderer` is the shared rendering core. It owns parsing, navigation, search, endpoint pages, request samples, and the request builder.
+`@mcclowes/speccy-renderer` is the shared rendering core. It owns parsing, navigation, search, endpoint pages, request samples, and the request builder.
 
 ## Basic use
 
 ```tsx
-import {Speccy} from '@speccy/renderer';
-import '@speccy/renderer/styles.css';
+import {Speccy} from '@mcclowes/speccy-renderer';
+import '@mcclowes/speccy-renderer/styles.css';
 
 export function Reference() {
   return (

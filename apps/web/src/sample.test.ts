@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createReferenceModel } from '@speccy/renderer';
+import { createReferenceModel } from '@mcclowes/speccy-renderer';
 import { SAMPLE_SPEC } from './sample';
 
 describe('sample spec', () => {

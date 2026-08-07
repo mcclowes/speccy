@@ -1,5 +1,5 @@
 {
-  "name": "create-speccy-reference",
+  "name": "@mcclowes/create-speccy-reference",
   "version": "0.1.0",
   "description": "Create a standalone Speccy API reference site.",
   "type": "module",

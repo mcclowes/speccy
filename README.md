@@ -6,10 +6,10 @@ The design stays quiet around the content. Color identifies methods, status, req
 
 ## What’s included
 
-- `@speccy/renderer` - the shared React renderer
+- `@mcclowes/speccy-renderer` - the shared React renderer
 - `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
-- `@speccy/docusaurus` - generated reference routes and an embeddable MDX component
-- `create-speccy-reference` - a standalone static reference starter
+- `@mcclowes/speccy-docusaurus` - generated reference routes and an embeddable MDX component
+- `@mcclowes/create-speccy-reference` - a standalone static reference starter
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
@@ -36,8 +36,8 @@ The build runs the renderer and web builds, embeds the resulting assets, runs th
 ## Use the React renderer
 
 ```tsx
-import {Speccy} from '@speccy/renderer';
-import '@speccy/renderer/styles.css';
+import {Speccy} from '@mcclowes/speccy-renderer';
+import '@mcclowes/speccy-renderer/styles.css';
 
 export function Reference({spec}) {
   return <Speccy spec={spec} accentColor="#6d5dfc" theme="system" />;
@@ -65,7 +65,7 @@ tags:
 export default {
   plugins: [
     [
-      '@speccy/docusaurus',
+      '@mcclowes/speccy-docusaurus',
       {
         route: '/api',
         spec: './static/openapi.yaml',
@@ -79,7 +79,7 @@ export default {
 Use `specUrl` instead of `spec` to fetch a remote document at build time. For MDX embedding:
 
 ```mdx
-import {OpenAPI} from '@speccy/docusaurus/client';
+import {OpenAPI} from '@mcclowes/speccy-docusaurus/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} />
@@ -90,7 +90,7 @@ import spec from '@site/static/openapi.json';
 Use the standalone starter when the API reference is the whole site:
 
 ```sh
-npm create speccy-reference my-api-reference
+npm create @mcclowes/speccy-reference my-api-reference
 cd my-api-reference
 npm install
 npm run dev
