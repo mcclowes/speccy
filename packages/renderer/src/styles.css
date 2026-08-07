@@ -23,6 +23,7 @@
 .speccy code, .speccy pre { font-family: 'DM Mono', ui-monospace, monospace; }
 .speccy a { color: inherit; text-decoration: none; }
 .speccy button, .speccy input { font: inherit; }
+.speccy input::placeholder { color: color-mix(in srgb, var(--sp-muted) 58%, var(--sp-bg)); opacity: 1; }
 .speccy p { margin: 0 0 0.8em; }
 .sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; color-scheme: dark; }
 @media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; color-scheme: dark; } }
