@@ -115,6 +115,7 @@
 .sp-response-head { width: 100%; display: grid; grid-template-columns: 45px 1fr auto; align-items: center; gap: 9px; padding: 13px 0; border: 0; color: var(--sp-text); background: transparent; text-align: left; cursor: pointer; font-size: 11px; }
 .sp-status { font-family: 'DM Mono', monospace; color: var(--sp-muted); } .sp-status.is-success { color: #14815f; }
 .sp-response-body { padding: 0 0 17px 54px; }
+.sp-response-body > .sp-markdown + .sp-media-list { margin-top: 12px; }
 .sp-code-panel { min-width: 0; padding: 20px; color: var(--sp-code-text); background: var(--sp-code); }
 .sp-code-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; color: #8e8f9c; font-size: 10px; }
 .sp-code-panel .sp-copy { color: #adaeba; background: #252630; }
