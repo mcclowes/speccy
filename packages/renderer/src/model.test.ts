@@ -113,6 +113,32 @@ describe('createReferenceModel', () => {
     const responseSchema = operation?.responses?.['200']?.content?.['application/json']?.schema;
     expect(requestSchema?.properties?.name?.type).toBe('string');
     expect(responseSchema?.properties?.name?.type).toBe('string');
+    expect(requestSchema?.title).toBe('Pet');
+    expect(responseSchema?.title).toBe('Pet');
+  });
+
+  it('keeps an explicit schema title when resolving a $ref', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/pets': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: { Pet: { title: 'Animal', type: 'object' } },
+      },
+    });
+
+    const schema = model.operations[0]?.operation.responses?.['200']?.content?.['application/json']?.schema;
+    expect(schema?.title).toBe('Animal');
   });
 
   it('does not hang on circular $ref schemas', () => {

@@ -5,6 +5,12 @@ import { SchemaView } from './SchemaView';
 afterEach(cleanup);
 
 describe('SchemaView composition', () => {
+  it('shows a schema title alongside its type', () => {
+    render(<SchemaView schema={{ title: 'Connection', type: 'object' }} />);
+
+    expect(screen.getByText('Connection · object')).toBeInTheDocument();
+  });
+
   it('does not present allOf members as alternatives', () => {
     render(<SchemaView schema={{
       type: 'array',

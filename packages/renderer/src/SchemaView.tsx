@@ -14,9 +14,12 @@ import type { MediaType, SchemaObject } from './types';
 function schemaLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  if (schema.type === 'array') return `array<${schemaLabel(schema.items)}>`;
-  if (schema.enum) return schema.enum.map(String).join(' | ');
-  return [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+  const type = schema.type === 'array'
+    ? `array<${schemaLabel(schema.items)}>`
+    : schema.enum
+      ? schema.enum.map(String).join(' | ')
+      : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+  return [schema.title, type].filter(Boolean).join(' · ');
 }
 
 export function JsonValue({ value }: { value: unknown }) {

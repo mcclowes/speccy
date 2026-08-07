@@ -69,6 +69,11 @@ export function parseSpec(input: OpenAPIDocument | string): OpenAPIDocument {
 export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
   const resolved = new Map<string, unknown>();
 
+  function schemaTitle(ref: string): string | undefined {
+    const match = ref.match(/^#\/(?:components\/schemas|definitions)\/([^/]+)$/);
+    return match?.[1]?.replace(/~1/g, '/').replace(/~0/g, '~');
+  }
+
   function lookup(ref: string): unknown {
     if (!ref.startsWith('#/')) return undefined;
     const segments = ref
@@ -93,7 +98,11 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
       if (resolved.has(ref)) return resolved.get(ref);
       const target = lookup(ref);
       if (target === undefined) return node;
-      const value = resolve(target, new Set(activeRefs).add(ref));
+      const resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
+      const inferredTitle = schemaTitle(ref);
+      const value = inferredTitle && resolvedTarget && typeof resolvedTarget === 'object' && !Array.isArray(resolvedTarget)
+        ? { title: inferredTitle, ...resolvedTarget }
+        : resolvedTarget;
       resolved.set(ref, value);
       return value;
     }
