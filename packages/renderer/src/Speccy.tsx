@@ -252,7 +252,7 @@ function NavigationGroup({
               aria-current={activeOperationId === item.id ? 'page' : undefined}
               onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
               key={item.id}
-            ><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><span>{item.operation.summary ?? item.path}</span></a>
+            ><span className="sp-nav-operation-label">{item.operation.summary ?? item.path}</span><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span></a>
           ))}
         </div>
       )}
