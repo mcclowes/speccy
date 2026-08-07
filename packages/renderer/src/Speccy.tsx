@@ -21,7 +21,7 @@ import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
 import { OpenApiDownload } from './OpenApiDownload';
-import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
+import { componentAnchorId, DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
 import { RequestSample } from './RequestSample';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
@@ -1096,14 +1096,16 @@ export function Speccy({
     rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
-  function navigateReference(key: ReferenceKey) {
+  function navigateReference(key: ReferenceKey, component?: string) {
     const nextRoute: SpeccyRoute = { page: 'reference', section: key };
     if (onNavigate) onNavigate(nextRoute);
     else {
-      window.history.pushState({}, '', hrefForRoute(nextRoute));
+      const anchor = component ? componentAnchorId(key, component) : undefined;
+      window.history.pushState({}, '', `${hrefForRoute(nextRoute)}${anchor ? `#${anchor}` : ''}`);
       setInternalRoute(routeKey(nextRoute));
     }
-    rootRef.current?.scrollIntoView({ block: 'start' });
+    if (component) requestAnimationFrame(() => document.getElementById(componentAnchorId(key, component))?.scrollIntoView({ block: 'start' }));
+    else rootRef.current?.scrollIntoView({ block: 'start' });
   }
 
   const searchResults: SearchResult[] = [
@@ -1123,7 +1125,7 @@ export function Speccy({
     })),
     ...REFERENCE_GROUPS.flatMap(([key, label]) => Object.keys(model.document.components?.[key] ?? {}).map((name) => ({
       id: `reference-${key}-${slugify(name)}`, group: 'Reference' as const, label: name, detail: label,
-      terms: [name, label], navigate: () => navigateReference(key),
+      terms: [name, label], navigate: () => navigateReference(key, name),
     }))),
   ];
 

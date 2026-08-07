@@ -801,7 +801,21 @@ describe('Speccy navigation', () => {
     fireEvent.keyDown(search, { key: 'Enter' });
 
     expect(window.location.pathname).toBe('/reference/schemas');
+    expect(window.location.hash).toBe('#component-schemas-company-record');
     expect(screen.getByRole('heading', { name: 'CompanyRecord' })).toBeInTheDocument();
+  });
+
+  it('renders an on-page index for reusable components', () => {
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Components API' }, paths: {},
+      components: { schemas: { Email: { type: 'string' }, SensitivePassword: { type: 'object' } } },
+    }} route={{ page: 'reference', section: 'schemas' }} />);
+
+    const toc = screen.getByRole('navigation', { name: 'Schemas on this page' });
+    expect(within(toc).getByRole('link', { name: 'Email' })).toHaveAttribute('href', '#component-schemas-email');
+    expect(within(toc).getByRole('link', { name: 'SensitivePassword' })).toHaveAttribute('href', '#component-schemas-sensitive-password');
+    expect(screen.getByRole('combobox', { name: 'Jump to schemas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Email' }).closest('article')).toHaveAttribute('id', 'component-schemas-email');
   });
 
   it('renders untagged webhooks, reusable components, security, and every media type', () => {

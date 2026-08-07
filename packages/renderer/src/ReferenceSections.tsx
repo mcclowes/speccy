@@ -7,7 +7,7 @@
  * ---
  */
 
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Markdown } from './Markdown';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type { OpenAPIDocument, SecurityScheme } from './types';
@@ -46,12 +46,54 @@ export function ReferenceNavigation({ document, activeKey, hrefFor, onNavigate, 
   </div>;
 }
 
-function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
-  return <section className="sp-tag sp-reference-section" id={id}><div className="sp-tag-heading"><div><span className="sp-tag-kicker">Reference</span><h2>{title}</h2></div></div>{children}</section>;
+export function componentAnchorId(key: ReferenceKey, name: string): string {
+  const slug = name.trim().replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return `component-${key}-${slug || encodeURIComponent(name)}`;
 }
 
-function Card({ name, children }: { name: string; children: ReactNode }) {
-  return <article className="sp-component-card"><h3>{name}</h3>{children}</article>;
+function Section({ id, title, activeKey, names, children }: { id: string; title: string; activeKey: ReferenceKey; names: string[]; children: ReactNode }) {
+  const [activeId, setActiveId] = useState(() => names[0] ? componentAnchorId(activeKey, names[0]) : '');
+
+  useEffect(() => {
+    const ids = names.map((name) => componentAnchorId(activeKey, name));
+    const hashId = ids.find((item) => item === window.location.hash.slice(1));
+    setActiveId(hashId ?? ids[0] ?? '');
+    if (hashId) requestAnimationFrame(() => document.getElementById(hashId)?.scrollIntoView?.({ block: 'start' }));
+    if (!('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((observations) => {
+      const visible = observations.filter((item) => item.isIntersecting)
+        .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top)[0];
+      if (visible) setActiveId(visible.target.id);
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    ids.forEach((item) => {
+      const element = document.getElementById(item);
+      if (element) observer.observe(element);
+    });
+    return () => observer.disconnect();
+  }, [activeKey, names.join('\u0000')]);
+
+  function jumpTo(id: string) {
+    if (!id) return;
+    window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}#${id}`);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActiveId(id);
+  }
+
+  return <section className="sp-tag sp-reference-section" id={id}>
+    <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Reference</span><h2>{title}</h2></div></div>
+    {names.length > 1 && <label className="sp-reference-jump"><span>Jump to {title.toLowerCase()}</span><select value={activeId} onChange={(event) => jumpTo(event.target.value)}>{names.map((name) => <option value={componentAnchorId(activeKey, name)} key={name}>{name}</option>)}</select></label>}
+    <div className="sp-reference-layout">
+      <div className="sp-reference-cards">{children}</div>
+      {names.length > 1 && <nav className="sp-reference-toc" aria-label={`${title} on this page`}><strong>On this page</strong><div>{names.map((name) => {
+        const anchor = componentAnchorId(activeKey, name);
+        return <a className={activeId === anchor ? 'is-active' : ''} aria-current={activeId === anchor ? 'location' : undefined} href={`#${anchor}`} onClick={(event) => { event.preventDefault(); jumpTo(anchor); }} key={name}>{name}</a>;
+      })}</div></nav>}
+    </div>
+  </section>;
+}
+
+function Card({ id, name, children }: { id: string; name: string; children: ReactNode }) {
+  return <article className="sp-component-card" id={id}><h3>{name}</h3>{children}</article>;
 }
 
 function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
@@ -69,15 +111,19 @@ export function DocumentReference({ document, activeKey }: {
   activeKey: ReferenceKey;
 }) {
   const components = document.components ?? {};
+  const renderCards = (key: ReferenceKey, render: (name: string, value: any) => ReactNode) => {
+    const items = entries(components[key]);
+    return <Section id={`components-${key}`} title={REFERENCE_GROUPS.find(([item]) => item === key)?.[1] ?? key} activeKey={key} names={items.map(([name]) => name)}>{items.map(([name, value]) => <Card id={componentAnchorId(key, name)} name={name} key={name}>{render(name, value)}</Card>)}</Section>;
+  };
   return <>
-    {activeKey === 'schemas' && <Section id="components-schemas" title="Schemas">{entries(components.schemas).map(([name, schema]) => <Card name={name} key={name}><SchemaView schema={schema} /></Card>)}</Section>}
-    {activeKey === 'parameters' && <Section id="components-parameters" title="Parameters">{entries(components.parameters).map(([name, parameter]) => <Card name={name} key={name}><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required">required</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</Card>)}</Section>}
-    {activeKey === 'requestBodies' && <Section id="components-requestBodies" title="Request bodies">{entries(components.requestBodies).map(([name, body]) => <Card name={name} key={name}><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></Card>)}</Section>}
-    {activeKey === 'responses' && <Section id="components-responses" title="Responses">{entries(components.responses).map(([name, response]) => <Card name={name} key={name}><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></Card>)}</Section>}
-    {activeKey === 'headers' && <Section id="components-headers" title="Headers">{entries(components.headers).map(([name, header]) => <Card name={name} key={name}><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></Card>)}</Section>}
-    {activeKey === 'examples' && <Section id="components-examples" title="Examples">{entries(components.examples).map(([name, example]) => <Card name={name} key={name}><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></Card>)}</Section>}
-    {activeKey === 'links' && <Section id="components-links" title="Links">{entries(components.links).map(([name, link]) => <Card name={name} key={name}><Markdown>{link.description}</Markdown><p>Operation: <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code></p>{entries(link.parameters).map(([parameter, value]) => <div key={parameter}><code>{parameter}</code>: <code>{JSON.stringify(value)}</code></div>)}</Card>)}</Section>}
-    {activeKey === 'callbacks' && <Section id="components-callbacks" title="Callbacks">{entries(components.callbacks).map(([name, callback]) => <Card name={name} key={name}>{entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => <div key={expression}><code>{expression}</code><div>{entries(pathItem).filter(([method]) => ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'].includes(method)).map(([method, operation]) => <span className="sp-callback-method" key={method}>{method.toUpperCase()} {operation.summary ?? operation.operationId}</span>)}</div></div>)}</Card>)}</Section>}
-    {activeKey === 'securitySchemes' && <Section id="components-securitySchemes" title="Security schemes">{entries(components.securitySchemes).map(([name, scheme]) => <Card name={name} key={name}><SecuritySchemeView scheme={scheme} /></Card>)}</Section>}
+    {activeKey === 'schemas' && renderCards('schemas', (_name, schema) => <SchemaView schema={schema} />)}
+    {activeKey === 'parameters' && renderCards('parameters', (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required">required</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
+    {activeKey === 'requestBodies' && renderCards('requestBodies', (_name, body) => <><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></>)}
+    {activeKey === 'responses' && renderCards('responses', (_name, response) => <><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></>)}
+    {activeKey === 'headers' && renderCards('headers', (_name, header) => <><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></>)}
+    {activeKey === 'examples' && renderCards('examples', (_name, example) => <><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></>)}
+    {activeKey === 'links' && renderCards('links', (_name, link) => <><Markdown>{link.description}</Markdown><p>Operation: <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code></p>{entries(link.parameters).map(([parameter, value]) => <div key={parameter}><code>{parameter}</code>: <code>{JSON.stringify(value)}</code></div>)}</>)}
+    {activeKey === 'callbacks' && renderCards('callbacks', (_name, callback) => <>{entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => <div key={expression}><code>{expression}</code><div>{entries(pathItem).filter(([method]) => ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'].includes(method)).map(([method, operation]) => <span className="sp-callback-method" key={method}>{method.toUpperCase()} {operation.summary ?? operation.operationId}</span>)}</div></div>)}</>)}
+    {activeKey === 'securitySchemes' && renderCards('securitySchemes', (_name, scheme) => <SecuritySchemeView scheme={scheme} />)}
   </>;
 }
