@@ -151,14 +151,13 @@ function SecurityRequirements({ requirements, schemes }: {
   const entries = requirements.flatMap((requirement) => Object.entries(requirement));
   const onlyEntry = entries.length === 1 ? entries[0] : undefined;
   const onlyScheme = onlyEntry ? schemes?.[onlyEntry[0]] : undefined;
-  return <section className="sp-section sp-security-section"><div className="sp-security-heading"><h4>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><button
+  return <section className="sp-section sp-security-section"><h4 className="sp-security-heading"><button
     type="button"
     className="sp-security-toggle"
-    data-tooltip={expanded ? 'Hide authorization details' : 'Show authorization details'}
-    aria-label={expanded ? 'Hide authorization details' : 'Show authorization details'}
+    title={expanded ? 'Hide authorization details' : 'Show authorization details'}
     aria-expanded={expanded}
     onClick={() => setExpanded(!expanded)}
-  ><span aria-hidden="true">i</span></button></div>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
+  ><svg className="sp-security-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</span><span className="sp-security-info" aria-hidden="true">i</span></button></h4>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
     <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
       const scheme = schemes?.[name];
       return <div className="sp-security-scheme" key={name}>
