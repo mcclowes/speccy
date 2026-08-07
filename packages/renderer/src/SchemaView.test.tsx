@@ -85,6 +85,21 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('FINANCE')).toBeVisible();
   });
 
+  it('separates constraint labels and values for compact field metadata', () => {
+    const { container } = render(<SchemaView name="username" exampleValue="maxmcc" schema={{
+      type: 'string',
+      maxLength: 25,
+      pattern: '^[a-zA-Z0-9]+$',
+    }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for username' }));
+
+    const constraints = container.querySelector('.sp-schema-constraints');
+    expect(constraints).toHaveTextContent('max length 25pattern ^[a-zA-Z0-9]+$');
+    expect(constraints?.querySelectorAll('code')).toHaveLength(2);
+    expect(screen.getByText('Example').closest('.sp-schema-example')).toHaveTextContent('Examplemaxmcc');
+  });
+
   it('surfaces array item enum values in the array field details', () => {
     render(<SchemaView name="state" summaryOnly schema={{
       type: 'array',

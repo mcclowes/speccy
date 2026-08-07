@@ -66,13 +66,12 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   const alternativeLabel = schema.oneOf ? 'one of' : 'any of';
   const isObject = schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues = schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
-  const constraints = [
-    schema.minimum !== undefined && `min ${schema.minimum}`,
-    schema.maximum !== undefined && `max ${schema.maximum}`,
-    schema.minLength !== undefined && `min length ${schema.minLength}`,
-    schema.maxLength !== undefined && `max length ${schema.maxLength}`,
-    schema.pattern && `pattern ${schema.pattern}`,
-  ].filter(Boolean);
+  const constraints: Array<{ label: string; value: string | number }> = [];
+  if (schema.minimum !== undefined) constraints.push({ label: 'min', value: schema.minimum });
+  if (schema.maximum !== undefined) constraints.push({ label: 'max', value: schema.maximum });
+  if (schema.minLength !== undefined) constraints.push({ label: 'min length', value: schema.minLength });
+  if (schema.maxLength !== undefined) constraints.push({ label: 'max length', value: schema.maxLength });
+  if (schema.pattern) constraints.push({ label: 'pattern', value: schema.pattern });
   const hasFieldDetails = Boolean(name && (
     schema.description
     || enumValues
@@ -114,9 +113,9 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       <Markdown className="sp-schema-description">{schema.description}</Markdown>
       {enumValues && <p className="sp-schema-meta">Enum: {enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>).reduce<React.ReactNode[]>((values, value, index) => index === 0 ? [value] : [...values, ' | ', value], [])}</p>}
-      {constraints.length > 0 && <p className="sp-schema-meta">{constraints.join(' · ')}</p>}
+      {constraints.length > 0 && <p className="sp-schema-meta sp-schema-constraints">{constraints.map((constraint) => <span className="sp-schema-constraint" key={constraint.label}><span>{constraint.label}</span> <code>{constraint.value}</code></span>)}</p>}
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
-      {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta">Example: <code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}
+      {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta sp-schema-example"><span>Example</span><code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}
       {exampleValue === undefined && showExample && schema.example !== undefined && <><div className="sp-schema-meta">Example</div><JsonValue value={schema.example} /></>}
   </div>;
   const structuralBody = <>
