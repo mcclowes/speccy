@@ -29,7 +29,7 @@ export function CollapsibleMarkdown({ children, className = '' }: { children?: s
 
   const collapsible = children.length > COLLAPSIBLE_DESCRIPTION_LENGTH;
   return (
-    <div className={`sp-collapsible-markdown ${collapsible ? 'is-collapsible' : ''} ${expanded ? 'is-expanded' : ''}`}>
+    <div className={`sp-collapsible-markdown ${className} ${collapsible ? 'is-collapsible' : ''} ${expanded ? 'is-expanded' : ''}`}>
       <Markdown className={className}>{children}</Markdown>
       {collapsible && (
         <button type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>

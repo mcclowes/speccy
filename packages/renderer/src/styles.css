@@ -145,8 +145,10 @@
 .sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
 .sp-endpoint-response-grid > .sp-markdown { grid-column: 1 / -1; }
 .sp-endpoint-response-detail { min-width: 0; }
+.sp-collapsible-markdown.is-collapsible:not(.is-expanded) { position: relative; }
 .sp-collapsible-markdown.is-collapsible:not(.is-expanded) > .sp-markdown { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .sp-collapsible-markdown > button { margin: 3px 0 0; padding: 0; border: 0; color: var(--sp-accent); background: transparent; cursor: pointer; font: inherit; }
+.sp-collapsible-markdown.is-collapsible:not(.is-expanded) > button { position: absolute; right: 0; bottom: 0; margin: 0; padding-left: 14px; background: linear-gradient(to right, transparent, var(--sp-bg) 12px); }
 .sp-collapsible-markdown > button:hover { text-decoration: underline; }
 .sp-response-example { align-self: start; }
 .sp-response-example .sp-code-title > span:first-child { display: flex; min-width: 0; align-items: center; gap: 10px; }

@@ -5,7 +5,8 @@ import { Speccy } from './Speccy';
 
 describe('CollapsibleMarkdown', () => {
   it('only offers to expand long descriptions', () => {
-    const { rerender } = render(<CollapsibleMarkdown>Short response.</CollapsibleMarkdown>);
+    const { container, rerender } = render(<CollapsibleMarkdown className="sp-schema-description">Short response.</CollapsibleMarkdown>);
+    expect(container.firstChild).toHaveClass('sp-schema-description');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
 
     rerender(
