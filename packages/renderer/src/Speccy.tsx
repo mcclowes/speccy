@@ -286,7 +286,11 @@ export function Speccy({
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href="#sp-overview">{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
-          <label className="sp-search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search endpoints" aria-label="Search endpoints" /></label>
+          <div className="sp-search">
+            <span aria-hidden="true">⌕</span>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search endpoints" aria-label="Search endpoints" />
+            {query && <button type="button" className="sp-search-clear" onClick={() => setQuery('')} aria-label="Clear search">×</button>}
+          </div>
           <div className="sp-nav-scroll">
             {model.tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
               .filter(({ operations }) => operations.length > 0)

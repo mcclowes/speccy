@@ -54,4 +54,17 @@ describe('Speccy navigation', () => {
     expect(screen.queryByRole('heading', { name: 'Companies' })).not.toBeInTheDocument();
     expect(screen.getByText('No endpoints match “no such endpoint”.')).toBeInTheDocument();
   });
+
+  it('clears the search', () => {
+    render(<Speccy spec={spec} />);
+    const search = screen.getByRole('textbox', { name: 'Search endpoints' });
+
+    expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument();
+    fireEvent.change(search, { target: { value: 'no such endpoint' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+
+    expect(search).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Companies' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument();
+  });
 });
