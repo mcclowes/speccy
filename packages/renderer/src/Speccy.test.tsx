@@ -530,6 +530,33 @@ describe('Speccy navigation', () => {
     expect(screen.getByText(/Authorization: Bearer ••••••••/)).toBeInTheDocument();
   });
 
+  it('shares parameter and authorization values between endpoints', () => {
+    window.history.replaceState({}, '', '/api/get-company');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Secured API' }, servers: [{ url: 'https://api.example.com' }],
+      security: [{ bearerAuth: [] }],
+      tags: [{ name: 'Companies' }],
+      paths: {
+        '/companies/{companyId}': { get: {
+          tags: ['Companies'], summary: 'Get company', operationId: 'get-company',
+          parameters: [{ name: 'companyId', in: 'path', required: true, schema: { type: 'string' } }],
+        } },
+        '/companies/{companyId}/people': { get: {
+          tags: ['Companies'], summary: 'List company people', operationId: 'list-company-people',
+          parameters: [{ name: 'companyId', in: 'path', required: true, schema: { type: 'string' } }],
+        } },
+      },
+      components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
+    }} basePath="/api" />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: /companyId/ }), { target: { value: 'company-42' } });
+    fireEvent.change(screen.getByLabelText('bearerAuth'), { target: { value: 'secret-token' } });
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: /List company people/ }));
+
+    expect(screen.getByRole('textbox', { name: /companyId/ })).toHaveValue('company-42');
+    expect(screen.getByLabelText('bearerAuth')).toHaveValue('secret-token');
+  });
+
   it('filters endpoints in the sidebar without opening full search', () => {
     render(<Speccy spec={{
       ...spec,

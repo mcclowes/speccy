@@ -384,15 +384,18 @@ function RequestRail({
   parameterPrototype?: boolean;
 }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
-  const [values, setValues] = useLocalState<Record<string, string>>(`${storageScope}:operation:${item.id}:parameters`, Object.fromEntries(parameters.map((parameter) => [
+  const parameterDefaults = Object.fromEntries(parameters.map((parameter) => [
     `${parameter.in}-${parameter.name}`,
     String(parameter.example ?? parameter.schema?.default ?? ''),
-  ])));
+  ]));
+  const [storedValues, setStoredValues] = useLocalState<Record<string, string>>(`${storageScope}:parameters`, {});
+  const values = { ...parameterDefaults, ...storedValues };
   const requirements = item.operation.security ?? security;
   const schemeName = requirements?.flatMap(Object.keys)[0];
   const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
   const schemeLabel = securitySchemeLabel(scheme) ?? schemeName;
-  const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
+  const [credentials, setCredentials] = useLocalState<Record<string, string>>(`${storageScope}:authorization`, {});
+  const credential = schemeName ? credentials[schemeName] ?? '' : '';
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
   const [selectedOptionalParameters, setSelectedOptionalParameters] = useState<string[]>([]);
@@ -518,7 +521,7 @@ function RequestRail({
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
           <p className="sp-rail-card-description">Use the credential described under Request → Authorization{schemeLabel && `: ${schemeLabel}`}.</p>
-          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
+          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredentials({ ...credentials, [schemeName]: event.target.value })} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
         </section>
       )}
       {parameters.length > 0 && (
@@ -526,7 +529,7 @@ function RequestRail({
           <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
           <div className="sp-rail-fields">{requestBuilderParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
-            return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;
+            return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setStoredValues({ ...storedValues, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;
           })}</div>
           {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
             <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
