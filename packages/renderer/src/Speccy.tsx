@@ -602,7 +602,7 @@ function EndpointPage({ item, server, document, storageScope, parameterPrototype
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
           </section>}
           <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
-          {item.operation.requestBody && <section className="sp-endpoint-section"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
+          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
         </div>
         {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototype={parameterPrototype} />}
       </div>

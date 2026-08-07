@@ -343,6 +343,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-media-type { position: absolute; top: 12px; right: 12px; width: fit-content; padding: 3px 7px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-media-list { display: grid; gap: 12px; }
 .sp-media { position: relative; min-width: 0; padding: 12px; border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface-soft); }
+.sp-request-body .sp-media { background: var(--sp-surface); }
 .sp-endpoint-section > .sp-markdown + .sp-media-list { margin-top: 18px; }
 .sp-example { position: relative; overflow: auto; max-height: 320px; margin-top: 10px; padding: 12px; border-radius: 7px; }
 .sp-example .sp-code-title-copy-only { position: absolute; top: 50%; right: 0; margin: 0; transform: translateY(-50%); }
