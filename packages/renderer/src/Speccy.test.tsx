@@ -44,6 +44,20 @@ describe('Speccy navigation', () => {
     expect(screen.getByText('GET /companies has no description.')).toBeInTheDocument();
   });
 
+  it('links API health findings to their operation pages', () => {
+    const onNavigate = vi.fn();
+    render(<Speccy spec={spec} route={{ page: 'overview' }} onNavigate={onNavigate} hrefForRoute={(route) => route.page === 'operation' ? `/operations/${route.operationId}` : '/'} showDeveloperHints />);
+
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+    const finding = screen.getByText('GET /companies has no description.').closest<HTMLElement>('.sp-diagnostic-card')!;
+    const link = within(finding).getByRole('link', { name: 'View page' });
+    expect(link).toHaveAttribute('href', '/operations/get-companies');
+
+    fireEvent.click(link);
+    expect(onNavigate).toHaveBeenCalledWith({ page: 'operation', operationId: 'get-companies' });
+    expect(screen.queryByRole('dialog', { name: 'API health' })).not.toBeInTheDocument();
+  });
+
   it('does not render a default brand icon', () => {
     const { container } = render(<Speccy spec={spec} />);
 

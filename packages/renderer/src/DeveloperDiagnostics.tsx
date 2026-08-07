@@ -9,6 +9,7 @@
 
 import { useMemo, useState } from 'react';
 import type { ApiDiagnostic, DiagnosticSeverity } from './diagnostics';
+import type { SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
 
 const SEVERITY_LABELS: Record<DiagnosticSeverity, string> = { issue: 'Issues', warning: 'Warnings', suggestion: 'Suggestions' };
@@ -66,22 +67,28 @@ function downloadCsv(diagnostics: ApiDiagnostic[]) {
   URL.revokeObjectURL(url);
 }
 
-function DiagnosticCard({ diagnostic, onIgnore }: { diagnostic: ApiDiagnostic; onIgnore?: (ruleId: string) => void }) {
+function DiagnosticCard({ diagnostic, route, href, onNavigate, onIgnore }: { diagnostic: ApiDiagnostic; route?: SpeccyRoute; href?: string; onNavigate?: (route: SpeccyRoute) => void; onIgnore?: (ruleId: string) => void }) {
   return <article className={`sp-diagnostic-card is-${diagnostic.severity}`}>
     <div className="sp-diagnostic-card-head"><span>{diagnostic.severity}</span><code>{diagnostic.source}: {diagnostic.ruleId}</code></div>
     <strong>{diagnostic.message}</strong>
     {diagnostic.rationale && <p>{diagnostic.rationale}</p>}
     {diagnostic.suggestion && <p className="sp-diagnostic-fix">Try this: {diagnostic.suggestion}</p>}
-    <footer><span title={diagnostic.path.join('.')}>{diagnosticLocation(diagnostic)}</span>{onIgnore && <button type="button" onClick={() => onIgnore(diagnostic.ruleId)}>Ignore this rule</button>}</footer>
+    <footer><span title={diagnostic.path.join('.')}>{diagnosticLocation(diagnostic)}</span><span className="sp-diagnostic-actions">{route && href && <a href={href} onClick={(event) => { event.preventDefault(); onNavigate?.(route); }}>View page</a>}{onIgnore && <button type="button" onClick={() => onIgnore(diagnostic.ruleId)}>Ignore this rule</button>}</span></footer>
   </article>;
 }
 
-export function InlineDiagnostics({ diagnostics, onHide }: { diagnostics: ApiDiagnostic[]; onHide: () => void }) {
+type DiagnosticNavigationProps = {
+  routeForDiagnostic?: (diagnostic: ApiDiagnostic) => SpeccyRoute;
+  hrefForRoute?: (route: SpeccyRoute) => string;
+  onNavigate?: (route: SpeccyRoute) => void;
+};
+
+export function InlineDiagnostics({ diagnostics, onHide, routeForDiagnostic, hrefForRoute, onNavigate }: { diagnostics: ApiDiagnostic[]; onHide: () => void } & DiagnosticNavigationProps) {
   if (!diagnostics.length) return null;
-  return <div className="sp-inline-diagnostics"><button type="button" className="sp-inline-hide" onClick={onHide}>Hide hints</button>{diagnostics.slice(0, 3).map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} key={diagnostic.id} />)}{diagnostics.length > 3 && <span className="sp-inline-more">And {diagnostics.length - 3} more in API health</span>}</div>;
+  return <div className="sp-inline-diagnostics"><button type="button" className="sp-inline-hide" onClick={onHide}>Hide hints</button>{diagnostics.slice(0, 3).map((diagnostic) => { const route = routeForDiagnostic?.(diagnostic); return <DiagnosticCard diagnostic={diagnostic} route={route} href={route && hrefForRoute?.(route)} onNavigate={onNavigate} key={diagnostic.id} />; })}{diagnostics.length > 3 && <span className="sp-inline-more">And {diagnostics.length - 3} more in API health</span>}</div>;
 }
 
-export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHints, onShowInlineHintsChange }: { diagnostics: ApiDiagnostic[]; storageScope: string; showInlineHints: boolean; onShowInlineHintsChange: (show: boolean) => void }) {
+export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHints, onShowInlineHintsChange, routeForDiagnostic, hrefForRoute, onNavigate }: { diagnostics: ApiDiagnostic[]; storageScope: string; showInlineHints: boolean; onShowInlineHintsChange: (show: boolean) => void } & DiagnosticNavigationProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
@@ -123,7 +130,7 @@ export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHint
         <div className="sp-diagnostics-tools">
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a path, rule, or message" aria-label="Filter API health findings" />
         </div>
-        <div className="sp-diagnostics-list">{filtered.map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} onIgnore={ignore} key={diagnostic.id} />)}{filtered.length === 0 && <div className="sp-diagnostics-empty"><strong>No matching findings</strong><span>Change the filter or restore ignored rules.</span></div>}</div>
+        <div className="sp-diagnostics-list">{filtered.map((diagnostic) => { const diagnosticRoute = routeForDiagnostic?.(diagnostic); return <DiagnosticCard diagnostic={diagnostic} route={diagnosticRoute} href={diagnosticRoute && hrefForRoute?.(diagnosticRoute)} onNavigate={(route) => { setOpen(false); onNavigate?.(route); }} onIgnore={ignore} key={diagnostic.id} />; })}{filtered.length === 0 && <div className="sp-diagnostics-empty"><strong>No matching findings</strong><span>Change the filter or restore ignored rules.</span></div>}</div>
       </aside>
     </div>}
   </>;

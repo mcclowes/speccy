@@ -1117,6 +1117,20 @@ export function Speccy({
   ].some((value) => value?.toLowerCase().includes(normalizedFilter));
   const filteredOperationCount = [...model.operations, ...model.webhooks].filter(matchesFilter).length;
 
+  function routeForDiagnostic(diagnostic: ReturnType<typeof analyzeOpenApi>[number]): SpeccyRoute {
+    const [root, name, method] = diagnostic.path;
+    if ((root === 'paths' || root === 'webhooks') && typeof name === 'string' && typeof method === 'string') {
+      const operation = [...model.operations, ...model.webhooks].find((item) => item.path === name && item.method === method);
+      if (operation) return { page: 'operation', operationId: operation.id };
+    }
+    if (root === 'components' && typeof name === 'string' && isReferenceKey(name)) return { page: 'reference', section: name };
+    if (diagnostic.tag) {
+      const tag = model.tags.find((item) => item.name === diagnostic.tag);
+      if (tag) return { page: 'tag', tag: tagSlug(tag) };
+    }
+    return { page: 'overview' };
+  }
+
   function navigate(operationId?: string) {
     const nextRoute: SpeccyRoute = operationId ? { page: 'operation', operationId } : { page: 'overview' };
     if (onNavigate) onNavigate(nextRoute);
@@ -1147,6 +1161,15 @@ export function Speccy({
     }
     if (component) requestAnimationFrame(() => document.getElementById(componentAnchorId(key, component))?.scrollIntoView({ block: 'start' }));
     else rootRef.current?.scrollIntoView({ block: 'start' });
+  }
+
+  function navigateDiagnostic(nextRoute: SpeccyRoute) {
+    if (nextRoute.page === 'operation') navigate(nextRoute.operationId);
+    else if (nextRoute.page === 'tag') {
+      const tag = model.tags.find((item) => tagSlug(item) === nextRoute.tag);
+      if (tag) navigateTag(tag);
+    } else if (nextRoute.page === 'reference' && isReferenceKey(nextRoute.section)) navigateReference(nextRoute.section);
+    else navigate();
   }
 
   const searchResults: SearchResult[] = [
@@ -1232,7 +1255,7 @@ export function Speccy({
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>
       {searchOpen && <QuickSearch results={searchResults} onClose={() => setSearchOpen(false)} />}
-      {showDeveloperHints && <DeveloperDiagnostics diagnostics={diagnostics} storageScope={storageScope} showInlineHints={showInlineHints} onShowInlineHintsChange={setShowInlineHints} />}
+      {showDeveloperHints && <DeveloperDiagnostics diagnostics={diagnostics} storageScope={storageScope} showInlineHints={showInlineHints} onShowInlineHintsChange={setShowInlineHints} routeForDiagnostic={routeForDiagnostic} hrefForRoute={hrefForRoute} onNavigate={navigateDiagnostic} />}
     </div>
   );
 }
