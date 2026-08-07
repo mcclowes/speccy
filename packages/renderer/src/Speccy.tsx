@@ -154,10 +154,9 @@ function SecurityRequirements({ requirements, schemes }: {
   return <section className="sp-section sp-security-section"><h4 className="sp-security-heading"><button
     type="button"
     className="sp-security-toggle"
-    title={expanded ? 'Hide authorization details' : 'Show authorization details'}
     aria-expanded={expanded}
     onClick={() => setExpanded(!expanded)}
-  ><svg className="sp-security-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</span><span className="sp-security-info" aria-hidden="true">i</span></button></h4>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
+  ><svg className="sp-security-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</span><span className="sp-security-info" data-tooltip={expanded ? 'Hide authorization details' : 'Show authorization details'} aria-hidden="true">i</span></button></h4>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
     <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
       const scheme = schemes?.[name];
       return <div className="sp-security-scheme" key={name}>
@@ -188,72 +187,67 @@ const PARAMETER_GROUP_LABELS: Record<string, string> = {
 
 const DEFAULT_VISIBLE_PARAMETERS = 5;
 
-function ParameterGroup({ location, items, prototypeVariant = 'A' }: { location: string; items: Parameter[]; prototypeVariant?: 'A' | 'B' | 'C' }) {
+function ParameterCard({ location, parameter, index }: { location: string; parameter: Parameter; index: number }) {
+  return <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
+    <div className="sp-parameter-name">
+      <code>{parameter.name ?? 'unnamed'}</code>
+      <SchemaView schema={parameter.schema} showExample={false} />
+      {parameter.required && <span className="sp-required">required</span>}
+    </div>
+    <Markdown>{parameter.description}</Markdown>
+    {(parameter.example !== undefined || parameter.schema?.example !== undefined) && (
+      <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />
+    )}
+  </div>;
+}
+
+function ParameterGroup({ location, items, parameterPrototype = false }: { location: string; items: Parameter[]; parameterPrototype?: boolean }) {
   const [expanded, setExpanded] = useState(false);
-  const [activeParameter, setActiveParameter] = useState(0);
   const requiredItems = items.filter((parameter) => parameter.required);
   const optionalItems = items.filter((parameter) => !parameter.required);
-  const collapsible = prototypeVariant === 'B' ? optionalItems.length > 0 : items.length > DEFAULT_VISIBLE_PARAMETERS;
-  const visibleItems = prototypeVariant === 'B' && !expanded
-    ? requiredItems
-    : expanded ? items : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
+  const collapsible = items.length > DEFAULT_VISIBLE_PARAMETERS;
+  const visibleItems = expanded ? items : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
   const hiddenCount = items.length - visibleItems.length;
 
-  if (prototypeVariant === 'C') {
-    const parameter = items[activeParameter] ?? items[0];
+  if (parameterPrototype) {
     return (
-      <section className="sp-endpoint-section sp-parameter-prototype-index">
+      <section className="sp-endpoint-section sp-parameter-prototype">
         <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
-        <div className="sp-parameter-index" role="tablist" aria-label={PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}>
-          {items.map((item, index) => <button type="button" role="tab" aria-selected={index === activeParameter} onClick={() => setActiveParameter(index)} key={`${location}-${item.name}-${index}`}>{item.name ?? 'unnamed'}{item.required && <b>*</b>}</button>)}
-        </div>
-        {parameter && <div className="sp-endpoint-parameters"><div className="sp-endpoint-parameter">
-          <div className="sp-parameter-name"><code>{parameter.name ?? 'unnamed'}</code><SchemaView schema={parameter.schema} showExample={false} />{parameter.required && <span className="sp-required">required</span>}</div>
-          <Markdown>{parameter.description}</Markdown>
-          {(parameter.example !== undefined || parameter.schema?.example !== undefined) && <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />}
-        </div></div>}
+        {requiredItems.length > 0 && <div className="sp-endpoint-parameters">{requiredItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
+        {optionalItems.length > 0 && <div className="sp-optional-parameter-docs">
+          <button type="button" className="sp-optional-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
+            <span><strong>Optional {location} parameters</strong><small>Pagination, filtering, sorting, and related data</small></span>
+            <span>{optionalItems.length}<i className="sp-chevron" aria-hidden="true" /></span>
+          </button>
+          {expanded && <div className="sp-endpoint-parameters">{optionalItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
+        </div>}
       </section>
     );
   }
 
   return (
-    <section className={`sp-endpoint-section ${prototypeVariant === 'B' ? 'sp-parameter-prototype-collapsed' : ''}`}>
-      {prototypeVariant === 'B' ? <button type="button" className="sp-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
-        <span><strong>{requiredItems.length ? PARAMETER_GROUP_LABELS[location] : `Optional ${location} parameters`}</strong><small>{optionalItems.length ? 'Pagination, filtering, and sorting' : 'Required for this request'}</small></span>
-        <span className="sp-parameter-summary-meta">{items.length}<i className="sp-chevron" aria-hidden="true" /></span>
-      </button> : <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>}
-      {(visibleItems.length > 0 || prototypeVariant !== 'B') && <div className="sp-endpoint-parameters">
-        {visibleItems.map((parameter, index) => (
-          <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
-            <div className="sp-parameter-name">
-              <code>{parameter.name ?? 'unnamed'}</code>
-              <SchemaView schema={parameter.schema} showExample={false} />
-              {parameter.required && <span className="sp-required">required</span>}
-            </div>
-            <Markdown>{parameter.description}</Markdown>
-            {(parameter.example !== undefined || parameter.schema?.example !== undefined) && (
-              <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />
-            )}
-          </div>
-        ))}
+    <section className="sp-endpoint-section">
+      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
+      <div className="sp-endpoint-parameters">
+        {visibleItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}
         {collapsible && (
           <button type="button" className="sp-parameter-toggle" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
             {expanded ? 'Show fewer' : `Show ${hiddenCount} more`}
           </button>
         )}
-      </div>}
+      </div>
     </section>
   );
 }
 
-function GroupedParameterList({ parameters, prototypeVariant }: { parameters: Parameter[]; prototypeVariant?: 'A' | 'B' | 'C' }) {
+function GroupedParameterList({ parameters, parameterPrototype }: { parameters: Parameter[]; parameterPrototype?: boolean }) {
   const groups = Object.entries(parameters.reduce<Record<string, Parameter[]>>((result, parameter) => {
     const location = parameter.in ?? 'query';
     (result[location] ??= []).push(parameter);
     return result;
   }, {}));
   return <>{groups.map(([location, items]) => (
-    <ParameterGroup location={location} items={items} prototypeVariant={prototypeVariant} key={location} />
+    <ParameterGroup location={location} items={items} parameterPrototype={parameterPrototype} key={location} />
   ))}</>;
 }
 
@@ -380,14 +374,14 @@ function RequestRail({
   security,
   securitySchemes,
   storageScope,
-  parameterPrototypeVariant = 'A',
+  parameterPrototype = false,
 }: {
   item: OperationModel;
   server: string;
   security?: SecurityRequirement[];
   securitySchemes?: Record<string, SecurityScheme>;
   storageScope: string;
-  parameterPrototypeVariant?: 'A' | 'B' | 'C';
+  parameterPrototype?: boolean;
 }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const [values, setValues] = useLocalState<Record<string, string>>(`${storageScope}:operation:${item.id}:parameters`, Object.fromEntries(parameters.map((parameter) => [
@@ -401,6 +395,9 @@ function RequestRail({
   const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
+  const [selectedOptionalParameters, setSelectedOptionalParameters] = useState<string[]>([]);
+  const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
+  const [optionalPickerQuery, setOptionalPickerQuery] = useState('');
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const [body, setBody] = useState(() => requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]));
   const [result, setResult] = useState<{ status?: number; statusText?: string; body?: string; error?: string }>();
@@ -412,13 +409,20 @@ function RequestRail({
   const maskedHeaders: string[] = [];
   const requiredParameters = parameters.filter((parameter) => parameter.required);
   const optionalParameters = parameters.filter((parameter) => !parameter.required);
-  const visibleOptionalCount = parameterPrototypeVariant === 'B' ? 0 : Math.max(0, DEFAULT_VISIBLE_PARAMETERS - requiredParameters.length);
+  const visibleOptionalCount = Math.max(0, DEFAULT_VISIBLE_PARAMETERS - requiredParameters.length);
   const hiddenParameterCount = Math.max(0, optionalParameters.length - visibleOptionalCount);
   const visibleParameters = parametersExpanded || hiddenParameterCount === 0
     ? parameters
     : parameters.filter((parameter) => parameter.required || optionalParameters.indexOf(parameter) < visibleOptionalCount);
+  const activePrototypeParameters = parameters.filter((parameter) => parameter.required || selectedOptionalParameters.includes(`${parameter.in}-${parameter.name}`));
+  const requestParameters = parameterPrototype ? activePrototypeParameters : parameters;
+  const requestBuilderParameters = parameterPrototype ? activePrototypeParameters : visibleParameters;
+  const availableOptionalParameters = optionalParameters.filter((parameter) => {
+    const key = `${parameter.in}-${parameter.name}`;
+    return !selectedOptionalParameters.includes(key) && (!optionalPickerQuery.trim() || parameter.name?.toLowerCase().includes(optionalPickerQuery.trim().toLowerCase()));
+  });
 
-  for (const parameter of parameters) {
+  for (const parameter of requestParameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
     if (!parameter.name || !value) continue;
     if (parameter.in === 'path') requestPath = requestPath.replace(`{${parameter.name}}`, encodeURIComponent(value));
@@ -501,16 +505,24 @@ function RequestRail({
       )}
       {parameters.length > 0 && (
         <section className="sp-rail-card">
-          <h3>{parameterPrototypeVariant === 'B' && requiredParameters.length === 0 ? 'Optional parameters' : 'Parameters'} <span className="sp-section-count">{parameters.length}</span></h3>
-          <div className="sp-rail-fields">{visibleParameters.map((parameter, index) => {
+          <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+          <div className="sp-rail-fields">{requestBuilderParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
-            return <label className="sp-field" key={`${key}-${index}`}><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>;
+            return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;
           })}</div>
-          {hiddenParameterCount > 0 && (
+          {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker">
+            <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
+            {optionalPickerOpen && <div className="sp-optional-parameter-menu">
+              <input autoFocus value={optionalPickerQuery} onChange={(event) => setOptionalPickerQuery(event.target.value)} placeholder="Find a parameter" aria-label="Find an optional parameter" />
+              <div>{availableOptionalParameters.map((parameter) => {
+                const key = `${parameter.in}-${parameter.name}`;
+                return <button type="button" onClick={() => { setSelectedOptionalParameters([...selectedOptionalParameters, key]); setOptionalPickerQuery(''); }} key={key}><strong>{parameter.name}</strong><small>{parameter.description}</small></button>;
+              })}{availableOptionalParameters.length === 0 && <span>No parameters found</span>}</div>
+            </div>}
+          </div>}
+          {!parameterPrototype && hiddenParameterCount > 0 && (
             <button type="button" className="sp-rail-parameter-toggle" onClick={() => setParametersExpanded(!parametersExpanded)} aria-expanded={parametersExpanded}>
-              {parameterPrototypeVariant === 'B'
-                ? (parametersExpanded ? 'Hide optional parameters' : `Show ${hiddenParameterCount} optional parameter${hiddenParameterCount === 1 ? '' : 's'}`)
-                : (parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`)}
+              {parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`}
             </button>
           )}
         </section>
@@ -538,7 +550,7 @@ function RequestRail({
   );
 }
 
-function EndpointPage({ item, server, document, storageScope, parameterPrototypeVariant }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototypeVariant?: 'A' | 'B' | 'C' }) {
+function EndpointPage({ item, server, document, storageScope, parameterPrototype }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
@@ -556,10 +568,10 @@ function EndpointPage({ item, server, document, storageScope, parameterPrototype
             <h2>Request</h2>
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
           </section>}
-          <GroupedParameterList parameters={parameters} prototypeVariant={parameterPrototypeVariant} />
+          <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
           {item.operation.requestBody && <section className="sp-endpoint-section"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
         </div>
-        {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototypeVariant={parameterPrototypeVariant} />}
+        {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototype={parameterPrototype} />}
       </div>
       {item.operation.responses && <EndpointResponses responses={item.operation.responses} />}
       {item.operation.callbacks && <CallbackList callbacks={item.operation.callbacks} server={server} />}
@@ -893,7 +905,7 @@ export function Speccy({
   logo,
   basePath: basePathProp = '/',
   onError,
-  parameterPrototypeVariant,
+  parameterPrototype,
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {
@@ -1060,7 +1072,7 @@ export function Speccy({
           );
         })}
         {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} basePath={basePath} onNavigate={navigate} />}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} parameterPrototypeVariant={parameterPrototypeVariant} key={activeOperation.id} /></section>}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>

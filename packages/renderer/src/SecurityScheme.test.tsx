@@ -35,12 +35,12 @@ describe('operation security schemes', () => {
     expect(screen.getByRole('heading', { level: 4, name: 'Authorization: API key' })).toBeInTheDocument();
     const toggle = screen.getByRole('button', { name: 'Authorization: API key' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(toggle).toHaveAttribute('title', 'Show authorization details');
     expect(toggle.querySelector('.sp-security-lock')).toBeInTheDocument();
+    expect(toggle.querySelector('.sp-security-info')).toHaveAttribute('data-tooltip', 'Show authorization details');
     expect(screen.queryByText(/The word "Basic" followed by a space/)).not.toBeInTheDocument();
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(toggle).toHaveAttribute('title', 'Hide authorization details');
+    expect(toggle.querySelector('.sp-security-info')).toHaveAttribute('data-tooltip', 'Hide authorization details');
     expect(screen.getByText(/The word "Basic" followed by a space/)).toBeInTheDocument();
     expect(screen.getByText('Authorization: 123')).toBeInTheDocument();
   });
