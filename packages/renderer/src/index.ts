@@ -1,4 +1,5 @@
 export { Speccy } from './Speccy';
+export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
 export { createReferenceModel, normalizeDocument, parseSpec, resolveRefs } from './model';
 export type {
@@ -19,3 +20,12 @@ export type {
   SpeccyProps,
   SpeccyRoute,
 } from './types';
+export type {
+  ApiChange,
+  DiffKind,
+  DiffReport,
+  DiffSeverity,
+  DiffSourceLocation,
+  DiffSpecVersion,
+  SpecDiffProps,
+} from './SpecDiff';
