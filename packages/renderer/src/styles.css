@@ -260,7 +260,7 @@ related:
 .sp-endpoint { margin-top: 38px; }
 .sp-endpoint-header { max-width: 820px; margin-bottom: 54px; }
 .sp-endpoint-header .sp-tag-kicker { margin-bottom: 10px; }
-.sp-tag-link { display: block; width: fit-content; text-decoration: none; }
+.speccy .sp-tag-link, .speccy .sp-tag-link:visited { display: block; width: fit-content; color: var(--sp-accent); text-decoration: none; }
 .sp-tag-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .sp-endpoint-header h1 { margin: 0 0 18px; font-size: clamp(32px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.045em; }
 .sp-endpoint-header > .sp-markdown { max-width: 760px; margin-top: 20px; font-size: 15px; line-height: 1.75; }
