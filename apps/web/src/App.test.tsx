@@ -42,4 +42,11 @@ describe('source editor', () => {
 
     expect(previewRender).toHaveBeenCalledTimes(rendersBeforeApply + 1);
   });
+
+  it('renders the studio logo without a navigation target', () => {
+    render(<App />);
+
+    expect(screen.queryByRole('link', { name: 'Speccy' })).toBeNull();
+    expect(screen.getByText('Speccy')).toBeTruthy();
+  });
 });

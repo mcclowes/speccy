@@ -113,7 +113,7 @@ export function App() {
   return (
     <div className={`studio studio-${theme}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void loadFile(event.dataTransfer.files[0]); }}>
       <header className="studio-bar">
-        <a className="studio-logo" href="./"><Mark /><span>Speccy</span></a>
+        <div className="studio-logo"><Mark /><span>Speccy</span></div>
         <div className="studio-document"><span className="studio-dot" />{fileName}</div>
         <div className="studio-actions">
           <button type="button" onClick={() => setUrlOpen(!urlOpen)}>Load URL</button>
