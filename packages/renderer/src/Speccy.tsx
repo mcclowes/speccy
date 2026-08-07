@@ -927,6 +927,7 @@ export function Speccy({
   className = '',
   defaultExpanded = false,
   showSidebar = true,
+  showThemeToggle = true,
   theme = 'system',
   accentColor = '#6d5dfc',
   logo,
@@ -1050,7 +1051,7 @@ export function Speccy({
 
   return (
     <div ref={rootRef} className={`speccy sp-theme-${selectedTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
-      <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />
+      {showThemeToggle && <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />}
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo}<span>{model.document.info?.title ?? 'API reference'}</span></a>

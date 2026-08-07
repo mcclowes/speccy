@@ -259,7 +259,7 @@ export function App() {
     return (
       <main className={`studio studio-preview-only studio-${theme}`}>
         <button className="studio-preview-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`} title={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
-        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} basePath="" parameterPrototype />}
+        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} showThemeToggle={false} basePath="" parameterPrototype />}
       </main>
     );
   }
@@ -305,7 +305,7 @@ export function App() {
           {drawerOpen && (
             <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName, activeId)} />
           )}
-          <div className="studio-preview"><Speccy spec={spec} theme={theme} basePath="" parameterPrototype /></div>
+          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} basePath="" parameterPrototype /></div>
         </div>
       ) : (
         <main className="studio-home">

@@ -205,6 +205,8 @@ export interface SpeccyProps {
   className?: string;
   defaultExpanded?: boolean;
   showSidebar?: boolean;
+  /** Shows the renderer's persistent light/dark theme control. */
+  showThemeToggle?: boolean;
   theme?: 'light' | 'dark' | 'system';
   accentColor?: string;
   logo?: React.ReactNode;
