@@ -508,6 +508,8 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-error p { margin: 6px 0 0; }
 .sp-empty { color: var(--sp-muted); border-color: var(--sp-line); background: var(--sp-surface); text-align: center; }
 .sp-inline-diagnostics { position: fixed; right: 20px; bottom: 72px; z-index: 18; width: min(380px, calc(100vw - 40px)); max-height: calc(100vh - 112px); overflow: hidden auto; display: grid; gap: 8px; padding: 1px; }
+.sp-inline-hide { justify-self: end; padding: 5px 8px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 7px; background: var(--sp-surface); box-shadow: 0 4px 14px rgba(12,13,18,.1); cursor: pointer; font-size: 9px; }
+.sp-inline-hide:hover { color: var(--sp-text); border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line)); }
 .sp-inline-diagnostics .sp-diagnostic-card { box-shadow: 0 7px 24px rgba(12,13,18,.12); }
 .sp-inline-more { padding: 3px 4px; color: var(--sp-muted); font-size: 10px; text-align: right; text-shadow: 0 1px 2px var(--sp-bg); }
 .sp-diagnostics-trigger { position: fixed; right: 20px; bottom: 20px; z-index: 19; min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 11px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); box-shadow: 0 7px 24px rgba(12,13,18,.16); cursor: pointer; font-size: 11px; }

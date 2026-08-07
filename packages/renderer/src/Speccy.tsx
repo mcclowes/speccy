@@ -594,7 +594,7 @@ function RequestRail({
   );
 }
 
-function EndpointPage({ item, tag, server, document, storageScope, parameterPrototype, diagnostics = [], onNavigateTag, hrefForRoute }: { item: OperationModel; tag: TagModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean; diagnostics?: ReturnType<typeof analyzeOpenApi>; onNavigateTag: (tag: TagModel) => void; hrefForRoute: (route: SpeccyRoute) => string }) {
+function EndpointPage({ item, tag, server, document, storageScope, parameterPrototype, diagnostics = [], showInlineHints, onHideInlineHints, onNavigateTag, hrefForRoute }: { item: OperationModel; tag: TagModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean; diagnostics?: ReturnType<typeof analyzeOpenApi>; showInlineHints: boolean; onHideInlineHints: () => void; onNavigateTag: (tag: TagModel) => void; hrefForRoute: (route: SpeccyRoute) => string }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
@@ -609,7 +609,7 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
         <h1>{operationTitle(item)}</h1>
         <div className="sp-endpoint-address"><OperationBadge item={item} /><Path value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
-        <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.operationId === item.id)} />
+        {showInlineHints && <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.operationId === item.id)} onHide={onHideInlineHints} />}
       </header>
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
@@ -967,10 +967,12 @@ function TagIcon({ tag }: { tag: TagModel }) {
   return <img className="sp-tag-icon" src={tag.icon.url} alt={tag.icon.alt ?? ''} />;
 }
 
-function TagOverview({ tag, operations, diagnostics = [], onNavigate, hrefForRoute }: {
+function TagOverview({ tag, operations, diagnostics = [], showInlineHints, onHideInlineHints, onNavigate, hrefForRoute }: {
   tag: TagModel;
   operations: OperationModel[];
   diagnostics?: ReturnType<typeof analyzeOpenApi>;
+  showInlineHints: boolean;
+  onHideInlineHints: () => void;
   onNavigate: (operationId: string) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
 }) {
@@ -979,7 +981,7 @@ function TagOverview({ tag, operations, diagnostics = [], onNavigate, hrefForRou
       <div className="sp-tag-overview-intro">
         <h1 className="sp-tag-title"><TagIcon tag={tag} />{tag.name}</h1>
         <Markdown>{tag.description}</Markdown>
-        <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.tag === tag.name && !diagnostic.operationId)} />
+        {showInlineHints && <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.tag === tag.name && !diagnostic.operationId)} onHide={onHideInlineHints} />}
         <Markdown className="sp-tag-long-description">{tag.longDescription}</Markdown>
       </div>
       <div className="sp-tag-overview-operations">
@@ -1032,6 +1034,9 @@ export function Speccy({
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>('speccy:theme', theme);
+  const basePath = normalizeBasePath(basePathProp);
+  const storageScope = `speccy:${basePath || '/'}:${result.model?.document.info?.title ?? 'api'}`;
+  const [showInlineHints, setShowInlineHints] = useLocalState(`${storageScope}:show-inline-hints`, true);
   const previousTheme = useRef(theme);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -1041,7 +1046,6 @@ export function Speccy({
     setSelectedTheme(theme);
   }, [theme, setSelectedTheme]);
 
-  const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
     const prefix = `${basePath}/`;
@@ -1095,7 +1099,6 @@ export function Speccy({
   const activeTag = activeTagSlug ? model.tags.find((tag) => tagSlug(tag) === activeTagSlug) : undefined;
   const activeOperation = !activeReference && !activeTag ? [...model.operations, ...model.webhooks].find((item) => item.id === activeRoute) : undefined;
   const style = { '--sp-accent': accentColor } as CSSProperties;
-  const storageScope = `speccy:${basePath || '/'}:${model.document.info?.title ?? 'api'}`;
   const overviewDiagnostics = diagnostics.filter((diagnostic) => !diagnostic.operationId && !diagnostic.tag);
   const normalizedFilter = filterQuery.trim().toLowerCase();
   const matchesFilter = (item: OperationModel) => !normalizedFilter || [
@@ -1201,7 +1204,7 @@ export function Speccy({
             <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
             <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
             <Markdown>{model.document.info?.description}</Markdown>
-            <InlineDiagnostics diagnostics={overviewDiagnostics} />
+            {showInlineHints && <InlineDiagnostics diagnostics={overviewDiagnostics} onHide={() => setShowInlineHints(false)} />}
             {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
             <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
           </div>
@@ -1217,13 +1220,13 @@ export function Speccy({
             </section>
           );
         })}
-        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} diagnostics={diagnostics} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} tag={model.tags.find((tag) => tag.name === activeOperation.tag)!} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} diagnostics={diagnostics} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} key={activeOperation.id} /></section>}
+        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} diagnostics={diagnostics} showInlineHints={showInlineHints} onHideInlineHints={() => setShowInlineHints(false)} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} tag={model.tags.find((tag) => tag.name === activeOperation.tag)!} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} diagnostics={diagnostics} showInlineHints={showInlineHints} onHideInlineHints={() => setShowInlineHints(false)} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>
       {searchOpen && <QuickSearch results={searchResults} onClose={() => setSearchOpen(false)} />}
-      {showDeveloperHints && <DeveloperDiagnostics diagnostics={diagnostics} storageScope={storageScope} />}
+      {showDeveloperHints && <DeveloperDiagnostics diagnostics={diagnostics} storageScope={storageScope} showInlineHints={showInlineHints} onShowInlineHintsChange={setShowInlineHints} />}
     </div>
   );
 }

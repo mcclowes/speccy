@@ -26,9 +26,13 @@ describe('Speccy navigation', () => {
     expect(screen.queryByText('This API has no description.')).not.toBeInTheDocument();
     rerender(<Speccy spec={spec} showDeveloperHints />);
     expect(screen.getByText('This API has no description.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Hide hints' }));
+    expect(screen.queryByText('This API has no description.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
     expect(screen.getByRole('dialog', { name: 'API health' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Ignore this rule' }).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
+    expect(screen.getAllByText('This API has no description.')).toHaveLength(2);
   });
 
   it('shows contextual hints on tag and operation pages', () => {

@@ -76,12 +76,12 @@ function DiagnosticCard({ diagnostic, onIgnore }: { diagnostic: ApiDiagnostic; o
   </article>;
 }
 
-export function InlineDiagnostics({ diagnostics }: { diagnostics: ApiDiagnostic[] }) {
+export function InlineDiagnostics({ diagnostics, onHide }: { diagnostics: ApiDiagnostic[]; onHide: () => void }) {
   if (!diagnostics.length) return null;
-  return <div className="sp-inline-diagnostics">{diagnostics.slice(0, 3).map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} key={diagnostic.id} />)}{diagnostics.length > 3 && <span className="sp-inline-more">And {diagnostics.length - 3} more in API health</span>}</div>;
+  return <div className="sp-inline-diagnostics"><button type="button" className="sp-inline-hide" onClick={onHide}>Hide hints</button>{diagnostics.slice(0, 3).map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} key={diagnostic.id} />)}{diagnostics.length > 3 && <span className="sp-inline-more">And {diagnostics.length - 3} more in API health</span>}</div>;
 }
 
-export function DeveloperDiagnostics({ diagnostics, storageScope }: { diagnostics: ApiDiagnostic[]; storageScope: string }) {
+export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHints, onShowInlineHintsChange }: { diagnostics: ApiDiagnostic[]; storageScope: string; showInlineHints: boolean; onShowInlineHintsChange: (show: boolean) => void }) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
@@ -109,6 +109,7 @@ export function DeveloperDiagnostics({ diagnostics, storageScope }: { diagnostic
         <div className="sp-diagnostics-tools">
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a path, rule, or message" aria-label="Filter API health findings" />
           <div className="sp-diagnostics-actions">
+            <button type="button" onClick={() => onShowInlineHintsChange(!showInlineHints)}>{showInlineHints ? 'Hide hints' : 'Show hints'}</button>
             <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>
             <button type="button" onClick={() => downloadCsv(visible)} disabled={visible.length === 0}>Export CSV</button>
             {ignoredRules.length > 0 && <button type="button" onClick={() => setIgnoredRules([])}>Restore {ignoredRules.length} ignored rule{ignoredRules.length === 1 ? '' : 's'}</button>}

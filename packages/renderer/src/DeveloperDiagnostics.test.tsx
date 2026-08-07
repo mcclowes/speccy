@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DeveloperDiagnostics, diagnosticsAsCsv, diagnosticsAsText } from './DeveloperDiagnostics';
+import { DeveloperDiagnostics, InlineDiagnostics, diagnosticsAsCsv, diagnosticsAsText } from './DeveloperDiagnostics';
 import type { ApiDiagnostic } from './diagnostics';
 
 const findings: ApiDiagnostic[] = [{
@@ -49,12 +49,25 @@ describe('developer diagnostics layout', () => {
   it('copies all visible findings as AI-friendly text', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
-    render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" />);
+    render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" showInlineHints onShowInlineHintsChange={() => undefined} />);
 
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Copy all' }));
 
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('GET /companies has no description.'));
     expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+  });
+
+  it('lets users hide contextual hints and restore them from API health', () => {
+    const onHide = vi.fn();
+    const onShowInlineHintsChange = vi.fn();
+    render(<><InlineDiagnostics diagnostics={findings} onHide={onHide} /><DeveloperDiagnostics diagnostics={findings} storageScope="test" showInlineHints={false} onShowInlineHintsChange={onShowInlineHintsChange} /></>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide hints' }));
+    expect(onHide).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
+    expect(onShowInlineHintsChange).toHaveBeenCalledWith(true);
   });
 });
