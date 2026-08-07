@@ -104,16 +104,24 @@ export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHint
     </button>
     {open && <div className="sp-diagnostics-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
       <aside className="sp-diagnostics-drawer" aria-label="API health" aria-modal="true" role="dialog">
-        <header><div><span className="sp-eyebrow">Developer view</span><h2>API health</h2><p>Contract checks and design guidance. No opaque score.</p></div><button type="button" onClick={() => setOpen(false)} aria-label="Close API health">×</button></header>
+        <header>
+          <div><span className="sp-eyebrow">Developer view</span><h2>API health</h2><p>Contract checks and design guidance. No opaque score.</p></div>
+          <div className="sp-diagnostics-header-actions">
+            <details className="sp-diagnostics-menu">
+              <summary>Actions</summary>
+              <div>
+                <button type="button" onClick={() => onShowInlineHintsChange(!showInlineHints)}>{showInlineHints ? 'Hide hints' : 'Show hints'}</button>
+                <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>
+                <button type="button" onClick={() => downloadCsv(visible)} disabled={visible.length === 0}>Export CSV</button>
+                {ignoredRules.length > 0 && <button type="button" onClick={() => setIgnoredRules([])}>Restore {ignoredRules.length} ignored rule{ignoredRules.length === 1 ? '' : 's'}</button>}
+              </div>
+            </details>
+            <button type="button" className="sp-diagnostics-close" onClick={() => setOpen(false)} aria-label="Close API health">×</button>
+          </div>
+        </header>
         <div className="sp-diagnostics-summary">{(['issue', 'warning', 'suggestion'] as const).map((severity) => <button type="button" className={filter === severity ? 'is-active' : ''} onClick={() => setFilter(filter === severity ? 'all' : severity)} key={severity}><strong>{counts[severity]}</strong><span>{SEVERITY_LABELS[severity]}</span></button>)}</div>
         <div className="sp-diagnostics-tools">
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a path, rule, or message" aria-label="Filter API health findings" />
-          <div className="sp-diagnostics-actions">
-            <button type="button" onClick={() => onShowInlineHintsChange(!showInlineHints)}>{showInlineHints ? 'Hide hints' : 'Show hints'}</button>
-            <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>
-            <button type="button" onClick={() => downloadCsv(visible)} disabled={visible.length === 0}>Export CSV</button>
-            {ignoredRules.length > 0 && <button type="button" onClick={() => setIgnoredRules([])}>Restore {ignoredRules.length} ignored rule{ignoredRules.length === 1 ? '' : 's'}</button>}
-          </div>
         </div>
         <div className="sp-diagnostics-list">{filtered.map((diagnostic) => <DiagnosticCard diagnostic={diagnostic} onIgnore={ignore} key={diagnostic.id} />)}{filtered.length === 0 && <div className="sp-diagnostics-empty"><strong>No matching findings</strong><span>Change the filter or restore ignored rules.</span></div>}</div>
       </aside>
