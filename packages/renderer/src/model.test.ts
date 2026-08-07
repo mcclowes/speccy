@@ -13,6 +13,32 @@ describe('parseSpec', () => {
 });
 
 describe('createReferenceModel', () => {
+  it('keeps operations in their YAML declaration order', () => {
+    const document = parseSpec(`
+openapi: 3.1.0
+paths:
+  /corporates/kyb:
+    post:
+      summary: Start KYB for a corporate
+      tags: [Corporates]
+    get:
+      summary: Get KYB for a corporate
+      tags: [Corporates]
+  /corporates/{id}:
+    patch:
+      summary: Update a corporate
+      tags: [Corporates]
+`);
+
+    const model = createReferenceModel(document);
+
+    expect(model.tags[0]?.operations.map(({ method, path }) => `${method} ${path}`)).toEqual([
+      'post /corporates/kyb',
+      'get /corporates/kyb',
+      'patch /corporates/{id}',
+    ]);
+  });
+
   it('groups operations by tag and gives duplicate IDs a stable suffix', () => {
     const model = createReferenceModel({
       openapi: '3.1.0',

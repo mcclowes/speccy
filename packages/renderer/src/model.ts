@@ -52,6 +52,15 @@ export interface ReferenceModel {
   webhooks: OperationModel[];
 }
 
+function operationsInDeclarationOrder(pathItem: PathItem): Array<[HttpMethod, Operation]> {
+  return Object.keys(pathItem).flatMap((key) => {
+    const method = key as HttpMethod;
+    if (!HTTP_METHODS.includes(method)) return [];
+    const operation = pathItem[method];
+    return operation ? [[method, operation]] : [];
+  });
+}
+
 export function parseSpec(input: OpenAPIDocument | string): OpenAPIDocument {
   if (typeof input !== 'string') return input;
 
@@ -217,10 +226,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   const usedIds = new Map<string, number>();
 
   for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
-    for (const method of HTTP_METHODS) {
-      const operation = pathItem[method];
-      if (!operation) continue;
-
+    for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
       const tag = operation.tags?.[0] ?? 'Other';
       const baseId = slugify(operation.operationId ?? `${method}-${path}`) || 'operation';
       const count = usedIds.get(baseId) ?? 0;
@@ -239,9 +245,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
 
   const webhooks: OperationModel[] = [];
   for (const [path, pathItem] of Object.entries(document.webhooks ?? {})) {
-    for (const method of HTTP_METHODS) {
-      const operation = pathItem[method];
-      if (!operation) continue;
+    for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
       const baseId = slugify(`webhook-${operation.operationId ?? `${method}-${path}`}`) || 'webhook';
       webhooks.push({ id: baseId, method, path, operation, pathItem, tag: operation.tags?.[0] ?? 'Other webhooks', source: 'webhook' });
     }
