@@ -2,12 +2,12 @@
  * ---
  * purpose: Provides the web studio's realistic, interactive semantic OpenAPI diff showcase.
  * related:
- *   - ../../../packages/renderer/src/SpecDiff.tsx - Renders the normalized example report.
+ *   - speccy-renderer - Renders the normalized example report through the public package API.
  *   - ./main.tsx - Selects this showcase for the /diff route.
  * ---
  */
 
-import { SpecDiff, type DiffReport } from '../../../packages/renderer/src/SpecDiff';
+import { SpecDiff, type DiffReport } from 'speccy-renderer';
 
 const EXAMPLE_REPORT: DiffReport = {
   base: { title: 'Luma Library API', version: '1.4.0' },
@@ -44,10 +44,11 @@ const EXAMPLE_REPORT: DiffReport = {
       id: 'narrow-loan-status',
       severity: 'breaking',
       kind: 'changed',
-      method: 'get',
-      path: '/loans/{loanId}',
-      operationId: 'get-loan',
       tag: 'Loans',
+      affectedOperations: [
+        { method: 'get', path: '/loans/{loanId}', operationId: 'get-loan', tag: 'Loans' },
+        { method: 'get', path: '/loans', operationId: 'list-loans', tag: 'Loans' },
+      ],
       scope: { area: 'response-body', label: '200 · application/json · Loan.status' },
       location: ['components', 'schemas', 'Loan', 'properties', 'status', 'enum'],
       message: 'Removed pending_review from the returned loan status values.',
@@ -122,5 +123,12 @@ const EXAMPLE_REPORT: DiffReport = {
 };
 
 export function DiffExample() {
-  return <SpecDiff className="diff-example" report={EXAMPLE_REPORT} />;
+  return (
+    <SpecDiff
+      className="diff-example"
+      headingLevel={1}
+      report={EXAMPLE_REPORT}
+      hrefForChange={(change) => change.operationId ? `/#${change.operationId}` : undefined}
+    />
+  );
 }
