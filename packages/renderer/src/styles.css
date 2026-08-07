@@ -43,6 +43,11 @@ related:
 .sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-field-head: #24252c; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; --sp-json-key: #b8a8f0; --sp-json-string: #82c9aa; --sp-json-number: #e2ae72; --sp-json-literal: #e196b1; color-scheme: dark; }
 @media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-field-head: #24252c; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; --sp-json-key: #b8a8f0; --sp-json-string: #82c9aa; --sp-json-number: #e2ae72; --sp-json-literal: #e196b1; color-scheme: dark; } }
 
+.sp-theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 20; display: grid; width: 40px; height: 40px; padding: 0; place-items: center; color: var(--sp-text); background: var(--sp-surface); border: 1px solid var(--sp-line); border-radius: 10px; box-shadow: 0 5px 18px rgba(12,13,18,.12); cursor: pointer; }
+.sp-theme-toggle:hover { border-color: color-mix(in srgb, var(--sp-accent) 45%, var(--sp-line)); }
+.sp-theme-toggle:focus-visible { outline: 2px solid var(--sp-accent); outline-offset: 2px; }
+.sp-theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
 .sp-with-sidebar { display: grid; grid-template-columns: 280px minmax(0, 1fr); }
 .sp-sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--sp-line); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); display: flex; flex-direction: column; z-index: 10; }
 .sp-brand { min-height: 72px; padding: 17px 20px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid var(--sp-line); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
@@ -398,6 +403,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 }
 
 @media print {
+  .sp-theme-toggle { display: none; }
   .sp-sidebar, .sp-search-backdrop, .sp-copy, .sp-chevron { display: none !important; }
   .sp-with-sidebar { display: block; }
   .sp-content { padding: 0; }

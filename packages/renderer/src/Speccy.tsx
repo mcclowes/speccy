@@ -34,6 +34,7 @@ import type {
   SecurityScheme,
   SpeccyProps,
 } from './types';
+import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';
 import { WebhookIcon } from './WebhookIcon';
 
@@ -942,6 +943,7 @@ export function Speccy({
   }, [spec]);
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useLocalState<Theme>('speccy:theme', theme);
   const rootRef = useRef<HTMLDivElement>(null);
   const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
@@ -1047,7 +1049,8 @@ export function Speccy({
   ];
 
   return (
-    <div ref={rootRef} className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
+    <div ref={rootRef} className={`speccy sp-theme-${selectedTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
+      <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo}<span>{model.document.info?.title ?? 'API reference'}</span></a>
