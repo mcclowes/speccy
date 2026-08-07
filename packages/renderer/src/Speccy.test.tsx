@@ -343,11 +343,10 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByTitle('Webhook')).toHaveLength(2);
     expect(screen.queryByText('POST')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Payload' })).toBeInTheDocument();
-    const payloadSchema = screen.getByText('payload').closest('details');
-    expect(payloadSchema).not.toHaveAttribute('open');
-    expect(payloadSchema?.querySelector('summary')).toBeInTheDocument();
+    const payloadToggle = screen.getByRole('button', { name: 'Expand payload' });
+    expect(payloadToggle).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByText('quotaRemaining')).not.toBeVisible();
-    fireEvent.click(payloadSchema!.querySelector('summary')!);
+    fireEvent.click(payloadToggle);
     expect(screen.getByText('quotaRemaining')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
     expect(screen.queryByRole('complementary', { name: 'Request builder' })).not.toBeInTheDocument();

@@ -93,6 +93,12 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     setDetailsOpen((open) => !open);
   };
 
+  const toggleStructure = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setStructureOpen((open) => !open);
+  };
+
   const headerContents = <>
         {name && <code className="sp-property">{name}</code>}
         {required && <span className="sp-required" title="Required">*</span>}
@@ -101,22 +107,37 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
         {schema.writeOnly && <span className="sp-qualifier">write only</span>}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
-        {hasFieldDetails && <span
-          className="sp-schema-details-toggle"
-          data-tooltip={detailsOpen ? 'Hide field details' : 'Show field details'}
-          aria-hidden="true"
-        ><span /></span>}
   </>;
   const headerClassName = `sp-schema-head${name ? ' sp-schema-head-named' : ''}${schema.deprecated ? ' sp-schema-head-deprecated' : ''}`;
-  const header = name && hasFieldDetails
-    ? <button
-        type="button"
-        className={headerClassName}
-        aria-expanded={detailsOpen}
-        aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
-        onClick={toggleDetails}
-      >{headerContents}</button>
-    : <div className={headerClassName}>{headerContents}</div>;
+  const detailsToggle = name && hasFieldDetails && <button
+    type="button"
+    className="sp-schema-details-toggle"
+    data-tooltip={detailsOpen ? 'Hide field details' : 'Show field details'}
+    aria-expanded={detailsOpen}
+    aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
+    onClick={toggleDetails}
+  ><span /></button>;
+  const namedHeader = (hasStructure: boolean) => <div className={headerClassName}>
+    {hasStructure && <button
+      type="button"
+      className="sp-schema-structure-toggle"
+      aria-expanded={structureOpen}
+      aria-label={`${structureOpen ? 'Collapse' : 'Expand'} ${name}`}
+      onClick={toggleStructure}
+    ><span /></button>}
+    {!hasStructure && <span className="sp-schema-structure-spacer" aria-hidden="true" />}
+    <button
+      type="button"
+      className="sp-schema-head-action"
+      aria-label={`Toggle field ${name}`}
+      onClick={() => {
+        if (hasStructure) setStructureOpen((open) => !open);
+        if (hasFieldDetails) setDetailsOpen((open) => !open);
+      }}
+    >{headerContents}</button>
+    {detailsToggle}
+  </div>;
+  const header = name ? namedHeader(false) : <div className={headerClassName}>{headerContents}</div>;
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       <Markdown className="sp-schema-description">{schema.description}</Markdown>
       {enumValues && <p className="sp-schema-meta sp-schema-enum"><span>Enum:</span>{enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>)}</p>}
@@ -154,15 +175,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     if (name) {
       return <div className={`${className} sp-schema-object-shell`}>
         <div className="sp-schema-field-card">
-          <details
-            className="sp-schema-object sp-schema-object-named"
-            open={structureOpen}
-          >
-            <summary onClick={(event) => {
-              event.preventDefault();
-              setStructureOpen((open) => !open);
-            }}>{header}</summary>
-          </details>
+          {namedHeader(true)}
           {detailsOpen && fieldDetails}
         </div>
         <div hidden={!structureOpen}>{structuralBody}</div>

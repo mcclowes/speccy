@@ -159,18 +159,38 @@ describe('SchemaView composition', () => {
     }} />);
 
     const root = container.querySelector('details');
-    const nested = container.querySelector('.sp-schema-object-shell details');
+    const nestedToggle = screen.getByRole('button', { name: 'Expand result' });
     expect(root).toHaveAttribute('open');
     expect(screen.getByText('result')).toBeVisible();
-    expect(nested).not.toHaveAttribute('open');
+    expect(nestedToggle).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByText('id')).not.toBeVisible();
 
     fireEvent.click(root!.querySelector('summary')!);
     expect(root).not.toHaveAttribute('open');
     fireEvent.click(root!.querySelector('summary')!);
 
-    fireEvent.click(nested!.querySelector('summary')!);
+    fireEvent.click(nestedToggle);
     expect(screen.getByText('id')).toBeVisible();
+  });
+
+  it('toggles structure and details from an object row while keeping its icon actions separate', () => {
+    render(<SchemaView collapseObjects name="cardNumber" schema={{
+      type: 'object',
+      description: 'The full card number of the card.',
+      properties: { token: { type: 'string' } },
+    }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle field cardNumber' }));
+    expect(screen.getByText('The full card number of the card.')).toBeVisible();
+    expect(screen.getByText('token')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse cardNumber' }));
+    expect(screen.getByText('The full card number of the card.')).toBeVisible();
+    expect(screen.queryByText('token')).not.toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide details for cardNumber' }));
+    expect(screen.queryByText('The full card number of the card.')).not.toBeInTheDocument();
+    expect(screen.queryByText('token')).not.toBeVisible();
   });
 
   it('shows full descriptions when response schema details are visible', () => {
@@ -205,11 +225,12 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('id')).toBeVisible();
     expect(screen.getByText('connection')).toBeVisible();
     expect(screen.getByText('id').closest('.sp-schema-head')).toHaveClass('sp-schema-head-named');
-    expect(screen.getByText('id').closest('.sp-schema-head')).toHaveRole('button');
+    expect(screen.getByText('id').closest('.sp-schema-head')).toContainElement(screen.getByRole('button', { name: 'Show details for id' }));
     expect(screen.queryByText('Unique identifier for the company.')).not.toBeInTheDocument();
 
     const idDetailsButton = screen.getByRole('button', { name: 'Show details for id' });
-    expect(idDetailsButton.querySelector('.sp-schema-details-toggle')).toHaveAttribute('data-tooltip', 'Show field details');
+    expect(idDetailsButton).toHaveClass('sp-schema-details-toggle');
+    expect(idDetailsButton).toHaveAttribute('data-tooltip', 'Show field details');
 
     fireEvent.click(idDetailsButton);
     const idDescription = screen.getByText('Unique identifier for the company.');
@@ -218,7 +239,7 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('ee2eb431-c0fa-4dc9-93fa-d29781c12bcd')).toBeVisible();
     const openIdDetailsButton = screen.getByRole('button', { name: 'Hide details for id' });
     expect(openIdDetailsButton).toHaveAttribute('aria-expanded', 'true');
-    expect(openIdDetailsButton.querySelector('.sp-schema-details-toggle')).toHaveAttribute('data-tooltip', 'Hide field details');
+    expect(openIdDetailsButton).toHaveAttribute('data-tooltip', 'Hide field details');
 
     fireEvent.click(screen.getByRole('button', { name: 'Show details for connection' }));
     const connectionDescription = screen.getByText('The company data connection.');
@@ -238,7 +259,7 @@ describe('SchemaView composition', () => {
     }} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Show details for items' }));
-    fireEvent.click(screen.getByText('items').closest('summary')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Expand items' }));
 
     const description = screen.getByText('A company returned by the API.');
     const subfield = screen.getByText('id');
