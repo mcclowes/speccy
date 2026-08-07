@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
@@ -8,6 +8,30 @@ afterEach(() => {
 });
 
 describe('operation security schemes', () => {
+  it('renders alternative schemes as OR and combined schemes as AND', () => {
+    window.history.replaceState({}, '', '/secured-operation');
+    render(<Speccy spec={{
+      openapi: '3.1.0',
+      info: { title: 'Secured API' },
+      security: [{ bearerAuth: [] }, { apiKey: [], tenantKey: [] }],
+      components: { securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', description: 'Authenticate as a user.' },
+        apiKey: { type: 'apiKey', name: 'X-API-Key', in: 'header', description: 'Authenticate the client.' },
+        tenantKey: { type: 'apiKey', name: 'X-Tenant-Key', in: 'header', description: 'Select the tenant.' },
+      } },
+      paths: { '/secured': { get: { operationId: 'secured-operation' } } },
+    }} showThemeToggle={false} />);
+
+    const toggle = screen.getByRole('button', { name: 'Authorization' });
+    fireEvent.click(toggle);
+    const authorization = within(toggle.closest('section')!);
+
+    expect(authorization.getByText('or')).toBeInTheDocument();
+    expect(authorization.getByText('and')).toBeInTheDocument();
+    expect(authorization.getByText('Bearer')).toBeInTheDocument();
+    expect(authorization.getAllByText('API key')).toHaveLength(2);
+  });
+
   it('renders the referenced Swagger API key definition', () => {
     window.history.replaceState({}, '', '/create-connection');
     render(<Speccy spec={{

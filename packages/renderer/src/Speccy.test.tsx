@@ -304,6 +304,31 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('button', { name: 'Hide authorization' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('selects alternative authorization methods and includes combined credentials', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Secured API' }, servers: [{ url: 'https://api.example.com' }],
+      security: [{ bearerAuth: [] }, { apiKey: [], tenantKey: [] }],
+      paths: { '/companies': { get: { operationId: 'get-companies' } } },
+      components: { securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', name: 'auth_token' },
+        apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+        tenantKey: { type: 'apiKey', in: 'query', name: 'tenant_key' },
+      } },
+    }} basePath="/api" showThemeToggle={false} />);
+
+    expect(screen.getByLabelText('auth_token')).toBeInTheDocument();
+    expect(screen.queryByLabelText('X-API-Key')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Authorization method' }), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('X-API-Key'), { target: { value: 'client-secret' } });
+    fireEvent.change(screen.getByLabelText('tenant_key'), { target: { value: 'tenant-secret' } });
+
+    expect(screen.queryByLabelText('auth_token')).not.toBeInTheDocument();
+    expect(screen.getByText(/X-API-Key: ••••••••/)).toBeInTheDocument();
+    expect(screen.getByText(/tenant_key=%E2%80%A2%E2%80%A2/)).toBeInTheDocument();
+  });
+
   it('executes a configured API request and renders its response', async () => {
     window.history.replaceState({}, '', '/api/create-company');
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 'company-42' }), {

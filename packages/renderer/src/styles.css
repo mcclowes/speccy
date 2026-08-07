@@ -37,7 +37,7 @@ related:
 .speccy *, .speccy *::before, .speccy *::after { box-sizing: border-box; }
 .speccy code, .speccy pre { font-family: 'DM Mono', ui-monospace, monospace; }
 .speccy a { color: inherit; text-decoration: none; }
-.speccy button, .speccy input { font: inherit; }
+.speccy button, .speccy input, .speccy select { font: inherit; }
 .speccy input::placeholder { color: color-mix(in srgb, var(--sp-muted) 38%, var(--sp-bg)); opacity: 1; }
 .speccy p { margin: 0 0 0.8em; }
 .sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-field-head: #24252c; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; --sp-json-key: #b8a8f0; --sp-json-string: #82c9aa; --sp-json-number: #e2ae72; --sp-json-literal: #e196b1; color-scheme: dark; }
@@ -239,6 +239,10 @@ related:
 .sp-field textarea { width: 100%; min-height: 120px; resize: vertical; padding: 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; line-height: 1.55; }
 .sp-field input:focus, .sp-field textarea:focus { border-color: color-mix(in srgb, var(--sp-accent) 65%, var(--sp-line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent) 12%, transparent); }
 .sp-rail-card h3 small { margin-left: 5px; color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400; }
+.sp-auth-method { margin-bottom: 14px; }
+.sp-auth-method select { width: 100%; height: 38px; padding: 0 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-size: 10px; }
+.sp-auth-method select:focus { border-color: color-mix(in srgb, var(--sp-accent) 65%, var(--sp-line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent) 12%, transparent); }
+.sp-auth-fields { display: grid; gap: 12px; }
 .sp-execute { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 40px; border: 0; border-radius: 8px; color: #fff; background: var(--sp-accent); cursor: pointer; font: inherit; font-size: 12px; font-weight: 650; transition: filter 160ms ease; }
 .sp-execute svg { width: 16px; height: 16px; flex: 0 0 auto; transition: transform 160ms ease; }
 .sp-execute:hover:not(:disabled) { filter: brightness(.94); }
@@ -319,7 +323,9 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-named-example { margin-top: 12px; }
 .sp-detail-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--sp-line); font-size: 11px; }
 .sp-security-requirements { display: grid; gap: 6px; }
-.sp-security-requirements > div { display: flex; flex-wrap: wrap; gap: 12px; color: var(--sp-muted); font-size: 11px; }
+.sp-security-option { display: grid; gap: 6px; color: var(--sp-muted); font-size: 11px; }
+.sp-security-option > div { display: grid; gap: 8px; }
+.sp-security-operator { color: var(--sp-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .sp-security-scheme { display: grid; gap: 8px; width: 100%; }
 .sp-security-scheme .sp-markdown { color: var(--sp-text); font-size: 12px; }
 .sp-callback { margin-top: 12px; padding: 14px; border: 1px solid var(--sp-line); border-radius: 9px; }
