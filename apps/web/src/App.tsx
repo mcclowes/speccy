@@ -34,6 +34,21 @@ function Mark() {
   return <span className="studio-mark" aria-hidden="true"><i /><i /><i /></span>;
 }
 
+function SourceEditor({ initialSource, onApply }: {
+  initialSource: string;
+  onApply: (source: string) => void;
+}) {
+  const [draft, setDraft] = useState(initialSource);
+
+  return (
+    <aside className="studio-editor">
+      <div className="studio-editor-head"><span>OpenAPI source</span><button type="button" onClick={() => onApply(draft)}>Render changes</button></div>
+      <textarea spellCheck={false} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') onApply(draft); }} />
+      <div className="studio-editor-foot"><span>YAML or JSON</span><span>⌘ Enter to render</span></div>
+    </aside>
+  );
+}
+
 export function App() {
   const schemaDetailsPrototype = useSchemaDetailsPrototype();
   const [spec, setSpec] = useState<OpenAPIDocument | string>(SAMPLE_SPEC);
@@ -123,11 +138,7 @@ export function App() {
 
       <div className={`studio-workspace ${drawerOpen ? 'is-editing' : ''}`}>
         {drawerOpen && (
-          <aside className="studio-editor">
-            <div className="studio-editor-head"><span>OpenAPI source</span><button type="button" onClick={() => applySource(source, fileName)}>Render changes</button></div>
-            <textarea spellCheck={false} value={source} onChange={(event) => setSource(event.target.value)} onKeyDown={(event) => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') applySource(source, fileName); }} />
-            <div className="studio-editor-foot"><span>YAML or JSON</span><span>⌘ Enter to render</span></div>
-          </aside>
+          <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName)} />
         )}
         <div className="studio-preview">
           <schemaDetailsPrototype.Variant>
