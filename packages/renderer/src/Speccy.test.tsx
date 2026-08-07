@@ -207,6 +207,8 @@ describe('Speccy navigation', () => {
     }} basePath="/api" />);
 
     const authorization = screen.getByLabelText('api_key');
+    expect(screen.getByRole('heading', { level: 3, name: 'Authorization API key' })).toBeInTheDocument();
+    expect(screen.getByText('Enter the credential described under Request → Security: API key.')).toBeInTheDocument();
     fireEvent.change(authorization, { target: { value: 'secret token' } });
 
     expect(screen.queryByText(/secret(?:\+|%20| )token/)).not.toBeInTheDocument();
