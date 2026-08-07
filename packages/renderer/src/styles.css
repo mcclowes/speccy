@@ -234,9 +234,10 @@ related:
 .sp-endpoint-parameter .sp-parameter-name > .sp-schema .sp-schema-properties { display: none; }
 .sp-endpoint-parameter > .sp-markdown { max-width: 640px; margin-top: 7px; font-size: 12px; }
 .sp-request-rail { position: sticky; top: 24px; display: grid; gap: 12px; min-width: 0; }
-.sp-rail-card, .sp-rail-code { overflow: hidden; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
+.sp-rail-card, .sp-rail-code { border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
+.sp-rail-card { overflow: hidden; }
+.sp-rail-code { overflow: visible; }
 .sp-rail-card:has(.sp-optional-parameter-picker) { overflow: visible; }
-.sp-rail-code:has(.sp-sample-language[open]) { overflow: visible; }
 .sp-rail-card { padding: 18px; }
 .sp-rail-card h3 { margin: 0 0 14px; font-size: 13px; }
 .sp-rail-card-description { margin: -6px 0 14px; color: var(--sp-muted); font-size: 10px; line-height: 1.5; }
