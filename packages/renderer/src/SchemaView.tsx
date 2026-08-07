@@ -153,16 +153,18 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   if (collapseObjects && isObject) {
     if (name) {
       return <div className={`${className} sp-schema-object-shell`}>
-        <details
-          className="sp-schema-object sp-schema-object-named"
-          open={structureOpen}
-        >
-          <summary onClick={(event) => {
-            event.preventDefault();
-            setStructureOpen((open) => !open);
-          }}>{header}</summary>
-        </details>
-        {detailsOpen && fieldDetails}
+        <div className="sp-schema-field-card">
+          <details
+            className="sp-schema-object sp-schema-object-named"
+            open={structureOpen}
+          >
+            <summary onClick={(event) => {
+              event.preventDefault();
+              setStructureOpen((open) => !open);
+            }}>{header}</summary>
+          </details>
+          {detailsOpen && fieldDetails}
+        </div>
         <div hidden={!structureOpen}>{structuralBody}</div>
       </div>;
     }
@@ -178,8 +180,13 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
 
   return (
     <div className={className}>
-      {header}
-      {(!name || detailsOpen) && fieldDetails}
+      {name ? <div className="sp-schema-field-card">
+        {header}
+        {detailsOpen && fieldDetails}
+      </div> : <>
+        {header}
+        {fieldDetails}
+      </>}
       {!summaryOnly && structuralBody}
     </div>
   );
