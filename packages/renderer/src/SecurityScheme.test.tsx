@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
@@ -33,6 +33,11 @@ describe('operation security schemes', () => {
     }} />);
 
     expect(screen.getByRole('heading', { level: 4, name: 'Authorization: API key' })).toBeInTheDocument();
+    const toggle = screen.getByRole('button', { name: 'Show authorization details' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText(/The word "Basic" followed by a space/)).not.toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(screen.getByRole('button', { name: 'Hide authorization details' })).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText(/The word "Basic" followed by a space/)).toBeInTheDocument();
     expect(screen.getByText('Authorization: 123')).toBeInTheDocument();
   });

@@ -170,6 +170,16 @@
 .sp-example-select { min-width: 0; max-width: 180px; padding: 4px 24px 4px 7px; color: var(--sp-code-text); border: 1px solid var(--sp-code-border); border-radius: 5px; background: var(--sp-code-control); font: inherit; }
 .sp-request-intro .sp-section { margin-top: 0; padding: 20px 22px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface-soft); }
 .sp-request-intro .sp-section h4 { margin-bottom: 9px; font-size: 12px; letter-spacing: 0; text-transform: none; }
+.sp-request-intro .sp-security-section { padding-top: 14px; padding-bottom: 14px; }
+.sp-security-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sp-request-intro .sp-security-heading h4 { margin-bottom: 0; }
+.sp-security-toggle { position: relative; display: grid; flex: 0 0 24px; width: 24px; height: 24px; padding: 0; color: var(--sp-muted); border: 0; border-radius: 50%; background: transparent; cursor: pointer; place-items: center; }
+.sp-security-toggle > span { display: grid; width: 17px; height: 17px; border: 1px solid currentColor; border-radius: 50%; font: 700 10px/1 Manrope, sans-serif; place-items: center; }
+.sp-security-toggle:hover { color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 8%, transparent); }
+.sp-security-toggle:focus-visible { outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent); outline-offset: 2px; }
+.sp-security-toggle::after { content: attr(data-tooltip); position: absolute; right: 0; bottom: calc(100% + 7px); z-index: 20; width: max-content; padding: 5px 7px; color: var(--sp-surface); border-radius: 5px; background: var(--sp-text); box-shadow: 0 4px 16px rgba(0,0,0,.18); font: 600 9px/1.2 Manrope, sans-serif; opacity: 0; pointer-events: none; transform: translateY(3px); transition: opacity 120ms ease, transform 120ms ease; }
+.sp-security-toggle:hover::after, .sp-security-toggle:focus-visible::after { opacity: 1; transform: translateY(0); }
+.sp-security-heading + .sp-security-requirements { margin-top: 9px; }
 .sp-endpoint-parameters { overflow: hidden; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-endpoint-parameter { padding: 20px 22px; border-bottom: 1px solid var(--sp-line); }
 .sp-endpoint-parameter:last-child { border-bottom: 0; }

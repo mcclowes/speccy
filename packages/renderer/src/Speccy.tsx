@@ -145,12 +145,20 @@ function SecurityRequirements({ requirements, schemes }: {
   requirements?: SecurityRequirement[];
   schemes?: Record<string, SecurityScheme>;
 }) {
+  const [expanded, setExpanded] = useState(false);
   if (!requirements) return null;
   if (requirements.length === 0) return <section className="sp-section"><h4>Authorization</h4><p>Public endpoint</p></section>;
   const entries = requirements.flatMap((requirement) => Object.entries(requirement));
   const onlyEntry = entries.length === 1 ? entries[0] : undefined;
   const onlyScheme = onlyEntry ? schemes?.[onlyEntry[0]] : undefined;
-  return <section className="sp-section"><h4>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><div className="sp-security-requirements">{requirements.map((requirement, index) => (
+  return <section className="sp-section sp-security-section"><div className="sp-security-heading"><h4>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><button
+    type="button"
+    className="sp-security-toggle"
+    data-tooltip={expanded ? 'Hide authorization details' : 'Show authorization details'}
+    aria-label={expanded ? 'Hide authorization details' : 'Show authorization details'}
+    aria-expanded={expanded}
+    onClick={() => setExpanded(!expanded)}
+  ><span aria-hidden="true">i</span></button></div>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
     <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
       const scheme = schemes?.[name];
       return <div className="sp-security-scheme" key={name}>
@@ -158,7 +166,7 @@ function SecurityRequirements({ requirements, schemes }: {
         <Markdown>{scheme?.description}</Markdown>
       </div>;
     })}</div>
-  ))}</div></section>;
+  ))}</div>}</section>;
 }
 
 function CodeSample({ item, server }: { item: OperationModel; server: string }) {
