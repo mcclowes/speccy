@@ -317,7 +317,7 @@ related:
 .sp-schema-head { width: 100%; }
 .sp-schema-head-named { min-height: 28px; padding: 5px 8px 5px 28px; color: inherit; border: 0; border-radius: 6px; background: var(--sp-field-head); font: inherit; text-align: left; }
 button.sp-schema-head-named { cursor: pointer; }
-button.sp-schema-head-named:hover { filter: brightness(.985); }
+button.sp-schema-head-named:hover { background: color-mix(in srgb, var(--sp-accent) 7%, var(--sp-field-head)); }
 button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent); outline-offset: 1px; }
 .sp-parameter-name code, .sp-property { color: var(--sp-text); font-size: 11px; font-weight: 500; }
 .sp-parameter-name > span:not(.sp-required) { color: var(--sp-muted); font-size: 9px; }
@@ -331,7 +331,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-object[open] > summary::before { transform: rotate(45deg); }
 .sp-schema-object-named > summary { position: relative; }
 .sp-schema-object-named > summary::before { position: absolute; z-index: 1; left: 11px; margin: 0; }
-.sp-schema-object > summary:hover > .sp-schema-head:not(button) { filter: brightness(1.15); }
+.sp-schema-object > summary:hover > .sp-schema-head:not(button) { background: color-mix(in srgb, var(--sp-accent) 7%, var(--sp-field-head)); }
 .sp-schema-details-toggle { position: relative; display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: var(--sp-muted); }
 .sp-schema-details-toggle > span { display: grid; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: 50%; place-items: center; }
 .sp-schema-details-toggle > span::before { content: '?'; font: 700 10px/1 Manrope, sans-serif; }
