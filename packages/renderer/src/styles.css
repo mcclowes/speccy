@@ -233,7 +233,7 @@
 .sp-parameter { padding: 17px 0; border-bottom: 1px solid var(--sp-line); }
 .sp-parameter-name, .sp-schema-head { display: flex; align-items: baseline; gap: 9px; }
 .sp-schema-head { width: 100%; }
-.sp-schema-head-named { min-height: 28px; padding: 5px 8px; color: inherit; border: 0; border-radius: 6px; background: var(--sp-field-head); font: inherit; text-align: left; }
+.sp-schema-head-named { min-height: 28px; padding: 5px 8px 5px 28px; color: inherit; border: 0; border-radius: 6px; background: var(--sp-field-head); font: inherit; text-align: left; }
 button.sp-schema-head-named { cursor: pointer; }
 button.sp-schema-head-named:hover { filter: brightness(.985); }
 button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent); outline-offset: 1px; }
@@ -246,7 +246,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-object > summary::before { content: ''; width: 7px; height: 7px; margin-left: 1px; margin-right: 4px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; color: var(--sp-muted); transform: rotate(-45deg); transition: transform 140ms ease; }
 .sp-schema-object[open] > summary::before { transform: rotate(45deg); }
 .sp-schema-object-named > summary { position: relative; }
-.sp-schema-object-named > summary::before { position: absolute; left: -15px; margin: 0; }
+.sp-schema-object-named > summary::before { position: absolute; z-index: 1; left: 11px; margin: 0; }
 .sp-schema-object > summary:hover > .sp-schema-head:not(button) { filter: brightness(1.15); }
 .sp-schema-details-toggle { display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: var(--sp-muted); }
 .sp-schema-details-toggle > span { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }
