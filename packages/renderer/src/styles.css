@@ -276,6 +276,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-endpoint-section > .sp-markdown + .sp-media-list { margin-top: 18px; }
 .sp-example { position: relative; overflow: auto; max-height: 320px; margin-top: 10px; padding: 12px; border-radius: 7px; }
 .sp-example .sp-code-title-copy-only { position: absolute; top: 12px; right: 12px; margin: 0; }
+.sp-example .sp-copy { width: 28px; height: 28px; justify-content: center; gap: 0; padding: 0; font-size: 0; }
 .sp-named-example { margin-top: 12px; }
 .sp-detail-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--sp-line); font-size: 11px; }
 .sp-security-requirements { display: grid; gap: 6px; }
