@@ -14,6 +14,9 @@ describe('CodeBlock', () => {
     expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
     expect(writeText).toHaveBeenCalledWith('curl /things?key=secret');
 
+    rerender(<CodeBlock value="example" />);
+    expect(screen.getByRole('button', { name: /copied|copy/i }).parentElement).toHaveClass('sp-code-title-copy-only');
+
     rerender(<CodeBlock value="example" copyable={false} />);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });

@@ -37,7 +37,7 @@ export function CodeBlock({
   return (
     <div className={`sp-code-block ${className}`.trim()}>
       {(title || copyable) && (
-        <div className="sp-code-title">
+        <div className={`sp-code-title${!title && copyable ? ' sp-code-title-copy-only' : ''}`}>
           <span>{title}</span>
           {copyable && <CopyButton value={copyValue} />}
         </div>
