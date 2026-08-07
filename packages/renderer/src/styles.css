@@ -110,6 +110,8 @@
 .sp-schema { min-width: 0; padding: 9px 0; }
 .sp-schema-properties { margin: 8px 0 0 6px; padding-left: 15px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line)); }
 .sp-type { color: var(--sp-accent); font-family: 'DM Mono', monospace; font-size: 9px; }
+.sp-schema .sp-schema-head > .sp-required { overflow: hidden; width: 5px; color: #d24859; font-size: 0; letter-spacing: 0; text-transform: none; }
+.sp-schema .sp-schema-head > .sp-required::after { content: '*'; font-size: 11px; }
 .sp-schema-meta code { color: var(--sp-text); }
 .sp-media-type { width: fit-content; margin: 8px 0; padding: 3px 7px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-response { border-bottom: 1px solid var(--sp-line); }
