@@ -147,7 +147,7 @@
 .sp-response-tab:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-response-tab[aria-selected='true'] { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
-.sp-response-summary { grid-column: 1; padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 6px; background: var(--sp-surface-soft); }
+.sp-response-summary { grid-column: 1; padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 0 6px 6px 0; background: var(--sp-surface-soft); }
 .sp-response-summary.is-success { border-left-color: #25a878; }
 .sp-response-label { display: flex; align-items: baseline; gap: 8px; color: var(--sp-text); font-size: 12px; }
 .sp-response-label > strong { font-weight: 600; }
