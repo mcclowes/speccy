@@ -372,8 +372,8 @@ related:
 .sp-sample-chevron { width: 7px; height: 7px; margin: -4px 3px 0 auto; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
 .sp-sample-language[open] .sp-sample-chevron { margin-top: 4px; transform: rotate(225deg); }
 .sp-sample-language-menu { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; width: 220px; padding: 6px; background: var(--sp-code); border: 1px solid var(--sp-code-border); border-radius: 10px; box-shadow: 0 14px 32px rgba(0, 0, 0, .3); }
-.sp-sample-language-menu button { display: grid; grid-template-columns: 24px minmax(0, 1fr) 16px; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; color: var(--sp-code-text); background: transparent; border: 0; border-radius: 6px; cursor: pointer; font: inherit; text-align: left; }
-.sp-sample-language-menu button:hover, .sp-sample-language-menu button:focus-visible { background: var(--sp-code-control); outline: none; }
+.sp-sample-language-menu button { display: grid; grid-template-columns: 24px minmax(0, 1fr) 16px; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; color: var(--sp-code-text); background: transparent; border: 0; border-radius: 6px; cursor: pointer; font: inherit; text-align: left; transition: background-color 120ms ease; }
+.sp-sample-language-menu button:hover, .sp-sample-language-menu button:focus-visible { background: color-mix(in srgb, var(--sp-accent) 9%, var(--sp-code)); outline: none; }
 .sp-sample-check { font-size: 13px; text-align: center; }
 .sp-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; clip-path: inset(50%); }
 .sp-rail-code .sp-copy { color: var(--sp-code-text); background: var(--sp-code-control); }
