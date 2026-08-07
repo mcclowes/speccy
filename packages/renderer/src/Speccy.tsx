@@ -37,6 +37,10 @@ const METHOD_LABELS: Record<string, string> = {
   options: 'OPTIONS', head: 'HEAD', trace: 'TRACE',
 };
 
+function operationTitle(item: OperationModel): string {
+  return item.operation.summary ?? item.operation.operationId ?? (item.source === 'webhook' ? item.path : 'Untitled operation');
+}
+
 function Path({ value, className }: { value: string; className?: string }) {
   const parts = value.split(/(\{[^{}]+\})/g);
   return (
@@ -385,24 +389,25 @@ function RequestRail({
 function EndpointPage({ item, server, document, storageScope }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
+  const isWebhook = item.source === 'webhook';
   return (
     <article id={item.id} className={`sp-endpoint sp-method-${item.method}`}>
       <header className="sp-endpoint-header">
         <div className="sp-tag-kicker">{item.tag}</div>
-        <h1>{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</h1>
+        <h1>{operationTitle(item)}</h1>
         <div className="sp-endpoint-address"><span className="sp-method">{METHOD_LABELS[item.method]}</span><Path value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
       </header>
-      <div className="sp-endpoint-layout">
+      <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
-          <section className="sp-endpoint-section sp-request-intro">
+          {!isWebhook && <section className="sp-endpoint-section sp-request-intro">
             <h2>Request</h2>
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
-          </section>
+          </section>}
           <GroupedParameterList parameters={parameters} />
-          {item.operation.requestBody && <section className="sp-endpoint-section"><h2>Request body {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} /></section>}
+          {item.operation.requestBody && <section className="sp-endpoint-section"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} /></section>}
         </div>
-        <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} />
+        {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} />}
       </div>
       {item.operation.responses && <EndpointResponses responses={item.operation.responses} />}
       {item.operation.callbacks && <CallbackList callbacks={item.operation.callbacks} server={server} />}
@@ -422,7 +427,7 @@ function OperationCard({ item, server, defaultExpanded }: {
       <button type="button" className="sp-operation-summary" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="sp-method">{METHOD_LABELS[item.method]}</span>
         <code className="sp-path">{item.path}</code>
-        <span className="sp-operation-name">{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span>
+        <span className="sp-operation-name">{operationTitle(item)}</span>
         {item.operation.deprecated && <span className="sp-deprecated">deprecated</span>}
         <span className="sp-chevron" aria-hidden="true" />
       </button>
@@ -688,7 +693,7 @@ function TagOverview({ tag, operations, basePath, onNavigate }: {
         <h2>Operations</h2>
         <div className="sp-operation-list">{operations.map((item) => (
           <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }} key={item.id}>
-            <span className="sp-operation-link-summary">{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span>
+            <span className="sp-operation-link-summary">{operationTitle(item)}</span>
             <span className="sp-operation-link-address">
               <span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>
               <Path className="sp-path" value={item.path} />
@@ -868,7 +873,7 @@ export function Speccy({
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
               <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
-              <div className="sp-operation-list">{visible.map((item) => <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); navigate(item.id); }} key={item.id}><span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><code className="sp-path">{item.path}</code><span>{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span></a>)}</div>
+              <div className="sp-operation-list">{visible.map((item) => <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); navigate(item.id); }} key={item.id}><span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><code className="sp-path">{item.path}</code><span>{operationTitle(item)}</span></a>)}</div>
             </section>
           );
         })}

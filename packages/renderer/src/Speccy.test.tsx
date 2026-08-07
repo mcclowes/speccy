@@ -102,6 +102,40 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'System ready' })).toBeInTheDocument();
   });
 
+  it('renders a webhook as a read-only event using its webhook name as the title', () => {
+    render(<Speccy spec={{
+      openapi: '3.1.0',
+      info: { title: 'Webhook API' },
+      paths: {},
+      security: [{ apiKey: [] }],
+      webhooks: {
+        'Account categories updated': {
+          post: {
+            requestBody: {
+              description: 'Triggered when a company’s accounts are categorized.',
+              content: { 'application/json': { schema: { type: 'object' } } },
+            },
+            responses: { '204': { description: 'Webhook accepted.' } },
+          },
+        },
+      },
+      components: {
+        securitySchemes: { apiKey: { type: 'apiKey', in: 'header', name: 'Authorization' } },
+      },
+    }} />);
+
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    fireEvent.click(navigation.getByRole('button', { name: 'Other webhooks' }));
+    fireEvent.click(navigation.getByRole('link', { name: /Account categories updated/ }));
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Account categories updated' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Payload' })).toBeInTheDocument();
+    expect(screen.queryByRole('complementary', { name: 'Request builder' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Send request' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Security: API key')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Responses' })).toBeInTheDocument();
+  });
+
   it('updates the request sample from endpoint parameters', () => {
     window.history.replaceState({}, '', '/api/get-company');
     render(<Speccy spec={{

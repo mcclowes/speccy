@@ -134,6 +134,7 @@
 .sp-endpoint-address code { overflow: hidden; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .sp-path-parameter { color: var(--sp-accent); }
 .sp-endpoint-layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); gap: clamp(36px, 5vw, 76px); align-items: start; }
+.sp-endpoint-layout.is-webhook { grid-template-columns: minmax(0, 1fr); }
 .sp-endpoint-main { min-width: 0; }
 .sp-endpoint-section { margin: 0 0 46px; }
 .sp-endpoint-section > h2 { margin: 0 0 18px; font-size: 23px; line-height: 1.2; letter-spacing: -0.03em; }
