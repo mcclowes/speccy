@@ -33,6 +33,24 @@ const URL_STORAGE_KEY = 'speccy-oas-url';
 const RECENTS_STORAGE_KEY = 'speccy-recent-references';
 const MAX_RECENTS = 6;
 
+type InitialLocation = {
+  preview: boolean;
+  source?: string;
+  name?: string;
+  url?: string;
+};
+
+function initialLocation(): InitialLocation {
+  const search = new URLSearchParams(window.location.search);
+  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  return {
+    preview: search.get('preview') === '1',
+    source: fragment.get('source') ?? undefined,
+    name: fragment.get('name') ?? undefined,
+    url: search.get('url') ?? undefined,
+  };
+}
+
 function storageItem(key: string) {
   try {
     return window.localStorage.getItem(key);
@@ -85,6 +103,10 @@ function Mark() {
   );
 }
 
+function ShareIcon() {
+  return <svg className="studio-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>;
+}
+
 function SourceEditor({ initialSource, onApply }: {
   initialSource: string;
   onApply: (source: string) => void;
@@ -101,22 +123,25 @@ function SourceEditor({ initialSource, onApply }: {
 }
 
 export function App() {
-  const [spec, setSpec] = useState<OpenAPIDocument | string>(SAMPLE_SPEC);
-  const [source, setSource] = useState(JSON.stringify(SAMPLE_SPEC, null, 2));
-  const [fileName, setFileName] = useState('');
+  const [location] = useState(initialLocation);
+  const [spec, setSpec] = useState<OpenAPIDocument | string>(() => location.source ?? (location.url ? '' : SAMPLE_SPEC));
+  const [source, setSource] = useState(() => location.source ?? JSON.stringify(SAMPLE_SPEC, null, 2));
+  const [fileName, setFileName] = useState(() => location.source ? (location.name ?? 'Shared API reference') : '');
+  const [sourceUrl, setSourceUrl] = useState(() => location.url ?? '');
   const [activeId, setActiveId] = useState('');
   const [recents, setRecents] = useState<RecentReference[]>(storedRecents);
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(location.url));
   const [message, setMessage] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
 
   useEffect(() => {
-    const initialUrl = new URLSearchParams(window.location.search).get('url') ?? url;
+    const initialUrl = location.url ?? (!location.preview ? url : '');
     if (initialUrl) {
       setUrl(initialUrl);
       void loadUrl(initialUrl);
@@ -143,6 +168,7 @@ export function App() {
     setFileName(name);
     setActiveId(id);
     setMessage('');
+    setSourceUrl('');
     setRecents((current) => {
       const updated = [{ id, name, source: next, openedAt }, ...current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
       recentsRef.current = updated;
@@ -179,6 +205,7 @@ export function App() {
       const response = await fetch(nextUrl);
       if (!response.ok) throw new Error(`The server returned ${response.status}.`);
       applySource(await response.text(), new URL(nextUrl).pathname.split('/').pop() || nextUrl);
+      setSourceUrl(nextUrl);
       setUrl(nextUrl);
       storeItem(URL_STORAGE_KEY, nextUrl);
       setUrlOpen(false);
@@ -190,6 +217,38 @@ export function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function previewUrl() {
+    const preview = new URL(window.location.href);
+    preview.search = '';
+    preview.hash = '';
+    preview.searchParams.set('preview', '1');
+    if (sourceUrl) {
+      preview.searchParams.set('url', sourceUrl);
+    } else {
+      const fragment = new URLSearchParams({ source, name: fileName || 'API reference' });
+      preview.hash = fragment.toString();
+    }
+    return preview.toString();
+  }
+
+  async function sharePreview() {
+    const link = previewUrl();
+    try {
+      await navigator.clipboard.writeText(link);
+      setShareMessage('Preview link copied');
+    } catch {
+      window.prompt('Copy this preview link', link);
+    }
+  }
+
+  if (location.preview) {
+    return (
+      <main className={`studio studio-preview-only studio-${theme}`}>
+        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" parameterPrototype />}
+      </main>
+    );
   }
 
   return (
@@ -209,6 +268,7 @@ export function App() {
           </label>
         ) : <div className="studio-document">Your API references</div>}
         <div className="studio-actions">
+          {fileName && <button className="studio-action-share" type="button" onClick={() => void sharePreview()} aria-label="Copy preview link" title={shareMessage || 'Copy preview link'}><ShareIcon /><span className="studio-share-label">Share</span></button>}
           {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
           {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
           {fileName && <button className="studio-action-source" type="button" onClick={() => setDrawerOpen(!drawerOpen)}><span>{drawerOpen ? 'Close source' : 'Edit source'}</span></button>}

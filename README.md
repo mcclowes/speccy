@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Vite prints the local URL. Open a `.yaml`, `.yml`, or `.json` document, paste source directly, or load a URL. A URL can also be shared with `?url=https://example.com/openapi.yaml` when that server allows cross-origin requests.
+Vite prints the local URL. Open a `.yaml`, `.yml`, or `.json` document, paste source directly, or load a URL. Use the share button to copy a clean preview link without the studio controls. Remote documents stay linked to their source URL; local and pasted documents are included in the link itself.
 
 ## Build the Mac app
 

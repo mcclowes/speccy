@@ -117,4 +117,29 @@ describe('source editor', () => {
     expect(screen.getByText('Preview')).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Switch API reference' })).toBeTruthy();
   });
+
+  it('copies a self-contained preview link for a local reference', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy preview link' }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+    const shared = new URL(writeText.mock.calls[0]![0]);
+    expect(shared.searchParams.get('preview')).toBe('1');
+    expect(new URLSearchParams(shared.hash.slice(1)).get('source')).toContain('"openapi"');
+  });
+
+  it('renders a preview URL without studio navigation or editing controls', () => {
+    const fragment = new URLSearchParams({ source: '{"openapi":"3.1.0"}', name: 'Catalog API' });
+    window.history.replaceState({}, '', `/?preview=1#${fragment}`);
+
+    render(<App />);
+
+    expect(screen.getByText('Preview')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Speccy home' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Edit source' })).toBeNull();
+  });
 });
