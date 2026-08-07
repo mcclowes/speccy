@@ -62,6 +62,7 @@ body { color: var(--site-ink); }
 .preview-sidebar { padding: 24px 16px; border-right: 1px solid var(--site-line); background: color-mix(in srgb, var(--site-paper) 96%, var(--ifm-color-primary)); }
 .preview-brand { margin-bottom: 48px; display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; }
 .preview-brand > span { width: 30px; height: 30px; display: grid; color: white; border-radius: 9px; background: var(--ifm-color-primary); place-items: center; }
+.preview-brand svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .preview-sidebar small { display: block; margin: 0 7px 12px; color: var(--site-muted); font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .preview-tag, .preview-link { display: flex; align-items: center; border-radius: 6px; font-size: 9px; }
 .preview-tag { gap: 8px; padding: 8px; color: var(--site-muted); font-weight: 700; }

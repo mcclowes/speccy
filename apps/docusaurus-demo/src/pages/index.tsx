@@ -67,7 +67,10 @@ function ReferencePreview() {
   return (
     <div className="preview-shell" aria-label="Speccy API reference preview">
       <aside className="preview-sidebar">
-        <div className="preview-brand"><span>S</span>Speccy Books</div>
+        <div className="preview-brand">
+          <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" /><circle cx="6.5" cy="13" r="3.5" /><circle cx="17.5" cy="13" r="3.5" /></svg></span>
+          Speccy Books
+        </div>
         <small>Resources</small>
         <div className="preview-tag is-active"><span>▱</span>Books <i>⌄</i></div>
         <div className="preview-link is-active">List books <b>GET</b></div>

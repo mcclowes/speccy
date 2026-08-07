@@ -74,7 +74,15 @@ function referenceLabel(reference: RecentReference, references: RecentReference[
 }
 
 function Mark() {
-  return <span className="studio-mark" aria-hidden="true"><i /><i /><i /></span>;
+  return (
+    <span className="studio-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" />
+        <circle cx="6.5" cy="13" r="3.5" />
+        <circle cx="17.5" cy="13" r="3.5" />
+      </svg>
+    </span>
+  );
 }
 
 function SourceEditor({ initialSource, onApply }: {
