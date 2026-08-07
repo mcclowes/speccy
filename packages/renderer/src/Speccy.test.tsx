@@ -51,6 +51,7 @@ describe('Speccy navigation', () => {
 
     expect(window.location.pathname).toBe('/api/get-companies');
     expect(within(navigation).getByRole('link', { name: /List companies/ })).toHaveAttribute('aria-current', 'page');
+    expect(within(navigation).getByRole('button', { name: 'Companies' })).toHaveClass('is-active');
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
     expect(screen.getByRole('complementary', { name: 'Request builder' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Test API' })).not.toBeInTheDocument();
@@ -126,6 +127,7 @@ describe('Speccy navigation', () => {
 
     expect(window.location.pathname).toBe('/api/tags/companies');
     expect(navigation.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
+    expect(navigation.getByRole('button', { name: 'Companies' })).toHaveClass('is-active');
     expect(screen.getByRole('heading', { level: 1, name: 'Companies' })).toBeInTheDocument();
     expect(screen.getByText('Create and manage companies.')).toBeInTheDocument();
     expect(screen.getByText('connections').tagName).toBe('STRONG');

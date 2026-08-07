@@ -811,7 +811,7 @@ function NavigationGroup({
     <div className="sp-nav-group">
       <button
         type="button"
-        className="sp-nav-tag"
+        className={`sp-nav-tag ${activeRouteIsWithinGroup ? 'is-active' : ''}`}
         onClick={() => setOpen(!expanded)}
         aria-expanded={expanded}
         aria-controls={operationListId}
