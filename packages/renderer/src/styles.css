@@ -420,7 +420,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-object-named > summary { position: relative; }
 .sp-schema-object-named > summary::before { position: absolute; z-index: 1; left: 11px; margin: 0; }
 .sp-schema-object > summary:hover > .sp-schema-head:not(button) { background: color-mix(in srgb, var(--sp-accent) 7%, var(--sp-field-head)); }
-.sp-schema-details-toggle { position: relative; display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: var(--sp-muted); }
+.sp-schema-details-toggle { position: relative; display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: color-mix(in srgb, var(--sp-muted) 55%, transparent); }
 .sp-schema-details-toggle > span { display: grid; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: 50%; place-items: center; }
 .sp-schema-details-toggle > span::before { content: '?'; font: 700 10px/1 Manrope, sans-serif; }
 .sp-schema-details-toggle::after { content: attr(data-tooltip); position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 20; width: max-content; padding: 5px 7px; color: var(--sp-surface); border-radius: 5px; background: var(--sp-muted); box-shadow: 0 4px 12px rgba(0,0,0,.1); font: 600 9px/1.2 Manrope, sans-serif; opacity: 0; pointer-events: none; transform: translateY(3px); transition: opacity 120ms ease, transform 120ms ease; }
