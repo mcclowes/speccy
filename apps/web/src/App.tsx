@@ -33,14 +33,30 @@ const URL_STORAGE_KEY = 'speccy-oas-url';
 const RECENTS_STORAGE_KEY = 'speccy-recent-references';
 const MAX_RECENTS = 6;
 
+function storageItem(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function storeItem(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Browser storage is optional and may be unavailable or full.
+  }
+}
+
 function storedTheme(): Theme {
-  const theme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const theme = storageItem(THEME_STORAGE_KEY);
   return theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
 }
 
 function storedRecents(): RecentReference[] {
   try {
-    const references = JSON.parse(window.localStorage.getItem(RECENTS_STORAGE_KEY) ?? '[]');
+    const references = JSON.parse(storageItem(RECENTS_STORAGE_KEY) ?? '[]');
     return Array.isArray(references) ? references.slice(0, MAX_RECENTS) : [];
   } catch {
     return [];
@@ -79,7 +95,7 @@ export function App() {
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
-  const [url, setUrl] = useState(() => window.localStorage.getItem(URL_STORAGE_KEY) ?? '');
+  const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
@@ -93,7 +109,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    storeItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
@@ -110,7 +126,7 @@ export function App() {
     setMessage('');
     setRecents((current) => {
       const updated = [{ id, name, source: next, openedAt: Date.now() }, ...current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
-      window.localStorage.setItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
+      storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
   }
@@ -144,7 +160,7 @@ export function App() {
       if (!response.ok) throw new Error(`The server returned ${response.status}.`);
       applySource(await response.text(), new URL(nextUrl).pathname.split('/').pop() || nextUrl);
       setUrl(nextUrl);
-      window.localStorage.setItem(URL_STORAGE_KEY, nextUrl);
+      storeItem(URL_STORAGE_KEY, nextUrl);
       setUrlOpen(false);
       const location = new URL(window.location.href);
       location.searchParams.set('url', nextUrl);

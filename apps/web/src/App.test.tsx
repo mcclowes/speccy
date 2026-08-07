@@ -14,7 +14,10 @@ vi.mock('../../../packages/renderer/src/Speccy', () => ({
 }));
 
 describe('source editor', () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
 
   beforeEach(() => {
     previewRender.mockClear();
@@ -66,5 +69,20 @@ describe('source editor', () => {
 
     expect((screen.getByRole('combobox', { name: 'Switch API reference' }) as HTMLSelectElement).value).toBe('two');
     expect(screen.getByRole('option', { name: 'Billing API' })).toBeTruthy();
+  });
+
+  it('keeps an opened reference usable when recent storage is full', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    setItem.mockImplementation((key) => {
+      if (key === 'speccy-recent-references') {
+        throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+      }
+    });
+    render(<App />);
+
+    expect(() => fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }))).not.toThrow();
+
+    expect(screen.getByText('Preview')).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: 'Switch API reference' })).toBeTruthy();
   });
 });
