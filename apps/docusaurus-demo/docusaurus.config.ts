@@ -1,10 +1,13 @@
 import type { Config } from '@docusaurus/types';
 
+const isVercel = process.env.VERCEL === '1';
+const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+
 const config: Config = {
   title: 'Speccy',
   tagline: 'OpenAPI reference docs with room to breathe.',
-  url: 'https://mcclowes.github.io',
-  baseUrl: '/speccy/',
+  url: isVercel && vercelHost ? `https://${vercelHost}` : 'https://mcclowes.github.io',
+  baseUrl: isVercel ? '/' : '/speccy/',
   organizationName: 'mcclowes',
   projectName: 'speccy',
   favicon: 'favicon.svg',
@@ -13,7 +16,7 @@ const config: Config = {
     [
       '@speccy/docusaurus',
       {
-        route: '/speccy/api',
+        route: isVercel ? '/api' : '/speccy/api',
         spec: './static/openapi.yaml',
         renderer: { accentColor: '#6d5dfc', theme: 'system' },
       },
