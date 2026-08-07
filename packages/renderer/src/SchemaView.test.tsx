@@ -104,10 +104,15 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('id').closest('.sp-schema-head')).toHaveRole('button');
     expect(screen.queryByText('Unique identifier for the company.')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show details for id' }));
+    const idDetailsButton = screen.getByRole('button', { name: 'Show details for id' });
+    expect(idDetailsButton.querySelector('.sp-schema-details-toggle')).toHaveAttribute('data-tooltip', 'Show field details');
+
+    fireEvent.click(idDetailsButton);
     expect(screen.getByText('Unique identifier for the company.').closest('.sp-schema-field-details')).toHaveClass('sp-schema-field-details-named');
     expect(screen.getByText('ee2eb431-c0fa-4dc9-93fa-d29781c12bcd')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Hide details for id' })).toHaveAttribute('aria-expanded', 'true');
+    const openIdDetailsButton = screen.getByRole('button', { name: 'Hide details for id' });
+    expect(openIdDetailsButton).toHaveAttribute('aria-expanded', 'true');
+    expect(openIdDetailsButton.querySelector('.sp-schema-details-toggle')).toHaveAttribute('data-tooltip', 'Hide field details');
 
     fireEvent.click(screen.getByRole('button', { name: 'Show details for connection' }));
     expect(screen.getByText('The company data connection.')).toBeVisible();

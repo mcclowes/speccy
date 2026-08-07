@@ -73,7 +73,11 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
         {schema.writeOnly && <span className="sp-qualifier">write only</span>}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
-        {hasFieldDetails && <span className="sp-schema-details-toggle" aria-hidden="true"><span /></span>}
+        {hasFieldDetails && <span
+          className="sp-schema-details-toggle"
+          data-tooltip={detailsOpen ? 'Hide field details' : 'Show field details'}
+          aria-hidden="true"
+        ><span /></span>}
   </>;
   const header = name && hasFieldDetails
     ? <button

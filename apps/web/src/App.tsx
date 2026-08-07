@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { OpenAPIDocument } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
 import { SAMPLE_SPEC } from './sample';
-import { SchemaDetailsPrototypeSwitcher, useSchemaDetailsPrototype } from './SchemaDetailsPrototype';
 
 declare global {
   interface Window {
@@ -50,7 +49,6 @@ function SourceEditor({ initialSource, onApply }: {
 }
 
 export function App() {
-  const schemaDetailsPrototype = useSchemaDetailsPrototype();
   const [spec, setSpec] = useState<OpenAPIDocument | string>(SAMPLE_SPEC);
   const [source, setSource] = useState(JSON.stringify(SAMPLE_SPEC, null, 2));
   const [fileName, setFileName] = useState('Luma sample');
@@ -140,13 +138,8 @@ export function App() {
         {drawerOpen && (
           <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName)} />
         )}
-        <div className="studio-preview">
-          <schemaDetailsPrototype.Variant>
-            <Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" />
-          </schemaDetailsPrototype.Variant>
-        </div>
+        <div className="studio-preview"><Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" /></div>
       </div>
-      <SchemaDetailsPrototypeSwitcher variant={schemaDetailsPrototype.variant} cycle={schemaDetailsPrototype.cycle} />
     </div>
   );
 }
