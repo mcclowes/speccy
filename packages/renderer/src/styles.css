@@ -10,10 +10,10 @@ related:
 
 .speccy {
   --sp-accent: #6d5dfc;
-  --sp-bg: #fbfbfd;
+  --sp-bg: #fff;
   --sp-surface: #fff;
   --sp-surface-soft: #f5f5f8;
-  --sp-field-head: #f2f2f4;
+  --sp-field-head: #fbfbfd;
   --sp-text: #17171c;
   --sp-muted: #6d6d79;
   --sp-line: #e7e7ec;
