@@ -67,7 +67,7 @@ body { color: var(--site-ink); }
 .preview-tag, .preview-link { display: flex; align-items: center; border-radius: 6px; font-size: 9px; }
 .preview-tag { gap: 8px; padding: 8px; color: var(--site-muted); font-weight: 700; }
 .preview-tag i { margin-left: auto; font-style: normal; }
-.preview-tag.is-active { color: var(--ifm-color-primary); }
+.preview-tag.is-active { color: var(--site-ink); background: color-mix(in srgb, var(--site-muted) 9%, transparent); }
 .preview-link { margin: 2px 0 2px 20px; padding: 8px 7px; }
 .preview-link b { margin-left: auto; color: #2f9b73; font-size: 7px; }
 .preview-link.is-active { background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent); }

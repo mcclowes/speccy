@@ -94,7 +94,7 @@ related:
 .sp-tag-icon { width: 1em; height: 1em; flex: none; object-fit: contain; }
 .sp-nav-tag .sp-tag-icon { width: 14px; height: 14px; }
 .sp-nav-tag:hover { color: var(--sp-text); }
-.sp-nav-tag.is-active { color: var(--sp-accent); }
+.sp-nav-tag.is-active { color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 7px; }
 .sp-nav-chevron { width: 6px; height: 6px; margin-right: 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }
 .sp-nav-tag[aria-expanded='false'] .sp-nav-chevron { transform: rotate(-45deg); }
 .sp-nav-operation { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 7px; font-size: 11px; color: var(--sp-text); }
