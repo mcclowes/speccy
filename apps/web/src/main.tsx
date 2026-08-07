@@ -4,9 +4,12 @@ import 'speccy-renderer/styles.css';
 import './studio.css';
 import './parameter-prototype.css';
 import { App } from './App';
+import { DiffExample } from './DiffExample';
+
+const Root = window.location.pathname === '/diff' ? DiffExample : App;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Root />
   </StrictMode>,
 );
