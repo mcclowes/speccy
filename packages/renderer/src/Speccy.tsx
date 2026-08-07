@@ -10,11 +10,11 @@
 
 import {
   type CSSProperties,
-  type ReactNode,
   useEffect,
   useMemo,
   useState,
 } from 'react';
+import { Markdown } from './Markdown';
 import { createReferenceModel, parseSpec, type OperationModel } from './model';
 import type {
   MediaType,
@@ -28,17 +28,6 @@ const METHOD_LABELS: Record<string, string> = {
   get: 'GET', post: 'POST', put: 'PUT', patch: 'PATCH', delete: 'DELETE',
   options: 'OPTIONS', head: 'HEAD', trace: 'TRACE',
 };
-
-function RichText({ children, className = '' }: { children?: string; className?: string }) {
-  if (!children) return null;
-  return (
-    <div className={`sp-richtext ${className}`}>
-      {children.split(/\n\s*\n/).map((paragraph, index) => (
-        <p key={`${paragraph.slice(0, 20)}-${index}`}>{paragraph}</p>
-      ))}
-    </div>
-  );
-}
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
@@ -77,7 +66,7 @@ function SchemaView({ schema, name, required = false, depth = 0 }: {
         {schema.nullable && <span className="sp-qualifier">nullable</span>}
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
       </div>
-      {schema.description && <p className="sp-schema-description">{schema.description}</p>}
+      <Markdown className="sp-schema-description">{schema.description}</Markdown>
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
       {schema.example !== undefined && <p className="sp-schema-meta">Example: <code>{JSON.stringify(schema.example)}</code></p>}
       {Object.entries(properties).length > 0 && (
@@ -116,7 +105,7 @@ function ParameterList({ parameters }: { parameters: Parameter[] }) {
               <span>{parameter.in ?? 'query'}</span>
               {parameter.required && <span className="sp-required">required</span>}
             </div>
-            {parameter.description && <p>{parameter.description}</p>}
+            <Markdown>{parameter.description}</Markdown>
             <SchemaView schema={parameter.schema} />
           </div>
         ))}
@@ -136,7 +125,7 @@ function RequestBodyView({ operation }: { operation: OperationModel['operation']
   return (
     <section className="sp-section">
       <h4>Request body {body.required && <span className="sp-required">required</span>}</h4>
-      {body.description && <p>{body.description}</p>}
+      <Markdown>{body.description}</Markdown>
       {media && <><div className="sp-media-type">{media[0]}</div><SchemaView schema={media[1].schema} /></>}
     </section>
   );
@@ -149,10 +138,15 @@ function ResponseView({ code, response }: { code: string; response: ResponseObje
     <div className="sp-response">
       <button type="button" className="sp-response-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className={`sp-status ${code.startsWith('2') ? 'is-success' : ''}`}>{code}</span>
-        <span>{response.description ?? 'Response'}</span>
+        <span>Response</span>
         <span className="sp-chevron">{open ? '−' : '+'}</span>
       </button>
-      {open && media && <div className="sp-response-body"><div className="sp-media-type">{media[0]}</div><SchemaView schema={media[1].schema} /></div>}
+      {open && (
+        <div className="sp-response-body">
+          <Markdown>{response.description}</Markdown>
+          {media && <><div className="sp-media-type">{media[0]}</div><SchemaView schema={media[1].schema} /></>}
+        </div>
+      )}
     </div>
   );
 }
@@ -190,7 +184,7 @@ function OperationCard({ item, server, defaultExpanded }: {
       {open && (
         <div className="sp-operation-body">
           <div className="sp-operation-main">
-            <RichText>{item.operation.description}</RichText>
+            <Markdown>{item.operation.description}</Markdown>
             <ParameterList parameters={parameters} />
             <RequestBodyView operation={item.operation} />
             {item.operation.responses && (
@@ -311,7 +305,7 @@ export function Speccy({
         <header className="sp-hero" id="sp-overview">
           <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
           <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
-          <RichText>{model.document.info?.description}</RichText>
+          <Markdown>{model.document.info?.description}</Markdown>
           {server && <div className="sp-server"><span>Base URL</span><code>{server}</code><CopyButton value={server} /></div>}
         </header>
         {model.tags.map((tag) => {
@@ -319,7 +313,7 @@ export function Speccy({
           if (visible.length === 0) return null;
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
-              <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><RichText>{tag.description}</RichText></div>
+              <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
               <div className="sp-operation-list">{visible.map((item) => <OperationCard item={item} server={server} defaultExpanded={defaultExpanded} key={item.id} />)}</div>
             </section>
           );

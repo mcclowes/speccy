@@ -54,8 +54,20 @@
 .sp-eyebrow, .sp-tag-kicker { color: var(--sp-accent); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 .sp-eyebrow span { margin-left: 8px; padding: 3px 7px; color: var(--sp-muted); background: var(--sp-surface-soft); border-radius: 5px; letter-spacing: 0; text-transform: none; }
 .sp-hero h1 { max-width: 800px; margin: 18px 0 18px; font-size: clamp(38px, 6vw, 67px); line-height: 1.03; letter-spacing: -0.055em; }
-.sp-richtext { max-width: 680px; color: var(--sp-muted); font-size: 14px; }
-.sp-hero > .sp-richtext { font-size: 16px; line-height: 1.75; }
+.sp-markdown { max-width: 680px; color: var(--sp-muted); font-size: 14px; }
+.sp-markdown > :first-child { margin-top: 0; }
+.sp-markdown > :last-child { margin-bottom: 0; }
+.sp-markdown a { color: var(--sp-accent); text-decoration: underline; text-underline-offset: 2px; }
+.sp-markdown h1, .sp-markdown h2, .sp-markdown h3, .sp-markdown h4, .sp-markdown h5, .sp-markdown h6 { margin: 1.4em 0 0.55em; color: var(--sp-text); line-height: 1.25; letter-spacing: -0.02em; }
+.sp-markdown ul, .sp-markdown ol { margin: 0 0 0.8em; padding-left: 1.5em; }
+.sp-markdown blockquote { margin: 0 0 0.8em; padding-left: 1em; border-left: 3px solid var(--sp-line); }
+.sp-markdown code { padding: 0.12em 0.35em; color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 4px; font-size: 0.9em; }
+.sp-markdown pre { overflow-x: auto; margin: 0 0 0.8em; padding: 14px; color: var(--sp-code-text); background: var(--sp-code); border-radius: 8px; }
+.sp-markdown pre code { padding: 0; color: inherit; background: transparent; }
+.sp-markdown table { width: 100%; margin: 0 0 0.8em; border-collapse: collapse; color: var(--sp-text); font-size: 0.9em; }
+.sp-markdown th, .sp-markdown td { padding: 8px 10px; border: 1px solid var(--sp-line); text-align: left; vertical-align: top; }
+.sp-markdown th { background: var(--sp-surface-soft); font-weight: 600; }
+.sp-hero > .sp-markdown { font-size: 16px; line-height: 1.75; }
 .sp-server { width: fit-content; max-width: 100%; margin-top: 30px; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-server > span { color: var(--sp-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .sp-server code { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; }
@@ -64,7 +76,7 @@
 .sp-tag { max-width: 1120px; padding: 70px 0 20px; scroll-margin-top: 20px; }
 .sp-tag-heading { display: grid; grid-template-columns: minmax(180px, 0.65fr) minmax(280px, 1fr); gap: 40px; align-items: end; margin-bottom: 24px; }
 .sp-tag h2 { margin: 5px 0 0; font-size: 30px; line-height: 1.2; letter-spacing: -0.035em; }
-.sp-tag-heading .sp-richtext { justify-self: end; }
+.sp-tag-heading .sp-markdown { justify-self: end; }
 .sp-operation-list { display: grid; gap: 12px; }
 .sp-operation { overflow: hidden; border: 1px solid var(--sp-line); border-radius: 12px; background: var(--sp-surface); scroll-margin-top: 16px; box-shadow: 0 1px 1px rgba(20, 20, 30, 0.02); }
 .sp-operation-summary { width: 100%; min-height: 68px; display: grid; grid-template-columns: 60px minmax(120px, 0.85fr) minmax(150px, 1.15fr) auto auto; gap: 12px; align-items: center; padding: 14px 18px; text-align: left; color: var(--sp-text); background: transparent; border: 0; cursor: pointer; }
