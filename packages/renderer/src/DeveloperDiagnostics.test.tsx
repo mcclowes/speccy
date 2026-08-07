@@ -31,6 +31,14 @@ describe('developer diagnostics layout', () => {
     expect(css).toMatch(/\.sp-diagnostics-drawer \{[^}]*overflow-x: hidden;/);
   });
 
+  it('floats contextual findings above the API health trigger', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(/\.sp-inline-diagnostics \{[^}]*position: fixed;[^}]*right: 20px;[^}]*bottom: 72px;/);
+    expect(css).toMatch(/\.sp-inline-diagnostics \{[^}]*width: min\(380px, calc\(100vw - 40px\)\);[^}]*max-height: calc\(100vh - 112px\);/);
+    expect(css).not.toMatch(/\.sp-inline-diagnostics \{[^}]*margin-top:/);
+  });
+
   it('formats every finding for copying and CSV export', () => {
     expect(diagnosticsAsText(findings)).toContain('0 issues, 1 warning, 0 suggestions');
     expect(diagnosticsAsText(findings)).toContain('Suggested fix: Describe the operation.');
