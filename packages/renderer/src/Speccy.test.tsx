@@ -154,6 +154,32 @@ describe('Speccy navigation', () => {
     expect(screen.getByText(/https:\/\/api\.example\.com\/companies\/co%20123\?page=1/)).toBeInTheDocument();
   });
 
+  it('masks authorization in the request sample while preserving the copied request', async () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Secured API' }, servers: [{ url: 'https://api.example.com' }],
+      security: [{ apiKey: [] }],
+      paths: { '/companies': { get: { summary: 'Get companies', operationId: 'get-companies' } } },
+      components: { securitySchemes: { apiKey: { type: 'apiKey', in: 'query', name: 'api_key' } } },
+    }} basePath="/api" />);
+
+    const authorization = screen.getByLabelText('api_key');
+    fireEvent.change(authorization, { target: { value: 'secret token' } });
+
+    expect(screen.queryByText(/secret(?:\+|%20| )token/)).not.toBeInTheDocument();
+    expect(screen.getByText(/api_key=%E2%80%A2%E2%80%A2/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('api_key=secret+token'));
+
+    expect(authorization).toHaveAttribute('type', 'password');
+    fireEvent.click(screen.getByRole('button', { name: 'Show authorization' }));
+    expect(authorization).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Hide authorization' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('executes a configured API request and renders its response', async () => {
     window.history.replaceState({}, '', '/api/create-company');
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 'company-42' }), {
@@ -326,7 +352,7 @@ describe('Speccy navigation', () => {
 
     expect(screen.getByRole('textbox', { name: /companyId/ })).toHaveValue('company-42');
     expect(screen.getByLabelText('bearerAuth')).toHaveValue('secret-token');
-    expect(screen.getByText(/Authorization: Bearer secret-token/)).toBeInTheDocument();
+    expect(screen.getByText(/Authorization: Bearer ••••••••/)).toBeInTheDocument();
   });
 
   it('filters endpoints in the sidebar without opening full search', () => {

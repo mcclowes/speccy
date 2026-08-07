@@ -23,11 +23,13 @@ export function CopyButton({ value }: { value: string }) {
 
 export function CodeBlock({
   value,
+  copyValue = value,
   title,
   className = '',
   copyable = true,
 }: {
   value: string;
+  copyValue?: string;
   title?: ReactNode;
   className?: string;
   copyable?: boolean;
@@ -37,7 +39,7 @@ export function CodeBlock({
       {(title || copyable) && (
         <div className="sp-code-title">
           <span>{title}</span>
-          {copyable && <CopyButton value={value} />}
+          {copyable && <CopyButton value={copyValue} />}
         </div>
       )}
       <pre><code>{value}</code></pre>

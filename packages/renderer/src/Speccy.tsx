@@ -287,6 +287,7 @@ function RequestRail({
   const schemeName = requirements?.flatMap(Object.keys)[0];
   const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
   const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
+  const [credentialVisible, setCredentialVisible] = useState(false);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const [body, setBody] = useState(() => {
     const example = bodyMedia?.[1].example ?? bodyMedia?.[1].schema?.example;
@@ -297,27 +298,60 @@ function RequestRail({
   let requestPath = item.path;
   const query = new URLSearchParams();
   const headers: string[] = [];
+  const maskedQuery = new URLSearchParams();
+  const maskedHeaders: string[] = [];
 
   for (const parameter of parameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
     if (!parameter.name || !value) continue;
     if (parameter.in === 'path') requestPath = requestPath.replace(`{${parameter.name}}`, encodeURIComponent(value));
-    if (parameter.in === 'query') query.set(parameter.name, value);
-    if (parameter.in === 'header') headers.push(`${parameter.name}: ${value}`);
+    if (parameter.in === 'query') {
+      query.set(parameter.name, value);
+      maskedQuery.set(parameter.name, value);
+    }
+    if (parameter.in === 'header') {
+      headers.push(`${parameter.name}: ${value}`);
+      maskedHeaders.push(`${parameter.name}: ${value}`);
+    }
   }
   if (credential && scheme) {
-    if (scheme.type === 'apiKey' && scheme.in === 'header') headers.push(`${scheme.name ?? schemeName}: ${credential}`);
-    if (scheme.type === 'apiKey' && scheme.in === 'query') query.set(scheme.name ?? schemeName ?? 'api_key', credential);
-    if (scheme.type === 'apiKey' && scheme.in === 'cookie') headers.push(`Cookie: ${scheme.name ?? schemeName}=${credential}`);
-    if (scheme.type === 'http') headers.push(`Authorization: ${scheme.scheme === 'basic' ? 'Basic' : 'Bearer'} ${credential}`);
+    const mask = '••••••••';
+    if (scheme.type === 'apiKey' && scheme.in === 'header') {
+      headers.push(`${scheme.name ?? schemeName}: ${credential}`);
+      maskedHeaders.push(`${scheme.name ?? schemeName}: ${mask}`);
+    }
+    if (scheme.type === 'apiKey' && scheme.in === 'query') {
+      query.set(scheme.name ?? schemeName ?? 'api_key', credential);
+      maskedQuery.set(scheme.name ?? schemeName ?? 'api_key', mask);
+    }
+    if (scheme.type === 'apiKey' && scheme.in === 'cookie') {
+      headers.push(`Cookie: ${scheme.name ?? schemeName}=${credential}`);
+      maskedHeaders.push(`Cookie: ${scheme.name ?? schemeName}=${mask}`);
+    }
+    if (scheme.type === 'http') {
+      const prefix = scheme.scheme === 'basic' ? 'Basic' : 'Bearer';
+      headers.push(`Authorization: ${prefix} ${credential}`);
+      maskedHeaders.push(`Authorization: ${prefix} ${mask}`);
+    }
   }
   const contentType = bodyMedia?.[0];
-  if (contentType) headers.push(`Content-Type: ${contentType}`);
+  if (contentType) {
+    headers.push(`Content-Type: ${contentType}`);
+    maskedHeaders.push(`Content-Type: ${contentType}`);
+  }
   const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${query.size ? `?${query}` : ''}`;
+  const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${maskedQuery.size ? `?${maskedQuery}` : ''}`;
   const lines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${requestUrl}'`];
+  const maskedLines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${maskedRequestUrl}'`];
   for (const header of headers) lines.push(`  --header '${header}'`);
-  if (body && item.method !== 'get' && item.method !== 'head') lines.push(`  --data '${body.replaceAll("'", "'\\''")}'`);
+  for (const header of maskedHeaders) maskedLines.push(`  --header '${header}'`);
+  if (body && item.method !== 'get' && item.method !== 'head') {
+    const dataLine = `  --data '${body.replaceAll("'", "'\\''")}'`;
+    lines.push(dataLine);
+    maskedLines.push(dataLine);
+  }
   const sample = lines.join(' \\\n');
+  const maskedSample = maskedLines.join(' \\\n');
 
   async function executeRequest() {
     const missing = parameters.filter((parameter) => parameter.required && !values[`${parameter.in}-${parameter.name}`]?.trim());
@@ -356,7 +390,7 @@ function RequestRail({
       {schemeName && (
         <section className="sp-rail-card">
           <h3>Authorization</h3>
-          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><input type="password" value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /></label>
+          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}>{credentialVisible ? 'Hide' : 'Show'}</button></div></label>
         </section>
       )}
       {parameters.length > 0 && (
@@ -374,7 +408,7 @@ function RequestRail({
           <label className="sp-field"><span>Request body</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={contentType === 'application/json' ? '{}' : 'Request body'} /></label>
         </section>
       )}
-      <CodeBlock className="sp-rail-code" title="Request sample · cURL" value={sample} />
+      <CodeBlock className="sp-rail-code" title="Request sample · cURL" value={maskedSample} copyValue={sample} />
       <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}>{executing ? 'Sending…' : 'Send request'}</button>
       {result && (
         <section className={`sp-live-response ${result.error ? 'is-error' : ''}`} aria-live="polite">

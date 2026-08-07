@@ -181,6 +181,10 @@
 .sp-field b { color: #d24859; }
 .sp-field small { color: var(--sp-muted); font-size: 9px; font-weight: 400; }
 .sp-field input { width: 100%; height: 38px; padding: 0 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; }
+.sp-secret-field { position: relative; }
+.sp-secret-field input { padding-right: 52px; }
+.sp-secret-field button { position: absolute; top: 50%; right: 5px; padding: 5px 7px; color: var(--sp-muted); background: transparent; border: 0; border-radius: 5px; cursor: pointer; font: inherit; font-size: 9px; transform: translateY(-50%); }
+.sp-secret-field button:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-field textarea { width: 100%; min-height: 120px; resize: vertical; padding: 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; line-height: 1.55; }
 .sp-field input:focus, .sp-field textarea:focus { border-color: color-mix(in srgb, var(--sp-accent) 65%, var(--sp-line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent) 12%, transparent); }
 .sp-rail-card h3 small { margin-left: 5px; color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400; }
