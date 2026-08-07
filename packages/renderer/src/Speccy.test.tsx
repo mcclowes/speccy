@@ -111,6 +111,14 @@ describe('Speccy navigation', () => {
     expect(screen.getByText('This endpoint doesn’t accept query parameters or a request body.')).toBeInTheDocument();
   });
 
+  it('updates the rendered theme when the theme prop changes', () => {
+    const { container, rerender } = render(<Speccy spec={spec} theme="light" />);
+
+    expect(container.querySelector('.speccy')).toHaveClass('sp-theme-light');
+    rerender(<Speccy spec={spec} theme="dark" />);
+    expect(container.querySelector('.speccy')).toHaveClass('sp-theme-dark');
+  });
+
   it('omits the empty request state when the endpoint accepts input', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={{

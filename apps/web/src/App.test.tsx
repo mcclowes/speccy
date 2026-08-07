@@ -7,13 +7,14 @@ import { App } from './App';
 const { previewRender } = vi.hoisted(() => ({ previewRender: vi.fn() }));
 
 vi.mock('../../../packages/renderer/src/Speccy', () => ({
-  Speccy: ({ onNavigate, hrefForRoute }: {
+  Speccy: ({ onNavigate, hrefForRoute, theme }: {
     onNavigate?: (route: { page: 'operation'; operationId: string }) => void;
     hrefForRoute?: (route: { page: 'operation'; operationId: string }) => string;
+    theme?: 'light' | 'dark' | 'system';
   }) => {
     previewRender();
     const operation = { page: 'operation' as const, operationId: 'list-companies' };
-    return <div>Preview{onNavigate && <a href={hrefForRoute?.(operation)} onClick={(event) => { event.preventDefault(); onNavigate(operation); }}>Open test operation</a>}</div>;
+    return <div className={`speccy sp-theme-${theme}`}>Preview{onNavigate && <a href={hrefForRoute?.(operation)} onClick={(event) => { event.preventDefault(); onNavigate(operation); }}>Open test operation</a>}</div>;
   },
 }));
 
@@ -175,8 +176,10 @@ describe('source editor', () => {
 
     expect(screen.getByText('Preview')).toBeTruthy();
     const themePicker = screen.getByRole('button', { name: 'Theme: system' });
+    expect(document.querySelector('.speccy')?.classList.contains('sp-theme-system')).toBe(true);
     fireEvent.click(themePicker);
     expect(screen.getByRole('button', { name: 'Theme: dark' })).toBeTruthy();
+    expect(document.querySelector('.speccy')?.classList.contains('sp-theme-dark')).toBe(true);
     expect(screen.queryByRole('button', { name: 'Speccy home' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Edit source' })).toBeNull();
   });

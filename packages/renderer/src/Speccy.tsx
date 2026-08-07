@@ -1018,7 +1018,15 @@ export function Speccy({
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>('speccy:theme', theme);
+  const previousTheme = useRef(theme);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (previousTheme.current === theme) return;
+    previousTheme.current = theme;
+    setSelectedTheme(theme);
+  }, [theme, setSelectedTheme]);
+
   const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
