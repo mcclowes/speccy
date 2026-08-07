@@ -339,7 +339,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-head:hover .sp-schema-details-toggle::after,
 .sp-schema-head:focus-visible .sp-schema-details-toggle::after { opacity: 1; transform: translateY(0); }
 .sp-schema-object:not(.sp-schema-object-named) > .sp-schema-field-details { padding-left: 19px; }
-.sp-schema-field-details-named { padding-right: 8px; padding-left: 28px; }
+.sp-schema-field-details-named { padding: 8px 8px 0 28px; }
 .sp-schema-properties { display: grid; gap: 8px; margin: 9px 0 0 4px; padding-left: 17px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 15%, var(--sp-line)); }
 .sp-type { color: var(--sp-accent); font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-schema-meta code { color: var(--sp-text); }
