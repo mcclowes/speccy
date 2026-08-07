@@ -645,10 +645,10 @@ describe('Speccy navigation', () => {
     expect(screen.queryByText('The current company state.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show details for state' }));
     expect(screen.getByText('The current company state.')).toBeInTheDocument();
-    expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent === 'Example: found')).toBeInTheDocument();
+    expect(container.querySelector('.sp-schema-example')).toHaveTextContent('Examplefound');
     expect(screen.getByText(/"found"/)).toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Response example' }), { target: { value: '1' } });
-    expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent === 'Example: cached')).toBeInTheDocument();
+    expect(container.querySelector('.sp-schema-example')).toHaveTextContent('Examplecached');
     expect(screen.getByText(/"cached"/)).toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Response example' }), { target: { value: '2' } });
     expect(screen.getByText(/"generic"/)).toBeInTheDocument();
