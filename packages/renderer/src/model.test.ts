@@ -205,6 +205,57 @@ paths:
     expect(schema?.properties?.children?.items?.$ref).toBe('#/components/schemas/Node');
   });
 
+  it('expands discriminator mappings into their allOf subtype choices', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/cards': {
+          post: {
+            requestBody: {
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/ManagedCardRequest' } } },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          ManagedCardRequest: {
+            type: 'object',
+            required: ['mode'],
+            properties: { mode: { type: 'string' } },
+            discriminator: {
+              propertyName: 'mode',
+              mapping: {
+                PREPAID_MODE: '#/components/schemas/PrepaidModeCardRequest',
+                DEBIT_MODE: '#/components/schemas/DebitModeCardRequest',
+              },
+            },
+          },
+          PrepaidModeCardRequest: {
+            allOf: [
+              { $ref: '#/components/schemas/ManagedCardRequest' },
+              { type: 'object', required: ['currency'], properties: { currency: { type: 'string' } } },
+            ],
+          },
+          DebitModeCardRequest: {
+            allOf: [
+              { $ref: '#/components/schemas/ManagedCardRequest' },
+              { type: 'object', required: ['parentManagedAccountId'], properties: { parentManagedAccountId: { type: 'string' } } },
+            ],
+          },
+        },
+      },
+    });
+
+    const schema = model.operations[0]?.operation.requestBody?.content?.['application/json']?.schema;
+    expect(schema?.oneOf?.map((choice) => choice.title)).toEqual([
+      'PrepaidModeCardRequest',
+      'DebitModeCardRequest',
+    ]);
+    expect(schema?.oneOf?.[0]?.allOf?.[1]?.required).toEqual(['currency']);
+    expect(schema?.oneOf?.[1]?.allOf?.[1]?.required).toEqual(['parentManagedAccountId']);
+  });
+
   it('normalizes Swagger 2 servers, body parameters, responses, and definitions', () => {
     const model = createReferenceModel({
       swagger: '2.0', host: 'api.example.com', basePath: '/v2', schemes: ['https'],

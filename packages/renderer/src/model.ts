@@ -127,6 +127,30 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
   return resolve(document, new Set()) as OpenAPIDocument;
 }
 
+/** Presents discriminator mappings as the concrete schema choices they describe. */
+function expandDiscriminatorMappings(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(expandDiscriminatorMappings);
+  if (!node || typeof node !== 'object') return node;
+
+  const source = node as Record<string, unknown>;
+  const discriminator = source.discriminator;
+  const mapping = discriminator && typeof discriminator === 'object' && !Array.isArray(discriminator)
+    ? (discriminator as { mapping?: unknown }).mapping
+    : undefined;
+  const result = Object.fromEntries(
+    Object.entries(source).map(([key, value]) => [key, expandDiscriminatorMappings(value)]),
+  );
+
+  if (!source.oneOf && !source.anyOf && mapping && typeof mapping === 'object' && !Array.isArray(mapping)) {
+    const refs = Object.values(mapping)
+      .filter((ref): ref is string => typeof ref === 'string')
+      .map((ref) => ({ $ref: ref }));
+    if (refs.length > 0) result.oneOf = refs;
+  }
+
+  return result;
+}
+
 function swaggerSchema(parameter: Parameter) {
   return parameter.schema ?? {
     type: parameter.type,
@@ -215,7 +239,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
     throw new Error('This does not look like an OpenAPI document. Add an openapi or swagger version.');
   }
 
-  const document = normalizeDocument(resolveRefs(rawDocument));
+  const document = normalizeDocument(resolveRefs(expandDiscriminatorMappings(rawDocument) as OpenAPIDocument));
 
   const declaredTags = new Map(
     (document.tags ?? [])
