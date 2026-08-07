@@ -264,7 +264,10 @@ function EndpointResponseBody({ code, response }: { code: string; response: Resp
   const activeExample = examples[activeIndex];
 
   return <div className="sp-endpoint-response-grid">
-    <div className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}><Markdown>{response.description}</Markdown></div>
+    <div className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}>
+      <span className="sp-response-code">{code}</span>
+      <Markdown>{response.description}</Markdown>
+    </div>
     <div className="sp-endpoint-response-detail" role="tabpanel">
       <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
       {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
