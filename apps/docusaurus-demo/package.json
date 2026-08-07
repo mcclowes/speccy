@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
+    "prebuild": "npm run build -w @speccy/renderer && npm run build -w @speccy/docusaurus",
     "build": "docusaurus build",
     "typecheck": "tsc --noEmit"
   },
