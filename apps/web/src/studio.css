@@ -47,6 +47,7 @@ body { overflow: hidden; background: #fbfbfd; }
 @media (prefers-color-scheme: dark) { .studio-system .studio-preview { background: #111217; } }
 .studio-preview > .speccy { min-height: 100%; }
 .studio .sp-sidebar { top: 0; height: calc(100vh - 58px); }
+.studio-preview-only .sp-sidebar { height: 100vh; }
 .studio-url + .studio-workspace .sp-sidebar { height: calc(100vh - 120px); }
 .studio-url + .studio-workspace .studio-editor { top: 0; height: 100%; }
 
