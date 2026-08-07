@@ -26,7 +26,7 @@ function schemaLabel(schema?: SchemaObject): string {
 export function JsonValue({ value }: { value: unknown }) {
   if (value === undefined) return null;
   const serialized = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-  return <CodeBlock className="sp-example" value={serialized} copyable={false} />;
+  return <CodeBlock className="sp-example" value={serialized} />;
 }
 
 export function SchemaView({ schema, name, required = false, depth = 0, collapseObjects = false, showExample = true, exampleValue }: {

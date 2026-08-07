@@ -135,7 +135,18 @@ describe('Speccy navigation', () => {
           post: {
             requestBody: {
               description: 'Triggered when a company’s accounts are categorized.',
-              content: { 'application/json': { schema: { type: 'object' } } },
+              content: { 'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    payload: {
+                      type: 'object',
+                      properties: { quotaRemaining: { type: 'integer' } },
+                    },
+                  },
+                },
+                example: { payload: { quotaRemaining: 11993 } },
+              } },
             },
             responses: { '204': { description: 'Webhook accepted.' } },
           },
@@ -154,6 +165,13 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByTitle('Webhook')).toHaveLength(2);
     expect(screen.queryByText('POST')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Payload' })).toBeInTheDocument();
+    const payloadSchema = screen.getByText('payload').closest('details');
+    expect(payloadSchema).not.toHaveAttribute('open');
+    expect(payloadSchema?.querySelector('summary')).toBeInTheDocument();
+    expect(screen.getByText('quotaRemaining')).not.toBeVisible();
+    fireEvent.click(payloadSchema!.querySelector('summary')!);
+    expect(screen.getByText('quotaRemaining')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
     expect(screen.queryByRole('complementary', { name: 'Request builder' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Send request' })).not.toBeInTheDocument();
     expect(screen.queryByText('Security: API key')).not.toBeInTheDocument();
