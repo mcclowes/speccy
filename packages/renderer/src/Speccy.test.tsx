@@ -270,6 +270,32 @@ describe('Speccy navigation', () => {
     }));
   });
 
+  it('prepopulates the request body from its schema', () => {
+    window.history.replaceState({}, '', '/api/create-company');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Test API' },
+      paths: { '/companies': { post: {
+        summary: 'Create company', operationId: 'create-company',
+        requestBody: { content: { 'application/json': { schema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', readOnly: true },
+            name: { type: 'string', example: 'Acme' },
+            active: { type: 'boolean', default: false },
+            tags: { type: 'array', items: { type: 'string' } },
+          },
+        } } } },
+      } } },
+    }} basePath="/api" />);
+
+    expect(screen.getByRole('textbox', { name: 'Request body' })).toHaveValue(JSON.stringify({
+      name: 'Acme',
+      active: false,
+      tags: ['string'],
+    }, null, 2));
+    expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
+  });
+
   it('does not execute while a required parameter is missing', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const fetchMock = vi.spyOn(globalThis, 'fetch');

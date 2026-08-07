@@ -247,20 +247,20 @@ function responseExamples(response?: ResponseObject): { label: string; value: un
   return examples;
 }
 
-function schemaExample(schema: SchemaObject): unknown {
+function schemaExample(schema: SchemaObject, mode: 'request' | 'response' = 'response'): unknown {
   if (schema.example !== undefined) return schema.example;
   if (schema.default !== undefined) return schema.default;
   if (schema.enum?.length) return schema.enum[0];
   if (schema.allOf?.length) {
-    return Object.assign({}, ...schema.allOf.map(schemaExample).filter((value) => value && typeof value === 'object' && !Array.isArray(value)));
+    return Object.assign({}, ...schema.allOf.map((member) => schemaExample(member, mode)).filter((value) => value && typeof value === 'object' && !Array.isArray(value)));
   }
-  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0]);
-  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0]);
-  if (schema.type === 'array' || schema.items) return schema.items ? [schemaExample(schema.items)] : [];
+  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0], mode);
+  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0], mode);
+  if (schema.type === 'array' || schema.items) return schema.items ? [schemaExample(schema.items, mode)] : [];
   if (schema.type === 'object' || schema.properties) {
     return Object.fromEntries(Object.entries(schema.properties ?? {})
-      .filter(([, property]) => !property.writeOnly)
-      .map(([name, property]) => [name, schemaExample(property)]));
+      .filter(([, property]) => mode === 'request' ? !property.readOnly : !property.writeOnly)
+      .map(([name, property]) => [name, schemaExample(property, mode)]));
   }
   if (schema.type === 'integer' || schema.type === 'number') return 0;
   if (schema.type === 'boolean') return true;
@@ -268,6 +268,16 @@ function schemaExample(schema: SchemaObject): unknown {
   if (schema.format === 'date') return '2024-01-01';
   if (schema.format === 'uuid') return '00000000-0000-4000-8000-000000000000';
   return 'string';
+}
+
+function requestBodyValue(contentType: string | undefined, media: MediaType | undefined): string {
+  const namedExample = Object.values(media?.examples ?? {}).find((example) => example.value !== undefined)?.value;
+  const example = media?.example
+    ?? namedExample
+    ?? (media?.schema ? schemaExample(media.schema, 'request') : undefined)
+    ?? (contentType === 'application/json' ? {} : undefined);
+  if (example === undefined) return '';
+  return typeof example === 'string' ? example : JSON.stringify(example, null, 2);
 }
 
 function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
@@ -366,10 +376,7 @@ function RequestRail({
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
-  const [body, setBody] = useState(() => {
-    const example = bodyMedia?.[1].example ?? bodyMedia?.[1].schema?.example;
-    return example === undefined ? '' : typeof example === 'string' ? example : JSON.stringify(example, null, 2);
-  });
+  const [body, setBody] = useState(() => requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]));
   const [result, setResult] = useState<{ status?: number; statusText?: string; body?: string; error?: string }>();
   const [executing, setExecuting] = useState(false);
   let requestPath = item.path;
