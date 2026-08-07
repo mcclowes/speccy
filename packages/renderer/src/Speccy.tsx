@@ -915,20 +915,19 @@ export function Speccy({
     const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
     window.history.pushState({}, '', href);
     setActiveRoute(operationId);
-    const content = document.querySelector<HTMLElement>('.sp-content');
-    if (typeof content?.scrollTo === 'function') content.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
   }
 
   function navigateTag(tag: TagModel) {
     window.history.pushState({}, '', tagHref(basePath, tag));
     setActiveRoute(`tags/${tagSlug(tag)}`);
-    document.querySelector<HTMLElement>('.sp-content')?.scrollTo?.({ top: 0 });
+    window.scrollTo({ top: 0 });
   }
 
   function navigateReference(key: ReferenceKey) {
     window.history.pushState({}, '', referenceHref(basePath, key));
     setActiveRoute(`reference/${key}`);
-    document.querySelector<HTMLElement>('.sp-content')?.scrollTo?.({ top: 0 });
+    window.scrollTo({ top: 0 });
   }
 
   const searchResults: SearchResult[] = [
