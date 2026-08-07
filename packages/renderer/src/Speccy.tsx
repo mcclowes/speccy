@@ -592,14 +592,18 @@ function RequestRail({
   );
 }
 
-function EndpointPage({ item, server, document, storageScope, parameterPrototype }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean }) {
+function EndpointPage({ item, tag, server, document, storageScope, parameterPrototype, onNavigateTag, hrefForRoute }: { item: OperationModel; tag: TagModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean; onNavigateTag: (tag: TagModel) => void; hrefForRoute: (route: SpeccyRoute) => string }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
   return (
     <article id={item.id} className={`sp-endpoint sp-method-${item.method}`}>
       <header className="sp-endpoint-header">
-        <div className="sp-tag-kicker">{item.tag}</div>
+        <a
+          className="sp-tag-kicker sp-tag-link"
+          href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
+          onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
+        >{item.tag}</a>
         <h1>{operationTitle(item)}</h1>
         <div className="sp-endpoint-address"><OperationBadge item={item} /><Path value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
@@ -1190,7 +1194,7 @@ export function Speccy({
           );
         })}
         {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} key={activeOperation.id} /></section>}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} tag={model.tags.find((tag) => tag.name === activeOperation.tag)!} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>

@@ -93,6 +93,20 @@ describe('Speccy navigation', () => {
     render(<Speccy spec={spec} basePath="/api" />);
 
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
+    const tag = screen.getByRole('link', { name: 'Companies' });
+    expect(tag).toHaveAttribute('href', '/api/tags/companies');
+
+    fireEvent.click(tag);
+
+    expect(window.location.pathname).toBe('/api/tags/companies');
+    expect(screen.getByRole('heading', { level: 1, name: 'Companies' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Operations' })).toBeInTheDocument();
+  });
+
+  it('renders an endpoint without request parameters', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={spec} basePath="/api" />);
+
     expect(screen.getByText('No request parameters')).toBeInTheDocument();
     expect(screen.getByText('This endpoint doesn’t accept query parameters or a request body.')).toBeInTheDocument();
   });
