@@ -150,9 +150,8 @@ related:
 .sp-copy.is-copied { color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 12%, var(--sp-surface-soft)); }
 
 .sp-tag { max-width: 1120px; padding: 70px 0 20px; scroll-margin-top: 20px; }
-.sp-tag-heading { display: grid; grid-template-columns: minmax(180px, 0.65fr) minmax(280px, 1fr); gap: 40px; align-items: end; margin-bottom: 24px; }
+.sp-tag-heading { display: grid; gap: 12px; margin-bottom: 24px; }
 .sp-tag h2 { margin: 5px 0 0; font-size: 30px; line-height: 1.2; letter-spacing: -0.035em; }
-.sp-tag-heading .sp-markdown { justify-self: end; }
 .sp-operation-list { display: grid; gap: 12px; }
 .sp-operation-link { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; padding: 18px; color: var(--sp-text); background: var(--sp-surface); border: 1px solid var(--sp-line); border-radius: 12px; text-decoration: none; box-shadow: 0 1px 1px rgba(20, 20, 30, .02); }
 .sp-operation-link:hover { border-color: color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line)); box-shadow: 0 8px 24px rgba(20, 20, 30, .06); }
