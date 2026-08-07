@@ -26,6 +26,7 @@ import type {
   Parameter,
   OpenAPIDocument,
   ResponseObject,
+  SchemaObject,
   SecurityRequirement,
   SecurityScheme,
   SpeccyProps,
@@ -199,7 +200,31 @@ function responseExamples(response?: ResponseObject): { label: string; value: un
     if (value !== undefined) examples.push({ label: example.summary ?? name, value });
   }
   if (media.schema?.example !== undefined) examples.push({ label: 'Generic example', value: media.schema.example });
+  if (examples.length === 0 && media.schema) examples.push({ label: 'Generated example', value: schemaExample(media.schema) });
   return examples;
+}
+
+function schemaExample(schema: SchemaObject): unknown {
+  if (schema.example !== undefined) return schema.example;
+  if (schema.default !== undefined) return schema.default;
+  if (schema.enum?.length) return schema.enum[0];
+  if (schema.allOf?.length) {
+    return Object.assign({}, ...schema.allOf.map(schemaExample).filter((value) => value && typeof value === 'object' && !Array.isArray(value)));
+  }
+  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0]);
+  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0]);
+  if (schema.type === 'array' || schema.items) return schema.items ? [schemaExample(schema.items)] : [];
+  if (schema.type === 'object' || schema.properties) {
+    return Object.fromEntries(Object.entries(schema.properties ?? {})
+      .filter(([, property]) => !property.writeOnly)
+      .map(([name, property]) => [name, schemaExample(property)]));
+  }
+  if (schema.type === 'integer' || schema.type === 'number') return 0;
+  if (schema.type === 'boolean') return true;
+  if (schema.format === 'date-time') return '2024-01-01T00:00:00Z';
+  if (schema.format === 'date') return '2024-01-01';
+  if (schema.format === 'uuid') return '00000000-0000-4000-8000-000000000000';
+  return 'string';
 }
 
 function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
