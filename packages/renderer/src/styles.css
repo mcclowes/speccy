@@ -118,6 +118,8 @@
 .sp-response-body > .sp-markdown + .sp-media-list { margin-top: 12px; }
 .sp-code-panel { min-width: 0; padding: 20px; color: var(--sp-code-text); background: var(--sp-code); }
 .sp-code-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; color: #8e8f9c; font-size: 10px; }
+.sp-example { color: var(--sp-code-text); background: var(--sp-code); font-size: 10px; white-space: pre-wrap; }
+.sp-example code { padding: 0; color: inherit; background: transparent; border: 0; }
 .sp-code-panel .sp-copy { color: #adaeba; background: #252630; }
 .sp-code-panel pre { overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 10px; line-height: 1.8; }
 .sp-error, .sp-empty { margin: 40px auto; max-width: 680px; padding: 24px; border: 1px solid #efcbd0; border-radius: 12px; color: #8b2534; background: #fff4f5; }
