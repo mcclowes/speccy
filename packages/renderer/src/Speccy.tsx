@@ -556,7 +556,7 @@ function RequestRail({
           <div className="sp-parameter-card-header">
             <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
             {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
-              <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
+              <button type="button" className="sp-add-optional-parameter" aria-label="Add optional parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Optional</button>
               {optionalPickerOpen && <div className="sp-optional-parameter-menu">
                 <input autoFocus value={optionalPickerQuery} onChange={(event) => setOptionalPickerQuery(event.target.value)} placeholder="Find a parameter" aria-label="Find an optional parameter" />
                 <div>{availableOptionalParameters.map((parameter) => {
