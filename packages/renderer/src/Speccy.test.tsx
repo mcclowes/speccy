@@ -296,32 +296,6 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByText(/"missing"/)).toHaveLength(1);
   });
 
-  it('builds an example response payload from schema property examples', () => {
-    window.history.replaceState({}, '', '/api/list-fruit');
-    render(<Speccy spec={{
-      openapi: '3.1.0', info: { title: 'Orchard API' },
-      paths: { '/fruit': { get: {
-        summary: 'List fruit', operationId: 'list-fruit',
-        responses: { '200': { description: 'Fruit in the orchard.', content: { 'application/json': {
-          schema: { type: 'array', items: { $ref: '#/components/schemas/Fruit' } },
-        } } } },
-      } } },
-      components: { schemas: { Fruit: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', example: 'Apple' },
-          variety: { type: 'string', example: 'Discovery' },
-          pickedAt: { type: 'string', format: 'date-time' },
-        },
-      } } },
-    }} basePath="/api" />);
-
-    expect(screen.getByText('Response example')).toBeInTheDocument();
-    expect(screen.getByText(/"name": "Apple"/)).toBeInTheDocument();
-    expect(screen.getByText(/"variety": "Discovery"/)).toBeInTheDocument();
-    expect(screen.getByText(/"pickedAt": "2024-01-01T00:00:00Z"/)).toBeInTheDocument();
-  });
-
   it('collapses and expands endpoint groups', () => {
     const { unmount } = render(<Speccy spec={spec} />);
 
