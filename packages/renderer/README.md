@@ -31,6 +31,26 @@ paths:
       summary: Read the audit log
 ```
 
+## Show API health guidance
+
+Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design, webhooks, and change safety.
+
+```tsx
+<Speccy
+  spec={currentSpec}
+  previousSpec={publishedSpec}
+  showDeveloperHints
+/>
+```
+
+Speccy runs Spectral's standard OAS ruleset automatically. Pass additional results from your own configured Spectral run through `spectralDiagnostics`. Speccy preserves the rule ID, severity, object path, and source range, and labels these findings separately from its own design guidance.
+
+```tsx
+<Speccy spec={spec} showDeveloperHints spectralDiagnostics={spectralResults} />
+```
+
+Developer hints are off by default, excluded from print output, and should stay off in public preview links. Ignored rules are stored locally for each rendered API. `previousSpec` enables checks for removed operations and responses, new required inputs, narrowed enums, response-shape changes, and stricter authentication.
+
 ## Present an API diff
 
 `SpecDiff` presents a normalized semantic diff produced by a tool such as [oasdiff](https://github.com/oasdiff/oasdiff). Run the comparison outside the browser, translate its machine-readable output into a `DiffReport`, then pass the report to the renderer:

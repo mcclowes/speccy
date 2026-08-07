@@ -13,6 +13,7 @@ import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
 import type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';
+import { runSpectral } from './spectral';
 
 const require = createRequire(import.meta.url);
 
@@ -67,10 +68,15 @@ export default function speccyPlugin(
       return [require.resolve('speccy-renderer/styles.css')];
     },
     async loadContent() {
+      const spec = await loadSpec(options, context.siteDir);
+      const renderer = options.renderer ?? {};
+      if (process.env.NODE_ENV !== 'production' && renderer.showDeveloperHints !== false) {
+        renderer.spectralDiagnostics = [...(renderer.spectralDiagnostics ?? []), ...await runSpectral(spec)];
+      }
       return {
-        spec: await loadSpec(options, context.siteDir),
+        spec,
         route: normalizeRoute(options.route),
-        renderer: options.renderer ?? {},
+        renderer,
       };
     },
     async contentLoaded({ content, actions }) {

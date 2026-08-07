@@ -40,3 +40,5 @@ import spec from '@site/static/openapi.json';
 ```
 
 Embedded references hide their internal sidebar by default. Set `showSidebar` to add it.
+
+Generated references show Speccy's API health guidance during local Docusaurus development and hide it in production builds. Override this with `renderer.showDeveloperHints` when you need explicit control. You can also pass `previousSpec` and `spectralDiagnostics` through the renderer options.

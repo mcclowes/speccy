@@ -45,5 +45,9 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@stoplight/spectral-core": "^1.23.1",
+    "@stoplight/spectral-rulesets": "^1.22.7"
   }
 }

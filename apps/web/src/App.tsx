@@ -9,9 +9,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { OpenAPIDocument, SpeccyRoute } from '@speccy/renderer';
+import type { OpenAPIDocument, SpeccyRoute, SpectralDiagnosticInput } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
 import { bundleFragmentedSpec } from '../../../packages/renderer/src/fragmentedSpec';
+import { parseSpec } from '../../../packages/renderer/src/model';
 import { SAMPLE_SPEC } from './sample';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 
@@ -126,9 +127,20 @@ export function App() {
   const [message, setMessage] = useState('');
   const [shareMessage, setShareMessage] = useState('');
   const [route, setRoute] = useState<StudioRoute>(() => parseStudioRoute(window.location));
+  const [spectralDiagnostics, setSpectralDiagnostics] = useState<SpectralDiagnosticInput[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
   const restoredInitialRoute = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    if (location.preview || !fileName) {
+      setSpectralDiagnostics([]);
+      return () => { active = false; };
+    }
+    void import('./spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
+    return () => { active = false; };
+  }, [spec, fileName, location.preview]);
 
   useEffect(() => {
     if (location.preview) {
@@ -379,7 +391,7 @@ export function App() {
 
       {fileName ? (
         <div className="studio-workspace">
-          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype /></div>
+          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} showDeveloperHints spectralDiagnostics={spectralDiagnostics} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype /></div>
         </div>
       ) : (
         <main className="studio-home">

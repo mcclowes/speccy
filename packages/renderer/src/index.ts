@@ -1,6 +1,7 @@
 export { Speccy } from './Speccy';
 export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
+export { adaptSpectralDiagnostics, analyzeOpenApi } from './diagnostics';
 export { createReferenceModel, normalizeDocument, parseSpec, resolveRefs } from './model';
 export type {
   CallbackObject,
@@ -20,6 +21,7 @@ export type {
   SpeccyProps,
   SpeccyRoute,
 } from './types';
+export type { ApiDiagnostic, DiagnosticCategory, DiagnosticSeverity, DiagnosticSource, SpectralDiagnosticInput } from './diagnostics';
 export type {
   ApiChange,
   DiffArea,

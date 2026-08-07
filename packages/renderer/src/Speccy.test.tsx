@@ -23,17 +23,20 @@ describe('Speccy navigation', () => {
   it('shows missing-description hints only when authoring hints are enabled', () => {
     const { rerender } = render(<Speccy spec={spec} />);
 
-    expect(screen.queryByText('You’re missing a description for this API.')).not.toBeInTheDocument();
+    expect(screen.queryByText('This API has no description.')).not.toBeInTheDocument();
     rerender(<Speccy spec={spec} showDeveloperHints />);
-    expect(screen.getByText('You’re missing a description for this API.')).toBeInTheDocument();
+    expect(screen.getByText('This API has no description.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+    expect(screen.getByRole('dialog', { name: 'API health' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Ignore this rule' }).length).toBeGreaterThan(0);
   });
 
   it('shows contextual hints on tag and operation pages', () => {
     const { rerender } = render(<Speccy spec={spec} route={{ page: 'tag', tag: 'companies' }} showDeveloperHints />);
 
-    expect(screen.getByText('You’re missing a description for this tag.')).toBeInTheDocument();
+    expect(screen.getByText('Companies has no description.')).toBeInTheDocument();
     rerender(<Speccy spec={spec} route={{ page: 'operation', operationId: 'get-companies' }} showDeveloperHints />);
-    expect(screen.getByText('You’re missing a description for this operation.')).toBeInTheDocument();
+    expect(screen.getByText('GET /companies has no description.')).toBeInTheDocument();
   });
 
   it('does not render a default brand icon', () => {

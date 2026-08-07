@@ -7,6 +7,8 @@
  * ---
  */
 
+import type { SpectralDiagnosticInput } from './diagnostics';
+
 export type HttpMethod =
   | 'get'
   | 'post'
@@ -233,6 +235,10 @@ export interface SpeccyProps {
   onError?: (error: Error) => void;
   /** Shows contextual authoring suggestions that are omitted from published previews. */
   showDeveloperHints?: boolean;
+  /** Optional previous contract used to surface potentially breaking changes. */
+  previousSpec?: OpenAPIDocument | string;
+  /** Spectral results to present alongside Speccy's built-in guidance. */
+  spectralDiagnostics?: SpectralDiagnosticInput[];
   /** PROTOTYPE: separates required parameters from optional parameters added on demand. */
   parameterPrototype?: boolean;
 }

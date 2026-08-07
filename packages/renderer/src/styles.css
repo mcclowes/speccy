@@ -506,9 +506,39 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-error, .sp-empty { margin: 40px auto; max-width: 680px; padding: 24px; border: 1px solid #efcbd0; border-radius: 12px; color: #8b2534; background: #fff4f5; }
 .sp-error p { margin: 6px 0 0; }
 .sp-empty { color: var(--sp-muted); border-color: var(--sp-line); background: var(--sp-surface); text-align: center; }
-.sp-developer-hint { display: flex; align-items: flex-start; gap: 9px; width: fit-content; margin-top: 14px; padding: 9px 11px; color: #78590a; border: 1px solid color-mix(in srgb, #d9a514 42%, transparent); border-radius: 8px; background: color-mix(in srgb, #f5c84b 12%, var(--sp-surface)); font-size: 11px; line-height: 1.45; }
-.sp-developer-hint > span { display: grid; place-items: center; width: 16px; height: 16px; flex: 0 0 16px; color: #fff; border-radius: 50%; background: #b27b00; font-size: 10px; font-weight: 800; }
-.sp-developer-hint p { margin: 0; }
+.sp-inline-diagnostics { display: grid; gap: 8px; margin-top: 16px; }
+.sp-inline-more { color: var(--sp-muted); font-size: 10px; }
+.sp-diagnostics-trigger { position: fixed; right: 20px; bottom: 20px; z-index: 19; min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 11px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); box-shadow: 0 7px 24px rgba(12,13,18,.16); cursor: pointer; font-size: 11px; }
+.sp-diagnostics-trigger > span { display: grid; width: 18px; height: 18px; place-items: center; color: #fff; border-radius: 50%; background: #b27b00; font-size: 10px; font-weight: 800; }
+.sp-diagnostics-trigger.has-issues > span { background: #c43d50; }
+.sp-diagnostics-trigger small { min-width: 20px; padding: 2px 5px; color: var(--sp-muted); border-radius: 8px; background: var(--sp-surface-soft); text-align: center; }
+.sp-diagnostics-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: rgba(8,9,13,.28); backdrop-filter: blur(2px); }
+.sp-diagnostics-drawer { width: min(520px, 100%); height: 100%; display: grid; grid-template-rows: auto auto auto minmax(0,1fr); color: var(--sp-text); border-left: 1px solid var(--sp-line); background: var(--sp-bg); box-shadow: -20px 0 60px rgba(8,9,13,.2); }
+.sp-diagnostics-drawer > header { display: flex; justify-content: space-between; gap: 20px; padding: 25px 24px 19px; border-bottom: 1px solid var(--sp-line); }
+.sp-diagnostics-drawer h2 { margin: 3px 0 5px; font-size: 22px; }
+.sp-diagnostics-drawer header p { margin: 0; color: var(--sp-muted); font-size: 11px; }
+.sp-diagnostics-drawer header button { align-self: flex-start; width: 31px; height: 31px; padding: 0; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface); cursor: pointer; font-size: 20px; }
+.sp-diagnostics-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 14px 24px; border-bottom: 1px solid var(--sp-line); }
+.sp-diagnostics-summary button { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 7px; padding: 9px 10px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface); cursor: pointer; text-align: left; font-size: 10px; }
+.sp-diagnostics-summary button.is-active { color: var(--sp-text); border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line)); background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface)); }
+.sp-diagnostics-summary strong { color: var(--sp-text); font-size: 16px; }
+.sp-diagnostics-tools { display: flex; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--sp-line); }
+.sp-diagnostics-tools input { min-width: 0; flex: 1; padding: 9px 10px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 8px; outline: none; background: var(--sp-surface); font-size: 11px; }
+.sp-diagnostics-tools button { padding: 7px 9px; color: var(--sp-muted); border: 0; background: transparent; cursor: pointer; font-size: 9px; }
+.sp-diagnostics-list { overflow-y: auto; display: grid; align-content: start; gap: 10px; padding: 18px 24px 32px; }
+.sp-diagnostic-card { padding: 12px 13px; color: var(--sp-text); border: 1px solid var(--sp-line); border-left: 3px solid #b27b00; border-radius: 8px; background: var(--sp-surface); font-size: 11px; line-height: 1.5; }
+.sp-diagnostic-card.is-issue { border-left-color: #c43d50; }
+.sp-diagnostic-card.is-suggestion { border-left-color: #6d5dfc; }
+.sp-diagnostic-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.sp-diagnostic-card-head span { color: var(--sp-muted); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.sp-diagnostic-card-head code { overflow: hidden; color: var(--sp-muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.sp-diagnostic-card > strong { display: block; }
+.sp-diagnostic-card p { margin: 5px 0 0; color: var(--sp-muted); }
+.sp-diagnostic-card .sp-diagnostic-fix { color: var(--sp-text); }
+.sp-diagnostic-card footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 9px; padding-top: 8px; color: var(--sp-muted); border-top: 1px solid var(--sp-line); font-size: 8px; }
+.sp-diagnostic-card footer > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-diagnostic-card footer button { flex: none; padding: 0; color: var(--sp-muted); border: 0; background: transparent; cursor: pointer; font-size: inherit; text-decoration: underline; }
+.sp-diagnostics-empty { display: grid; gap: 4px; padding: 30px; color: var(--sp-muted); text-align: center; font-size: 11px; }
 
 @container sp-content (max-width: 900px) {
   .sp-hero { grid-template-columns: 1fr; gap: 32px; }
@@ -568,7 +598,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 
 @media print {
   .sp-theme-toggle { display: none; }
-  .sp-sidebar, .sp-search-backdrop, .sp-copy, .sp-chevron, .sp-reference-toc, .sp-reference-jump, .sp-developer-hint { display: none !important; }
+  .sp-sidebar, .sp-search-backdrop, .sp-copy, .sp-chevron, .sp-reference-toc, .sp-reference-jump, .sp-inline-diagnostics, .sp-diagnostics-trigger, .sp-diagnostics-backdrop { display: none !important; }
   .sp-with-sidebar { display: block; }
   .sp-content { padding: 0; }
   .sp-operation { break-inside: avoid; }
