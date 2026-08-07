@@ -23,6 +23,8 @@ describe('Speccy navigation', () => {
     window.history.replaceState({}, '', '/api');
     render(<Speccy spec={spec} basePath="/api" />);
 
+    expect(within(screen.getByRole('main')).getByRole('link', { name: /List companies.*GET.*companies/ })).toBeInTheDocument();
+
     const navigation = screen.getByRole('navigation', { name: 'API reference' });
     fireEvent.click(within(navigation).getByRole('button', { name: 'Companies' }));
     fireEvent.click(within(navigation).getByRole('link', { name: /List companies/ }));

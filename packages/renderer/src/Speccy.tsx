@@ -710,6 +710,22 @@ function NavigationTags({
     ))}</>;
 }
 
+function OperationLink({ item, basePath, onNavigate }: {
+  item: OperationModel;
+  basePath: string;
+  onNavigate: (operationId: string) => void;
+}) {
+  return (
+    <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}>
+      <span className="sp-operation-link-summary">{operationTitle(item)}</span>
+      <span className="sp-operation-link-address">
+        <span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>
+        <Path className="sp-path" value={item.path} />
+      </span>
+    </a>
+  );
+}
+
 function TagOverview({ tag, operations, basePath, onNavigate }: {
   tag: TagModel;
   operations: OperationModel[];
@@ -726,13 +742,7 @@ function TagOverview({ tag, operations, basePath, onNavigate }: {
       <div className="sp-tag-overview-operations">
         <h2>Operations</h2>
         <div className="sp-operation-list">{operations.map((item) => (
-          <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }} key={item.id}>
-            <span className="sp-operation-link-summary">{operationTitle(item)}</span>
-            <span className="sp-operation-link-address">
-              <span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>
-              <Path className="sp-path" value={item.path} />
-            </span>
-          </a>
+          <OperationLink item={item} basePath={basePath} onNavigate={onNavigate} key={item.id} />
         ))}</div>
       </div>
     </section>
@@ -909,7 +919,7 @@ export function Speccy({
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
               <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
-              <div className="sp-operation-list">{visible.map((item) => <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); navigate(item.id); }} key={item.id}><span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span><code className="sp-path">{item.path}</code><span>{operationTitle(item)}</span></a>)}</div>
+              <div className="sp-operation-list">{visible.map((item) => <OperationLink item={item} basePath={basePath} onNavigate={navigate} key={item.id} />)}</div>
             </section>
           );
         })}
