@@ -11,7 +11,7 @@
 .sp-optional-parameter-docs > .sp-endpoint-parameters { border: 0; border-top: 1px solid var(--sp-line); border-radius: 0; }
 
 .sp-prototype-parameter-field { position: relative; }
-.sp-prototype-parameter-field > button { position: absolute; top: 27px; right: 9px; width: 24px; height: 24px; padding: 0; color: var(--sp-muted); border: 0; border-radius: 5px; background: transparent; cursor: pointer; font-size: 16px; }
+.sp-prototype-parameter-field > button { position: absolute; top: 27px; right: 9px; width: 24px; height: 24px; padding: 0; color: var(--sp-muted); border: 0; border-radius: 5px; background: transparent; cursor: pointer; font-size: 16px; transition: color 120ms ease, background-color 120ms ease; }
 .sp-prototype-parameter-field > button:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-prototype-parameter-field:has(> button) input { padding-right: 36px; }
 .sp-optional-parameter-picker { position: relative; margin-top: 14px; }
@@ -19,7 +19,7 @@
 .sp-optional-parameter-menu { position: absolute; top: 26px; left: 0; right: 0; z-index: 5; overflow: hidden; padding: 7px; border: 1px solid var(--sp-line); border-radius: 9px; background: var(--sp-surface); box-shadow: 0 12px 32px rgba(0,0,0,.14); }
 .sp-optional-parameter-menu > input { box-sizing: border-box; width: 100%; padding: 9px 10px; color: var(--sp-text); border: 1px solid var(--sp-line); border-radius: 6px; outline: none; background: var(--sp-surface-soft); font: 10px Manrope, sans-serif; }
 .sp-optional-parameter-menu > div { max-height: 210px; overflow-y: auto; margin-top: 6px; }
-.sp-optional-parameter-menu > div > button { width: 100%; display: flex; flex-direction: column; gap: 2px; padding: 9px 10px; color: var(--sp-text); border: 0; border-radius: 6px; background: transparent; cursor: pointer; text-align: left; }
+.sp-optional-parameter-menu > div > button { width: 100%; display: flex; flex-direction: column; gap: 2px; padding: 9px 10px; color: var(--sp-text); border: 0; border-radius: 6px; background: transparent; cursor: pointer; text-align: left; transition: background-color 120ms ease; }
 .sp-optional-parameter-menu > div > button:hover { background: var(--sp-surface-soft); }
 .sp-optional-parameter-menu strong { font: 600 10px 'DM Mono', monospace; }
 .sp-optional-parameter-menu small, .sp-optional-parameter-menu > div > span { overflow: hidden; color: var(--sp-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
