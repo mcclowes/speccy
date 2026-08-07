@@ -609,6 +609,12 @@ function EndpointPage({ item, server, document, storageScope, parameterPrototype
           {!isWebhook && <section className="sp-endpoint-section sp-request-intro">
             <h2>Request</h2>
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
+            {parameters.length === 0 && !item.operation.requestBody && (
+              <div className="sp-request-empty">
+                <strong>No request parameters</strong>
+                <span>This endpoint doesn’t accept query parameters or a request body.</span>
+              </div>
+            )}
           </section>}
           <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
           {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required" title="Required">*</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}

@@ -93,6 +93,21 @@ describe('Speccy navigation', () => {
     render(<Speccy spec={spec} basePath="/api" />);
 
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
+    expect(screen.getByText('No request parameters')).toBeInTheDocument();
+    expect(screen.getByText('This endpoint doesn’t accept query parameters or a request body.')).toBeInTheDocument();
+  });
+
+  it('omits the empty request state when the endpoint accepts input', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      ...spec,
+      paths: { '/companies': { get: {
+        summary: 'List companies',
+        parameters: [{ name: 'cursor', in: 'query', schema: { type: 'string' } }],
+      } } },
+    }} basePath="/api" />);
+
+    expect(screen.queryByText('No request parameters')).not.toBeInTheDocument();
   });
 
   it('scrolls a directly opened endpoint into the sidebar viewport', () => {

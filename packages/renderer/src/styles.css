@@ -295,6 +295,8 @@ related:
 .sp-request-intro .sp-section { margin-top: 0; padding: 20px 22px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface-soft); }
 .sp-request-intro .sp-section h4 { margin-bottom: 9px; font-size: 12px; letter-spacing: 0; text-transform: none; }
 .sp-request-intro .sp-security-section { padding-top: 14px; padding-bottom: 14px; }
+.sp-request-empty { display: grid; gap: 3px; margin-top: 14px; color: var(--sp-muted); font-size: 12px; line-height: 1.5; }
+.sp-request-empty strong { color: var(--sp-text); font-weight: 600; }
 .sp-security-heading { margin-bottom: 0 !important; }
 .sp-security-toggle { display: flex; width: 100%; align-items: center; gap: 8px; padding: 0; color: var(--sp-text); border: 0; background: transparent; cursor: pointer; font: inherit; font-weight: inherit; letter-spacing: inherit; text-align: left; text-transform: inherit; }
 .sp-security-lock { flex: 0 0 15px; width: 15px; height: 15px; color: var(--sp-muted); }
