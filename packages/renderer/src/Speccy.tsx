@@ -816,7 +816,7 @@ function NavigationGroup({
         aria-expanded={expanded}
         aria-controls={operationListId}
       >
-        <span>{tag.name}</span>
+        <span className="sp-tag-label"><TagIcon tag={tag} />{tag.name}</span>
         <span className="sp-nav-chevron" aria-hidden="true" />
       </button>
       {expanded && (
@@ -886,6 +886,11 @@ function OperationLink({ item, basePath, onNavigate }: {
   );
 }
 
+function TagIcon({ tag }: { tag: TagModel }) {
+  if (!tag.icon) return null;
+  return <img className="sp-tag-icon" src={tag.icon.url} alt={tag.icon.alt ?? ''} />;
+}
+
 function TagOverview({ tag, operations, basePath, onNavigate }: {
   tag: TagModel;
   operations: OperationModel[];
@@ -895,7 +900,7 @@ function TagOverview({ tag, operations, basePath, onNavigate }: {
   return (
     <section className="sp-tag-overview">
       <div className="sp-tag-overview-intro">
-        <h1>{tag.name}</h1>
+        <h1 className="sp-tag-title"><TagIcon tag={tag} />{tag.name}</h1>
         <Markdown>{tag.description}</Markdown>
         <Markdown className="sp-tag-long-description">{tag.longDescription}</Markdown>
       </div>
@@ -1084,7 +1089,7 @@ export function Speccy({
           if (visible.length === 0) return null;
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
-              <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2>{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
+              <div className="sp-tag-heading"><div><span className="sp-tag-kicker">Resource</span><h2 className="sp-tag-title"><TagIcon tag={tag} />{tag.name}</h2></div><Markdown>{tag.description}</Markdown></div>
               <div className="sp-operation-list">{visible.map((item) => <OperationLink item={item} basePath={basePath} onNavigate={navigate} key={item.id} />)}</div>
             </section>
           );

@@ -45,6 +45,18 @@ export function Reference({spec}) {
 
 `spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `defaultExpanded`, `logo`, `className`, and `onError`.
 
+Tags can display an icon in the sidebar and tag headings with Speccy's `x-icon` extension:
+
+```yaml
+tags:
+  - name: Lending
+    x-icon:
+      url: /icons/lending.svg
+      alt: Lending
+```
+
+`url` accepts any image URL supported by the browser. Keep `alt` empty when the icon is purely decorative.
+
 ## Use the Docusaurus plugin
 
 ```ts

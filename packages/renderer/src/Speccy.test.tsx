@@ -136,6 +136,22 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('link', { name: /List companies.*GET.*companies/ })).toBeInTheDocument();
   });
 
+  it('renders a tag icon in navigation and tag headings', () => {
+    render(<Speccy spec={{
+      ...spec,
+      tags: [{ name: 'Companies', 'x-icon': { url: '/icons/companies.svg', alt: 'Company' } }],
+    }} basePath="/api" />);
+
+    expect(screen.getAllByRole('img', { name: 'Company' })).toHaveLength(2);
+
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    fireEvent.click(navigation.getByRole('button', { name: 'Company Companies' }));
+    fireEvent.click(navigation.getByRole('link', { name: 'Overview' }));
+
+    expect(screen.getAllByRole('img', { name: 'Company' })).toHaveLength(2);
+    expect(screen.getByRole('heading', { level: 1, name: 'Company Companies' })).toBeInTheDocument();
+  });
+
   it('opens a tag overview route directly', () => {
     window.history.replaceState({}, '', '/api/tags/companies');
     render(<Speccy spec={spec} basePath="/api" />);

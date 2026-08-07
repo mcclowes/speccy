@@ -34,7 +34,12 @@ export interface OpenAPIDocument {
   schemes?: string[];
   consumes?: string[];
   produces?: string[];
-  tags?: Array<{ name?: string; description?: string; 'x-longDescription'?: string }>;
+  tags?: Array<{
+    name?: string;
+    description?: string;
+    'x-longDescription'?: string;
+    'x-icon'?: { url?: string; alt?: string };
+  }>;
   'x-tagGroups'?: Array<{ name?: string; tags?: string[] }>;
   paths?: Record<string, PathItem>;
   webhooks?: Record<string, PathItem>;

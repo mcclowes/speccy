@@ -85,6 +85,9 @@ related:
 .sp-nav-tag-group .sp-nav-group { margin: 4px 0; }
 .sp-nav-tag { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; color: var(--sp-muted); background: transparent; border: 0; cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; }
 .sp-nav-tag > span:first-child { font-weight: 700; }
+.sp-tag-label, .sp-tag-title { display: flex; align-items: center; gap: 8px; }
+.sp-tag-icon { width: 1em; height: 1em; flex: none; object-fit: contain; }
+.sp-nav-tag .sp-tag-icon { width: 14px; height: 14px; }
 .sp-nav-tag:hover { color: var(--sp-text); }
 .sp-nav-tag.is-active { color: var(--sp-text); }
 .sp-nav-chevron { width: 6px; height: 6px; margin-right: 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }

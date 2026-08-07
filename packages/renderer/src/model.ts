@@ -35,6 +35,7 @@ export interface TagModel {
   name: string;
   description?: string;
   longDescription?: string;
+  icon?: { url: string; alt?: string };
   operations: OperationModel[];
 }
 
@@ -209,7 +210,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
 
   const declaredTags = new Map(
     (document.tags ?? [])
-      .filter((tag): tag is { name: string; description?: string; 'x-longDescription'?: string } => Boolean(tag.name))
+      .filter((tag): tag is NonNullable<OpenAPIDocument['tags']>[number] & { name: string } => Boolean(tag.name))
       .map((tag) => [tag.name, tag]),
   );
   const operations: OperationModel[] = [];
@@ -253,12 +254,17 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   ].filter((name, index, all) => all.indexOf(name) === index);
 
   let tags: TagModel[] = tagNames
-    .map((name) => ({
-      name,
-      description: declaredTags.get(name)?.description,
-      longDescription: declaredTags.get(name)?.['x-longDescription'],
-      operations: taggedOperations.filter((operation) => operation.tag === name),
-    }))
+    .map((name) => {
+      const declaredTag = declaredTags.get(name);
+      const icon = declaredTag?.['x-icon'];
+      return {
+        name,
+        description: declaredTag?.description,
+        longDescription: declaredTag?.['x-longDescription'],
+        icon: icon?.url ? { url: icon.url, alt: icon.alt } : undefined,
+        operations: taggedOperations.filter((operation) => operation.tag === name),
+      };
+    })
     .filter((tag) => tag.operations.length > 0);
 
   const configuredTagGroups = (document['x-tagGroups'] ?? [])
