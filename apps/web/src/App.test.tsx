@@ -139,6 +139,9 @@ describe('source editor', () => {
     render(<App />);
 
     expect(screen.getByText('Preview')).toBeTruthy();
+    const themePicker = screen.getByRole('button', { name: 'Theme: system' });
+    fireEvent.click(themePicker);
+    expect(screen.getByRole('button', { name: 'Theme: dark' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Speccy home' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Edit source' })).toBeNull();
   });

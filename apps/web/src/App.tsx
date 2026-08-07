@@ -241,9 +241,14 @@ export function App() {
     }
   }
 
+  function cycleTheme() {
+    setTheme(theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system');
+  }
+
   if (location.preview) {
     return (
       <main className={`studio studio-preview-only studio-${theme}`}>
+        <button className="studio-preview-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`} title={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
         {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" parameterPrototype />}
       </main>
     );
@@ -270,7 +275,7 @@ export function App() {
           {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
           {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
           {fileName && <button className="studio-action-source" type="button" onClick={() => setDrawerOpen(!drawerOpen)}><span>{drawerOpen ? 'Close source' : 'Edit source'}</span></button>}
-          <button className="studio-theme" type="button" onClick={() => setTheme(theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system')} aria-label={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
+          <button className="studio-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
           <input ref={fileInput} type="file" accept=".yaml,.yml,.json,application/json,text/yaml" hidden onChange={(event) => void loadFile(event.target.files?.[0])} />
         </div>
       </header>
