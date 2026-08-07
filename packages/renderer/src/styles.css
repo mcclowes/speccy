@@ -86,7 +86,7 @@ related:
 .sp-nav-empty span { font-size: 11px; }
 .sp-nav-group { margin: 6px 0; }
 .sp-nav-tag-group { margin: 20px 0 26px; }
-.sp-nav-tag-group > .sp-nav-heading { padding: 5px 8px 2px; color: var(--sp-text); font-size: 11px; text-transform: none; }
+.sp-nav-tag-group > .sp-nav-heading { padding: 5px 8px 2px; color: color-mix(in srgb, var(--sp-text) 78%, var(--sp-muted)); font-size: 11px; text-transform: none; }
 .sp-nav-tag-group .sp-nav-group { margin: 4px 0; }
 .sp-nav-tag { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; color: var(--sp-muted); background: transparent; border: 0; cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; }
 .sp-nav-tag > span:first-child { font-weight: 700; }
