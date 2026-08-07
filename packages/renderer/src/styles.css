@@ -355,6 +355,8 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-example .sp-copy { width: 26px; height: 26px; justify-content: center; gap: 0; padding: 0; font-size: 0; }
 .sp-named-example { margin-top: 12px; }
 .sp-detail-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--sp-line); font-size: 11px; }
+.sp-response-content .sp-detail-list + .sp-media-list,
+.sp-response-body .sp-detail-list + .sp-media-list { margin-top: 32px; }
 .sp-security-requirements { display: grid; gap: 6px; }
 .sp-security-option { display: grid; gap: 6px; color: var(--sp-muted); font-size: 11px; }
 .sp-security-option > div { display: grid; gap: 8px; }
