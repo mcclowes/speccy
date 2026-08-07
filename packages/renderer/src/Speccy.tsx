@@ -258,13 +258,13 @@ function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
   return <CodeBlock className="sp-rail-code sp-response-example" title={title} value={JSON.stringify(activeExample.value, null, 2)} />;
 }
 
-function EndpointResponseBody({ response }: { response: ResponseObject }) {
+function EndpointResponseBody({ code, response }: { code: string; response: ResponseObject }) {
   const examples = responseExamples(response);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeExample = examples[activeIndex];
 
   return <div className="sp-endpoint-response-grid">
-    <div className="sp-response-summary"><Markdown>{response.description}</Markdown></div>
+    <div className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}><Markdown>{response.description}</Markdown></div>
     <div className="sp-endpoint-response-detail" role="tabpanel">
       <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
       {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
@@ -301,7 +301,7 @@ function EndpointResponses({ responses }: { responses: Record<string, ResponseOb
           ))}
         </div>
       </div>
-      <EndpointResponseBody response={activeResponse} key={activeCode} />
+      <EndpointResponseBody code={activeCode} response={activeResponse} key={activeCode} />
     </section>
   );
 }
