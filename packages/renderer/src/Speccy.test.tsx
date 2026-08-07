@@ -151,6 +151,8 @@ describe('Speccy navigation', () => {
     fireEvent.click(navigation.getByRole('link', { name: /Account categories updated/ }));
 
     expect(screen.getByRole('heading', { level: 1, name: 'Account categories updated' })).toBeInTheDocument();
+    expect(screen.getAllByTitle('Webhook')).toHaveLength(2);
+    expect(screen.queryByText('POST')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Payload' })).toBeInTheDocument();
     expect(screen.queryByRole('complementary', { name: 'Request builder' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Send request' })).not.toBeInTheDocument();

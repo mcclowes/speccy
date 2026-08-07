@@ -1,4 +1,5 @@
 export { Speccy } from './Speccy';
+export { WebhookIcon } from './WebhookIcon';
 export { createReferenceModel, normalizeDocument, parseSpec, resolveRefs } from './model';
 export type {
   CallbackObject,

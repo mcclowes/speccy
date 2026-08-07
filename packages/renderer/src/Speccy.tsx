@@ -32,6 +32,7 @@ import type {
   SpeccyProps,
 } from './types';
 import { useLocalState } from './useLocalState';
+import { WebhookIcon } from './WebhookIcon';
 
 const METHOD_LABELS: Record<string, string> = {
   get: 'GET', post: 'POST', put: 'PUT', patch: 'PATCH', delete: 'DELETE',
@@ -48,6 +49,13 @@ const HTTP_STATUS_PHRASES: Record<string, string> = {
 
 function operationTitle(item: OperationModel): string {
   return item.operation.summary ?? item.operation.operationId ?? (item.source === 'webhook' ? item.path : 'Untitled operation');
+}
+
+function OperationBadge({ item, compact = false }: { item: OperationModel; compact?: boolean }) {
+  if (item.source === 'webhook') {
+    return <span className={compact ? 'sp-nav-method sp-webhook' : 'sp-method sp-webhook'} title="Webhook"><WebhookIcon /><span className="sp-visually-hidden">Webhook</span></span>;
+  }
+  return <span className={compact ? `sp-nav-method sp-nav-method-${item.method}` : `sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>;
 }
 
 function Path({ value, className }: { value: string; className?: string }) {
@@ -489,7 +497,7 @@ function EndpointPage({ item, server, document, storageScope }: { item: Operatio
       <header className="sp-endpoint-header">
         <div className="sp-tag-kicker">{item.tag}</div>
         <h1>{operationTitle(item)}</h1>
-        <div className="sp-endpoint-address"><span className="sp-method">{METHOD_LABELS[item.method]}</span><Path value={item.path} /></div>
+        <div className="sp-endpoint-address"><OperationBadge item={item} /><Path value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
       </header>
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
@@ -519,7 +527,7 @@ function OperationCard({ item, server, defaultExpanded }: {
   return (
     <article id={item.id} className={`sp-operation sp-method-${item.method}`}>
       <button type="button" className="sp-operation-summary" onClick={() => setOpen(!open)} aria-expanded={open}>
-        <span className="sp-method">{METHOD_LABELS[item.method]}</span>
+        <OperationBadge item={item} />
         <code className="sp-path">{item.path}</code>
         <span className="sp-operation-name">{operationTitle(item)}</span>
         {item.operation.deprecated && <span className="sp-deprecated">deprecated</span>}
@@ -598,6 +606,7 @@ type SearchResult = {
   group: 'Pages' | 'Tags' | 'Endpoints' | 'Reference';
   label: string;
   detail?: string;
+  webhook?: boolean;
   terms: string[];
   navigate: () => void;
 };
@@ -677,7 +686,7 @@ function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: (
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => select(result)}
                 key={result.id}
-              ><span>{result.label}</span>{result.detail && <small>{result.detail}</small>}</button>;
+              ><span>{result.label}</span>{result.detail && <small>{result.webhook && <WebhookIcon />} {result.detail}</small>}</button>;
             })}
           </section>)}
           {matches.length === 0 && <div className="sp-search-empty" role="status">No results for “{query}”.</div>}
@@ -740,7 +749,7 @@ function NavigationGroup({
               aria-current={activeOperationId === item.id ? 'page' : undefined}
               onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
               key={item.id}
-            ><span className="sp-nav-operation-label">{item.operation.summary ?? item.path}</span><span className={`sp-nav-method sp-nav-method-${item.method}`}>{METHOD_LABELS[item.method]}</span></a>
+            ><span className="sp-nav-operation-label">{item.operation.summary ?? item.path}</span><OperationBadge item={item} compact /></a>
           ))}
         </div>
       )}
@@ -785,7 +794,7 @@ function OperationLink({ item, basePath, onNavigate }: {
     <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}>
       <span className="sp-operation-link-summary">{operationTitle(item)}</span>
       <span className="sp-operation-link-address">
-        <span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>
+        <OperationBadge item={item} />
         <Path className="sp-path" value={item.path} />
       </span>
     </a>
@@ -932,7 +941,8 @@ export function Speccy({
     ...[...model.operations, ...model.webhooks].map((item) => ({
       id: `operation-${item.id}`, group: 'Endpoints' as const,
       label: item.operation.summary ?? item.operation.operationId ?? item.path,
-      detail: `${METHOD_LABELS[item.method]} ${item.path}`,
+      detail: item.source === 'webhook' ? item.path : `${METHOD_LABELS[item.method]} ${item.path}`,
+      webhook: item.source === 'webhook',
       terms: [item.path, item.method, item.operation.summary ?? '', item.operation.operationId ?? '', item.tag],
       navigate: () => navigate(item.id),
     })),
