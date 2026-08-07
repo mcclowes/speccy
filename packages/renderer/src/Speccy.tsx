@@ -553,21 +553,23 @@ function RequestRail({
       )}
       {parameters.length > 0 && (
         <section className="sp-rail-card">
-          <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+          <div className="sp-parameter-card-header">
+            <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+            {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
+              <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
+              {optionalPickerOpen && <div className="sp-optional-parameter-menu">
+                <input autoFocus value={optionalPickerQuery} onChange={(event) => setOptionalPickerQuery(event.target.value)} placeholder="Find a parameter" aria-label="Find an optional parameter" />
+                <div>{availableOptionalParameters.map((parameter) => {
+                  const key = `${parameter.in}-${parameter.name}`;
+                  return <button type="button" onClick={() => { setSelectedOptionalParameters([...selectedOptionalParameters, key]); setOptionalPickerQuery(''); }} key={key}><strong>{parameter.name}</strong><small>{parameter.description}</small></button>;
+                })}{availableOptionalParameters.length === 0 && <span>No parameters found</span>}</div>
+              </div>}
+            </div>}
+          </div>
           <div className="sp-rail-fields">{requestBuilderParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
             return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setStoredValues({ ...storedValues, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;
           })}</div>
-          {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
-            <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
-            {optionalPickerOpen && <div className="sp-optional-parameter-menu">
-              <input autoFocus value={optionalPickerQuery} onChange={(event) => setOptionalPickerQuery(event.target.value)} placeholder="Find a parameter" aria-label="Find an optional parameter" />
-              <div>{availableOptionalParameters.map((parameter) => {
-                const key = `${parameter.in}-${parameter.name}`;
-                return <button type="button" onClick={() => { setSelectedOptionalParameters([...selectedOptionalParameters, key]); setOptionalPickerQuery(''); }} key={key}><strong>{parameter.name}</strong><small>{parameter.description}</small></button>;
-              })}{availableOptionalParameters.length === 0 && <span>No parameters found</span>}</div>
-            </div>}
-          </div>}
           {!parameterPrototype && hiddenParameterCount > 0 && (
             <button type="button" className="sp-rail-parameter-toggle" onClick={() => setParametersExpanded(!parametersExpanded)} aria-expanded={parametersExpanded}>
               {parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`}

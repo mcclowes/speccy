@@ -171,7 +171,7 @@ describe('Speccy navigation', () => {
 
   it('dismisses the optional parameter picker from outside clicks and Escape', () => {
     window.history.replaceState({}, '', '/api/get-companies');
-    render(<Speccy spec={{
+    const { container } = render(<Speccy spec={{
       ...spec,
       paths: { '/companies': { get: {
         summary: 'List companies',
@@ -180,6 +180,7 @@ describe('Speccy navigation', () => {
     }} basePath="/api" parameterPrototype />);
 
     const trigger = screen.getByRole('button', { name: /Add optional parameter/ });
+    expect(trigger).toBe(container.querySelector('.sp-parameter-card-header .sp-add-optional-parameter'));
     fireEvent.click(trigger);
     expect(screen.getByRole('textbox', { name: 'Find an optional parameter' })).toBeInTheDocument();
 
