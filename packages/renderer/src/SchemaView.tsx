@@ -23,6 +23,13 @@ function schemaLabel(schema?: SchemaObject): string {
   return [schema.title, type].filter(Boolean).join(' · ');
 }
 
+function alternativeName(schema: SchemaObject, index: number): string {
+  if (!schema.title) return `Option ${index + 1}`;
+  return schema.title
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ');
+}
+
 export function JsonValue({ value }: { value: unknown }) {
   if (value === undefined) return null;
   const serialized = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -63,7 +70,6 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   if (!schema) return null;
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
-  const alternativeLabel = schema.oneOf ? 'one of' : 'any of';
   const isObject = schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues = schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
   const constraints: Array<{ label: string; value: string | number }> = [];
@@ -128,16 +134,19 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
       {schema.allOf && <div className="sp-schema-properties">{schema.allOf.map((member, index) => (
         <SchemaView key={index} schema={member} depth={depth + 1} collapseObjects={collapseObjects} showExample={showExample} />
       ))}</div>}
-      {alternatives && <div className="sp-schema-properties">{alternatives.map((alternative, index) => (
-        <SchemaView
-          key={index}
-          name={alternatives.length > 1 ? `${alternativeLabel} ${index + 1}` : undefined}
-          schema={alternative}
-          depth={depth + 1}
-          collapseObjects={collapseObjects}
-          showExample={showExample}
-        />
-      ))}</div>}
+      {alternatives && <div className="sp-schema-alternatives">
+        {alternatives.length > 1 && <div className="sp-schema-alternatives-label">Accepted shapes</div>}
+        <div className="sp-schema-properties">{alternatives.map((alternative, index) => (
+          <SchemaView
+            key={index}
+            name={alternatives.length > 1 ? alternativeName(alternative, index) : undefined}
+            schema={alternative}
+            depth={depth + 1}
+            collapseObjects={collapseObjects}
+            showExample={showExample}
+          />
+        ))}</div>
+      </div>}
   </>;
   const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
 

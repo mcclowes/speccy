@@ -127,16 +127,24 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('BLOCKED')).toBeVisible();
   });
 
-  it('labels genuine alternatives and omits a meaningless label for one choice', () => {
+  it('labels alternatives by schema title with a numbered fallback', () => {
     const { rerender } = render(<SchemaView schema={{
-      oneOf: [{ type: 'string' }, { type: 'integer' }],
+      oneOf: [
+        { title: 'LinkedAccount', type: 'object' },
+        { title: 'UnknownSenderAccount', type: 'object' },
+        { type: 'string' },
+      ],
     }} />);
 
-    expect(screen.getByText('one of 1')).toBeInTheDocument();
-    expect(screen.getByText('one of 2')).toBeInTheDocument();
+    expect(screen.getByText('Accepted shapes')).toBeInTheDocument();
+    expect(screen.getByText('Linked Account')).toBeInTheDocument();
+    expect(screen.getByText('Unknown Sender Account')).toBeInTheDocument();
+    expect(screen.getByText('Option 3')).toBeInTheDocument();
+    expect(screen.queryByText(/one of/i)).not.toBeInTheDocument();
 
     rerender(<SchemaView schema={{ anyOf: [{ type: 'string' }] }} />);
-    expect(screen.queryByText(/any of/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Accepted shapes')).not.toBeInTheDocument();
+    expect(screen.queryByText(/option/i)).not.toBeInTheDocument();
   });
 
   it('opens structural response objects while nested named objects start collapsed', () => {
