@@ -100,6 +100,8 @@ describe('SchemaView composition', () => {
 
     expect(screen.getByText('id')).toBeVisible();
     expect(screen.getByText('connection')).toBeVisible();
+    expect(screen.getByText('id').closest('.sp-schema-head')).toHaveClass('sp-schema-head-named');
+    expect(screen.getByText('id').closest('.sp-schema-head')).toHaveRole('button');
     expect(screen.queryByText('Unique identifier for the company.')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Show details for id' }));

@@ -65,8 +65,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     setDetailsOpen((open) => !open);
   };
 
-  const header = (
-    <div className="sp-schema-head">
+  const headerContents = <>
         {name && <code className="sp-property">{name}</code>}
         {required && <span className="sp-required">required</span>}
         <span className="sp-type">{schemaLabel(schema)}</span>
@@ -74,15 +73,17 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
         {schema.writeOnly && <span className="sp-qualifier">write only</span>}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
-        {hasFieldDetails && <button
-          type="button"
-          className="sp-schema-details-toggle"
-          aria-expanded={detailsOpen}
-          aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
-          onClick={toggleDetails}
-        ><span aria-hidden="true" /></button>}
-    </div>
-  );
+        {hasFieldDetails && <span className="sp-schema-details-toggle" aria-hidden="true"><span /></span>}
+  </>;
+  const header = name && hasFieldDetails
+    ? <button
+        type="button"
+        className="sp-schema-head sp-schema-head-named"
+        aria-expanded={detailsOpen}
+        aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
+        onClick={toggleDetails}
+      >{headerContents}</button>
+    : <div className={`sp-schema-head${name ? ' sp-schema-head-named' : ''}`}>{headerContents}</div>;
   const fieldDetails = <div className="sp-schema-field-details">
       {collapseObjects
         ? <CollapsibleMarkdown className="sp-schema-description">{schema.description}</CollapsibleMarkdown>

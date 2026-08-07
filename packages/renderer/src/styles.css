@@ -5,6 +5,7 @@
   --sp-bg: #fbfbfd;
   --sp-surface: #fff;
   --sp-surface-soft: #f5f5f8;
+  --sp-field-head: #f2f2f4;
   --sp-text: #17171c;
   --sp-muted: #6d6d79;
   --sp-line: #e7e7ec;
@@ -27,8 +28,8 @@
 .speccy button, .speccy input { font: inherit; }
 .speccy input::placeholder { color: color-mix(in srgb, var(--sp-muted) 38%, var(--sp-bg)); opacity: 1; }
 .speccy p { margin: 0 0 0.8em; }
-.sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; color-scheme: dark; }
-@media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; color-scheme: dark; } }
+.sp-theme-dark { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-field-head: #24252c; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; color-scheme: dark; }
+@media (prefers-color-scheme: dark) { .sp-theme-system { --sp-bg: #111217; --sp-surface: #18191f; --sp-surface-soft: #202127; --sp-field-head: #24252c; --sp-text: #f3f3f6; --sp-muted: #9c9ca7; --sp-line: #2c2d35; --sp-code: #0c0d11; --sp-code-text: #ededf4; --sp-code-border: #292a33; --sp-code-control: #252630; color-scheme: dark; } }
 
 .sp-with-sidebar { display: grid; grid-template-columns: 280px minmax(0, 1fr); }
 .sp-sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--sp-line); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); display: flex; flex-direction: column; z-index: 10; }
@@ -146,7 +147,7 @@
 .sp-response-tab:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-response-tab[aria-selected='true'] { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
-.sp-response-summary { grid-column: 1; padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 0 6px 6px 0; background: var(--sp-surface-soft); }
+.sp-response-summary { grid-column: 1; padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 6px; background: var(--sp-surface-soft); }
 .sp-response-summary.is-success { border-left-color: #25a878; }
 .sp-response-label { display: flex; align-items: baseline; gap: 8px; color: var(--sp-text); font-size: 12px; }
 .sp-response-label > strong { font-weight: 600; }
@@ -232,22 +233,25 @@
 .sp-parameter { padding: 17px 0; border-bottom: 1px solid var(--sp-line); }
 .sp-parameter-name, .sp-schema-head { display: flex; align-items: baseline; gap: 9px; }
 .sp-schema-head { width: 100%; }
+.sp-schema-head-named { min-height: 28px; padding: 5px 8px; color: inherit; border: 0; border-radius: 6px; background: var(--sp-field-head); font: inherit; text-align: left; }
+button.sp-schema-head-named { cursor: pointer; }
+button.sp-schema-head-named:hover { filter: brightness(.985); }
+button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent); outline-offset: 1px; }
 .sp-parameter-name code, .sp-property { color: var(--sp-text); font-size: 11px; font-weight: 500; }
 .sp-parameter-name > span:not(.sp-required) { color: var(--sp-muted); font-size: 9px; }
 .sp-parameter p, .sp-schema-description, .sp-schema-meta { margin: 6px 0; color: var(--sp-muted); font-size: 11px; }
-.sp-schema { min-width: 0; padding: 9px 0; }
+.sp-schema { min-width: 0; padding: 4px 0; }
 .sp-schema-object > summary { display: flex; align-items: center; gap: 7px; width: 100%; cursor: pointer; list-style: none; }
 .sp-schema-object > summary::-webkit-details-marker { display: none; }
 .sp-schema-object > summary::before { content: ''; width: 7px; height: 7px; margin-left: 1px; margin-right: 4px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; color: var(--sp-muted); transform: rotate(-45deg); transition: transform 140ms ease; }
 .sp-schema-object[open] > summary::before { transform: rotate(45deg); }
 .sp-schema-object-named > summary { position: relative; }
 .sp-schema-object-named > summary::before { position: absolute; left: -15px; margin: 0; }
-.sp-schema-object > summary:hover .sp-schema-head { filter: brightness(1.15); }
-.sp-schema-details-toggle { display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; padding: 0; place-items: center; color: var(--sp-muted); background: transparent; border: 0; border-radius: 4px; cursor: pointer; }
-.sp-schema-details-toggle:hover { color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 8%, transparent); }
+.sp-schema-object > summary:hover > .sp-schema-head:not(button) { filter: brightness(1.15); }
+.sp-schema-details-toggle { display: grid; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; place-items: center; color: var(--sp-muted); }
 .sp-schema-details-toggle > span { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform 140ms ease; }
-.sp-schema-details-toggle[aria-expanded='true'] > span { transform: rotate(225deg); }
-.sp-schema-properties { margin: 8px 0 0 6px; padding-left: 15px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line)); }
+.sp-schema-head[aria-expanded='true'] .sp-schema-details-toggle > span { transform: rotate(225deg); }
+.sp-schema-properties { margin: 5px 0 0 6px; padding-left: 15px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line)); }
 .sp-type { color: var(--sp-accent); font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-schema .sp-schema-head > .sp-required { overflow: hidden; width: 5px; color: #d24859; font-size: 0; letter-spacing: 0; text-transform: none; }
 .sp-schema .sp-schema-head > .sp-required::after { content: '*'; font-size: 11px; }
