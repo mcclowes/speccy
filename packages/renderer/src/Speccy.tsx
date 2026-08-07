@@ -156,7 +156,7 @@ function SecurityRequirements({ requirements, schemes }: {
     className="sp-security-toggle"
     aria-expanded={expanded}
     onClick={() => setExpanded(!expanded)}
-  ><svg className="sp-security-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</span><span className="sp-security-info" data-tooltip={expanded ? 'Hide authorization details' : 'Show authorization details'} aria-hidden="true">i</span></button></h4>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
+  ><svg className="sp-security-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</span><span className="sp-security-info" data-tooltip={expanded ? 'Hide authorization details' : 'Show authorization details'} aria-hidden="true">?</span></button></h4>{expanded && <div className="sp-security-requirements">{requirements.map((requirement, index) => (
     <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
       const scheme = schemes?.[name];
       return <div className="sp-security-scheme" key={name}>
@@ -398,6 +398,7 @@ function RequestRail({
   const [selectedOptionalParameters, setSelectedOptionalParameters] = useState<string[]>([]);
   const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
   const [optionalPickerQuery, setOptionalPickerQuery] = useState('');
+  const optionalPickerRef = useRef<HTMLDivElement>(null);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const [body, setBody] = useState(() => requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]));
   const [result, setResult] = useState<{ status?: number; statusText?: string; body?: string; error?: string }>();
@@ -421,6 +422,23 @@ function RequestRail({
     const key = `${parameter.in}-${parameter.name}`;
     return !selectedOptionalParameters.includes(key) && (!optionalPickerQuery.trim() || parameter.name?.toLowerCase().includes(optionalPickerQuery.trim().toLowerCase()));
   });
+
+  useEffect(() => {
+    if (!optionalPickerOpen) return;
+
+    function dismissOptionalPicker(event: MouseEvent | globalThis.KeyboardEvent) {
+      if (event instanceof globalThis.KeyboardEvent && event.key !== 'Escape') return;
+      if (event instanceof MouseEvent && optionalPickerRef.current?.contains(event.target as Node)) return;
+      setOptionalPickerOpen(false);
+    }
+
+    document.addEventListener('click', dismissOptionalPicker);
+    document.addEventListener('keydown', dismissOptionalPicker);
+    return () => {
+      document.removeEventListener('click', dismissOptionalPicker);
+      document.removeEventListener('keydown', dismissOptionalPicker);
+    };
+  }, [optionalPickerOpen]);
 
   for (const parameter of requestParameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
@@ -510,7 +528,7 @@ function RequestRail({
             const key = `${parameter.in}-${parameter.name}`;
             return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;
           })}</div>
-          {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker">
+          {parameterPrototype && optionalParameters.length > 0 && <div className="sp-optional-parameter-picker" ref={optionalPickerRef}>
             <button type="button" className="sp-add-optional-parameter" onClick={() => setOptionalPickerOpen(!optionalPickerOpen)} aria-expanded={optionalPickerOpen}>+ Add optional parameter</button>
             {optionalPickerOpen && <div className="sp-optional-parameter-menu">
               <input autoFocus value={optionalPickerQuery} onChange={(event) => setOptionalPickerQuery(event.target.value)} placeholder="Find a parameter" aria-label="Find an optional parameter" />

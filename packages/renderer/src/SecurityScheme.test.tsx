@@ -36,6 +36,7 @@ describe('operation security schemes', () => {
     const toggle = screen.getByRole('button', { name: 'Authorization: API key' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(toggle.querySelector('.sp-security-lock')).toBeInTheDocument();
+    expect(toggle.querySelector('.sp-security-info')).toHaveTextContent('?');
     expect(toggle.querySelector('.sp-security-info')).toHaveAttribute('data-tooltip', 'Show authorization details');
     expect(screen.queryByText(/The word "Basic" followed by a space/)).not.toBeInTheDocument();
     fireEvent.click(toggle);

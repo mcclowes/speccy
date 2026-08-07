@@ -18,6 +18,7 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         tags: ['Books'], operationId: 'listBooks', summary: 'List books',
         description: 'Returns a cursor-paginated list of books. Results can be narrowed by title, author, or ISBN.',
         parameters: [
+          { name: 'catalog', in: 'query', required: true, description: 'Catalog to search.', schema: { type: 'string', example: 'public' } },
           { name: 'query', in: 'query', description: 'A title, author, or ISBN fragment.', schema: { type: 'string', example: 'Ursula Le Guin' } },
           { name: 'limit', in: 'query', description: 'The maximum number of books to return.', schema: { type: 'integer', default: 20 } },
           { name: 'cursor', in: 'query', description: 'Continue from a cursor returned by the previous page.', schema: { type: 'string' } },

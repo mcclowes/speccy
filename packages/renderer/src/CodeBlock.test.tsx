@@ -20,4 +20,17 @@ describe('CodeBlock', () => {
     rerender(<CodeBlock value="example" copyable={false} />);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('highlights valid JSON without changing non-JSON samples', () => {
+    const { container, rerender } = render(<CodeBlock value={'{"name":"Speccy","count":2,"ready":true,"empty":null}'} />);
+
+    expect(container.querySelector('.sp-json-key')).toHaveTextContent('"name"');
+    expect(container.querySelector('.sp-json-string')).toHaveTextContent('"Speccy"');
+    expect(container.querySelector('.sp-json-number')).toHaveTextContent('2');
+    expect(container.querySelectorAll('.sp-json-literal')).toHaveLength(2);
+    expect(container.querySelector('code')).toHaveTextContent('{"name":"Speccy","count":2,"ready":true,"empty":null}');
+
+    rerender(<CodeBlock value="curl https://example.com" />);
+    expect(container.querySelector('code span')).not.toBeInTheDocument();
+  });
 });

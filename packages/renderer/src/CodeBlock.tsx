@@ -9,6 +9,30 @@
 
 import { useState, type ReactNode } from 'react';
 
+const JSON_TOKEN_PATTERN = /("(?:\\.|[^"\\])*")(?=\s*:)|("(?:\\.|[^"\\])*")|(-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b/g;
+
+function highlightedJson(value: string): ReactNode {
+  try {
+    JSON.parse(value);
+  } catch {
+    return value;
+  }
+
+  const tokens: ReactNode[] = [];
+  let cursor = 0;
+
+  for (const match of value.matchAll(JSON_TOKEN_PATTERN)) {
+    const index = match.index;
+    if (index > cursor) tokens.push(value.slice(cursor, index));
+    const type = match[1] ? 'key' : match[2] ? 'string' : match[3] ? 'number' : 'literal';
+    tokens.push(<span className={`sp-json-${type}`} key={index}>{match[0]}</span>);
+    cursor = index + match[0].length;
+  }
+
+  if (cursor < value.length) tokens.push(value.slice(cursor));
+  return tokens;
+}
+
 export function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -42,7 +66,7 @@ export function CodeBlock({
           {copyable && <CopyButton value={copyValue} />}
         </div>
       )}
-      <pre><code>{value}</code></pre>
+      <pre><code>{highlightedJson(value)}</code></pre>
     </div>
   );
 }

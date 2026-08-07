@@ -5,7 +5,7 @@ import { MediaContent, SchemaView } from './SchemaView';
 afterEach(cleanup);
 
 describe('SchemaView composition', () => {
-  it('identifies named media examples as example payloads', () => {
+  it('shows named media examples in an example payload selector', () => {
     render(<MediaContent content={{
       'application/json': {
         examples: {
@@ -13,11 +13,22 @@ describe('SchemaView composition', () => {
             summary: 'Update tags',
             value: { tags: { reference: 'new reference' } },
           },
+          updateName: {
+            summary: 'Update name',
+            value: { name: 'New name' },
+          },
         },
       },
     }} />);
 
-    expect(screen.getByText('Example payload: Update tags')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Example payload' })).toHaveValue('0');
+    expect(screen.getByText(/"reference": "new reference"/)).toBeInTheDocument();
+    expect(screen.queryByText(/"name": "New name"/)).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Example payload' }), { target: { value: '1' } });
+
+    expect(screen.getByText(/"name": "New name"/)).toBeInTheDocument();
+    expect(screen.queryByText(/"reference": "new reference"/)).not.toBeInTheDocument();
   });
 
   it('shows a schema title alongside its type', () => {

@@ -1,6 +1,6 @@
 /**
  * ---
- * purpose: Renders schemas, examples, and every declared media type without operation-level state.
+ * purpose: Renders recursive schema trees, per-field detail disclosure, and every declared media type's examples.
  * related:
  *   - ./Speccy.tsx - Uses these primitives for parameters, requests, and responses.
  *   - ./ReferenceSections.tsx - Uses them for reusable component catalogues.
@@ -27,6 +27,25 @@ export function JsonValue({ value }: { value: unknown }) {
   if (value === undefined) return null;
   const serialized = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   return <CodeBlock className="sp-example" value={serialized} />;
+}
+
+function NamedMediaExamples({ examples }: { examples: NonNullable<MediaType['examples']> }) {
+  const entries = Object.entries(examples);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [name, activeExample] = entries[activeIndex] ?? [];
+  if (!activeExample) return null;
+
+  const label = activeExample.summary ?? name;
+  const title = entries.length > 1 ? (
+    <><span>Example payload</span><select className="sp-example-select" aria-label="Example payload" value={activeIndex} onChange={(event) => setActiveIndex(Number(event.target.value))}>{entries.map(([exampleName, example], index) => <option value={index} key={exampleName}>{example.summary ?? exampleName}</option>)}</select></>
+  ) : `Example payload: ${label}`;
+  const value = activeExample.value ?? activeExample.externalValue;
+  const serialized = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+
+  return <div className="sp-named-example">
+    <Markdown>{activeExample.description}</Markdown>
+    <CodeBlock className="sp-example" title={title} value={serialized} />
+  </div>;
 }
 
 export function SchemaView({ schema, name, required = false, depth = 0, collapseObjects = false, showExample = true, exampleValue }: {
@@ -149,9 +168,7 @@ export function MediaContent({ content, collapseObjects = false, showExamples = 
       <div className="sp-media-type">{mediaType}</div>
       <SchemaView schema={media.schema} collapseObjects={collapseObjects} showExample={showExamples} exampleValue={exampleValue} />
       {showExamples && media.example !== undefined && <JsonValue value={media.example} />}
-      {showExamples && media.examples && Object.entries(media.examples).map(([name, example]) => (
-        <div className="sp-named-example" key={name}><strong>Example payload: {example.summary ?? name}</strong><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></div>
-      ))}
+      {showExamples && media.examples && <NamedMediaExamples examples={media.examples} />}
     </section>
   ))}</div>;
 }

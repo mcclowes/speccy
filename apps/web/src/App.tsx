@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { OpenAPIDocument } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
 import { SAMPLE_SPEC } from './sample';
-import { ParameterPrototypeSwitcher, readParameterPrototypeVariant } from './ParameterPrototypeSwitcher';
 
 declare global {
   interface Window {
@@ -50,7 +49,6 @@ function SourceEditor({ initialSource, onApply }: {
 }
 
 export function App() {
-  const [parameterVariant, setParameterVariant] = useState(readParameterPrototypeVariant);
   const [spec, setSpec] = useState<OpenAPIDocument | string>(SAMPLE_SPEC);
   const [source, setSource] = useState(JSON.stringify(SAMPLE_SPEC, null, 2));
   const [fileName, setFileName] = useState('Luma sample');
@@ -140,9 +138,8 @@ export function App() {
         {drawerOpen && (
           <SourceEditor key={source} initialSource={source} onApply={(draft) => applySource(draft, fileName)} />
         )}
-        <div className={`studio-preview parameter-prototype-${parameterVariant.toLowerCase()}`}><Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" parameterPrototypeVariant={parameterVariant} /></div>
+        <div className="studio-preview"><Speccy spec={spec} theme={theme} logo={<Mark />} basePath="" parameterPrototype /></div>
       </div>
-      {import.meta.env.DEV && <ParameterPrototypeSwitcher variant={parameterVariant} onChange={setParameterVariant} />}
     </div>
   );
 }

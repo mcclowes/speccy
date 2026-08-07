@@ -67,6 +67,28 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
   });
 
+  it('dismisses the optional parameter picker from outside clicks and Escape', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      ...spec,
+      paths: { '/companies': { get: {
+        summary: 'List companies',
+        parameters: [{ name: 'cursor', in: 'query', schema: { type: 'string' } }],
+      } } },
+    }} basePath="/api" parameterPrototype />);
+
+    const trigger = screen.getByRole('button', { name: /Add optional parameter/ });
+    fireEvent.click(trigger);
+    expect(screen.getByRole('textbox', { name: 'Find an optional parameter' })).toBeInTheDocument();
+
+    fireEvent.click(document.body);
+    expect(screen.queryByRole('textbox', { name: 'Find an optional parameter' })).not.toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('textbox', { name: 'Find an optional parameter' })).not.toBeInTheDocument();
+  });
+
   it('labels responses with their standard HTTP status phrase without repeating the description', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={{
