@@ -20,6 +20,9 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         parameters: [
           { name: 'query', in: 'query', description: 'A title, author, or ISBN fragment.', schema: { type: 'string', example: 'Ursula Le Guin' } },
           { name: 'limit', in: 'query', description: 'The maximum number of books to return.', schema: { type: 'integer', default: 20 } },
+          { name: 'cursor', in: 'query', description: 'Continue from a cursor returned by the previous page.', schema: { type: 'string' } },
+          { name: 'orderBy', in: 'query', description: 'Field used to order matching books.', schema: { type: 'string', enum: ['title', 'author', 'publishedAt'] } },
+          { name: 'include', in: 'query', description: 'Include related records in the response.', schema: { type: 'string', example: 'editions' } },
         ],
         responses: {
           '200': { description: 'A page of books.', content: { 'application/json': { schema: { type: 'object', required: ['data'], properties: { data: { type: 'array', items: { $ref: '#/components/schemas/Book' } }, nextCursor: { type: 'string', nullable: true } } } } } },
@@ -63,4 +66,3 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
     },
   },
 };
-

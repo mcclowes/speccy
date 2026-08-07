@@ -206,4 +206,6 @@ export interface SpeccyProps {
   /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/${operationId}`. */
   basePath?: string;
   onError?: (error: Error) => void;
+  /** PROTOTYPE: temporary query parameter layout shown by the standalone studio. */
+  parameterPrototypeVariant?: 'A' | 'B' | 'C';
 }

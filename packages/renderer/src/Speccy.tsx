@@ -189,16 +189,41 @@ const PARAMETER_GROUP_LABELS: Record<string, string> = {
 
 const DEFAULT_VISIBLE_PARAMETERS = 5;
 
-function ParameterGroup({ location, items }: { location: string; items: Parameter[] }) {
+function ParameterGroup({ location, items, prototypeVariant = 'A' }: { location: string; items: Parameter[]; prototypeVariant?: 'A' | 'B' | 'C' }) {
   const [expanded, setExpanded] = useState(false);
-  const collapsible = items.length > DEFAULT_VISIBLE_PARAMETERS;
-  const visibleItems = expanded ? items : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
+  const [activeParameter, setActiveParameter] = useState(0);
+  const requiredItems = items.filter((parameter) => parameter.required);
+  const optionalItems = items.filter((parameter) => !parameter.required);
+  const collapsible = prototypeVariant === 'B' ? optionalItems.length > 0 : items.length > DEFAULT_VISIBLE_PARAMETERS;
+  const visibleItems = prototypeVariant === 'B' && !expanded
+    ? requiredItems
+    : expanded ? items : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
   const hiddenCount = items.length - visibleItems.length;
 
+  if (prototypeVariant === 'C') {
+    const parameter = items[activeParameter] ?? items[0];
+    return (
+      <section className="sp-endpoint-section sp-parameter-prototype-index">
+        <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
+        <div className="sp-parameter-index" role="tablist" aria-label={PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}>
+          {items.map((item, index) => <button type="button" role="tab" aria-selected={index === activeParameter} onClick={() => setActiveParameter(index)} key={`${location}-${item.name}-${index}`}>{item.name ?? 'unnamed'}{item.required && <b>*</b>}</button>)}
+        </div>
+        {parameter && <div className="sp-endpoint-parameters"><div className="sp-endpoint-parameter">
+          <div className="sp-parameter-name"><code>{parameter.name ?? 'unnamed'}</code><SchemaView schema={parameter.schema} showExample={false} />{parameter.required && <span className="sp-required">required</span>}</div>
+          <Markdown>{parameter.description}</Markdown>
+          {(parameter.example !== undefined || parameter.schema?.example !== undefined) && <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />}
+        </div></div>}
+      </section>
+    );
+  }
+
   return (
-    <section className="sp-endpoint-section">
-      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
-      <div className="sp-endpoint-parameters">
+    <section className={`sp-endpoint-section ${prototypeVariant === 'B' ? 'sp-parameter-prototype-collapsed' : ''}`}>
+      {prototypeVariant === 'B' ? <button type="button" className="sp-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
+        <span><strong>{requiredItems.length ? PARAMETER_GROUP_LABELS[location] : `Optional ${location} parameters`}</strong><small>{optionalItems.length ? 'Pagination, filtering, and sorting' : 'Required for this request'}</small></span>
+        <span className="sp-parameter-summary-meta">{items.length}<i className="sp-chevron" aria-hidden="true" /></span>
+      </button> : <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>}
+      {(visibleItems.length > 0 || prototypeVariant !== 'B') && <div className="sp-endpoint-parameters">
         {visibleItems.map((parameter, index) => (
           <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
             <div className="sp-parameter-name">
@@ -217,19 +242,19 @@ function ParameterGroup({ location, items }: { location: string; items: Paramete
             {expanded ? 'Show fewer' : `Show ${hiddenCount} more`}
           </button>
         )}
-      </div>
+      </div>}
     </section>
   );
 }
 
-function GroupedParameterList({ parameters }: { parameters: Parameter[] }) {
+function GroupedParameterList({ parameters, prototypeVariant }: { parameters: Parameter[]; prototypeVariant?: 'A' | 'B' | 'C' }) {
   const groups = Object.entries(parameters.reduce<Record<string, Parameter[]>>((result, parameter) => {
     const location = parameter.in ?? 'query';
     (result[location] ??= []).push(parameter);
     return result;
   }, {}));
   return <>{groups.map(([location, items]) => (
-    <ParameterGroup location={location} items={items} key={location} />
+    <ParameterGroup location={location} items={items} prototypeVariant={prototypeVariant} key={location} />
   ))}</>;
 }
 
@@ -356,12 +381,14 @@ function RequestRail({
   security,
   securitySchemes,
   storageScope,
+  parameterPrototypeVariant = 'A',
 }: {
   item: OperationModel;
   server: string;
   security?: SecurityRequirement[];
   securitySchemes?: Record<string, SecurityScheme>;
   storageScope: string;
+  parameterPrototypeVariant?: 'A' | 'B' | 'C';
 }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const [values, setValues] = useLocalState<Record<string, string>>(`${storageScope}:operation:${item.id}:parameters`, Object.fromEntries(parameters.map((parameter) => [
@@ -386,7 +413,7 @@ function RequestRail({
   const maskedHeaders: string[] = [];
   const requiredParameters = parameters.filter((parameter) => parameter.required);
   const optionalParameters = parameters.filter((parameter) => !parameter.required);
-  const visibleOptionalCount = Math.max(0, DEFAULT_VISIBLE_PARAMETERS - requiredParameters.length);
+  const visibleOptionalCount = parameterPrototypeVariant === 'B' ? 0 : Math.max(0, DEFAULT_VISIBLE_PARAMETERS - requiredParameters.length);
   const hiddenParameterCount = Math.max(0, optionalParameters.length - visibleOptionalCount);
   const visibleParameters = parametersExpanded || hiddenParameterCount === 0
     ? parameters
@@ -475,14 +502,16 @@ function RequestRail({
       )}
       {parameters.length > 0 && (
         <section className="sp-rail-card">
-          <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+          <h3>{parameterPrototypeVariant === 'B' && requiredParameters.length === 0 ? 'Optional parameters' : 'Parameters'} <span className="sp-section-count">{parameters.length}</span></h3>
           <div className="sp-rail-fields">{visibleParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
             return <label className="sp-field" key={`${key}-${index}`}><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>;
           })}</div>
           {hiddenParameterCount > 0 && (
             <button type="button" className="sp-rail-parameter-toggle" onClick={() => setParametersExpanded(!parametersExpanded)} aria-expanded={parametersExpanded}>
-              {parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`}
+              {parameterPrototypeVariant === 'B'
+                ? (parametersExpanded ? 'Hide optional parameters' : `Show ${hiddenParameterCount} optional parameter${hiddenParameterCount === 1 ? '' : 's'}`)
+                : (parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`)}
             </button>
           )}
         </section>
@@ -510,7 +539,7 @@ function RequestRail({
   );
 }
 
-function EndpointPage({ item, server, document, storageScope }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string }) {
+function EndpointPage({ item, server, document, storageScope, parameterPrototypeVariant }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototypeVariant?: 'A' | 'B' | 'C' }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
@@ -528,10 +557,10 @@ function EndpointPage({ item, server, document, storageScope }: { item: Operatio
             <h2>Request</h2>
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
           </section>}
-          <GroupedParameterList parameters={parameters} />
+          <GroupedParameterList parameters={parameters} prototypeVariant={parameterPrototypeVariant} />
           {item.operation.requestBody && <section className="sp-endpoint-section"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
         </div>
-        {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} />}
+        {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototypeVariant={parameterPrototypeVariant} />}
       </div>
       {item.operation.responses && <EndpointResponses responses={item.operation.responses} />}
       {item.operation.callbacks && <CallbackList callbacks={item.operation.callbacks} server={server} />}
@@ -865,6 +894,7 @@ export function Speccy({
   logo,
   basePath: basePathProp = '/',
   onError,
+  parameterPrototypeVariant,
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {
@@ -1031,7 +1061,7 @@ export function Speccy({
           );
         })}
         {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} basePath={basePath} onNavigate={navigate} />}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} key={activeOperation.id} /></section>}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} parameterPrototypeVariant={parameterPrototypeVariant} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>
