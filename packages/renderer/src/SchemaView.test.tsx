@@ -1,10 +1,25 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SchemaView } from './SchemaView';
+import { MediaContent, SchemaView } from './SchemaView';
 
 afterEach(cleanup);
 
 describe('SchemaView composition', () => {
+  it('identifies named media examples as example payloads', () => {
+    render(<MediaContent content={{
+      'application/json': {
+        examples: {
+          updateTags: {
+            summary: 'Update tags',
+            value: { tags: { reference: 'new reference' } },
+          },
+        },
+      },
+    }} />);
+
+    expect(screen.getByText('Example payload: Update tags')).toBeInTheDocument();
+  });
+
   it('shows a schema title alongside its type', () => {
     render(<SchemaView schema={{ title: 'Connection', type: 'object' }} />);
 

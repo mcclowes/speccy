@@ -150,7 +150,7 @@ export function MediaContent({ content, collapseObjects = false, showExamples = 
       <SchemaView schema={media.schema} collapseObjects={collapseObjects} showExample={showExamples} exampleValue={exampleValue} />
       {showExamples && media.example !== undefined && <JsonValue value={media.example} />}
       {showExamples && media.examples && Object.entries(media.examples).map(([name, example]) => (
-        <div className="sp-named-example" key={name}><strong>{example.summary ?? name}</strong><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></div>
+        <div className="sp-named-example" key={name}><strong>Example payload: {example.summary ?? name}</strong><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></div>
       ))}
     </section>
   ))}</div>;
