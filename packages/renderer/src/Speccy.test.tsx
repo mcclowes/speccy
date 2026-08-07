@@ -19,6 +19,12 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('does not render a default brand icon', () => {
+    const { container } = render(<Speccy spec={spec} />);
+
+    expect(container.querySelector('.sp-brand-mark')).not.toBeInTheDocument();
+  });
+
   it('links to all endpoints above the first tag', () => {
     window.history.replaceState({}, '', '/api/tags/companies');
     render(<Speccy spec={spec} basePath="/api" />);

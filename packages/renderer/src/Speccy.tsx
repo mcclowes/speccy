@@ -1050,7 +1050,7 @@ export function Speccy({
     <div ref={rootRef} className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
-          <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
+          <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo}<span>{model.document.info?.title ?? 'API reference'}</span></a>
           <div className="sp-nav-scroll">
             <a
               className={`sp-nav-operation sp-nav-overview ${!activeRoute ? 'is-active' : ''}`}
