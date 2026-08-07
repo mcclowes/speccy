@@ -159,3 +159,5 @@
   .sp-content { padding: 0; }
   .sp-operation { break-inside: avoid; }
 }
+
+.sp-response-example pre { max-height: none; }
