@@ -9,6 +9,7 @@ The design stays quiet around the content. Color identifies methods, status, req
 - `@speccy/renderer` - the shared React renderer
 - `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
 - `@speccy/docusaurus` - generated reference routes and an embeddable MDX component
+- `create-speccy-reference` - a standalone static reference starter
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
@@ -84,6 +85,19 @@ import spec from '@site/static/openapi.json';
 <OpenAPI spec={spec} />
 ```
 
+## Publish a standalone reference
+
+Use the standalone starter when the API reference is the whole site:
+
+```sh
+npm create speccy-reference my-api-reference
+cd my-api-reference
+npm install
+npm run dev
+```
+
+The generated project keeps its OpenAPI source, branding, and base path in `speccy.config.ts`. `npm run build` produces static assets for Cloudflare Pages, Netlify, Vercel, S3, or another static host. Use Docusaurus instead when the site also needs guides, tutorials, or other prose documentation.
+
 ## Check everything
 
 ```sh
@@ -102,4 +116,5 @@ apps/
 packages/
   renderer/           Shared parser, model, React UI, and styles
   docusaurus-plugin/  Docusaurus build plugin and MDX component
+  create-speccy-reference/ Standalone reference project generator
 ```

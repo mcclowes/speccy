@@ -5,7 +5,24 @@ description: Build and publish a Speccy reference on a static host.
 
 # Deployment
 
-Speccy doesn’t need a server. A React app or Docusaurus site can publish the finished reference as static assets.
+Speccy doesn’t need a server. A standalone reference, React app, or Docusaurus site can publish the finished reference as static assets.
+
+## Standalone reference
+
+Create and build a dedicated reference site:
+
+```sh
+npm create speccy-reference my-api-reference
+cd my-api-reference
+npm install
+npm run build
+```
+
+Publish the generated `dist` directory. The starter includes rewrite configuration for Netlify and Vercel. On another host, rewrite unknown paths to `index.html` so direct visits to operation URLs load the application shell.
+
+Set `basePath` in `speccy.config.ts` when the reference lives below the domain root. A reference published at `https://example.com/api/` should use `/api/`.
+
+Use `spec` for a local YAML or JSON file. Add `specUrl` to fetch a remote document at build time. Prefer a pinned or versioned URL in production so an upstream change can’t alter the next build without review.
 
 ## Docusaurus
 

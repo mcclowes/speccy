@@ -6,7 +6,17 @@ description: Add Speccy to a React app or publish an OpenAPI reference with Docu
 
 # Get started
 
-Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference documentation. Use the React package inside an existing app, or use the Docusaurus plugin to generate a complete reference route at build time.
+Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference documentation. Use the React package inside an existing app, the Docusaurus plugin inside a documentation site, or the standalone starter when the API reference is the whole site.
+
+## Choose a package
+
+| What you’re building | Start with |
+| --- | --- |
+| A reference inside a React application | `@speccy/renderer` |
+| A reference alongside guides in Docusaurus | `@speccy/docusaurus` |
+| A dedicated public API reference | `create-speccy-reference` |
+
+The Speccy Studio is for opening and reviewing specifications. It isn’t the production hosting shell.
 
 ## React
 
@@ -54,6 +64,19 @@ export default {
 ```
 
 Run your normal Docusaurus development server. The reference will be available at `/api`.
+
+## Standalone
+
+Create a static reference site without adopting Docusaurus:
+
+```sh
+npm create speccy-reference my-api-reference
+cd my-api-reference
+npm install
+npm run dev
+```
+
+Edit `speccy.config.ts`, then run `npm run build`. The generated app belongs to your project, so you can add analytics, authentication, custom headers, or other site-specific behavior without a Speccy plugin system.
 
 ## What the spec needs
 
