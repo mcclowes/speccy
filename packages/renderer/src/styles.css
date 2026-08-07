@@ -525,7 +525,8 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-diagnostics-header-actions { position: relative; flex: none; display: flex; align-items: flex-start; gap: 7px; }
 .sp-diagnostics-close, .sp-diagnostics-menu summary { height: 31px; padding: 0 10px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface); cursor: pointer; font-size: 9px; }
 .sp-diagnostics-close { width: 31px; padding: 0; font-size: 20px; }
-.sp-diagnostics-menu summary { display: flex; align-items: center; list-style: none; }
+.sp-diagnostics-menu summary { width: 31px; display: flex; align-items: center; justify-content: center; padding: 0; list-style: none; }
+.sp-diagnostics-menu summary span { margin-top: -4px; font-size: 12px; letter-spacing: 1px; }
 .sp-diagnostics-menu summary::-webkit-details-marker { display: none; }
 .sp-diagnostics-menu[open] summary { color: var(--sp-text); border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line)); }
 .sp-diagnostics-menu > div { position: absolute; top: 38px; right: 38px; z-index: 1; min-width: 132px; overflow: hidden; display: grid; padding: 4px; border: 1px solid var(--sp-line); border-radius: 9px; background: var(--sp-surface); box-shadow: 0 10px 30px rgba(12,13,18,.16); }

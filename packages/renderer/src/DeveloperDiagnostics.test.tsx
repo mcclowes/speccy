@@ -52,7 +52,7 @@ describe('developer diagnostics layout', () => {
     render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" showInlineHints onShowInlineHintsChange={() => undefined} />);
 
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(screen.getByLabelText('API health actions'));
     fireEvent.click(screen.getByRole('button', { name: 'Copy all' }));
 
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('GET /companies has no description.'));
@@ -68,7 +68,7 @@ describe('developer diagnostics layout', () => {
     expect(onHide).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(screen.getByLabelText('API health actions'));
     fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
     expect(onShowInlineHintsChange).toHaveBeenCalledWith(true);
   });

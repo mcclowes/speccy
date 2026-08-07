@@ -108,7 +108,7 @@ export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHint
           <div><span className="sp-eyebrow">Developer view</span><h2>API health</h2><p>Contract checks and design guidance. No opaque score.</p></div>
           <div className="sp-diagnostics-header-actions">
             <details className="sp-diagnostics-menu">
-              <summary>Actions</summary>
+              <summary aria-label="API health actions"><span aria-hidden="true">•••</span></summary>
               <div>
                 <button type="button" onClick={() => onShowInlineHintsChange(!showInlineHints)}>{showInlineHints ? 'Hide hints' : 'Show hints'}</button>
                 <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>

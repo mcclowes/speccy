@@ -31,7 +31,7 @@ describe('Speccy navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
     expect(screen.getByRole('dialog', { name: 'API health' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Ignore this rule' }).length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByText('Actions'));
+    fireEvent.click(screen.getByLabelText('API health actions'));
     fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
     expect(screen.getAllByText('This API has no description.')).toHaveLength(2);
   });
