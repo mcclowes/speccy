@@ -41,6 +41,15 @@ describe('Markdown', () => {
     expect(container.querySelector('b')).not.toBeInTheDocument();
   });
 
+  it('does not display Markdown HTML comments', () => {
+    const { container } = render(<Markdown>{'Before\n\n<!-- Start Codat Tags Table -->\n\n`<!-- example -->`\n\nAfter'}</Markdown>);
+
+    expect(container).toHaveTextContent('Before');
+    expect(container).toHaveTextContent('After');
+    expect(container).not.toHaveTextContent('Start Codat Tags Table');
+    expect(container).toHaveTextContent('<!-- example -->');
+  });
+
   it('renders every OpenAPI description field as Markdown', () => {
     render(<Speccy defaultExpanded spec={{
       openapi: '3.1.0',
