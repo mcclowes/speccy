@@ -20,6 +20,14 @@ declare global {
 
 type Theme = 'light' | 'dark' | 'system';
 
+const THEME_STORAGE_KEY = 'speccy-theme';
+const URL_STORAGE_KEY = 'speccy-oas-url';
+
+function storedTheme(): Theme {
+  const theme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
+}
+
 function Mark() {
   return <span className="studio-mark" aria-hidden="true"><i /><i /><i /></span>;
 }
@@ -28,18 +36,25 @@ export function App() {
   const [spec, setSpec] = useState<OpenAPIDocument | string>(SAMPLE_SPEC);
   const [source, setSource] = useState(JSON.stringify(SAMPLE_SPEC, null, 2));
   const [fileName, setFileName] = useState('Luma sample');
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>(storedTheme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState(() => window.localStorage.getItem(URL_STORAGE_KEY) ?? '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const initialUrl = new URLSearchParams(window.location.search).get('url');
-    if (initialUrl) void loadUrl(initialUrl);
+    const initialUrl = new URLSearchParams(window.location.search).get('url') ?? url;
+    if (initialUrl) {
+      setUrl(initialUrl);
+      void loadUrl(initialUrl);
+    }
   }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     window.speccyLoadSpec = (nextSource, name) => applySource(nextSource, name ?? 'Opened spec');
@@ -66,6 +81,8 @@ export function App() {
       const response = await fetch(nextUrl);
       if (!response.ok) throw new Error(`The server returned ${response.status}.`);
       applySource(await response.text(), new URL(nextUrl).pathname.split('/').pop() || nextUrl);
+      setUrl(nextUrl);
+      window.localStorage.setItem(URL_STORAGE_KEY, nextUrl);
       setUrlOpen(false);
       const location = new URL(window.location.href);
       location.searchParams.set('url', nextUrl);
