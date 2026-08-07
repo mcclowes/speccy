@@ -8,10 +8,6 @@ servers:
 tags:
   - name: Fruit
     description: Inspect and manage the orchard's harvest.
-x-tagGroups:
-  - name: Orchard management
-    tags:
-      - Fruit
 paths:
   /fruit:
     get:
