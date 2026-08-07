@@ -101,15 +101,16 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
           aria-hidden="true"
         ><span /></span>}
   </>;
+  const headerClassName = `sp-schema-head${name ? ' sp-schema-head-named' : ''}${schema.deprecated ? ' sp-schema-head-deprecated' : ''}`;
   const header = name && hasFieldDetails
     ? <button
         type="button"
-        className="sp-schema-head sp-schema-head-named"
+        className={headerClassName}
         aria-expanded={detailsOpen}
         aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
         onClick={toggleDetails}
       >{headerContents}</button>
-    : <div className={`sp-schema-head${name ? ' sp-schema-head-named' : ''}`}>{headerContents}</div>;
+    : <div className={headerClassName}>{headerContents}</div>;
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       <Markdown className="sp-schema-description">{schema.description}</Markdown>
       {enumValues && <p className="sp-schema-meta">Enum: {enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>).reduce<React.ReactNode[]>((values, value, index) => index === 0 ? [value] : [...values, ' | ', value], [])}</p>}

@@ -85,6 +85,15 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('FINANCE')).toBeVisible();
   });
 
+  it('marks deprecated field rows for subdued styling', () => {
+    render(<SchemaView name="legacyField" schema={{
+      type: 'string',
+      deprecated: true,
+    }} />);
+
+    expect(screen.getByText('legacyField').closest('.sp-schema-head')).toHaveClass('sp-schema-head-deprecated');
+  });
+
   it('separates constraint labels and values for compact field metadata', () => {
     const { container } = render(<SchemaView name="username" exampleValue="maxmcc" schema={{
       type: 'string',

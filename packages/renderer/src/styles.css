@@ -404,6 +404,8 @@ related:
 .sp-parameter-name, .sp-schema-head { display: flex; align-items: baseline; gap: 9px; }
 .sp-schema-head { width: 100%; }
 .sp-schema-head-named { min-height: 28px; padding: 5px 8px 5px 28px; color: inherit; border: 0; border-radius: 6px; background: var(--sp-field-head); font: inherit; text-align: left; }
+.sp-schema-head-deprecated { opacity: .5; transition: opacity 120ms ease; }
+.sp-schema-head-deprecated:hover, .sp-schema-head-deprecated:focus-visible { opacity: 1; }
 button.sp-schema-head-named { cursor: pointer; }
 button.sp-schema-head-named:hover { background: color-mix(in srgb, var(--sp-accent) 7%, var(--sp-field-head)); }
 button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent); outline-offset: 1px; }
