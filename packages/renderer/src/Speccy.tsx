@@ -34,6 +34,7 @@ import type {
   SecurityRequirement,
   SecurityScheme,
   SpeccyProps,
+  SpeccyRoute,
 } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';

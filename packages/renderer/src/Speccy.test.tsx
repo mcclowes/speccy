@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Speccy } from './Speccy';
+import type { SpeccyRoute } from './types';
 
 afterEach(() => {
   cleanup();
@@ -23,6 +24,26 @@ describe('Speccy navigation', () => {
     const { container } = render(<Speccy spec={spec} />);
 
     expect(container.querySelector('.sp-brand-mark')).not.toBeInTheDocument();
+  });
+
+  it('delegates routing to a controlling host without changing browser history', () => {
+    const onNavigate = vi.fn();
+    const hrefForRoute = vi.fn((route: SpeccyRoute) => route.page === 'operation'
+      ? `/references/catalog/operations/${route.operationId}`
+      : '/references/catalog');
+    render(<Speccy
+      spec={spec}
+      route={{ page: 'overview' }}
+      onNavigate={onNavigate}
+      hrefForRoute={hrefForRoute}
+    />);
+
+    const operation = within(screen.getByRole('main')).getByRole('link', { name: /List companies.*GET.*companies/ });
+    expect(operation).toHaveAttribute('href', '/references/catalog/operations/get-companies');
+    fireEvent.click(operation);
+
+    expect(onNavigate).toHaveBeenCalledWith({ page: 'operation', operationId: 'get-companies' });
+    expect(window.location.pathname).toBe('/');
   });
 
   it('links to all endpoints above the first tag', () => {
@@ -380,6 +401,27 @@ describe('Speccy navigation', () => {
       tags: ['string'],
     }, null, 2));
     expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
+  });
+
+  it('sizes the request body input to its content', () => {
+    window.history.replaceState({}, '', '/api/create-company');
+    let scrollHeight = 96;
+    const scrollHeightSpy = vi.spyOn(HTMLTextAreaElement.prototype, 'scrollHeight', 'get').mockImplementation(() => scrollHeight);
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Test API' },
+      paths: { '/companies': { post: {
+        summary: 'Create company', operationId: 'create-company',
+        requestBody: { content: { 'application/json': { example: { name: 'Acme' } } } },
+      } } },
+    }} basePath="/api" showThemeToggle={false} />);
+
+    const input = screen.getByRole('textbox', { name: 'Request body' });
+    expect(input).toHaveStyle({ height: '96px' });
+
+    scrollHeight = 144;
+    fireEvent.change(input, { target: { value: '{\n  "name": "Acme",\n  "active": true\n}' } });
+    expect(input).toHaveStyle({ height: '144px' });
+    scrollHeightSpy.mockRestore();
   });
 
   it('does not execute while a required parameter is missing', () => {
