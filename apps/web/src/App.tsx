@@ -63,8 +63,14 @@ function storedRecents(): RecentReference[] {
   }
 }
 
-function referenceId(name: string) {
-  return `${name}-${Date.now()}`;
+function referenceId(name: string, openedAt: number) {
+  return `${name}-${openedAt}`;
+}
+
+function referenceLabel(reference: RecentReference, references: RecentReference[]) {
+  if (references.filter((item) => item.name === reference.name).length < 2) return reference.name;
+  const imported = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(reference.openedAt);
+  return `${reference.name} — ${imported}`;
 }
 
 function Mark() {
@@ -99,6 +105,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
+  const recentsRef = useRef(recents);
 
   useEffect(() => {
     const initialUrl = new URLSearchParams(window.location.search).get('url') ?? url;
@@ -118,14 +125,19 @@ export function App() {
   }, []);
 
   function applySource(next: string, name = 'Pasted spec', existingId?: string) {
-    const id = existingId ?? referenceId(name);
+    const existing = existingId
+      ? recentsRef.current.find((item) => item.id === existingId)
+      : recentsRef.current.find((item) => item.name === name && item.source === next);
+    const openedAt = existing?.openedAt ?? Date.now();
+    const id = existing?.id ?? existingId ?? referenceId(name, openedAt);
     setSource(next);
     setSpec(next);
     setFileName(name);
     setActiveId(id);
     setMessage('');
     setRecents((current) => {
-      const updated = [{ id, name, source: next, openedAt: Date.now() }, ...current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
+      const updated = [{ id, name, source: next, openedAt }, ...current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
+      recentsRef.current = updated;
       storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
@@ -183,7 +195,7 @@ export function App() {
               const reference = recents.find((item) => item.id === event.target.value);
               if (reference) openRecent(reference);
             }}>
-              {recents.map((reference) => <option key={reference.id} value={reference.id}>{reference.name}</option>)}
+              {recents.map((reference) => <option key={reference.id} value={reference.id}>{referenceLabel(reference, recents)}</option>)}
             </select>
             <span className="studio-chevron" aria-hidden="true">⌄</span>
           </label>

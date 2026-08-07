@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
@@ -69,6 +69,38 @@ describe('source editor', () => {
 
     expect((screen.getByRole('combobox', { name: 'Switch API reference' }) as HTMLSelectElement).value).toBe('two');
     expect(screen.getByRole('option', { name: 'Billing API' })).toBeTruthy();
+  });
+
+  it('reuses an exact duplicate recent reference', async () => {
+    render(<App />);
+    await waitFor(() => expect(window.speccyLoadSpec).toBeTypeOf('function'));
+
+    act(() => {
+      window.speccyLoadSpec?.('{"openapi":"3.1.0"}', 'Catalog API');
+      window.speccyLoadSpec?.('{"openapi":"3.1.0"}', 'Catalog API');
+    });
+
+    const stored = JSON.parse(window.localStorage.getItem('speccy-recent-references') ?? '[]');
+    expect(stored).toHaveLength(1);
+  });
+
+  it('adds import times when same-name references have different contents', async () => {
+    vi.spyOn(Date, 'now')
+      .mockReturnValueOnce(new Date('2026-08-07T09:15:00Z').getTime())
+      .mockReturnValueOnce(new Date('2026-08-07T10:45:00Z').getTime());
+    render(<App />);
+    await waitFor(() => expect(window.speccyLoadSpec).toBeTypeOf('function'));
+
+    act(() => {
+      window.speccyLoadSpec?.('{"openapi":"3.0.0"}', 'Catalog API');
+      window.speccyLoadSpec?.('{"openapi":"3.1.0"}', 'Catalog API');
+    });
+
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+    expect(options[0]?.textContent).toMatch(/^Catalog API — /);
+    expect(options[1]?.textContent).toMatch(/^Catalog API — /);
+    expect(options[0]?.textContent).not.toBe(options[1]?.textContent);
   });
 
   it('keeps an opened reference usable when recent storage is full', () => {
