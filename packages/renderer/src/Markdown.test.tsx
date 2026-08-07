@@ -48,7 +48,9 @@ describe('Markdown', () => {
       expect(screen.getByRole('link', { name })).toHaveAttribute('href', `https://example.com/${name.toLowerCase()}`);
     }
 
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: /Create thing/ }));
+    const navigation = screen.getByRole('navigation', { name: 'API reference' });
+    fireEvent.click(within(navigation).getByRole('button', { name: 'Things' }));
+    fireEvent.click(within(navigation).getByRole('link', { name: /Create thing/ }));
 
     for (const name of ['Operation', 'Parameter', 'Request', 'Response', 'Schema']) {
       expect(screen.getByRole('link', { name })).toHaveAttribute('href', `https://example.com/${name.toLowerCase()}`);

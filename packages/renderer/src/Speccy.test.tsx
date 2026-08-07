@@ -23,6 +23,7 @@ describe('Speccy navigation', () => {
     render(<Speccy spec={spec} basePath="/api" />);
 
     const navigation = screen.getByRole('navigation', { name: 'API reference' });
+    fireEvent.click(within(navigation).getByRole('button', { name: 'Companies' }));
     fireEvent.click(within(navigation).getByRole('link', { name: /List companies/ }));
 
     expect(window.location.pathname).toBe('/api/get-companies');
@@ -47,10 +48,6 @@ describe('Speccy navigation', () => {
 
     const toggle = screen.getByRole('button', { name: 'Companies' });
     const navigation = screen.getByRole('navigation', { name: 'API reference' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(within(navigation).getByRole('link', { name: /List companies/ })).toBeInTheDocument();
-
-    fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(within(navigation).queryByRole('link', { name: /List companies/ })).not.toBeInTheDocument();
 

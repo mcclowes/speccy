@@ -227,7 +227,7 @@ function NavigationGroup({
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const expanded = searching || open;
   const operationListId = `sp-nav-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
