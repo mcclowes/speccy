@@ -350,6 +350,7 @@ function RequestRail({
   const requirements = item.operation.security ?? security;
   const schemeName = requirements?.flatMap(Object.keys)[0];
   const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
+  const schemeLabel = securitySchemeLabel(scheme) ?? schemeName;
   const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
@@ -449,7 +450,8 @@ function RequestRail({
     <aside className="sp-request-rail" aria-label="Request builder">
       {schemeName && (
         <section className="sp-rail-card">
-          <h3>Authorization</h3>
+          <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
+          <p className="sp-rail-card-description">Enter the credential described under Request → Security{schemeLabel && `: ${schemeLabel}`}.</p>
           <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}>{credentialVisible ? 'Hide' : 'Show'}</button></div></label>
         </section>
       )}
