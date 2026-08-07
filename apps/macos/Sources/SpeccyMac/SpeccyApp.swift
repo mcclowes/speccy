@@ -17,7 +17,6 @@ struct SpeccyApp: App {
                 .frame(minWidth: 920, minHeight: 640)
         }
         .defaultSize(width: 1360, height: 880)
-        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Open OpenAPI document…") {
@@ -44,4 +43,3 @@ extension Notification.Name {
     static let speccyReload = Notification.Name("speccy.reload")
     static let speccyPrint = Notification.Name("speccy.print")
 }
-

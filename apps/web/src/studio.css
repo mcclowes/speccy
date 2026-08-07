@@ -25,7 +25,12 @@ body { overflow: hidden; background: #fbfbfd; }
 .studio-editor-head button { color: #cbc7ff; border-color: #403b73; }
 .studio-editor textarea { resize: none; padding: 20px; color: #dedee6; border: 0; outline: 0; background: #121319; font: 11px/1.7 'DM Mono', ui-monospace, monospace; tab-size: 2; }
 .studio-editor-foot { border-top: 1px solid #2c2d34; border-bottom: 0; text-transform: none; letter-spacing: 0; }
-.studio-preview { min-width: 0; height: 100%; overflow-y: auto; background: #fbfbfd; }
+.studio-preview { min-width: 0; height: 100%; overflow-y: auto; background: #fbfbfd; scrollbar-color: var(--studio-muted) transparent; scrollbar-width: thin; }
+.studio-preview::-webkit-scrollbar { width: 10px; }
+.studio-preview::-webkit-scrollbar-track { background: transparent; }
+.studio-preview::-webkit-scrollbar-thumb { background: var(--studio-muted); border: 3px solid transparent; border-radius: 999px; background-clip: padding-box; }
+.studio-dark .studio-preview { background: #111217; }
+@media (prefers-color-scheme: dark) { .studio-system .studio-preview { background: #111217; } }
 .studio-preview > .speccy { min-height: 100%; }
 .studio .sp-sidebar { top: 0; height: calc(100vh - 58px); }
 .studio-url + .studio-workspace .sp-sidebar { height: calc(100vh - 120px); }
