@@ -48,13 +48,14 @@ function NamedMediaExamples({ examples }: { examples: NonNullable<MediaType['exa
   </div>;
 }
 
-export function SchemaView({ schema, name, required = false, depth = 0, collapseObjects = false, showExample = true, exampleValue }: {
+export function SchemaView({ schema, name, required = false, depth = 0, collapseObjects = false, showExample = true, summaryOnly = false, exampleValue }: {
   schema?: SchemaObject;
   name?: string;
   required?: boolean;
   depth?: number;
   collapseObjects?: boolean;
   showExample?: boolean;
+  summaryOnly?: boolean;
   exampleValue?: unknown;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -167,7 +168,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     <div className={className}>
       {header}
       {(!name || detailsOpen) && fieldDetails}
-      {structuralBody}
+      {!summaryOnly && structuralBody}
     </div>
   );
 }

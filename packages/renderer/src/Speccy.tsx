@@ -192,7 +192,7 @@ function ParameterCard({ location, parameter, index }: { location: string; param
   return <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
     <div className="sp-parameter-name">
       <code>{parameter.name ?? 'unnamed'}</code>
-      <SchemaView schema={parameter.schema} showExample={false} />
+      <SchemaView schema={parameter.schema} showExample={false} summaryOnly />
       {parameter.required && <span className="sp-required">required</span>}
     </div>
     <Markdown>{parameter.description}</Markdown>

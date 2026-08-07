@@ -78,4 +78,36 @@ describe('endpoint parameter layout', () => {
     expect(parameter).toContainElement(example);
     expect(metadata).not.toContainElement(example);
   });
+
+  it('summarizes array parameters without rendering a duplicate items row', () => {
+    window.history.replaceState({}, '', '/api/list-instruments');
+    const { container } = render(<Speccy spec={{
+      openapi: '3.1.0',
+      info: { title: 'Test API' },
+      paths: {
+        '/instruments': {
+          get: {
+            summary: 'List instruments',
+            operationId: 'list-instruments',
+            parameters: [{
+              name: 'state',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  title: 'InstrumentState',
+                  type: 'string',
+                  enum: ['ACTIVE', 'BLOCKED', 'DESTROYED', 'NOT_ENABLED'],
+                },
+              },
+            }],
+          },
+        },
+      },
+    }} basePath="/api" />);
+
+    const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter')!;
+    expect(within(parameter).getByText('array<InstrumentState · ACTIVE | BLOCKED | DESTROYED | NOT_ENABLED>')).toBeInTheDocument();
+    expect(within(parameter).queryByText('items')).not.toBeInTheDocument();
+  });
 });

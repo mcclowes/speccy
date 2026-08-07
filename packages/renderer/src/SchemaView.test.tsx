@@ -54,6 +54,20 @@ describe('SchemaView composition', () => {
     expect(screen.queryByText(/one of/i)).not.toBeInTheDocument();
   });
 
+  it('does not repeat primitive array items beneath the array type', () => {
+    render(<SchemaView name="state" summaryOnly schema={{
+      type: 'array',
+      items: {
+        title: 'InstrumentState',
+        type: 'string',
+        enum: ['ACTIVE', 'BLOCKED', 'DESTROYED', 'NOT_ENABLED'],
+      },
+    }} />);
+
+    expect(screen.getByText('array<InstrumentState · ACTIVE | BLOCKED | DESTROYED | NOT_ENABLED>')).toBeInTheDocument();
+    expect(screen.queryByText('items')).not.toBeInTheDocument();
+  });
+
   it('labels genuine alternatives and omits a meaningless label for one choice', () => {
     const { rerender } = render(<SchemaView schema={{
       oneOf: [{ type: 'string' }, { type: 'integer' }],
