@@ -120,6 +120,10 @@ related:
 .sp-markdown > :last-child { margin-bottom: 0; }
 .sp-markdown a { color: var(--sp-accent); text-decoration: underline; text-underline-offset: 2px; }
 .sp-markdown h1, .sp-markdown h2, .sp-markdown h3, .sp-markdown h4, .sp-markdown h5, .sp-markdown h6 { margin: 1.4em 0 0.55em; color: var(--sp-text); line-height: 1.25; letter-spacing: -0.02em; }
+.sp-markdown h1 { font-size: 2em; }
+.sp-markdown h2 { font-size: 1.5em; }
+.sp-markdown h3 { font-size: 1.25em; }
+.sp-markdown h4, .sp-markdown h5, .sp-markdown h6 { font-size: 1em; }
 .sp-markdown ul, .sp-markdown ol { margin: 0 0 0.8em; padding-left: 1.5em; }
 .sp-markdown blockquote { margin: 0 0 0.8em; padding-left: 1em; border-left: 3px solid var(--sp-line); }
 .sp-markdown code { padding: 0.12em 0.35em; color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 4px; font-size: 0.9em; }
