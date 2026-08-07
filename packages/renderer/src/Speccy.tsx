@@ -22,6 +22,7 @@ import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationM
 import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
 import { RequestSample } from './RequestSample';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
+import { SendIcon } from './SendIcon';
 import type {
   MediaType,
   Parameter,
@@ -349,7 +350,6 @@ function RequestRail({
   const requirements = item.operation.security ?? security;
   const schemeName = requirements?.flatMap(Object.keys)[0];
   const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
-  const schemeLabel = securitySchemeLabel(scheme) ?? schemeName;
   const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
@@ -449,8 +449,7 @@ function RequestRail({
     <aside className="sp-request-rail" aria-label="Request builder">
       {schemeName && (
         <section className="sp-rail-card">
-          <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
-          <p className="sp-rail-card-description">Enter the credential described under Request → Security{schemeLabel && `: ${schemeLabel}`}.</p>
+          <h3>Authorization</h3>
           <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}>{credentialVisible ? 'Hide' : 'Show'}</button></div></label>
         </section>
       )}
@@ -480,7 +479,7 @@ function RequestRail({
         request={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: maskedRequestUrl, headers: maskedHeaders, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
         copyRequest={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: requestUrl, headers, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
       />
-      <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}>{executing ? 'Sending…' : 'Send request'}</button>
+      <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}><SendIcon /> <span>{executing ? 'Sending…' : 'Send request'}</span></button>
       {result && (
         <section className={`sp-live-response ${result.error ? 'is-error' : ''}`} aria-live="polite">
           <div className="sp-live-response-head"><strong>{result.error ? 'Request failed' : 'Response'}</strong>{result.status !== undefined && <span>{result.status} {result.statusText}</span>}</div>

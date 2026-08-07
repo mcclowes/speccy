@@ -192,7 +192,6 @@
 .sp-rail-card, .sp-rail-code { overflow: hidden; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-rail-card { padding: 18px; }
 .sp-rail-card h3 { margin: 0 0 14px; font-size: 13px; }
-.sp-rail-card-description { margin: -6px 0 14px; color: var(--sp-muted); font-size: 10px; line-height: 1.5; }
 .sp-rail-fields { display: grid; gap: 13px; }
 .sp-field { display: grid; gap: 6px; color: var(--sp-text); font-size: 11px; font-weight: 600; }
 .sp-field span { display: flex; align-items: baseline; gap: 5px; }
@@ -206,8 +205,10 @@
 .sp-field textarea { width: 100%; min-height: 120px; resize: vertical; padding: 10px; color: var(--sp-text); background: var(--sp-bg); border: 1px solid var(--sp-line); border-radius: 7px; outline: none; font-family: 'DM Mono', monospace; font-size: 10px; line-height: 1.55; }
 .sp-field input:focus, .sp-field textarea:focus { border-color: color-mix(in srgb, var(--sp-accent) 65%, var(--sp-line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent) 12%, transparent); }
 .sp-rail-card h3 small { margin-left: 5px; color: var(--sp-muted); font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400; }
-.sp-execute { width: 100%; min-height: 40px; border: 0; border-radius: 8px; color: #fff; background: var(--sp-accent); cursor: pointer; font: inherit; font-size: 12px; font-weight: 650; }
+.sp-execute { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 40px; border: 0; border-radius: 8px; color: #fff; background: var(--sp-accent); cursor: pointer; font: inherit; font-size: 12px; font-weight: 650; transition: filter 160ms ease; }
+.sp-execute svg { width: 16px; height: 16px; flex: 0 0 auto; transition: transform 160ms ease; }
 .sp-execute:hover:not(:disabled) { filter: brightness(.94); }
+.sp-execute:hover:not(:disabled) svg { transform: translate(2px, -2px); }
 .sp-execute:disabled { cursor: wait; opacity: .65; }
 .sp-live-response { overflow: hidden; color: var(--sp-code-text); background: var(--sp-code); border: 1px solid var(--sp-code-border); border-radius: 10px; }
 .sp-live-response-head { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--sp-code-border); font-size: 10px; }
@@ -356,6 +357,10 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
   .sp-endpoint-section { margin-bottom: 36px; }
   .sp-endpoint-parameter { padding: 17px; }
   .sp-server { align-items: flex-start; flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-execute, .sp-execute svg { transition: none; }
 }
 
 @media print {
