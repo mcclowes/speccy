@@ -31,6 +31,33 @@ describe('Markdown', () => {
     expect(container).toHaveTextContent('<!-- example -->');
   });
 
+  it('renders Docusaurus admonitions with default and custom titles', () => {
+    const { container } = render(
+      <Markdown>{`:::note
+Default title
+:::
+
+:::warning[Check **this** first]
+Keep the [nested Markdown](https://example.com) intact.
+:::`}</Markdown>,
+    );
+
+    const note = container.querySelector('.sp-admonition-note');
+    const warning = container.querySelector('.sp-admonition-warning');
+
+    expect(note?.tagName).toBe('ASIDE');
+    expect(within(note as HTMLElement).getByText('Note')).toHaveClass('sp-admonition-title');
+    expect(warning?.tagName).toBe('ASIDE');
+    expect(within(warning as HTMLElement).getByText('this')).toHaveProperty('tagName', 'STRONG');
+    expect(within(warning as HTMLElement).getByRole('link', { name: 'nested Markdown' })).toHaveAttribute('href', 'https://example.com');
+  });
+
+  it.each(['note', 'tip', 'info', 'warning', 'danger'])('supports the %s admonition type', (type) => {
+    const { container } = render(<Markdown>{`:::${type}\nContent\n:::`}</Markdown>);
+
+    expect(container.querySelector(`.sp-admonition-${type}`)).toHaveTextContent('Content');
+  });
+
   it('renders every OpenAPI description field as Markdown', () => {
     render(<Speccy defaultExpanded spec={{
       openapi: '3.1.0',

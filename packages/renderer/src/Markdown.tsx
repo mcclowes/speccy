@@ -8,9 +8,51 @@
  */
 
 import MarkdownRenderer from 'react-markdown';
+import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 
-type MarkdownNode = { type?: string; value?: string; children?: MarkdownNode[] };
+type MarkdownNode = {
+  type?: string;
+  name?: string;
+  value?: string;
+  data?: {
+    directiveLabel?: boolean;
+    hName?: string;
+    hProperties?: Record<string, string | string[]>;
+  };
+  children?: MarkdownNode[];
+};
+
+const admonitionTypes = new Set(['note', 'tip', 'info', 'warning', 'danger']);
+
+function remarkAdmonitions() {
+  return (tree: MarkdownNode) => {
+    function transform(node: MarkdownNode) {
+      if (node.type === 'containerDirective' && node.name && admonitionTypes.has(node.name)) {
+        node.data = {
+          ...node.data,
+          hName: 'aside',
+          hProperties: { className: ['sp-admonition', `sp-admonition-${node.name}`] },
+        };
+
+        const label = node.children?.find((child) => child.data?.directiveLabel);
+        if (label) {
+          label.data = { ...label.data, hName: 'div', hProperties: { className: 'sp-admonition-title' } };
+        } else {
+          node.children?.unshift({
+            type: 'paragraph',
+            data: { hName: 'div', hProperties: { className: 'sp-admonition-title' } },
+            children: [{ type: 'text', value: node.name.charAt(0).toUpperCase() + node.name.slice(1) }],
+          });
+        }
+      }
+
+      node.children?.forEach(transform);
+    }
+
+    transform(tree);
+  };
+}
 
 function remarkRemoveHtmlComments() {
   return (tree: MarkdownNode) => {
@@ -29,7 +71,7 @@ export function Markdown({ children, className = '' }: { children?: string; clas
 
   return (
     <div className={`sp-markdown ${className}`}>
-      <MarkdownRenderer remarkPlugins={[remarkGfm, remarkRemoveHtmlComments]}>{children}</MarkdownRenderer>
+      <MarkdownRenderer remarkPlugins={[remarkGfm, remarkDirective, remarkAdmonitions, remarkRemoveHtmlComments]}>{children}</MarkdownRenderer>
     </div>
   );
 }

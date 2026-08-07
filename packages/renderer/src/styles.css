@@ -128,6 +128,14 @@ related:
 .sp-markdown h4, .sp-markdown h5, .sp-markdown h6 { font-size: 1em; }
 .sp-markdown ul, .sp-markdown ol { margin: 0 0 0.8em; padding-left: 1.5em; }
 .sp-markdown blockquote { margin: 0 0 0.8em; padding-left: 1em; border-left: 3px solid var(--sp-line); }
+.sp-admonition { --sp-admonition-color: var(--sp-accent); margin: 0 0 .8em; padding: 12px 14px; color: var(--sp-text); background: color-mix(in srgb, var(--sp-admonition-color) 8%, var(--sp-surface)); border: 1px solid color-mix(in srgb, var(--sp-admonition-color) 35%, var(--sp-line)); border-left: 4px solid var(--sp-admonition-color); border-radius: 8px; }
+.sp-admonition-note { --sp-admonition-color: var(--sp-muted); }
+.sp-admonition-tip { --sp-admonition-color: #16875f; }
+.sp-admonition-info { --sp-admonition-color: #3478b8; }
+.sp-admonition-warning { --sp-admonition-color: #b87812; }
+.sp-admonition-danger { --sp-admonition-color: #c74555; }
+.sp-admonition-title { margin-bottom: 5px; color: var(--sp-admonition-color); font-size: 12px; font-weight: 700; }
+.sp-admonition > :last-child { margin-bottom: 0; }
 .sp-markdown code { padding: 0.12em 0.35em; color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 4px; font-size: 0.9em; }
 .sp-markdown pre { overflow-x: auto; margin: 0 0 0.8em; padding: 14px; color: var(--sp-code-text); background: var(--sp-code); border-radius: 8px; }
 .sp-markdown pre code { padding: 0; color: inherit; background: transparent; }
