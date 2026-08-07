@@ -818,6 +818,28 @@ function NavigationGroup({
   const activeRouteIsWithinGroup = activeTag === tag || operations.some((item) => item.id === activeOperationId);
   const expanded = searching || open;
   const operationListId = `sp-nav-${slugify(tag.name)}`;
+  const subgroupedOperations = new Map<string, OperationModel[]>();
+  const ungroupedOperations: OperationModel[] = [];
+  for (const item of operations) {
+    const subgroup = item.operation['x-tagSubgroup']?.trim();
+    if (!subgroup) {
+      ungroupedOperations.push(item);
+      continue;
+    }
+    const subgroupOperations = subgroupedOperations.get(subgroup) ?? [];
+    subgroupOperations.push(item);
+    subgroupedOperations.set(subgroup, subgroupOperations);
+  }
+
+  const operationLink = (item: OperationModel) => (
+    <a
+      className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
+      href={operationHref(basePath, item.id)}
+      aria-current={activeOperationId === item.id ? 'page' : undefined}
+      onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
+      key={item.id}
+    ><span className="sp-nav-operation-label">{item.operation.summary ?? item.path}</span><OperationBadge item={item} compact /></a>
+  );
 
   useEffect(() => {
     if (activeRouteIsWithinGroup) setOpen(true);
@@ -848,15 +870,13 @@ function NavigationGroup({
             aria-current={activeTag === tag ? 'page' : undefined}
             onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
           >Overview</a>
-          {operations.map((item) => (
-            <a
-              className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
-              href={operationHref(basePath, item.id)}
-              aria-current={activeOperationId === item.id ? 'page' : undefined}
-              onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
-              key={item.id}
-            ><span className="sp-nav-operation-label">{item.operation.summary ?? item.path}</span><OperationBadge item={item} compact /></a>
+          {[...subgroupedOperations].map(([subgroup, subgroupOperations]) => (
+            <section className="sp-nav-subgroup" aria-labelledby={`${operationListId}-${slugify(subgroup)}`} key={subgroup}>
+              <h3 id={`${operationListId}-${slugify(subgroup)}`}>{subgroup}</h3>
+              {subgroupOperations.map(operationLink)}
+            </section>
           ))}
+          {ungroupedOperations.map(operationLink)}
         </div>
       )}
     </div>
