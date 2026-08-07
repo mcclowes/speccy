@@ -220,7 +220,7 @@
 .sp-operation-summary { width: 100%; min-height: 68px; display: grid; grid-template-columns: 60px minmax(120px, 0.85fr) minmax(150px, 1.15fr) auto auto; gap: 12px; align-items: center; padding: 14px 18px; text-align: left; color: var(--sp-text); background: transparent; border: 0; cursor: pointer; }
 .sp-method { width: fit-content; min-width: 48px; padding: 5px 6px; color: #5148bd; background: #eeecff; border-radius: 5px; text-align: center; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; }
 .sp-method-post .sp-method, .sp-method.sp-method-post { color: #087653; background: #e2f8ef; } .sp-method-put .sp-method, .sp-method-patch .sp-method, .sp-method.sp-method-put, .sp-method.sp-method-patch { color: #9a5d09; background: #fff2dd; } .sp-method-delete .sp-method, .sp-method.sp-method-delete { color: #b82c40; background: #ffe8ec; }
-.sp-method.sp-webhook { min-width: 34px; color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface)); }
+.sp-method.sp-webhook { display: inline-grid; min-width: 34px; color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface)); place-items: center; line-height: 0; }
 .sp-webhook svg { width: 15px; height: 15px; }
 .sp-nav-method.sp-webhook { display: inline-flex; color: var(--sp-accent); opacity: .8; }
 .sp-path { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
