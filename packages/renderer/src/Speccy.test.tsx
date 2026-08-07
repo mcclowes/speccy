@@ -296,6 +296,32 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByText(/"missing"/)).toHaveLength(1);
   });
 
+  it('builds an example response payload from schema property examples', () => {
+    window.history.replaceState({}, '', '/api/list-fruit');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Orchard API' },
+      paths: { '/fruit': { get: {
+        summary: 'List fruit', operationId: 'list-fruit',
+        responses: { '200': { description: 'Fruit in the orchard.', content: { 'application/json': {
+          schema: { type: 'array', items: { $ref: '#/components/schemas/Fruit' } },
+        } } } },
+      } } },
+      components: { schemas: { Fruit: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Apple' },
+          variety: { type: 'string', example: 'Discovery' },
+          pickedAt: { type: 'string', format: 'date-time' },
+        },
+      } } },
+    }} basePath="/api" />);
+
+    expect(screen.getByText('Response example')).toBeInTheDocument();
+    expect(screen.getByText(/"name": "Apple"/)).toBeInTheDocument();
+    expect(screen.getByText(/"variety": "Discovery"/)).toBeInTheDocument();
+    expect(screen.getByText(/"pickedAt": "2024-01-01T00:00:00Z"/)).toBeInTheDocument();
+  });
+
   it('collapses and expands endpoint groups', () => {
     const { unmount } = render(<Speccy spec={spec} />);
 
@@ -375,6 +401,33 @@ describe('Speccy navigation', () => {
     expect(screen.queryByRole('dialog', { name: 'Search API reference' })).not.toBeInTheDocument();
   });
 
+  it('filters all webhooks across tag groups by operation type', () => {
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Webhook API' },
+      paths: { '/companies': { get: { tags: ['Companies'], summary: 'List companies' } } },
+      tags: [{ name: 'Companies' }, { name: 'Payments' }],
+      'x-tagGroups': [
+        { name: 'Core API', tags: ['Companies'] },
+        { name: 'Money movement', tags: ['Payments'] },
+      ],
+      webhooks: {
+        companyUpdated: { post: { tags: ['Companies'], summary: 'Company updated' } },
+        paymentReceived: { post: { tags: ['Payments'], summary: 'Payment received' } },
+        systemReady: { post: { summary: 'System ready' } },
+      },
+    }} />);
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+
+    fireEvent.change(navigation.getByRole('textbox', { name: 'Filter endpoints' }), { target: { value: 'webhook' } });
+
+    expect(navigation.getByRole('heading', { name: 'Core API' })).toBeInTheDocument();
+    expect(navigation.getByRole('heading', { name: 'Money movement' })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /Company updated/ })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /Payment received/ })).toBeInTheDocument();
+    expect(navigation.getByRole('link', { name: /System ready/ })).toBeInTheDocument();
+    expect(navigation.queryByRole('link', { name: /List companies/ })).not.toBeInTheDocument();
+  });
+
   it('shows and clears an empty sidebar filter', () => {
     render(<Speccy spec={spec} />);
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
@@ -390,7 +443,7 @@ describe('Speccy navigation', () => {
 
   it('opens quick search and navigates to a matching endpoint', () => {
     render(<Speccy spec={spec} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open full search' }));
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
 
     const search = screen.getByRole('textbox', { name: 'Search API reference' });
     fireEvent.change(search, {
@@ -412,9 +465,24 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('textbox', { name: 'Search API reference' })).toHaveFocus();
   });
 
+  it('scrolls the active result into view during keyboard navigation', () => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+    render(<Speccy spec={spec} />);
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    scrollIntoView.mockClear();
+
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Search API reference' }), { key: 'ArrowDown' });
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: originalScrollIntoView });
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(screen.getByRole('option', { name: /Companies/ })).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('shows an empty search state and closes with Escape', () => {
     render(<Speccy spec={spec} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open full search' }));
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
     const search = screen.getByRole('textbox', { name: 'Search API reference' });
 
     fireEvent.change(search, { target: { value: 'no such endpoint' } });
@@ -422,7 +490,6 @@ describe('Speccy navigation', () => {
     fireEvent.keyDown(search, { key: 'Escape' });
 
     expect(screen.queryByRole('dialog', { name: 'Search API reference' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Open full search' })).toHaveFocus();
   });
 
   it('finds named reusable components', () => {

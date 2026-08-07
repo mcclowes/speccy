@@ -13,19 +13,20 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { Markdown } from './Markdown';
 import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
 import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
+import { RequestSample } from './RequestSample';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type {
   MediaType,
   Parameter,
   OpenAPIDocument,
   ResponseObject,
+  SchemaObject,
   SecurityRequirement,
   SecurityScheme,
   SpeccyProps,
@@ -144,12 +145,10 @@ function SecurityRequirements({ requirements, schemes }: {
 function CodeSample({ item, server }: { item: OperationModel; server: string }) {
   const url = `${server.replace(/\/$/, '')}${item.path}`;
   const contentType = firstMedia(item.operation.requestBody?.content)?.[0];
-  const lines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${url}'`];
-  if (contentType) lines.push(`  --header 'content-type: ${contentType}'`);
-  const sample = lines.join(' \\\n');
+  const request = { method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url, headers: contentType ? [`Content-Type: ${contentType}`] : [] };
   return (
     <aside className="sp-code-panel">
-      <CodeBlock title="cURL" value={sample} />
+      <RequestSample request={request} storageKey="speccy:request-language" />
     </aside>
   );
 }
@@ -161,17 +160,19 @@ const PARAMETER_GROUP_LABELS: Record<string, string> = {
   cookie: 'Cookie parameters',
 };
 
-function GroupedParameterList({ parameters }: { parameters: Parameter[] }) {
-  const groups = Object.entries(parameters.reduce<Record<string, Parameter[]>>((result, parameter) => {
-    const location = parameter.in ?? 'query';
-    (result[location] ??= []).push(parameter);
-    return result;
-  }, {}));
-  return <>{groups.map(([location, items]) => items && (
-    <section className="sp-endpoint-section" key={location}>
-      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h2>
+const DEFAULT_VISIBLE_PARAMETERS = 5;
+
+function ParameterGroup({ location, items }: { location: string; items: Parameter[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const collapsible = items.length > DEFAULT_VISIBLE_PARAMETERS;
+  const visibleItems = expanded ? items : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
+  const hiddenCount = items.length - visibleItems.length;
+
+  return (
+    <section className="sp-endpoint-section">
+      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
       <div className="sp-endpoint-parameters">
-        {items.map((parameter, index) => (
+        {visibleItems.map((parameter, index) => (
           <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
             <div className="sp-parameter-name">
               <code>{parameter.name ?? 'unnamed'}</code>
@@ -184,8 +185,24 @@ function GroupedParameterList({ parameters }: { parameters: Parameter[] }) {
             )}
           </div>
         ))}
+        {collapsible && (
+          <button type="button" className="sp-parameter-toggle" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
+            {expanded ? 'Show fewer' : `Show ${hiddenCount} more`}
+          </button>
+        )}
       </div>
     </section>
+  );
+}
+
+function GroupedParameterList({ parameters }: { parameters: Parameter[] }) {
+  const groups = Object.entries(parameters.reduce<Record<string, Parameter[]>>((result, parameter) => {
+    const location = parameter.in ?? 'query';
+    (result[location] ??= []).push(parameter);
+    return result;
+  }, {}));
+  return <>{groups.map(([location, items]) => (
+    <ParameterGroup location={location} items={items} key={location} />
   ))}</>;
 }
 
@@ -199,7 +216,31 @@ function responseExamples(response?: ResponseObject): { label: string; value: un
     if (value !== undefined) examples.push({ label: example.summary ?? name, value });
   }
   if (media.schema?.example !== undefined) examples.push({ label: 'Generic example', value: media.schema.example });
+  if (examples.length === 0 && media.schema) examples.push({ label: 'Generated example', value: schemaExample(media.schema) });
   return examples;
+}
+
+function schemaExample(schema: SchemaObject): unknown {
+  if (schema.example !== undefined) return schema.example;
+  if (schema.default !== undefined) return schema.default;
+  if (schema.enum?.length) return schema.enum[0];
+  if (schema.allOf?.length) {
+    return Object.assign({}, ...schema.allOf.map(schemaExample).filter((value) => value && typeof value === 'object' && !Array.isArray(value)));
+  }
+  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0]);
+  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0]);
+  if (schema.type === 'array' || schema.items) return schema.items ? [schemaExample(schema.items)] : [];
+  if (schema.type === 'object' || schema.properties) {
+    return Object.fromEntries(Object.entries(schema.properties ?? {})
+      .filter(([, property]) => !property.writeOnly)
+      .map(([name, property]) => [name, schemaExample(property)]));
+  }
+  if (schema.type === 'integer' || schema.type === 'number') return 0;
+  if (schema.type === 'boolean') return true;
+  if (schema.format === 'date-time') return '2024-01-01T00:00:00Z';
+  if (schema.format === 'date') return '2024-01-01';
+  if (schema.format === 'uuid') return '00000000-0000-4000-8000-000000000000';
+  return 'string';
 }
 
 function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
@@ -288,6 +329,7 @@ function RequestRail({
   const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
   const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
   const [credentialVisible, setCredentialVisible] = useState(false);
+  const [parametersExpanded, setParametersExpanded] = useState(false);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const [body, setBody] = useState(() => {
     const example = bodyMedia?.[1].example ?? bodyMedia?.[1].schema?.example;
@@ -300,6 +342,13 @@ function RequestRail({
   const headers: string[] = [];
   const maskedQuery = new URLSearchParams();
   const maskedHeaders: string[] = [];
+  const requiredParameters = parameters.filter((parameter) => parameter.required);
+  const optionalParameters = parameters.filter((parameter) => !parameter.required);
+  const visibleOptionalCount = Math.max(0, DEFAULT_VISIBLE_PARAMETERS - requiredParameters.length);
+  const hiddenParameterCount = Math.max(0, optionalParameters.length - visibleOptionalCount);
+  const visibleParameters = parametersExpanded || hiddenParameterCount === 0
+    ? parameters
+    : parameters.filter((parameter) => parameter.required || optionalParameters.indexOf(parameter) < visibleOptionalCount);
 
   for (const parameter of parameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
@@ -341,18 +390,6 @@ function RequestRail({
   }
   const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${query.size ? `?${query}` : ''}`;
   const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${maskedQuery.size ? `?${maskedQuery}` : ''}`;
-  const lines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${requestUrl}'`];
-  const maskedLines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${maskedRequestUrl}'`];
-  for (const header of headers) lines.push(`  --header '${header}'`);
-  for (const header of maskedHeaders) maskedLines.push(`  --header '${header}'`);
-  if (body && item.method !== 'get' && item.method !== 'head') {
-    const dataLine = `  --data '${body.replaceAll("'", "'\\''")}'`;
-    lines.push(dataLine);
-    maskedLines.push(dataLine);
-  }
-  const sample = lines.join(' \\\n');
-  const maskedSample = maskedLines.join(' \\\n');
-
   async function executeRequest() {
     const missing = parameters.filter((parameter) => parameter.required && !values[`${parameter.in}-${parameter.name}`]?.trim());
     if (missing.length > 0) {
@@ -395,11 +432,16 @@ function RequestRail({
       )}
       {parameters.length > 0 && (
         <section className="sp-rail-card">
-          <h3>Parameters</h3>
-          <div className="sp-rail-fields">{parameters.map((parameter, index) => {
+          <h3>Parameters <span className="sp-section-count">{parameters.length}</span></h3>
+          <div className="sp-rail-fields">{visibleParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
             return <label className="sp-field" key={`${key}-${index}`}><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>;
           })}</div>
+          {hiddenParameterCount > 0 && (
+            <button type="button" className="sp-rail-parameter-toggle" onClick={() => setParametersExpanded(!parametersExpanded)} aria-expanded={parametersExpanded}>
+              {parametersExpanded ? 'Show fewer' : `Show ${hiddenParameterCount} more`}
+            </button>
+          )}
         </section>
       )}
       {bodyMedia && item.method !== 'get' && item.method !== 'head' && (
@@ -408,7 +450,12 @@ function RequestRail({
           <label className="sp-field"><span>Request body</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={contentType === 'application/json' ? '{}' : 'Request body'} /></label>
         </section>
       )}
-      <CodeBlock className="sp-rail-code" title="Request sample · cURL" value={maskedSample} copyValue={sample} />
+      <RequestSample
+        className="sp-rail-code"
+        storageKey="speccy:request-language"
+        request={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: maskedRequestUrl, headers: maskedHeaders, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
+        copyRequest={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: requestUrl, headers, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
+      />
       <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}>{executing ? 'Sending…' : 'Send request'}</button>
       {result && (
         <section className={`sp-live-response ${result.error ? 'is-error' : ''}`} aria-live="polite">
@@ -556,6 +603,12 @@ function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: (
   }, []);
 
   useEffect(() => setActiveIndex(0), [normalizedQuery]);
+
+  useEffect(() => {
+    const activeResult = matches[activeIndex];
+    if (!activeResult) return;
+    document.getElementById(`sp-search-result-${activeResult.id}`)?.scrollIntoView?.({ block: 'nearest' });
+  }, [activeIndex, normalizedQuery]);
 
   function select(result?: SearchResult) {
     if (!result) return;
@@ -773,7 +826,6 @@ export function Speccy({
   }, [spec]);
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const fullSearchButton = useRef<HTMLButtonElement>(null);
   const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
@@ -814,10 +866,6 @@ export function Speccy({
     return () => window.removeEventListener('keydown', handleShortcut);
   }, []);
 
-  useEffect(() => {
-    if (!searchOpen) fullSearchButton.current?.focus();
-  }, [searchOpen]);
-
   if (result.error || !result.model) return <ErrorState error={result.error ?? new Error('Unknown rendering error.')} />;
 
   const model = result.model;
@@ -837,6 +885,7 @@ export function Speccy({
     item.operation.summary,
     item.operation.operationId,
     item.tag,
+    item.source,
   ].some((value) => value?.toLowerCase().includes(normalizedFilter));
   const filteredOperationCount = [...model.operations, ...model.webhooks].filter(matchesFilter).length;
 
@@ -885,12 +934,6 @@ export function Speccy({
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
-          <div className="sp-sidebar-search">
-            <span aria-hidden="true">⌕</span>
-            <input value={filterQuery} onChange={(event) => setFilterQuery(event.target.value)} placeholder="Filter endpoints" aria-label="Filter endpoints" />
-            {filterQuery && <button type="button" className="sp-search-clear" onClick={() => setFilterQuery('')} aria-label="Clear filter">×</button>}
-            <button ref={fullSearchButton} type="button" className="sp-full-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Open full search"><kbd>⌘K</kbd></button>
-          </div>
           <div className="sp-nav-scroll">
             {model.tagGroups.length > 0 ? <>{model.tagGroups.map((group) => {
               const visibleTags = group.tags.filter((tag) => tag.operations.some(matchesFilter));
@@ -902,6 +945,14 @@ export function Speccy({
             })}<NavigationTags tags={ungroupedTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} /></> : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
             {normalizedFilter && filteredOperationCount === 0 && <div className="sp-nav-empty"><strong>No matching endpoints</strong><span>Try a path, method, or operation name.</span></div>}
             {!normalizedFilter && <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />}
+          </div>
+          <div className="sp-sidebar-search">
+            <svg className="sp-filter-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+            <input value={filterQuery} onChange={(event) => setFilterQuery(event.target.value)} placeholder="Filter endpoints" aria-label="Filter endpoints" />
+            {filterQuery && <button type="button" className="sp-search-clear" onClick={() => setFilterQuery('')} aria-label="Clear filter">×</button>}
           </div>
         </nav>
       )}
