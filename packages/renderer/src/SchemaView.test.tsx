@@ -64,8 +64,41 @@ describe('SchemaView composition', () => {
       },
     }} />);
 
-    expect(screen.getByText('array<InstrumentState · ACTIVE | BLOCKED | DESTROYED | NOT_ENABLED>')).toBeInTheDocument();
+    expect(screen.getByText('array<InstrumentState · enum>')).toBeInTheDocument();
     expect(screen.queryByText('items')).not.toBeInTheDocument();
+  });
+
+  it('shows enum values in field details instead of the type summary', () => {
+    render(<SchemaView name="industry" schema={{
+      title: 'Industry',
+      type: 'string',
+      enum: ['ACCOUNTING', 'AUDIT', 'FINANCE'],
+    }} />);
+
+    expect(screen.getByText('Industry · enum')).toBeVisible();
+    expect(screen.queryByText('ACCOUNTING')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for industry' }));
+
+    expect(screen.getByText('ACCOUNTING')).toBeVisible();
+    expect(screen.getByText('AUDIT')).toBeVisible();
+    expect(screen.getByText('FINANCE')).toBeVisible();
+  });
+
+  it('surfaces array item enum values in the array field details', () => {
+    render(<SchemaView name="state" summaryOnly schema={{
+      type: 'array',
+      items: {
+        title: 'InstrumentState',
+        type: 'string',
+        enum: ['ACTIVE', 'BLOCKED'],
+      },
+    }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for state' }));
+
+    expect(screen.getByText('ACTIVE')).toBeVisible();
+    expect(screen.getByText('BLOCKED')).toBeVisible();
   });
 
   it('labels genuine alternatives and omits a meaningless label for one choice', () => {

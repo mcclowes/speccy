@@ -18,7 +18,7 @@ function schemaLabel(schema?: SchemaObject): string {
   const type = schema.type === 'array'
     ? `array<${schemaLabel(schema.items)}>`
     : schema.enum
-      ? schema.enum.map(String).join(' | ')
+      ? 'enum'
       : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
   return [schema.title, type].filter(Boolean).join(' · ');
 }
@@ -65,6 +65,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   const alternatives = schema.oneOf ?? schema.anyOf;
   const alternativeLabel = schema.oneOf ? 'one of' : 'any of';
   const isObject = schema.type === 'object' || Object.keys(properties).length > 0;
+  const enumValues = schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
   const constraints = [
     schema.minimum !== undefined && `min ${schema.minimum}`,
     schema.maximum !== undefined && `max ${schema.maximum}`,
@@ -74,6 +75,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
   ].filter(Boolean);
   const hasFieldDetails = Boolean(name && (
     schema.description
+    || enumValues
     || constraints.length > 0
     || schema.default !== undefined
     || (exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object'))
@@ -111,6 +113,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
     : <div className={`sp-schema-head${name ? ' sp-schema-head-named' : ''}`}>{headerContents}</div>;
   const fieldDetails = <div className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}>
       <Markdown className="sp-schema-description">{schema.description}</Markdown>
+      {enumValues && <p className="sp-schema-meta">Enum: {enumValues.map((value, index) => <code key={index}>{typeof value === 'string' ? value : JSON.stringify(value)}</code>).reduce<React.ReactNode[]>((values, value, index) => index === 0 ? [value] : [...values, ' | ', value], [])}</p>}
       {constraints.length > 0 && <p className="sp-schema-meta">{constraints.join(' · ')}</p>}
       {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
       {name && exampleValue !== undefined && (exampleValue === null || typeof exampleValue !== 'object') && <p className="sp-schema-meta">Example: <code>{typeof exampleValue === 'string' ? exampleValue : JSON.stringify(exampleValue)}</code></p>}

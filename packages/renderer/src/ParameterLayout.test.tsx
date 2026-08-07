@@ -107,7 +107,7 @@ describe('endpoint parameter layout', () => {
     }} basePath="/api" />);
 
     const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter')!;
-    expect(within(parameter).getByText('array<InstrumentState · ACTIVE | BLOCKED | DESTROYED | NOT_ENABLED>')).toBeInTheDocument();
+    expect(within(parameter).getByText('array<InstrumentState · enum>')).toBeInTheDocument();
     expect(within(parameter).queryByText('items')).not.toBeInTheDocument();
   });
 });
