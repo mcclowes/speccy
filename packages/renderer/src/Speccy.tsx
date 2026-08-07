@@ -722,8 +722,9 @@ export function Speccy({
       return { error: cause instanceof Error ? cause : new Error('Unable to parse the OpenAPI document.') };
     }
   }, [spec]);
+  const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const searchButton = useRef<HTMLButtonElement>(null);
+  const fullSearchButton = useRef<HTMLButtonElement>(null);
   const basePath = normalizeBasePath(basePathProp);
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
@@ -765,7 +766,7 @@ export function Speccy({
   }, []);
 
   useEffect(() => {
-    if (!searchOpen) searchButton.current?.focus();
+    if (!searchOpen) fullSearchButton.current?.focus();
   }, [searchOpen]);
 
   if (result.error || !result.model) return <ErrorState error={result.error ?? new Error('Unknown rendering error.')} />;
@@ -778,6 +779,15 @@ export function Speccy({
   const activeOperation = !activeReference && !activeTag ? [...model.operations, ...model.webhooks].find((item) => item.id === activeRoute) : undefined;
   const style = { '--sp-accent': accentColor } as CSSProperties;
   const storageScope = `speccy:${basePath || '/'}:${model.document.info?.title ?? 'api'}`;
+  const normalizedFilter = filterQuery.trim().toLowerCase();
+  const matchesFilter = (item: OperationModel) => !normalizedFilter || [
+    item.path,
+    item.method,
+    item.operation.summary,
+    item.operation.operationId,
+    item.tag,
+  ].some((value) => value?.toLowerCase().includes(normalizedFilter));
+  const filteredOperationCount = [...model.operations, ...model.webhooks].filter(matchesFilter).length;
 
   function navigate(operationId?: string) {
     const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
@@ -824,21 +834,23 @@ export function Speccy({
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
-          <button ref={searchButton} type="button" className="sp-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search API reference">
+          <div className="sp-sidebar-search">
             <span aria-hidden="true">⌕</span>
-            <span>Search API reference</span>
-            <kbd>⌘/Ctrl K</kbd>
-          </button>
+            <input value={filterQuery} onChange={(event) => setFilterQuery(event.target.value)} placeholder="Filter endpoints" aria-label="Filter endpoints" />
+            {filterQuery && <button type="button" className="sp-search-clear" onClick={() => setFilterQuery('')} aria-label="Clear filter">×</button>}
+            <button ref={fullSearchButton} type="button" className="sp-full-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Open full search"><kbd>⌘K</kbd></button>
+          </div>
           <div className="sp-nav-scroll">
             {model.tagGroups.length > 0 ? model.tagGroups.map((group) => {
-              const visibleTags = group.tags;
+              const visibleTags = group.tags.filter((tag) => tag.operations.some(matchesFilter));
               if (visibleTags.length === 0) return null;
               return <section className="sp-nav-tag-group" aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`} key={group.name}>
                 <h2 className="sp-nav-heading" id={`sp-nav-tag-group-${slugify(group.name)}`}>{group.name}</h2>
-                <NavigationTags tags={visibleTags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
+                <NavigationTags tags={visibleTags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
               </section>;
-            }) : <NavigationTags tags={model.tags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
-            <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />
+            }) : <NavigationTags tags={model.tags} matches={matchesFilter} searching={Boolean(normalizedFilter)} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
+            {normalizedFilter && filteredOperationCount === 0 && <div className="sp-nav-empty"><strong>No matching endpoints</strong><span>Try a path, method, or operation name.</span></div>}
+            {!normalizedFilter && <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />}
           </div>
         </nav>
       )}

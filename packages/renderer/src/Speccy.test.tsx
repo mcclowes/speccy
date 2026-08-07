@@ -294,9 +294,40 @@ describe('Speccy navigation', () => {
     expect(screen.getByText(/Authorization: Bearer secret-token/)).toBeInTheDocument();
   });
 
+  it('filters endpoints in the sidebar without opening full search', () => {
+    render(<Speccy spec={{
+      ...spec,
+      paths: {
+        ...spec.paths,
+        '/people': { get: { tags: ['People'], summary: 'List people' } },
+      },
+    }} />);
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+
+    fireEvent.change(navigation.getByRole('textbox', { name: 'Filter endpoints' }), { target: { value: 'people' } });
+
+    expect(navigation.queryByRole('button', { name: 'Companies' })).not.toBeInTheDocument();
+    expect(navigation.getByRole('button', { name: 'People' })).toHaveAttribute('aria-expanded', 'true');
+    expect(navigation.getByRole('link', { name: /List people/ })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Search API reference' })).not.toBeInTheDocument();
+  });
+
+  it('shows and clears an empty sidebar filter', () => {
+    render(<Speccy spec={spec} />);
+    const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
+    const filter = navigation.getByRole('textbox', { name: 'Filter endpoints' });
+
+    fireEvent.change(filter, { target: { value: 'no such endpoint' } });
+    expect(navigation.getByText('No matching endpoints')).toBeInTheDocument();
+    fireEvent.click(navigation.getByRole('button', { name: 'Clear filter' }));
+
+    expect(filter).toHaveValue('');
+    expect(navigation.getByRole('button', { name: 'Companies' })).toBeInTheDocument();
+  });
+
   it('opens quick search and navigates to a matching endpoint', () => {
     render(<Speccy spec={spec} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Search API reference' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open full search' }));
 
     const search = screen.getByRole('textbox', { name: 'Search API reference' });
     fireEvent.change(search, {
@@ -320,7 +351,7 @@ describe('Speccy navigation', () => {
 
   it('shows an empty search state and closes with Escape', () => {
     render(<Speccy spec={spec} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Search API reference' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open full search' }));
     const search = screen.getByRole('textbox', { name: 'Search API reference' });
 
     fireEvent.change(search, { target: { value: 'no such endpoint' } });
@@ -328,7 +359,7 @@ describe('Speccy navigation', () => {
     fireEvent.keyDown(search, { key: 'Escape' });
 
     expect(screen.queryByRole('dialog', { name: 'Search API reference' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Search API reference' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Open full search' })).toHaveFocus();
   });
 
   it('finds named reusable components', () => {
