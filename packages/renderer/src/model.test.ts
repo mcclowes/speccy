@@ -175,7 +175,7 @@ describe('createReferenceModel', () => {
     expect(model.webhooks).toMatchObject([{ method: 'post', path: 'paymentReceived', source: 'webhook' }]);
   });
 
-  it('adds tagged webhooks to their tag while leaving untagged webhooks separate', () => {
+  it('adds tagged webhooks to their tag and groups untagged webhooks under Other webhooks', () => {
     const model = createReferenceModel({
       openapi: '3.1.0', paths: {},
       tags: [{ name: 'Payments', description: 'Payment events.' }],
@@ -185,10 +185,10 @@ describe('createReferenceModel', () => {
       },
     });
 
-    expect(model.tags).toMatchObject([{
-      name: 'Payments',
-      operations: [{ source: 'webhook', path: 'paymentReceived' }],
-    }]);
+    expect(model.tags).toMatchObject([
+      { name: 'Payments', operations: [{ source: 'webhook', path: 'paymentReceived' }] },
+      { name: 'Other webhooks', operations: [{ source: 'webhook', path: 'systemReady' }] },
+    ]);
     expect(model.webhooks).toHaveLength(2);
   });
 });

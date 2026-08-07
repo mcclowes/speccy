@@ -233,11 +233,11 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
       const operation = pathItem[method];
       if (!operation) continue;
       const baseId = slugify(`webhook-${operation.operationId ?? `${method}-${path}`}`) || 'webhook';
-      webhooks.push({ id: baseId, method, path, operation, pathItem, tag: operation.tags?.[0] ?? 'Webhooks', source: 'webhook' });
+      webhooks.push({ id: baseId, method, path, operation, pathItem, tag: operation.tags?.[0] ?? 'Other webhooks', source: 'webhook' });
     }
   }
 
-  const taggedOperations = [...operations, ...webhooks.filter((webhook) => webhook.operation.tags?.length)];
+  const taggedOperations = [...operations, ...webhooks];
   const tagNames = [
     ...declaredTags.keys(),
     ...taggedOperations.map((operation) => operation.tag),

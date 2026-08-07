@@ -80,7 +80,7 @@ describe('Speccy navigation', () => {
     expect(within(screen.getByRole('navigation', { name: 'API reference' })).getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('shows tagged webhooks under their tag and untagged webhooks in the reference section', () => {
+  it('shows tagged webhooks under their tag and untagged webhooks under Other webhooks', () => {
     render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Webhook API' }, paths: {},
       webhooks: {
@@ -92,16 +92,14 @@ describe('Speccy navigation', () => {
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
     fireEvent.click(navigation.getByRole('button', { name: 'Companies' }));
     expect(navigation.getByRole('link', { name: /Company updated/ })).toBeInTheDocument();
-    expect(navigation.queryByRole('link', { name: /System ready/ })).not.toBeInTheDocument();
+    fireEvent.click(navigation.getByRole('button', { name: 'Other webhooks' }));
+    expect(navigation.getByRole('link', { name: /System ready/ })).toBeInTheDocument();
 
     fireEvent.click(navigation.getByRole('link', { name: /Company updated/ }));
     expect(screen.getByRole('heading', { level: 1, name: 'Company updated' })).toBeInTheDocument();
 
-    fireEvent.click(navigation.getByRole('button', { name: 'Reference' }));
-    fireEvent.click(navigation.getByRole('link', { name: 'Webhooks' }));
-    const content = within(screen.getByRole('main'));
-    expect(content.getByText('System ready')).toBeInTheDocument();
-    expect(content.queryByText('Company updated')).not.toBeInTheDocument();
+    fireEvent.click(navigation.getByRole('link', { name: /System ready/ }));
+    expect(screen.getByRole('heading', { level: 1, name: 'System ready' })).toBeInTheDocument();
   });
 
   it('updates the request sample from endpoint parameters', () => {
@@ -349,7 +347,7 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { name: 'CompanyRecord' })).toBeInTheDocument();
   });
 
-  it('renders webhooks, reusable components, security, and every media type', () => {
+  it('renders untagged webhooks, reusable components, security, and every media type', () => {
     render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Complete API' },
       servers: [{ url: 'https://one.example' }, { url: 'https://two.example', description: 'Sandbox' }],
@@ -366,17 +364,14 @@ describe('Speccy navigation', () => {
     }} />);
 
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
-    fireEvent.click(navigation.getByRole('button', { name: 'Reference' }));
-    fireEvent.click(navigation.getByRole('link', { name: 'Webhooks' }));
-    expect(window.location.pathname).toBe('/reference/webhooks');
-    expect(screen.getByRole('heading', { name: 'Webhooks' })).toBeInTheDocument();
-    expect(screen.getByText('Event delivered')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Schemas' })).not.toBeInTheDocument();
+    fireEvent.click(navigation.getByRole('button', { name: 'Other webhooks' }));
+    fireEvent.click(navigation.getByRole('link', { name: /Event delivered/ }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Event delivered' })).toBeInTheDocument();
 
+    fireEvent.click(navigation.getByRole('button', { name: 'Reference' }));
     fireEvent.click(navigation.getByRole('link', { name: 'Schemas' }));
     expect(window.location.pathname).toBe('/reference/schemas');
     expect(screen.getByRole('heading', { name: 'Schemas' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Webhooks' })).not.toBeInTheDocument();
 
     fireEvent.click(navigation.getByRole('link', { name: 'Security schemes' }));
     expect(window.location.pathname).toBe('/reference/security-schemes');

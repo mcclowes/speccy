@@ -1,6 +1,6 @@
 /**
  * ---
- * purpose: Renders reusable OpenAPI components and webhook operations as browsable reference sections.
+ * purpose: Renders reusable OpenAPI components as browsable reference sections.
  * related:
  *   - ./SchemaView.tsx - Supplies schema, media, and example presentation.
  *   - ./Speccy.tsx - Places these sections in the full API reference.
@@ -9,7 +9,6 @@
 
 import type { ReactNode } from 'react';
 import { Markdown } from './Markdown';
-import type { OperationModel } from './model';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type { OpenAPIDocument, SecurityScheme } from './types';
 import { useLocalState } from './useLocalState';
@@ -20,15 +19,14 @@ export const REFERENCE_GROUPS = [
   ['callbacks', 'Callbacks'], ['securitySchemes', 'Security schemes'],
 ] as const;
 
-export type ReferenceKey = 'webhooks' | typeof REFERENCE_GROUPS[number][0];
+export type ReferenceKey = typeof REFERENCE_GROUPS[number][0];
 
 function entries(value: unknown): [string, any][] {
   return value && typeof value === 'object' ? Object.entries(value) : [];
 }
 
-export function ReferenceNavigation({ document, webhookCount, activeKey, hrefFor, onNavigate, storageKey }: {
+export function ReferenceNavigation({ document, activeKey, hrefFor, onNavigate, storageKey }: {
   document: OpenAPIDocument;
-  webhookCount: number;
   activeKey?: ReferenceKey;
   hrefFor: (key: ReferenceKey) => string;
   onNavigate: (key: ReferenceKey) => void;
@@ -36,14 +34,13 @@ export function ReferenceNavigation({ document, webhookCount, activeKey, hrefFor
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
   const available = REFERENCE_GROUPS.filter(([key]) => entries(document.components?.[key]).length > 0);
-  if (available.length === 0 && webhookCount === 0) return null;
+  if (available.length === 0) return null;
   return <div className="sp-nav-group sp-reference-nav">
     <button type="button" className="sp-nav-tag" onClick={() => setOpen(!open)} aria-expanded={open}>
       <span>Reference</span>
       <span className="sp-nav-chevron" aria-hidden="true" />
     </button>
     {open && <div>
-      {webhookCount > 0 && <a className={`sp-nav-operation ${activeKey === 'webhooks' ? 'is-active' : ''}`} aria-current={activeKey === 'webhooks' ? 'page' : undefined} href={hrefFor('webhooks')} onClick={(event) => { event.preventDefault(); onNavigate('webhooks'); }}>Webhooks</a>}
       {available.map(([key, label]) => <a className={`sp-nav-operation ${activeKey === key ? 'is-active' : ''}`} aria-current={activeKey === key ? 'page' : undefined} href={hrefFor(key)} onClick={(event) => { event.preventDefault(); onNavigate(key); }} key={key}>{label}</a>)}
     </div>}
   </div>;
@@ -67,15 +64,12 @@ function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
   </>;
 }
 
-export function DocumentReference({ document, webhooks, renderOperation, activeKey }: {
+export function DocumentReference({ document, activeKey }: {
   document: OpenAPIDocument;
-  webhooks: OperationModel[];
-  renderOperation: (operation: OperationModel) => ReactNode;
   activeKey: ReferenceKey;
 }) {
   const components = document.components ?? {};
   return <>
-    {activeKey === 'webhooks' && webhooks.length > 0 && <Section id="webhooks" title="Webhooks"><div className="sp-operation-list">{webhooks.map((operation) => <div key={operation.id}>{renderOperation(operation)}</div>)}</div></Section>}
     {activeKey === 'schemas' && <Section id="components-schemas" title="Schemas">{entries(components.schemas).map(([name, schema]) => <Card name={name} key={name}><SchemaView schema={schema} /></Card>)}</Section>}
     {activeKey === 'parameters' && <Section id="components-parameters" title="Parameters">{entries(components.parameters).map(([name, parameter]) => <Card name={name} key={name}><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required">required</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</Card>)}</Section>}
     {activeKey === 'requestBodies' && <Section id="components-requestBodies" title="Request bodies">{entries(components.requestBodies).map(([name, body]) => <Card name={name} key={name}><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></Card>)}</Section>}

@@ -772,7 +772,6 @@ export function Speccy({
 
   const model = result.model;
   const server = model.document.servers?.[0]?.url ?? '';
-  const untaggedWebhooks = model.webhooks.filter((webhook) => !webhook.operation.tags?.length);
   const activeReference = activeRoute?.startsWith('reference/') ? activeRoute.slice('reference/'.length) as ReferenceKey : undefined;
   const activeTagSlug = activeRoute?.startsWith('tags/') ? activeRoute.slice('tags/'.length) : undefined;
   const activeTag = activeTagSlug ? model.tags.find((tag) => tagSlug(tag) === activeTagSlug) : undefined;
@@ -814,11 +813,6 @@ export function Speccy({
       terms: [item.path, item.method, item.operation.summary ?? '', item.operation.operationId ?? '', item.tag],
       navigate: () => navigate(item.id),
     })),
-    ...(untaggedWebhooks.length ? [{
-      id: 'reference-webhooks', group: 'Reference' as const, label: 'Webhooks',
-      detail: `${untaggedWebhooks.length} webhook${untaggedWebhooks.length === 1 ? '' : 's'}`,
-      terms: ['webhooks'], navigate: () => navigateReference('webhooks'),
-    }] : []),
     ...REFERENCE_GROUPS.flatMap(([key, label]) => Object.keys(model.document.components?.[key] ?? {}).map((name) => ({
       id: `reference-${key}-${slugify(name)}`, group: 'Reference' as const, label: name, detail: label,
       terms: [name, label], navigate: () => navigateReference(key),
@@ -844,7 +838,7 @@ export function Speccy({
                 <NavigationTags tags={visibleTags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
               </section>;
             }) : <NavigationTags tags={model.tags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
-            <ReferenceNavigation document={model.document} webhookCount={untaggedWebhooks.length} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />
+            <ReferenceNavigation document={model.document} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />
           </div>
         </nav>
       )}
@@ -869,7 +863,7 @@ export function Speccy({
         {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} basePath={basePath} onNavigate={navigate} />}
         {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
-        {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} webhooks={untaggedWebhooks} renderOperation={(item) => <OperationCard item={item} server={server} defaultExpanded={defaultExpanded} />} /></section>}
+        {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>
       {searchOpen && <QuickSearch results={searchResults} onClose={() => setSearchOpen(false)} />}
     </div>
