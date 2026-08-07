@@ -30,8 +30,165 @@ describe('createReferenceModel', () => {
     expect(model.operations.map(({ id }) => id)).toEqual(['listpets', 'listpets-2']);
   });
 
+  it('groups tags using the Redocly x-tagGroups extension', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      tags: [{ name: 'Setup' }, { name: 'Sign-in' }, { name: 'Internal' }],
+      'x-tagGroups': [{ name: 'Users & authentication', tags: ['Setup', 'Sign-in'] }],
+      paths: {
+        '/users': { post: { tags: ['Setup'], summary: 'Register a user' } },
+        '/sessions': { post: { tags: ['Sign-in'], summary: 'Sign in' } },
+        '/internal': { get: { tags: ['Internal'], summary: 'Internal operation' } },
+      },
+    });
+
+    expect(model.tagGroups.map((group) => ({
+      name: group.name,
+      tags: group.tags.map((tag) => tag.name),
+    }))).toEqual([{ name: 'Users & authentication', tags: ['Setup', 'Sign-in'] }]);
+    expect(model.tags.map((tag) => tag.name)).toEqual(['Setup', 'Sign-in']);
+    expect(model.operations).toHaveLength(3);
+  });
+
   it('rejects documents without an OpenAPI version', () => {
     expect(() => createReferenceModel({ paths: {} })).toThrow('openapi or swagger');
+  });
+
+  it('resolves $ref parameters against components.parameters', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/companies/{companyId}/connections': {
+          get: {
+            operationId: 'list-connections',
+            parameters: [
+              { $ref: '#/components/parameters/companyId' },
+              { $ref: '#/components/parameters/page' },
+            ],
+          },
+        },
+      },
+      components: {
+        parameters: {
+          companyId: { name: 'companyId', in: 'path', required: true, schema: { type: 'string' } },
+          page: { name: 'page', in: 'query', schema: { type: 'integer' } },
+        },
+      },
+    });
+
+    const parameters = model.operations[0]?.operation.parameters ?? [];
+    expect(parameters.map((parameter) => parameter.name)).toEqual(['companyId', 'page']);
+    expect(parameters[0]?.in).toBe('path');
+  });
+
+  it('resolves $ref schemas nested inside request and response bodies', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/pets': {
+          post: {
+            operationId: 'createPet',
+            requestBody: {
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } },
+            },
+            responses: {
+              '200': {
+                description: 'OK',
+                content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object', properties: { name: { type: 'string' } } },
+        },
+      },
+    });
+
+    const operation = model.operations[0]?.operation;
+    const requestSchema = operation?.requestBody?.content?.['application/json']?.schema;
+    const responseSchema = operation?.responses?.['200']?.content?.['application/json']?.schema;
+    expect(requestSchema?.properties?.name?.type).toBe('string');
+    expect(responseSchema?.properties?.name?.type).toBe('string');
+  });
+
+  it('does not hang on circular $ref schemas', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/nodes': {
+          get: {
+            operationId: 'getNode',
+            responses: {
+              '200': {
+                description: 'OK',
+                content: { 'application/json': { schema: { $ref: '#/components/schemas/Node' } } },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Node: {
+            type: 'object',
+            properties: {
+              children: { type: 'array', items: { $ref: '#/components/schemas/Node' } },
+            },
+          },
+        },
+      },
+    });
+
+    const schema = model.operations[0]?.operation.responses?.['200']?.content?.['application/json']?.schema;
+    expect(schema?.properties?.children?.items?.$ref).toBe('#/components/schemas/Node');
+  });
+
+  it('normalizes Swagger 2 servers, body parameters, responses, and definitions', () => {
+    const model = createReferenceModel({
+      swagger: '2.0', host: 'api.example.com', basePath: '/v2', schemes: ['https'],
+      consumes: ['application/json'], produces: ['application/json'],
+      paths: { '/pets': { post: {
+        parameters: [{ name: 'pet', in: 'body', required: true, schema: { $ref: '#/definitions/Pet' } }],
+        responses: { '201': { description: 'Created', schema: { $ref: '#/definitions/Pet' } } },
+      } } },
+      definitions: { Pet: { type: 'object', properties: { name: { type: 'string' } } } },
+    });
+
+    expect(model.document.servers?.[0]?.url).toBe('https://api.example.com/v2');
+    expect(model.document.components?.schemas?.Pet?.properties?.name?.type).toBe('string');
+    expect(model.operations[0]?.operation.parameters).toEqual([]);
+    expect(model.operations[0]?.operation.requestBody?.content?.['application/json']?.schema?.properties?.name?.type).toBe('string');
+    expect(model.operations[0]?.operation.responses?.['201']?.content?.['application/json']?.schema?.properties?.name?.type).toBe('string');
+  });
+
+  it('collects top-level webhook operations separately from API paths', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0', paths: {},
+      webhooks: { paymentReceived: { post: { operationId: 'paymentReceived', summary: 'Payment received' } } },
+    });
+
+    expect(model.operations).toHaveLength(0);
+    expect(model.webhooks).toMatchObject([{ method: 'post', path: 'paymentReceived', source: 'webhook' }]);
+  });
+
+  it('adds tagged webhooks to their tag while leaving untagged webhooks separate', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0', paths: {},
+      tags: [{ name: 'Payments', description: 'Payment events.' }],
+      webhooks: {
+        paymentReceived: { post: { tags: ['Payments'], summary: 'Payment received' } },
+        systemReady: { post: { summary: 'System ready' } },
+      },
+    });
+
+    expect(model.tags).toMatchObject([{
+      name: 'Payments',
+      operations: [{ source: 'webhook', path: 'paymentReceived' }],
+    }]);
+    expect(model.webhooks).toHaveLength(2);
   });
 });
 
@@ -40,4 +197,3 @@ describe('slugify', () => {
     expect(slugify('GET /pets/{petId}')).toBe('get-pets-petid');
   });
 });
-

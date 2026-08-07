@@ -29,11 +29,30 @@ export interface OpenAPIDocument {
     license?: { name?: string; url?: string };
   };
   servers?: Array<{ url?: string; description?: string }>;
+  host?: string;
+  basePath?: string;
+  schemes?: string[];
+  consumes?: string[];
+  produces?: string[];
   tags?: Array<{ name?: string; description?: string }>;
+  'x-tagGroups'?: Array<{ name?: string; tags?: string[] }>;
   paths?: Record<string, PathItem>;
+  webhooks?: Record<string, PathItem>;
+  security?: SecurityRequirement[];
+  definitions?: Record<string, SchemaObject>;
+  parameters?: Record<string, Parameter>;
+  responses?: Record<string, ResponseObject>;
+  securityDefinitions?: Record<string, SecurityScheme>;
   components?: {
     schemas?: Record<string, SchemaObject>;
-    securitySchemes?: Record<string, Record<string, unknown>>;
+    parameters?: Record<string, Parameter>;
+    requestBodies?: Record<string, RequestBody>;
+    responses?: Record<string, ResponseObject>;
+    headers?: Record<string, HeaderObject>;
+    examples?: Record<string, ExampleObject>;
+    links?: Record<string, LinkObject>;
+    callbacks?: Record<string, CallbackObject>;
+    securitySchemes?: Record<string, SecurityScheme>;
   };
   [key: string]: unknown;
 }
@@ -54,8 +73,13 @@ export interface Operation {
   parameters?: Parameter[];
   requestBody?: RequestBody;
   responses?: Record<string, ResponseObject>;
-  security?: Array<Record<string, string[]>>;
+  callbacks?: Record<string, CallbackObject>;
+  security?: SecurityRequirement[];
+  consumes?: string[];
+  produces?: string[];
 }
+
+export type SecurityRequirement = Record<string, string[]>;
 
 export interface Parameter {
   name?: string;
@@ -64,26 +88,82 @@ export interface Parameter {
   required?: boolean;
   deprecated?: boolean;
   schema?: SchemaObject;
+  type?: string;
+  format?: string;
+  items?: SchemaObject;
+  enum?: unknown[];
+  collectionFormat?: string;
   example?: unknown;
+  $ref?: string;
 }
 
 export interface RequestBody {
   description?: string;
   required?: boolean;
   content?: Record<string, MediaType>;
+  $ref?: string;
 }
 
 export interface ResponseObject {
   description?: string;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, HeaderObject>;
   content?: Record<string, MediaType>;
+  schema?: SchemaObject;
+  examples?: Record<string, unknown>;
+  links?: Record<string, LinkObject>;
   $ref?: string;
 }
 
 export interface MediaType {
   schema?: SchemaObject;
   example?: unknown;
-  examples?: Record<string, { value?: unknown }>;
+  examples?: Record<string, ExampleObject>;
+  encoding?: Record<string, Record<string, unknown>>;
+}
+
+export interface HeaderObject extends Omit<Parameter, 'name' | 'in'> {}
+
+export interface ExampleObject {
+  summary?: string;
+  description?: string;
+  value?: unknown;
+  externalValue?: string;
+  $ref?: string;
+}
+
+export interface LinkObject {
+  operationRef?: string;
+  operationId?: string;
+  parameters?: Record<string, unknown>;
+  requestBody?: unknown;
+  description?: string;
+  server?: { url?: string; description?: string };
+  $ref?: string;
+}
+
+export type CallbackObject = Record<string, PathItem> & { $ref?: string };
+
+export interface SecurityScheme {
+  type?: string;
+  description?: string;
+  name?: string;
+  in?: string;
+  scheme?: string;
+  bearerFormat?: string;
+  openIdConnectUrl?: string;
+  flows?: Record<string, OAuthFlow>;
+  flow?: string;
+  authorizationUrl?: string;
+  tokenUrl?: string;
+  scopes?: Record<string, string>;
+  $ref?: string;
+}
+
+export interface OAuthFlow {
+  authorizationUrl?: string;
+  tokenUrl?: string;
+  refreshUrl?: string;
+  scopes?: Record<string, string>;
 }
 
 export interface SchemaObject {
@@ -101,6 +181,13 @@ export interface SchemaObject {
   readOnly?: boolean;
   writeOnly?: boolean;
   deprecated?: boolean;
+  discriminator?: string | { propertyName?: string; mapping?: Record<string, string> };
+  additionalProperties?: boolean | SchemaObject;
+  minimum?: number;
+  maximum?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
   allOf?: SchemaObject[];
   oneOf?: SchemaObject[];
   anyOf?: SchemaObject[];
@@ -120,4 +207,3 @@ export interface SpeccyProps {
   basePath?: string;
   onError?: (error: Error) => void;
 }
-

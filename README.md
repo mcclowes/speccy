@@ -12,7 +12,7 @@ The design stays quiet around the content. Color identifies methods, status, req
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
-The renderer accepts OpenAPI 3.x and Swagger 2 documents in YAML or JSON. It covers info, servers, tags, operations, parameters, request bodies, response bodies, nested schemas, composition, enums, references, deprecation, search, cURL samples, dark mode, responsive layouts, and print styles.
+The renderer accepts OpenAPI 3.x and Swagger 2 documents in YAML or JSON. It covers info, all servers and media types, tags, operations, parameters, request and response bodies, webhooks, callbacks, security requirements and schemes, headers, links, examples, reusable component catalogues, nested schemas, composition, enums, references, deprecation, search, cURL samples, dark mode, responsive layouts, and print styles. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
 
 ## Run the web studio
 
@@ -91,4 +91,3 @@ packages/
   renderer/           Shared parser, model, React UI, and styles
   docusaurus-plugin/  Docusaurus build plugin and MDX component
 ```
-

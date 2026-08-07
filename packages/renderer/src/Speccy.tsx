@@ -10,85 +10,41 @@
 
 import {
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
+import { CodeBlock, CopyButton } from './CodeBlock';
 import { Markdown } from './Markdown';
-import { createReferenceModel, parseSpec, type OperationModel } from './model';
+import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
+import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
+import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type {
   MediaType,
   Parameter,
+  OpenAPIDocument,
   ResponseObject,
-  SchemaObject,
+  SecurityRequirement,
+  SecurityScheme,
   SpeccyProps,
 } from './types';
+import { useLocalState } from './useLocalState';
 
 const METHOD_LABELS: Record<string, string> = {
   get: 'GET', post: 'POST', put: 'PUT', patch: 'PATCH', delete: 'DELETE',
   options: 'OPTIONS', head: 'HEAD', trace: 'TRACE',
 };
 
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  async function copy() {
-    await navigator.clipboard?.writeText(value);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
-  }
-  return <button className="sp-copy" type="button" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>;
-}
-
-function schemaLabel(schema?: SchemaObject): string {
-  if (!schema) return 'any';
-  if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  if (schema.type === 'array') return `array<${schemaLabel(schema.items)}>`;
-  if (schema.enum) return schema.enum.map(String).join(' | ');
-  return [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
-}
-
-function SchemaView({ schema, name, required = false, depth = 0 }: {
-  schema?: SchemaObject;
-  name?: string;
-  required?: boolean;
-  depth?: number;
-}) {
-  if (!schema) return null;
-  const properties = schema.properties ?? {};
-  const variants = schema.oneOf ?? schema.anyOf ?? schema.allOf;
-
+function Path({ value, className }: { value: string; className?: string }) {
+  const parts = value.split(/(\{[^{}]+\})/g);
   return (
-    <div className={`sp-schema sp-schema-depth-${Math.min(depth, 3)}`}>
-      <div className="sp-schema-head">
-        {name && <code className="sp-property">{name}</code>}
-        <span className="sp-type">{schemaLabel(schema)}</span>
-        {required && <span className="sp-required">required</span>}
-        {schema.nullable && <span className="sp-qualifier">nullable</span>}
-        {schema.readOnly && <span className="sp-qualifier">read only</span>}
-      </div>
-      <Markdown className="sp-schema-description">{schema.description}</Markdown>
-      {schema.default !== undefined && <p className="sp-schema-meta">Default: <code>{JSON.stringify(schema.default)}</code></p>}
-      {schema.example !== undefined && <p className="sp-schema-meta">Example: <code>{JSON.stringify(schema.example)}</code></p>}
-      {Object.entries(properties).length > 0 && (
-        <div className="sp-schema-properties">
-          {Object.entries(properties).map(([propertyName, property]) => (
-            <SchemaView
-              key={propertyName}
-              name={propertyName}
-              schema={property}
-              required={schema.required?.includes(propertyName)}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
-      )}
-      {schema.items && depth < 4 && <SchemaView name="items" schema={schema.items} depth={depth + 1} />}
-      {variants && (
-        <div className="sp-schema-properties">
-          {variants.map((variant, index) => <SchemaView key={index} name={`option ${index + 1}`} schema={variant} depth={depth + 1} />)}
-        </div>
-      )}
-    </div>
+    <code className={className}>
+      {parts.map((part, index) => part.startsWith('{') && part.endsWith('}')
+        ? <span className="sp-path-parameter" key={`${part}-${index}`}>{part}</span>
+        : part)}
+    </code>
   );
 }
 
@@ -107,6 +63,7 @@ function ParameterList({ parameters }: { parameters: Parameter[] }) {
             </div>
             <Markdown>{parameter.description}</Markdown>
             <SchemaView schema={parameter.schema} />
+            {parameter.example !== undefined && <JsonValue value={parameter.example} />}
           </div>
         ))}
       </div>
@@ -121,19 +78,17 @@ function firstMedia(content?: Record<string, MediaType>): [string, MediaType] | 
 function RequestBodyView({ operation }: { operation: OperationModel['operation'] }) {
   const body = operation.requestBody;
   if (!body) return null;
-  const media = firstMedia(body.content);
   return (
     <section className="sp-section">
       <h4>Request body {body.required && <span className="sp-required">required</span>}</h4>
       <Markdown>{body.description}</Markdown>
-      {media && <><div className="sp-media-type">{media[0]}</div><SchemaView schema={media[1].schema} /></>}
+      <MediaContent content={body.content} />
     </section>
   );
 }
 
 function ResponseView({ code, response }: { code: string; response: ResponseObject }) {
   const [open, setOpen] = useState(code.startsWith('2'));
-  const media = firstMedia(response.content);
   return (
     <div className="sp-response">
       <button type="button" className="sp-response-head" onClick={() => setOpen(!open)} aria-expanded={open}>
@@ -144,24 +99,314 @@ function ResponseView({ code, response }: { code: string; response: ResponseObje
       {open && (
         <div className="sp-response-body">
           <Markdown>{response.description}</Markdown>
-          {media && <><div className="sp-media-type">{media[0]}</div><SchemaView schema={media[1].schema} /></>}
+          <MediaContent content={response.content} collapseObjects />
+          {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
+          {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
         </div>
       )}
     </div>
   );
 }
 
+function securitySchemeLabel(scheme?: SecurityScheme): string | undefined {
+  if (!scheme?.type) return undefined;
+  if (scheme.type === 'apiKey') return 'API key';
+  if (scheme.type === 'oauth2') return 'OAuth 2';
+  if (scheme.type === 'openIdConnect') return 'OpenID Connect';
+  if (scheme.type === 'http' && scheme.scheme) return scheme.scheme === 'basic' ? 'Basic' : scheme.scheme.charAt(0).toUpperCase() + scheme.scheme.slice(1);
+  return scheme.type;
+}
+
+function SecurityRequirements({ requirements, schemes }: {
+  requirements?: SecurityRequirement[];
+  schemes?: Record<string, SecurityScheme>;
+}) {
+  if (!requirements) return null;
+  if (requirements.length === 0) return <section className="sp-section"><h4>Security</h4><p>Public endpoint</p></section>;
+  const entries = requirements.flatMap((requirement) => Object.entries(requirement));
+  const onlyEntry = entries.length === 1 ? entries[0] : undefined;
+  const onlyScheme = onlyEntry ? schemes?.[onlyEntry[0]] : undefined;
+  return <section className="sp-section"><h4>Security{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><div className="sp-security-requirements">{requirements.map((requirement, index) => (
+    <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
+      const scheme = schemes?.[name];
+      return <div className="sp-security-scheme" key={name}>
+        {!onlyScheme && <span><code>{securitySchemeLabel(scheme) ?? name}</code>{scopes.length > 0 && ` - ${scopes.join(', ')}`}</span>}
+        <Markdown>{scheme?.description}</Markdown>
+      </div>;
+    })}</div>
+  ))}</div></section>;
+}
+
 function CodeSample({ item, server }: { item: OperationModel; server: string }) {
   const url = `${server.replace(/\/$/, '')}${item.path}`;
   const contentType = firstMedia(item.operation.requestBody?.content)?.[0];
-  const lines = [`curl --request ${METHOD_LABELS[item.method]} \\`, `  --url '${url}'`];
+  const lines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${url}'`];
   if (contentType) lines.push(`  --header 'content-type: ${contentType}'`);
   const sample = lines.join(' \\\n');
   return (
     <aside className="sp-code-panel">
-      <div className="sp-code-title"><span>cURL</span><CopyButton value={sample} /></div>
-      <pre><code>{sample}</code></pre>
+      <CodeBlock title="cURL" value={sample} />
     </aside>
+  );
+}
+
+const PARAMETER_GROUP_LABELS: Record<string, string> = {
+  path: 'Path parameters',
+  query: 'Query parameters',
+  header: 'Header parameters',
+  cookie: 'Cookie parameters',
+};
+
+function GroupedParameterList({ parameters }: { parameters: Parameter[] }) {
+  const groups = Object.entries(parameters.reduce<Record<string, Parameter[]>>((result, parameter) => {
+    const location = parameter.in ?? 'query';
+    (result[location] ??= []).push(parameter);
+    return result;
+  }, {}));
+  return <>{groups.map(([location, items]) => items && (
+    <section className="sp-endpoint-section" key={location}>
+      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h2>
+      <div className="sp-endpoint-parameters">
+        {items.map((parameter, index) => (
+          <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
+            <div className="sp-parameter-name">
+              <code>{parameter.name ?? 'unnamed'}</code>
+              <SchemaView schema={parameter.schema} showExample={false} />
+              {parameter.required && <span className="sp-required">required</span>}
+            </div>
+            <Markdown>{parameter.description}</Markdown>
+            {(parameter.example !== undefined || parameter.schema?.example !== undefined) && (
+              <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}</>;
+}
+
+function responseExamples(response?: ResponseObject): { label: string; value: unknown }[] {
+  const media = firstMedia(response?.content)?.[1];
+  if (!media) return [];
+  const examples: { label: string; value: unknown }[] = [];
+  if (media.example !== undefined) examples.push({ label: 'Example', value: media.example });
+  for (const [name, example] of Object.entries(media.examples ?? {})) {
+    const value = example.value ?? example.externalValue;
+    if (value !== undefined) examples.push({ label: example.summary ?? name, value });
+  }
+  if (media.schema?.example !== undefined) examples.push({ label: 'Generic example', value: media.schema.example });
+  return examples;
+}
+
+function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
+  examples: { label: string; value: unknown }[];
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
+}) {
+  const activeExample = examples[activeIndex];
+  if (!activeExample) return null;
+
+  const title = examples.length > 1 ? (
+    <><span>Response example</span><select className="sp-example-select" aria-label="Response example" value={activeIndex} onChange={(event) => setActiveIndex(Number(event.target.value))}>{examples.map((example, index) => <option value={index} key={`${example.label}-${index}`}>{example.label}</option>)}</select></>
+  ) : 'Response example';
+
+  return <CodeBlock className="sp-rail-code sp-response-example" title={title} value={JSON.stringify(activeExample.value, null, 2)} />;
+}
+
+function EndpointResponseBody({ response }: { response: ResponseObject }) {
+  const examples = responseExamples(response);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeExample = examples[activeIndex];
+
+  return <div className="sp-endpoint-response-grid">
+    <div className="sp-endpoint-response-detail" role="tabpanel">
+      <Markdown>{response.description}</Markdown>
+      <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
+      {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
+      {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
+    </div>
+    <ResponseExamplePanel examples={examples} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+  </div>;
+}
+
+function EndpointResponses({ responses }: { responses: Record<string, ResponseObject> }) {
+  const entries = Object.entries(responses);
+  const [activeCode, setActiveCode] = useState(entries.find(([code]) => code.startsWith('2'))?.[0] ?? entries[0]?.[0]);
+  const activeEntry = entries.find(([code]) => code === activeCode);
+  const activeResponse = activeEntry?.[1];
+
+  if (!activeCode || !activeResponse) return null;
+
+  return (
+    <section className="sp-endpoint-section sp-endpoint-responses">
+      <div className="sp-response-tabs-row">
+        <h2>Responses</h2>
+        <div className="sp-response-tabs" role="tablist" aria-label="Response status">
+          {entries.map(([code]) => (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={code === activeCode}
+              className={`sp-response-tab ${code.startsWith('2') ? 'is-success' : ''}`}
+              onClick={() => setActiveCode(code)}
+              key={code}
+            >
+              <span aria-hidden="true" />{code}
+            </button>
+          ))}
+        </div>
+      </div>
+      <EndpointResponseBody response={activeResponse} key={activeCode} />
+    </section>
+  );
+}
+
+function RequestRail({
+  item,
+  server,
+  security,
+  securitySchemes,
+  storageScope,
+}: {
+  item: OperationModel;
+  server: string;
+  security?: SecurityRequirement[];
+  securitySchemes?: Record<string, SecurityScheme>;
+  storageScope: string;
+}) {
+  const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
+  const [values, setValues] = useLocalState<Record<string, string>>(`${storageScope}:operation:${item.id}:parameters`, Object.fromEntries(parameters.map((parameter) => [
+    `${parameter.in}-${parameter.name}`,
+    String(parameter.example ?? parameter.schema?.default ?? ''),
+  ])));
+  const requirements = item.operation.security ?? security;
+  const schemeName = requirements?.flatMap(Object.keys)[0];
+  const scheme = schemeName ? securitySchemes?.[schemeName] : undefined;
+  const [credential, setCredential] = useLocalState(`${storageScope}:operation:${item.id}:authorization`, '');
+  const bodyMedia = firstMedia(item.operation.requestBody?.content);
+  const [body, setBody] = useState(() => {
+    const example = bodyMedia?.[1].example ?? bodyMedia?.[1].schema?.example;
+    return example === undefined ? '' : typeof example === 'string' ? example : JSON.stringify(example, null, 2);
+  });
+  const [result, setResult] = useState<{ status?: number; statusText?: string; body?: string; error?: string }>();
+  const [executing, setExecuting] = useState(false);
+  let requestPath = item.path;
+  const query = new URLSearchParams();
+  const headers: string[] = [];
+
+  for (const parameter of parameters) {
+    const value = values[`${parameter.in}-${parameter.name}`] ?? '';
+    if (!parameter.name || !value) continue;
+    if (parameter.in === 'path') requestPath = requestPath.replace(`{${parameter.name}}`, encodeURIComponent(value));
+    if (parameter.in === 'query') query.set(parameter.name, value);
+    if (parameter.in === 'header') headers.push(`${parameter.name}: ${value}`);
+  }
+  if (credential && scheme) {
+    if (scheme.type === 'apiKey' && scheme.in === 'header') headers.push(`${scheme.name ?? schemeName}: ${credential}`);
+    if (scheme.type === 'apiKey' && scheme.in === 'query') query.set(scheme.name ?? schemeName ?? 'api_key', credential);
+    if (scheme.type === 'apiKey' && scheme.in === 'cookie') headers.push(`Cookie: ${scheme.name ?? schemeName}=${credential}`);
+    if (scheme.type === 'http') headers.push(`Authorization: ${scheme.scheme === 'basic' ? 'Basic' : 'Bearer'} ${credential}`);
+  }
+  const contentType = bodyMedia?.[0];
+  if (contentType) headers.push(`Content-Type: ${contentType}`);
+  const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${query.size ? `?${query}` : ''}`;
+  const lines = [`curl --request ${METHOD_LABELS[item.method]}`, `  --url '${requestUrl}'`];
+  for (const header of headers) lines.push(`  --header '${header}'`);
+  if (body && item.method !== 'get' && item.method !== 'head') lines.push(`  --data '${body.replaceAll("'", "'\\''")}'`);
+  const sample = lines.join(' \\\n');
+
+  async function executeRequest() {
+    const missing = parameters.filter((parameter) => parameter.required && !values[`${parameter.in}-${parameter.name}`]?.trim());
+    if (missing.length > 0) {
+      setResult({ error: `Add the required ${missing.map((parameter) => parameter.name).join(', ')} ${missing.length === 1 ? 'parameter' : 'parameters'}.` });
+      return;
+    }
+
+    setExecuting(true);
+    setResult(undefined);
+    try {
+      const response = await fetch(requestUrl, {
+        method: METHOD_LABELS[item.method],
+        headers: Object.fromEntries(headers.map((header) => {
+          const separator = header.indexOf(':');
+          return [header.slice(0, separator), header.slice(separator + 1).trim()];
+        })),
+        body: item.method === 'get' || item.method === 'head' || !body ? undefined : body,
+      });
+      const responseBody = await response.text();
+      let formattedBody = responseBody;
+      if (responseBody) {
+        try { formattedBody = JSON.stringify(JSON.parse(responseBody), null, 2); } catch { /* Keep non-JSON responses as returned. */ }
+      }
+      setResult({ status: response.status, statusText: response.statusText, body: formattedBody || '(empty response)' });
+    } catch (cause) {
+      const detail = cause instanceof Error ? cause.message : 'The request failed.';
+      setResult({ error: `${detail} Check the server URL, network connection, and CORS policy.` });
+    } finally {
+      setExecuting(false);
+    }
+  }
+
+  return (
+    <aside className="sp-request-rail" aria-label="Request builder">
+      {schemeName && (
+        <section className="sp-rail-card">
+          <h3>Authorization</h3>
+          <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><input type="password" value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /></label>
+        </section>
+      )}
+      {parameters.length > 0 && (
+        <section className="sp-rail-card">
+          <h3>Parameters</h3>
+          <div className="sp-rail-fields">{parameters.map((parameter, index) => {
+            const key = `${parameter.in}-${parameter.name}`;
+            return <label className="sp-field" key={`${key}-${index}`}><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setValues({ ...values, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>;
+          })}</div>
+        </section>
+      )}
+      {bodyMedia && item.method !== 'get' && item.method !== 'head' && (
+        <section className="sp-rail-card">
+          <h3>Body <small>{contentType}</small></h3>
+          <label className="sp-field"><span>Request body</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={contentType === 'application/json' ? '{}' : 'Request body'} /></label>
+        </section>
+      )}
+      <CodeBlock className="sp-rail-code" title="Request sample · cURL" value={sample} />
+      <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}>{executing ? 'Sending…' : 'Send request'}</button>
+      {result && (
+        <section className={`sp-live-response ${result.error ? 'is-error' : ''}`} aria-live="polite">
+          <div className="sp-live-response-head"><strong>{result.error ? 'Request failed' : 'Response'}</strong>{result.status !== undefined && <span>{result.status} {result.statusText}</span>}</div>
+          {result.error ? <p>{result.error}</p> : <pre><code>{result.body}</code></pre>}
+        </section>
+      )}
+    </aside>
+  );
+}
+
+function EndpointPage({ item, server, document, storageScope }: { item: OperationModel; server: string; document: OpenAPIDocument; storageScope: string }) {
+  const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
+  const requirements = item.operation.security ?? document.security;
+  return (
+    <article id={item.id} className={`sp-endpoint sp-method-${item.method}`}>
+      <header className="sp-endpoint-header">
+        <div className="sp-tag-kicker">{item.tag}</div>
+        <h1>{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</h1>
+        <div className="sp-endpoint-address"><span className="sp-method">{METHOD_LABELS[item.method]}</span><Path value={item.path} /></div>
+        <Markdown>{item.operation.description}</Markdown>
+      </header>
+      <div className="sp-endpoint-layout">
+        <div className="sp-endpoint-main">
+          <section className="sp-endpoint-section sp-request-intro">
+            <h2>Request</h2>
+            <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
+          </section>
+          <GroupedParameterList parameters={parameters} />
+          {item.operation.requestBody && <section className="sp-endpoint-section"><h2>Request body {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} /></section>}
+        </div>
+        <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} />
+      </div>
+      {item.operation.responses && <EndpointResponses responses={item.operation.responses} />}
+      {item.operation.callbacks && <CallbackList callbacks={item.operation.callbacks} server={server} />}
+    </article>
   );
 }
 
@@ -185,6 +430,7 @@ function OperationCard({ item, server, defaultExpanded }: {
         <div className="sp-operation-body">
           <div className="sp-operation-main">
             <Markdown>{item.operation.description}</Markdown>
+            <SecurityRequirements requirements={item.operation.security} />
             <ParameterList parameters={parameters} />
             <RequestBodyView operation={item.operation} />
             {item.operation.responses && (
@@ -195,12 +441,26 @@ function OperationCard({ item, server, defaultExpanded }: {
                 </div>
               </section>
             )}
+            {item.operation.callbacks && <CallbackList callbacks={item.operation.callbacks} server={server} />}
           </div>
           <CodeSample item={item} server={server} />
         </div>
       )}
     </article>
   );
+}
+
+function CallbackList({ callbacks, server }: { callbacks: NonNullable<OperationModel['operation']['callbacks']>; server: string }) {
+  return <section className="sp-section"><h4>Callbacks</h4>{Object.entries(callbacks).map(([name, callback]) => (
+    <div className="sp-callback" key={name}><h5>{name}</h5>{Object.entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => (
+      typeof pathItem !== 'string' && <div key={expression}><code className="sp-callback-expression">{expression}</code>{HTTP_METHODS.map((method) => {
+        const operation = pathItem[method];
+        if (!operation) return null;
+        const item: OperationModel = { id: slugify(`callback-${name}-${method}-${expression}`), method, path: expression, operation, pathItem, tag: 'Callbacks', source: 'webhook' };
+        return <OperationCard key={method} item={item} server={server} defaultExpanded />;
+      })}</div>
+    ))}</div>
+  ))}</section>;
 }
 
 function normalizeBasePath(path: string): string {
@@ -212,24 +472,141 @@ function operationHref(basePath: string, operationId: string): string {
   return `${basePath}/${encodeURIComponent(operationId)}` || '/';
 }
 
+function tagHref(basePath: string, tag: TagModel): string {
+  return `${basePath}/tags/${encodeURIComponent(tagSlug(tag))}`;
+}
+
+function tagSlug(tag: TagModel): string {
+  return slugify(tag.name) || tag.name;
+}
+
+function referenceHref(basePath: string, key: ReferenceKey): string {
+  const slug = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  return `${basePath}/reference/${encodeURIComponent(slug)}`;
+}
+
+function isReferenceKey(value: string): value is ReferenceKey {
+  return value === 'webhooks' || REFERENCE_GROUPS.some(([key]) => key === value);
+}
+
+function referenceKeyFromSlug(value: string): ReferenceKey | undefined {
+  const key = value.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+  return isReferenceKey(key) ? key : undefined;
+}
+
+type SearchResult = {
+  id: string;
+  group: 'Pages' | 'Tags' | 'Endpoints' | 'Reference';
+  label: string;
+  detail?: string;
+  terms: string[];
+  navigate: () => void;
+};
+
+function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: () => void }) {
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const normalizedQuery = query.trim().toLowerCase();
+  const matches = useMemo(() => results.filter((result) => !normalizedQuery || result.terms
+    .some((term) => term.toLowerCase().includes(normalizedQuery))), [normalizedQuery, results]);
+  const grouped = matches.reduce<Array<[SearchResult['group'], SearchResult[]]>>((groups, result) => {
+    const current = groups.at(-1);
+    if (current?.[0] === result.group) current[1].push(result);
+    else groups.push([result.group, [result]]);
+    return groups;
+  }, []);
+
+  useEffect(() => setActiveIndex(0), [normalizedQuery]);
+
+  function select(result?: SearchResult) {
+    if (!result) return;
+    result.navigate();
+    onClose();
+  }
+
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActiveIndex((index) => matches.length ? (index + 1) % matches.length : 0);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActiveIndex((index) => matches.length ? (index - 1 + matches.length) % matches.length : 0);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      select(matches[activeIndex]);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+    }
+  }
+
+  let resultIndex = 0;
+  return (
+    <div className="sp-search-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="sp-search-dialog" role="dialog" aria-modal="true" aria-label="Search API reference">
+        <div className="sp-search-input">
+          <span aria-hidden="true">⌕</span>
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search endpoints, tags, and reference"
+            aria-label="Search API reference"
+            aria-controls="sp-search-results"
+            aria-activedescendant={matches[activeIndex] ? `sp-search-result-${matches[activeIndex].id}` : undefined}
+          />
+          <kbd>Esc</kbd>
+        </div>
+        <div className="sp-search-results" id="sp-search-results" role="listbox">
+          {grouped.map(([group, items]) => <section className="sp-search-group" aria-label={group} key={group}>
+            <h2>{group}</h2>
+            {items.map((result) => {
+              const index = resultIndex++;
+              return <button
+                id={`sp-search-result-${result.id}`}
+                type="button"
+                role="option"
+                aria-selected={index === activeIndex}
+                className={index === activeIndex ? 'is-active' : ''}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => select(result)}
+                key={result.id}
+              ><span>{result.label}</span>{result.detail && <small>{result.detail}</small>}</button>;
+            })}
+          </section>)}
+          {matches.length === 0 && <div className="sp-search-empty" role="status">No results for “{query}”.</div>}
+        </div>
+        <div className="sp-search-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Open</span></div>
+      </div>
+    </div>
+  );
+}
+
 function NavigationGroup({
-  name,
+  tag,
   operations,
   searching,
   basePath,
+  activeTag,
   activeOperationId,
   onNavigate,
+  onNavigateTag,
+  storageKey,
 }: {
-  name: string;
+  tag: TagModel;
   operations: OperationModel[];
   searching: boolean;
   basePath: string;
+  activeTag?: TagModel;
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
+  onNavigateTag: (tag: TagModel) => void;
+  storageKey: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const expanded = searching || open;
-  const operationListId = `sp-nav-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  const [open, setOpen] = useLocalState(storageKey, false);
+  const expanded = searching || open || activeTag === tag || operations.some((item) => item.id === activeOperationId);
+  const operationListId = `sp-nav-${slugify(tag.name)}`;
 
   return (
     <div className="sp-nav-group">
@@ -240,11 +617,17 @@ function NavigationGroup({
         aria-expanded={expanded}
         aria-controls={operationListId}
       >
-        <span>{name}</span>
+        <span>{tag.name}</span>
         <span className="sp-nav-chevron" aria-hidden="true" />
       </button>
       {expanded && (
         <div id={operationListId}>
+          <a
+            className={`sp-nav-operation sp-nav-overview ${activeTag === tag ? 'is-active' : ''}`}
+            href={tagHref(basePath, tag)}
+            aria-current={activeTag === tag ? 'page' : undefined}
+            onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
+          >Overview</a>
           {operations.map((item) => (
             <a
               className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
@@ -260,6 +643,62 @@ function NavigationGroup({
   );
 }
 
+function NavigationTags({
+  tags,
+  matches,
+  searching,
+  basePath,
+  activeTag,
+  activeOperationId,
+  onNavigate,
+  onNavigateTag,
+  storageScope,
+}: {
+  tags: TagModel[];
+  matches: (item: OperationModel) => boolean;
+  searching: boolean;
+  basePath: string;
+  activeTag?: TagModel;
+  activeOperationId?: string;
+  onNavigate: (operationId?: string) => void;
+  onNavigateTag: (tag: TagModel) => void;
+  storageScope: string;
+}) {
+  return <>{tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
+    .filter(({ operations }) => operations.length > 0)
+    .map(({ tag, operations }) => (
+      <NavigationGroup tag={tag} operations={operations} searching={searching} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperationId} onNavigate={onNavigate} onNavigateTag={onNavigateTag} storageKey={`${storageScope}:navigation:${tag.name}`} key={tag.name} />
+    ))}</>;
+}
+
+function TagOverview({ tag, operations, basePath, onNavigate }: {
+  tag: TagModel;
+  operations: OperationModel[];
+  basePath: string;
+  onNavigate: (operationId: string) => void;
+}) {
+  return (
+    <section className="sp-tag-overview">
+      <div className="sp-tag-overview-intro">
+        <h1>{tag.name}</h1>
+        <Markdown>{tag.description}</Markdown>
+      </div>
+      <div className="sp-tag-overview-operations">
+        <h2>Operations</h2>
+        <div className="sp-operation-list">{operations.map((item) => (
+          <a className="sp-operation-link" href={operationHref(basePath, item.id)} onClick={(event) => { event.preventDefault(); onNavigate(item.id); }} key={item.id}>
+            <span className="sp-operation-link-summary">{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span>
+            <span className="sp-operation-link-address">
+              <span className={`sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>
+              <Path className="sp-path" value={item.path} />
+            </span>
+          </a>
+        ))}</div>
+      </div>
+    </section>
+  );
+}
+
 function ErrorState({ error }: { error: Error }) {
   return <div className="sp-error" role="alert"><strong>Couldn’t render this spec</strong><p>{error.message}</p></div>;
 }
@@ -267,6 +706,7 @@ function ErrorState({ error }: { error: Error }) {
 export function Speccy({
   spec,
   className = '',
+  defaultExpanded = false,
   showSidebar = true,
   theme = 'system',
   accentColor = '#6d5dfc',
@@ -281,81 +721,142 @@ export function Speccy({
       return { error: cause instanceof Error ? cause : new Error('Unable to parse the OpenAPI document.') };
     }
   }, [spec]);
-  const [query, setQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchButton = useRef<HTMLButtonElement>(null);
   const basePath = normalizeBasePath(basePathProp);
-  const operationIdFromPath = () => {
+  const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
     const prefix = `${basePath}/`;
     if (!window.location.pathname.startsWith(prefix)) return undefined;
     const remainder = window.location.pathname.slice(prefix.length);
-    return remainder && !remainder.includes('/') ? decodeURIComponent(remainder) : undefined;
+    if (!remainder) return undefined;
+    const [segment, value, extra] = remainder.split('/').map(decodeURIComponent);
+    if (extra) return undefined;
+    const referenceKey = value ? referenceKeyFromSlug(value) : undefined;
+    if (segment === 'reference' && referenceKey) return `reference/${referenceKey}`;
+    if (segment === 'tags' && value) return `tags/${value}`;
+    return !value ? segment : undefined;
   };
-  const [activeOperationId, setActiveOperationId] = useState(operationIdFromPath);
+  const [activeRoute, setActiveRoute] = useState(routeFromPath);
 
   useEffect(() => {
     if (result.error) onError?.(result.error);
   }, [result.error, onError]);
 
   useEffect(() => {
-    const syncRoute = () => setActiveOperationId(operationIdFromPath());
+    const syncRoute = () => setActiveRoute(routeFromPath());
     window.addEventListener('popstate', syncRoute);
     syncRoute();
     return () => window.removeEventListener('popstate', syncRoute);
   }, [basePath]);
 
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen(true);
+      } else if (event.key === 'Escape') {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
+
+  useEffect(() => {
+    if (!searchOpen) searchButton.current?.focus();
+  }, [searchOpen]);
+
   if (result.error || !result.model) return <ErrorState error={result.error ?? new Error('Unknown rendering error.')} />;
 
   const model = result.model;
   const server = model.document.servers?.[0]?.url ?? '';
-  const normalizedQuery = query.trim().toLowerCase();
-  const matches = (item: OperationModel) => !normalizedQuery || [item.path, item.method, item.operation.summary, item.operation.operationId, item.tag]
-    .some((value) => value?.toLowerCase().includes(normalizedQuery));
-  const hasMatchingOperations = model.operations.some(matches);
-  const activeOperation = model.operations.find((item) => item.id === activeOperationId);
+  const untaggedWebhooks = model.webhooks.filter((webhook) => !webhook.operation.tags?.length);
+  const activeReference = activeRoute?.startsWith('reference/') ? activeRoute.slice('reference/'.length) as ReferenceKey : undefined;
+  const activeTagSlug = activeRoute?.startsWith('tags/') ? activeRoute.slice('tags/'.length) : undefined;
+  const activeTag = activeTagSlug ? model.tags.find((tag) => tagSlug(tag) === activeTagSlug) : undefined;
+  const activeOperation = !activeReference && !activeTag ? [...model.operations, ...model.webhooks].find((item) => item.id === activeRoute) : undefined;
   const style = { '--sp-accent': accentColor } as CSSProperties;
+  const storageScope = `speccy:${basePath || '/'}:${model.document.info?.title ?? 'api'}`;
 
   function navigate(operationId?: string) {
     const href = operationId ? operationHref(basePath, operationId) : (basePath || '/');
     window.history.pushState({}, '', href);
-    setActiveOperationId(operationId);
+    setActiveRoute(operationId);
     const content = document.querySelector<HTMLElement>('.sp-content');
     if (typeof content?.scrollTo === 'function') content.scrollTo({ top: 0 });
   }
+
+  function navigateTag(tag: TagModel) {
+    window.history.pushState({}, '', tagHref(basePath, tag));
+    setActiveRoute(`tags/${tagSlug(tag)}`);
+    document.querySelector<HTMLElement>('.sp-content')?.scrollTo?.({ top: 0 });
+  }
+
+  function navigateReference(key: ReferenceKey) {
+    window.history.pushState({}, '', referenceHref(basePath, key));
+    setActiveRoute(`reference/${key}`);
+    document.querySelector<HTMLElement>('.sp-content')?.scrollTo?.({ top: 0 });
+  }
+
+  const searchResults: SearchResult[] = [
+    { id: 'overview', group: 'Pages', label: 'API overview', terms: ['api overview', model.document.info?.title ?? ''], navigate: () => navigate() },
+    ...model.tags.map((tag) => ({
+      id: `tag-${tagSlug(tag)}`, group: 'Tags' as const, label: tag.name,
+      detail: `${tag.operations.length} endpoint${tag.operations.length === 1 ? '' : 's'}`,
+      terms: [tag.name, tag.description ?? ''], navigate: () => navigateTag(tag),
+    })),
+    ...[...model.operations, ...model.webhooks].map((item) => ({
+      id: `operation-${item.id}`, group: 'Endpoints' as const,
+      label: item.operation.summary ?? item.operation.operationId ?? item.path,
+      detail: `${METHOD_LABELS[item.method]} ${item.path}`,
+      terms: [item.path, item.method, item.operation.summary ?? '', item.operation.operationId ?? '', item.tag],
+      navigate: () => navigate(item.id),
+    })),
+    ...(untaggedWebhooks.length ? [{
+      id: 'reference-webhooks', group: 'Reference' as const, label: 'Webhooks',
+      detail: `${untaggedWebhooks.length} webhook${untaggedWebhooks.length === 1 ? '' : 's'}`,
+      terms: ['webhooks'], navigate: () => navigateReference('webhooks'),
+    }] : []),
+    ...REFERENCE_GROUPS.flatMap(([key, label]) => Object.keys(model.document.components?.[key] ?? {}).map((name) => ({
+      id: `reference-${key}-${slugify(name)}`, group: 'Reference' as const, label: name, detail: label,
+      terms: [name, label], navigate: () => navigateReference(key),
+    }))),
+  ];
 
   return (
     <div className={`speccy sp-theme-${theme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`} style={style}>
       {showSidebar && (
         <nav className="sp-sidebar" aria-label="API reference">
           <a className="sp-brand" href={basePath || '/'} onClick={(event) => { event.preventDefault(); navigate(); }}>{logo ?? <span className="sp-brand-mark">S</span>}<span>{model.document.info?.title ?? 'API reference'}</span></a>
-          <div className="sp-search">
+          <button ref={searchButton} type="button" className="sp-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search API reference">
             <span aria-hidden="true">⌕</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search endpoints" aria-label="Search endpoints" />
-            {query && <button type="button" className="sp-search-clear" onClick={() => setQuery('')} aria-label="Clear search">×</button>}
-          </div>
+            <span>Search API reference</span>
+            <kbd>⌘/Ctrl K</kbd>
+          </button>
           <div className="sp-nav-scroll">
-            {normalizedQuery && !hasMatchingOperations && (
-              <div className="sp-nav-empty" role="status">
-                <strong>No endpoints found</strong>
-                <span>Try a different search.</span>
-              </div>
-            )}
-            {model.tags.map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
-              .filter(({ operations }) => operations.length > 0)
-              .map(({ tag, operations }) => (
-                <NavigationGroup name={tag.name} operations={operations} searching={Boolean(normalizedQuery)} basePath={basePath} activeOperationId={activeOperation?.id} onNavigate={navigate} key={tag.name} />
-              ))}
+            {model.tagGroups.length > 0 ? model.tagGroups.map((group) => {
+              const visibleTags = group.tags;
+              if (visibleTags.length === 0) return null;
+              return <section className="sp-nav-tag-group" aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`} key={group.name}>
+                <h2 className="sp-nav-heading" id={`sp-nav-tag-group-${slugify(group.name)}`}>{group.name}</h2>
+                <NavigationTags tags={visibleTags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />
+              </section>;
+            }) : <NavigationTags tags={model.tags} matches={() => true} searching={false} basePath={basePath} activeTag={activeTag} activeOperationId={activeOperation?.id} onNavigate={navigate} onNavigateTag={navigateTag} storageScope={storageScope} />}
+            <ReferenceNavigation document={model.document} webhookCount={untaggedWebhooks.length} activeKey={activeReference} storageKey={`${storageScope}:navigation:reference`} hrefFor={(key) => referenceHref(basePath, key)} onNavigate={navigateReference} />
           </div>
         </nav>
       )}
       <main className="sp-content">
-        {!activeOperation && <header className="sp-hero" id="sp-overview">
+        {!activeOperation && !activeReference && !activeTag && <header className="sp-hero" id="sp-overview">
           <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
           <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
           <Markdown>{model.document.info?.description}</Markdown>
-          {server && <div className="sp-server"><span>Base URL</span><code>{server}</code><CopyButton value={server} /></div>}
+          {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
+          <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
         </header>}
-        {!activeOperation && model.tags.map((tag) => {
-          const visible = tag.operations.filter(matches);
+        {!activeOperation && !activeReference && !activeTag && model.tags.map((tag) => {
+          const visible = tag.operations;
           if (visible.length === 0) return null;
           return (
             <section className="sp-tag" id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={tag.name}>
@@ -364,10 +865,12 @@ export function Speccy({
             </section>
           );
         })}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><div className="sp-tag-kicker">{activeOperation.tag}</div><OperationCard item={activeOperation} server={server} defaultExpanded /></section>}
-        {!activeOperation && normalizedQuery && !hasMatchingOperations && <div className="sp-empty">No endpoints match “{query}”.</div>}
-        {!activeOperation && model.operations.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
+        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} basePath={basePath} onNavigate={navigate} />}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} server={server} document={model.document} storageScope={storageScope} key={activeOperation.id} /></section>}
+        {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
+        {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} webhooks={untaggedWebhooks} renderOperation={(item) => <OperationCard item={item} server={server} defaultExpanded={defaultExpanded} />} /></section>}
       </main>
+      {searchOpen && <QuickSearch results={searchResults} onClose={() => setSearchOpen(false)} />}
     </div>
   );
 }
