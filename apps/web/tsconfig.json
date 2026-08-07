@@ -3,7 +3,9 @@
   "include": ["src", "vite.config.ts"],
   "compilerOptions": {
     "noEmit": true,
+    "paths": {
+      "@speccy/renderer": ["../../packages/renderer/src/index.ts"]
+    },
     "types": ["vite/client"]
   }
 }
-
