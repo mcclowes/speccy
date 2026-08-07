@@ -86,12 +86,26 @@ struct SpeccyWebView: NSViewRepresentable {
                 let bundle = try Self.loadFragments(from: url)
                 let entrypoint = bundle.selectedDirectory ? try chooseEntrypoint(from: bundle.sources) : bundle.entrypoint
                 guard let entrypoint else { return }
-                let sourcesJSON = try Self.javascriptValue(bundle.sources)
-                let entrypointJSON = try Self.javascriptValue(entrypoint)
-                webView?.evaluateJavaScript("window.speccyLoadSpecBundle?.(\(sourcesJSON), \(entrypointJSON))")
+                guard let webView else { return }
+                Task { [weak self, weak webView] in
+                    guard let self, let webView else { return }
+                    do {
+                        try await Self.load(bundle.sources, entrypoint: entrypoint, into: webView)
+                    } catch {
+                        showError(error)
+                    }
+                }
             } catch {
                 showError(error)
             }
+        }
+
+        static func load(_ sources: [String: String], entrypoint: String, into webView: WKWebView) async throws {
+            _ = try await webView.callAsyncJavaScript(
+                "window.speccyLoadSpecBundle?.(sources, entrypoint)",
+                arguments: ["sources": sources, "entrypoint": entrypoint],
+                contentWorld: .page
+            )
         }
 
         private func chooseEntrypoint(from sources: [String: String]) throws -> String? {
