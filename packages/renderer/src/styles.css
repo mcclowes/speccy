@@ -108,7 +108,7 @@ related:
 .sp-reference-nav .sp-nav-operation { grid-template-columns: 1fr; }
 
 .sp-content { container: sp-content / inline-size; min-width: 0; padding: 0 clamp(24px, 5vw, 76px) 100px; }
-.sp-hero { max-width: 1120px; padding: 80px 0 72px; border-bottom: 1px solid var(--sp-line); scroll-margin-top: 20px; }
+.sp-hero { max-width: 1480px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .8fr); gap: clamp(48px, 7vw, 120px); align-items: start; padding: 80px 0 72px; border-bottom: 1px solid var(--sp-line); scroll-margin-top: 20px; }
 .sp-eyebrow, .sp-tag-kicker { color: var(--sp-accent); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 .sp-eyebrow span { margin-left: 8px; padding: 3px 7px; color: var(--sp-muted); background: var(--sp-surface-soft); border-radius: 5px; letter-spacing: 0; text-transform: none; }
 .sp-hero h1 { max-width: 800px; margin: 18px 0 18px; font-size: clamp(38px, 6vw, 67px); line-height: 1.03; letter-spacing: -0.055em; }
@@ -127,7 +127,18 @@ related:
 .sp-markdown tr:last-child > * { border-bottom: 0; }
 .sp-markdown tr > :last-child { border-right: 0; }
 .sp-markdown th { background: var(--sp-surface-soft); font-weight: 600; }
-.sp-hero > .sp-markdown { font-size: 16px; line-height: 1.75; }
+.sp-hero-intro > .sp-markdown { font-size: 16px; line-height: 1.75; }
+.sp-download-card { overflow: hidden; margin-top: 4px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
+.sp-download-card h2 { margin: 0; padding: 17px 20px; border-bottom: 1px solid var(--sp-line); font-size: 13px; line-height: 1.4; }
+.sp-download-options { padding: 0 20px; }
+.sp-download-options button { width: 100%; display: grid; grid-template-columns: 24px minmax(0, 1fr) 18px; gap: 10px; align-items: center; padding: 18px 0; color: var(--sp-text); border: 0; border-bottom: 1px solid var(--sp-line); background: transparent; cursor: pointer; text-align: left; }
+.sp-download-options button:last-child { border-bottom: 0; }
+.sp-download-options button:hover strong { color: var(--sp-accent); }
+.sp-download-options strong { font-size: 13px; transition: color 120ms ease; }
+.sp-download-options svg { width: 17px; height: 17px; color: var(--sp-muted); }
+.sp-download-format { font-family: 'DM Mono', monospace; font-size: 7px; font-weight: 700; text-transform: uppercase; }
+.sp-download-format-json { letter-spacing: -0.08em; }
+.sp-download-format-yaml { color: var(--sp-muted); }
 .sp-server { width: fit-content; max-width: 100%; margin-top: 30px; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-server > span { color: var(--sp-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .sp-server code { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; }
@@ -372,6 +383,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-empty { color: var(--sp-muted); border-color: var(--sp-line); background: var(--sp-surface); text-align: center; }
 
 @container sp-content (max-width: 900px) {
+  .sp-hero { grid-template-columns: 1fr; gap: 32px; }
   .sp-operation-body { grid-template-columns: 1fr; }
   .sp-endpoint-layout { grid-template-columns: 1fr; }
   .sp-endpoint-response-grid { grid-template-columns: 1fr; }

@@ -20,6 +20,7 @@ import { CodeBlock, CopyButton } from './CodeBlock';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
+import { OpenApiDownload } from './OpenApiDownload';
 import { DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
 import { RequestSample } from './RequestSample';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
@@ -953,7 +954,8 @@ export function Speccy({
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {
-      return { model: createReferenceModel(parseSpec(spec)) };
+      const document = parseSpec(spec);
+      return { document, model: createReferenceModel(document) };
     } catch (cause) {
       return { error: cause instanceof Error ? cause : new Error('Unable to parse the OpenAPI document.') };
     }
@@ -1101,11 +1103,14 @@ export function Speccy({
       )}
       <main className="sp-content">
         {!activeOperation && !activeReference && !activeTag && <header className="sp-hero" id="sp-overview">
-          <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
-          <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
-          <Markdown>{model.document.info?.description}</Markdown>
-          {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
-          <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
+          <div className="sp-hero-intro">
+            <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
+            <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
+            <Markdown>{model.document.info?.description}</Markdown>
+            {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
+            <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
+          </div>
+          <OpenApiDownload document={result.document ?? model.document} />
         </header>}
         {!activeOperation && !activeReference && !activeTag && model.tags.map((tag) => {
           const visible = tag.operations;
