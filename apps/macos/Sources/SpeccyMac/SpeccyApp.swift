@@ -1,3 +1,12 @@
+/**
+ ---
+ purpose: Declares the macOS app scene, its menu commands, and the notification names those commands post.
+ related:
+   - ./ContentView.swift - Observes these notifications and drives the embedded web view.
+   - ../../scripts/build-app.sh - Bundles the web build and packages this app.
+ ---
+ */
+
 import SwiftUI
 
 @main
