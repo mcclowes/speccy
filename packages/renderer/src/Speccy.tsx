@@ -19,7 +19,7 @@ import {
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
-import { HTTP_METHODS, createReferenceModel, parseSpec, slugify, type OperationModel, type TagModel } from './model';
+import { createReferenceModel, operationsInDeclarationOrder, parseSpec, slugify, type OperationModel, type TagModel } from './model';
 import { OpenApiDownload } from './OpenApiDownload';
 import { componentAnchorId, DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
 import { RequestSample } from './RequestSample';
@@ -664,9 +664,7 @@ function OperationCard({ item, server, defaultExpanded }: {
 function CallbackList({ callbacks, server }: { callbacks: NonNullable<OperationModel['operation']['callbacks']>; server: string }) {
   return <section className="sp-section"><h4>Callbacks</h4>{Object.entries(callbacks).map(([name, callback]) => (
     <div className="sp-callback" key={name}><h5>{name}</h5>{Object.entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => (
-      typeof pathItem !== 'string' && <div key={expression}><code className="sp-callback-expression">{expression}</code>{HTTP_METHODS.map((method) => {
-        const operation = pathItem[method];
-        if (!operation) return null;
+      typeof pathItem !== 'string' && <div key={expression}><code className="sp-callback-expression">{expression}</code>{operationsInDeclarationOrder(pathItem).map(([method, operation]) => {
         const item: OperationModel = { id: slugify(`callback-${name}-${method}-${expression}`), method, path: expression, operation, pathItem, tag: 'Callbacks', source: 'webhook' };
         return <OperationCard key={method} item={item} server={server} defaultExpanded />;
       })}</div>

@@ -79,7 +79,7 @@ paths:
       name: group.name,
       tags: group.tags.map((tag) => tag.name),
     }))).toEqual([{ name: 'Users & authentication', tags: ['Setup', 'Sign-in'] }]);
-    expect(model.tags.map((tag) => tag.name)).toEqual(['Setup', 'Sign-in']);
+    expect(model.tags.map((tag) => tag.name)).toEqual(['Setup', 'Sign-in', 'Internal']);
     expect(model.operations).toHaveLength(3);
   });
 
@@ -226,11 +226,21 @@ paths:
   it('collects top-level webhook operations separately from API paths', () => {
     const model = createReferenceModel({
       openapi: '3.1.0', paths: {},
-      webhooks: { paymentReceived: { post: { operationId: 'paymentReceived', summary: 'Payment received' } } },
+      webhooks: {
+        paymentReceived: {
+          post: { operationId: 'paymentReceived', summary: 'Payment received' },
+          get: { operationId: 'inspectPayment', summary: 'Inspect payment' },
+        },
+        systemReady: { post: { operationId: 'systemReady', summary: 'System ready' } },
+      },
     });
 
     expect(model.operations).toHaveLength(0);
-    expect(model.webhooks).toMatchObject([{ method: 'post', path: 'paymentReceived', source: 'webhook' }]);
+    expect(model.webhooks.map(({ method, path }) => `${method} ${path}`)).toEqual([
+      'post paymentReceived',
+      'get paymentReceived',
+      'post systemReady',
+    ]);
   });
 
   it('adds tagged webhooks to their tag and groups untagged webhooks under Other webhooks', () => {

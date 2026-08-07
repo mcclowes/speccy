@@ -52,7 +52,7 @@ export interface ReferenceModel {
   webhooks: OperationModel[];
 }
 
-function operationsInDeclarationOrder(pathItem: PathItem): Array<[HttpMethod, Operation]> {
+export function operationsInDeclarationOrder(pathItem: PathItem): Array<[HttpMethod, Operation]> {
   return Object.keys(pathItem).flatMap((key) => {
     const method = key as HttpMethod;
     if (!HTTP_METHODS.includes(method)) return [];
@@ -257,7 +257,7 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
     ...taggedOperations.map((operation) => operation.tag),
   ].filter((name, index, all) => all.indexOf(name) === index);
 
-  let tags: TagModel[] = tagNames
+  const tags: TagModel[] = tagNames
     .map((name) => {
       const declaredTag = declaredTags.get(name);
       const icon = declaredTag?.['x-icon'];
@@ -279,10 +279,5 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
       .map((name) => tags.find((tag) => tag.name === name))
       .filter((tag): tag is TagModel => Boolean(tag)),
   }));
-  if (configuredTagGroups.length > 0) {
-    const groupedTagNames = new Set(configuredTagGroups.flatMap((group) => group.tags ?? []));
-    tags = tags.filter((tag) => groupedTagNames.has(tag.name) || tag.name === 'Other webhooks');
-  }
-
   return { document, tags, tagGroups, operations, webhooks };
 }

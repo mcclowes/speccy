@@ -278,6 +278,37 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Responses' })).toBeInTheDocument();
   });
 
+  it('renders callback methods in declaration order', () => {
+    window.history.replaceState({}, '', '/api/source');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Callback API' },
+      paths: {
+        '/source': { get: {
+          operationId: 'source', summary: 'Source',
+          callbacks: {
+            notification: {
+              '{$request.body#/callbackUrl}': {
+                post: { summary: 'Create notification' },
+                get: { summary: 'Inspect notification' },
+              },
+            },
+          },
+        } },
+      },
+    }} basePath="/api" />);
+
+    const callback = screen.getByRole('heading', { name: 'notification' }).closest('.sp-callback')!;
+    const operations = [...callback.querySelectorAll('.sp-operation')];
+    expect(operations.map((operation) => operation.querySelector('.sp-operation-name')?.textContent)).toEqual([
+      'Create notification',
+      'Inspect notification',
+    ]);
+    expect(operations.map((operation) => operation.className)).toEqual([
+      'sp-operation sp-method-post',
+      'sp-operation sp-method-get',
+    ]);
+  });
+
   it('updates the request sample from endpoint parameters', () => {
     window.history.replaceState({}, '', '/api/get-company');
     render(<Speccy spec={{
@@ -600,11 +631,11 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'List companies' })).toBeInTheDocument();
   });
 
-  it('renders Redocly tag groups above their tags', () => {
+  it('renders configured tag and group order without dropping ungrouped tags', () => {
     render(<Speccy spec={{
       openapi: '3.1.0', info: { title: 'Grouped API' },
       tags: [{ name: 'Setup' }, { name: 'Sign-in' }, { name: 'Internal' }],
-      'x-tagGroups': [{ name: 'Users & authentication', tags: ['Setup', 'Sign-in'] }],
+      'x-tagGroups': [{ name: 'Users & authentication', tags: ['Sign-in', 'Setup'] }],
       paths: {
         '/users': { post: { tags: ['Setup'], summary: 'Register a user' } },
         '/sessions': { post: { tags: ['Sign-in'], summary: 'Sign in' } },
@@ -613,10 +644,9 @@ describe('Speccy navigation', () => {
     }} />);
 
     const navigation = within(screen.getByRole('navigation', { name: 'API reference' }));
-    expect(navigation.getByRole('heading', { name: 'Users & authentication' })).toBeInTheDocument();
-    expect(navigation.getByRole('button', { name: 'Setup' })).toBeInTheDocument();
-    expect(navigation.getByRole('button', { name: 'Sign-in' })).toBeInTheDocument();
-    expect(navigation.queryByRole('button', { name: 'Internal' })).not.toBeInTheDocument();
+    const group = navigation.getByRole('heading', { name: 'Users & authentication' }).closest('section')!;
+    expect(within(group).getAllByRole('button').map((button) => button.textContent)).toEqual(['Sign-in', 'Setup']);
+    expect(navigation.getByRole('button', { name: 'Internal' })).toBeInTheDocument();
   });
 
   it('groups operations within a tag using x-tagSubgroup', () => {
@@ -625,8 +655,10 @@ describe('Speccy navigation', () => {
       tags: [{ name: 'Payments' }],
       paths: {
         '/payments/{paymentId}/archive': { post: { tags: ['Payments'], summary: 'Archive payment' } },
-        '/payments': { post: { tags: ['Payments'], summary: 'Create payment', 'x-tagSubgroup': 'Payment lifecycle' } },
-        '/payments/{paymentId}': { get: { tags: ['Payments'], summary: 'Get payment', 'x-tagSubgroup': 'Payment lifecycle' } },
+        '/payments': {
+          post: { tags: ['Payments'], summary: 'Create payment', 'x-tagSubgroup': 'Payment lifecycle' },
+          get: { tags: ['Payments'], summary: 'Get payment', 'x-tagSubgroup': 'Payment lifecycle' },
+        },
         '/payments/{paymentId}/events': { get: { tags: ['Payments'], summary: 'List payment events', 'x-tagSubgroup': 'Reconciliation' } },
       },
     }} showThemeToggle={false} />);
