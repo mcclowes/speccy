@@ -194,7 +194,7 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
     expect(screen.queryByRole('complementary', { name: 'Request builder' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Send request' })).not.toBeInTheDocument();
-    expect(screen.queryByText('Security: API key')).not.toBeInTheDocument();
+    expect(screen.queryByText('Authorization: API key')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Responses' })).toBeInTheDocument();
   });
 
@@ -228,7 +228,7 @@ describe('Speccy navigation', () => {
 
     const authorization = screen.getByLabelText('api_key');
     expect(screen.getByRole('heading', { level: 3, name: 'Authorization API key' })).toBeInTheDocument();
-    expect(screen.getByText('Enter the credential described under Request → Security: API key.')).toBeInTheDocument();
+    expect(screen.getByText('Use the credential described under Request → Authorization: API key.')).toBeInTheDocument();
     fireEvent.change(authorization, { target: { value: 'secret token' } });
 
     expect(screen.queryByText(/secret(?:\+|%20| )token/)).not.toBeInTheDocument();

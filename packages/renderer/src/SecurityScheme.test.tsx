@@ -32,7 +32,7 @@ describe('operation security schemes', () => {
       },
     }} />);
 
-    expect(screen.getByRole('heading', { level: 4, name: 'Security: API key' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 4, name: 'Authorization: API key' })).toBeInTheDocument();
     expect(screen.getByText(/The word "Basic" followed by a space/)).toBeInTheDocument();
     expect(screen.getByText('Authorization: 123')).toBeInTheDocument();
   });

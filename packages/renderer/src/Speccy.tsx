@@ -146,11 +146,11 @@ function SecurityRequirements({ requirements, schemes }: {
   schemes?: Record<string, SecurityScheme>;
 }) {
   if (!requirements) return null;
-  if (requirements.length === 0) return <section className="sp-section"><h4>Security</h4><p>Public endpoint</p></section>;
+  if (requirements.length === 0) return <section className="sp-section"><h4>Authorization</h4><p>Public endpoint</p></section>;
   const entries = requirements.flatMap((requirement) => Object.entries(requirement));
   const onlyEntry = entries.length === 1 ? entries[0] : undefined;
   const onlyScheme = onlyEntry ? schemes?.[onlyEntry[0]] : undefined;
-  return <section className="sp-section"><h4>Security{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><div className="sp-security-requirements">{requirements.map((requirement, index) => (
+  return <section className="sp-section"><h4>Authorization{onlyScheme && `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}</h4><div className="sp-security-requirements">{requirements.map((requirement, index) => (
     <div key={index}>{Object.entries(requirement).map(([name, scopes]) => {
       const scheme = schemes?.[name];
       return <div className="sp-security-scheme" key={name}>
@@ -454,7 +454,7 @@ function RequestRail({
       {schemeName && (
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
-          <p className="sp-rail-card-description">Enter the credential described under Request → Security{schemeLabel && `: ${schemeLabel}`}.</p>
+          <p className="sp-rail-card-description">Use the credential described under Request → Authorization{schemeLabel && `: ${schemeLabel}`}.</p>
           <label className="sp-field"><span>{scheme?.name ?? schemeName}</span><div className="sp-secret-field"><input type={credentialVisible ? 'text' : 'password'} value={credential} onChange={(event) => setCredential(event.target.value)} placeholder={scheme?.type === 'http' ? 'Bearer token' : 'API key'} /><button type="button" aria-label={`${credentialVisible ? 'Hide' : 'Show'} authorization`} aria-pressed={credentialVisible} onClick={() => setCredentialVisible((visible) => !visible)}><EyeIcon crossed={credentialVisible} /></button></div></label>
         </section>
       )}
