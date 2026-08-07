@@ -5,7 +5,7 @@ const config: Config = {
   tagline: 'OpenAPI, beautifully clear.',
   url: 'https://speccy.example',
   baseUrl: '/',
-  favicon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><text y=%2226%22 font-size=%2228%22>◒</text></svg>',
+  favicon: 'favicon.svg',
   onBrokenLinks: 'throw',
   plugins: [
     [
