@@ -49,6 +49,42 @@ describe('endpoint parameter layout', () => {
     expect(within(requestBuilder).getByText('optional')).toBeInTheDocument();
   });
 
+  it('renders one or two optional parameters without a collapsible summary', () => {
+    window.history.replaceState({}, '', '/api/list-companies');
+    const parameters = [
+      { name: 'cursor', in: 'query', schema: { type: 'string' } },
+      { name: 'limit', in: 'query', schema: { type: 'integer' } },
+    ];
+    const { container } = render(<Speccy spec={{
+      openapi: '3.1.0',
+      info: { title: 'Test API' },
+      paths: { '/companies': { get: { summary: 'List companies', operationId: 'list-companies', parameters } } },
+    }} basePath="/api" parameterPrototype />);
+
+    const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    expect(within(documentation).getByText('cursor')).toBeInTheDocument();
+    expect(within(documentation).getByText('limit')).toBeInTheDocument();
+    expect(within(documentation).queryByRole('button', { name: /Optional query parameters/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps three optional parameters collapsed', () => {
+    window.history.replaceState({}, '', '/api/list-companies');
+    const parameters = Array.from({ length: 3 }, (_, index) => ({
+      name: `filter${index + 1}`,
+      in: 'query',
+      schema: { type: 'string' },
+    }));
+    const { container } = render(<Speccy spec={{
+      openapi: '3.1.0',
+      info: { title: 'Test API' },
+      paths: { '/companies': { get: { summary: 'List companies', operationId: 'list-companies', parameters } } },
+    }} basePath="/api" parameterPrototype />);
+
+    const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    expect(within(documentation).getByRole('button', { name: /Optional query parameters/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(within(documentation).queryByText('filter1')).not.toBeInTheDocument();
+  });
+
   it('renders schema examples in the parameter body, outside the metadata row', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const { container } = render(<Speccy spec={{

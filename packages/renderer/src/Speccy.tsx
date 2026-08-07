@@ -198,6 +198,7 @@ const PARAMETER_GROUP_LABELS: Record<string, string> = {
 };
 
 const DEFAULT_VISIBLE_PARAMETERS = 5;
+const MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS = 3;
 
 function ParameterCard({ location, parameter, index }: { location: string; parameter: Parameter; index: number }) {
   return <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
@@ -226,7 +227,10 @@ function ParameterGroup({ location, items, parameterPrototype = false }: { locat
       <section className="sp-endpoint-section sp-parameter-prototype">
         <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
         {requiredItems.length > 0 && <div className="sp-endpoint-parameters">{requiredItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
-        {optionalItems.length > 0 && <div className="sp-optional-parameter-docs">
+        {optionalItems.length > 0 && optionalItems.length < MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
+          <div className="sp-endpoint-parameters">{optionalItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>
+        )}
+        {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && <div className="sp-optional-parameter-docs">
           <button type="button" className="sp-optional-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
             <span><strong>Optional {location} parameters</strong><small>Pagination, filtering, sorting, and related data</small></span>
             <span>{optionalItems.length}<i className="sp-chevron" aria-hidden="true" /></span>
