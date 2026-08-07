@@ -474,6 +474,22 @@ describe('Speccy navigation', () => {
     expect(screen.getByText('{companyId}')).toHaveClass('sp-path-parameter');
   });
 
+  it('uses an asterisk for required parameters and response fields', () => {
+    window.history.replaceState({}, '', '/api/get-company');
+    const { container } = render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Test API' },
+      paths: { '/companies/{companyId}': { get: {
+        summary: 'Get company', operationId: 'get-company',
+        parameters: [{ name: 'companyId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Company found', content: { 'application/json': {
+          schema: { type: 'object', required: ['id'], properties: { id: { type: 'string' } } },
+        } } } },
+      } } },
+    }} basePath="/api" />);
+
+    expect([...container.querySelectorAll('.sp-required')].map((indicator) => indicator.textContent)).toEqual(['*', '*']);
+  });
+
   it('switches between responses in the full-width response section', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const { container } = render(<Speccy spec={{

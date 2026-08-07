@@ -117,7 +117,7 @@ export function DocumentReference({ document, activeKey }: {
   };
   return <>
     {activeKey === 'schemas' && renderCards('schemas', (_name, schema) => <SchemaView schema={schema} />)}
-    {activeKey === 'parameters' && renderCards('parameters', (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required">required</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
+    {activeKey === 'parameters' && renderCards('parameters', (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required" title="Required">*</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
     {activeKey === 'requestBodies' && renderCards('requestBodies', (_name, body) => <><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></>)}
     {activeKey === 'responses' && renderCards('responses', (_name, response) => <><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></>)}
     {activeKey === 'headers' && renderCards('headers', (_name, header) => <><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></>)}

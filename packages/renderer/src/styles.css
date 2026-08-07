@@ -309,7 +309,7 @@ related:
 .sp-operation-main { min-width: 0; padding: 28px; }
 .sp-section { margin-top: 30px; }
 .sp-section h4 { margin: 0 0 12px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
-.sp-required { color: var(--sp-accent); font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.sp-required { color: #d24859; font-size: 11px; font-weight: 700; }
 .sp-qualifier { color: var(--sp-muted); font-size: 9px; }
 .sp-parameter-list, .sp-responses { border-top: 1px solid var(--sp-line); }
 .sp-parameter { padding: 17px 0; border-bottom: 1px solid var(--sp-line); }
@@ -342,8 +342,6 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-schema-field-details-named { padding-right: 8px; padding-left: 28px; }
 .sp-schema-properties { display: grid; gap: 8px; margin: 9px 0 0 4px; padding-left: 17px; border-left: 1px solid color-mix(in srgb, var(--sp-accent) 15%, var(--sp-line)); }
 .sp-type { color: var(--sp-accent); font-family: 'DM Mono', monospace; font-size: 9px; }
-.sp-schema .sp-schema-head > .sp-required { overflow: hidden; width: 5px; color: #d24859; font-size: 0; letter-spacing: 0; text-transform: none; }
-.sp-schema .sp-schema-head > .sp-required::after { content: '*'; font-size: 11px; }
 .sp-schema-meta code { color: var(--sp-text); }
 .sp-media-type { position: absolute; top: 12px; right: 12px; width: fit-content; padding: 3px 7px; color: var(--sp-muted); border: 1px solid var(--sp-line); border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; }
 .sp-media-list { display: grid; gap: 12px; }

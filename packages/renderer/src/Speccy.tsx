@@ -86,7 +86,7 @@ function ParameterList({ parameters }: { parameters: Parameter[] }) {
             <div className="sp-parameter-name">
               <code>{parameter.name ?? 'unnamed'}</code>
               <span>{parameter.in ?? 'query'}</span>
-              {parameter.required && <span className="sp-required">required</span>}
+              {parameter.required && <span className="sp-required" title="Required">*</span>}
             </div>
             <Markdown>{parameter.description}</Markdown>
             <SchemaView schema={parameter.schema} />
@@ -107,7 +107,7 @@ function RequestBodyView({ operation }: { operation: OperationModel['operation']
   if (!body) return null;
   return (
     <section className="sp-section">
-      <h4>Request body {body.required && <span className="sp-required">required</span>}</h4>
+      <h4>Request body {body.required && <span className="sp-required" title="Required">*</span>}</h4>
       <Markdown>{body.description}</Markdown>
       <MediaContent content={body.content} />
     </section>
@@ -202,7 +202,7 @@ function ParameterCard({ location, parameter, index }: { location: string; param
     <div className="sp-parameter-name">
       <code>{parameter.name ?? 'unnamed'}</code>
       <SchemaView schema={parameter.schema} showExample={false} summaryOnly />
-      {parameter.required && <span className="sp-required">required</span>}
+      {parameter.required && <span className="sp-required" title="Required">*</span>}
     </div>
     <Markdown>{parameter.description}</Markdown>
     {(parameter.example !== undefined || parameter.schema?.example !== undefined) && (
@@ -611,7 +611,7 @@ function EndpointPage({ item, server, document, storageScope, parameterPrototype
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
           </section>}
           <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
-          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required">required</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
+          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required" title="Required">*</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
         </div>
         {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototype={parameterPrototype} />}
       </div>

@@ -90,7 +90,7 @@ export function SchemaView({ schema, name, required = false, depth = 0, collapse
 
   const headerContents = <>
         {name && <code className="sp-property">{name}</code>}
-        {required && <span className="sp-required">required</span>}
+        {required && <span className="sp-required" title="Required">*</span>}
         <span className="sp-type">{schemaLabel(schema)}</span>
         {schema.nullable && <span className="sp-qualifier">nullable</span>}
         {schema.readOnly && <span className="sp-qualifier">read only</span>}
