@@ -13,5 +13,22 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+
+          if (id.includes('react-dom') || id.includes('/react/') || id.includes('/scheduler/')) {
+            return 'react';
+          }
+
+          if (id.includes('/yaml/')) {
+            return 'yaml';
+          }
+
+          return 'vendor';
+        },
+      },
+    },
   },
 });
