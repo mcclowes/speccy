@@ -142,9 +142,9 @@
 .sp-response-tab.is-success > span { background: #25a878; }
 .sp-response-tab:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-response-tab[aria-selected='true'] { color: var(--sp-text); background: var(--sp-surface-soft); }
-.sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); gap: clamp(36px, 5vw, 76px); align-items: start; padding-top: 16px; }
+.sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
+.sp-endpoint-response-grid > .sp-markdown { grid-column: 1 / -1; }
 .sp-endpoint-response-detail { min-width: 0; }
-.sp-endpoint-response-detail > .sp-markdown { margin-bottom: 12px; }
 .sp-collapsible-markdown.is-collapsible:not(.is-expanded) > .sp-markdown { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .sp-collapsible-markdown > button { margin: 3px 0 0; padding: 0; border: 0; color: var(--sp-accent); background: transparent; cursor: pointer; font: inherit; }
 .sp-collapsible-markdown > button:hover { text-decoration: underline; }
