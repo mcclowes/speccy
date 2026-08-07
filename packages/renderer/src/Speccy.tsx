@@ -11,6 +11,7 @@
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
   useEffect,
   useMemo,
   useRef,
@@ -592,7 +593,11 @@ function RequestRail({
   );
 }
 
-function EndpointPage({ item, tag, server, document, storageScope, parameterPrototype, onNavigateTag, hrefForRoute }: { item: OperationModel; tag: TagModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean; onNavigateTag: (tag: TagModel) => void; hrefForRoute: (route: SpeccyRoute) => string }) {
+function DeveloperHint({ children }: { children: ReactNode }) {
+  return <div className="sp-developer-hint" role="note"><span aria-hidden="true">!</span><p>{children}</p></div>;
+}
+
+function EndpointPage({ item, tag, server, document, storageScope, parameterPrototype, showDeveloperHints, onNavigateTag, hrefForRoute }: { item: OperationModel; tag: TagModel; server: string; document: OpenAPIDocument; storageScope: string; parameterPrototype?: boolean; showDeveloperHints?: boolean; onNavigateTag: (tag: TagModel) => void; hrefForRoute: (route: SpeccyRoute) => string }) {
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
@@ -607,6 +612,7 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
         <h1>{operationTitle(item)}</h1>
         <div className="sp-endpoint-address"><OperationBadge item={item} /><Path value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
+        {showDeveloperHints && !item.operation.description?.trim() && <DeveloperHint>You’re missing a description for this operation.</DeveloperHint>}
       </header>
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
@@ -964,9 +970,10 @@ function TagIcon({ tag }: { tag: TagModel }) {
   return <img className="sp-tag-icon" src={tag.icon.url} alt={tag.icon.alt ?? ''} />;
 }
 
-function TagOverview({ tag, operations, onNavigate, hrefForRoute }: {
+function TagOverview({ tag, operations, showDeveloperHints, onNavigate, hrefForRoute }: {
   tag: TagModel;
   operations: OperationModel[];
+  showDeveloperHints?: boolean;
   onNavigate: (operationId: string) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
 }) {
@@ -975,6 +982,7 @@ function TagOverview({ tag, operations, onNavigate, hrefForRoute }: {
       <div className="sp-tag-overview-intro">
         <h1 className="sp-tag-title"><TagIcon tag={tag} />{tag.name}</h1>
         <Markdown>{tag.description}</Markdown>
+        {showDeveloperHints && !tag.description?.trim() && <DeveloperHint>You’re missing a description for this tag.</DeveloperHint>}
         <Markdown className="sp-tag-long-description">{tag.longDescription}</Markdown>
       </div>
       <div className="sp-tag-overview-operations">
@@ -1005,6 +1013,7 @@ export function Speccy({
   onNavigate,
   hrefForRoute: controlledHrefForRoute,
   onError,
+  showDeveloperHints = false,
   parameterPrototype,
 }: SpeccyProps) {
   const result = useMemo(() => {
@@ -1186,6 +1195,7 @@ export function Speccy({
             <div className="sp-eyebrow">API reference <span>{model.document.info?.version ?? model.document.openapi ?? model.document.swagger}</span></div>
             <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
             <Markdown>{model.document.info?.description}</Markdown>
+            {showDeveloperHints && !model.document.info?.description?.trim() && <DeveloperHint>You’re missing a description for this API.</DeveloperHint>}
             {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
             <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
           </div>
@@ -1201,8 +1211,8 @@ export function Speccy({
             </section>
           );
         })}
-        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
-        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} tag={model.tags.find((tag) => tag.name === activeOperation.tag)!} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} key={activeOperation.id} /></section>}
+        {activeTag && <TagOverview tag={activeTag} operations={activeTag.operations} showDeveloperHints={showDeveloperHints} onNavigate={navigate} hrefForRoute={hrefForRoute} />}
+        {activeOperation && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><EndpointPage item={activeOperation} tag={model.tags.find((tag) => tag.name === activeOperation.tag)!} server={server} document={model.document} storageScope={storageScope} parameterPrototype={parameterPrototype} showDeveloperHints={showDeveloperHints} onNavigateTag={navigateTag} hrefForRoute={hrefForRoute} key={activeOperation.id} /></section>}
         {!activeOperation && !activeReference && !activeTag && model.operations.length === 0 && model.webhooks.length === 0 && <div className="sp-empty">This spec doesn’t contain any operations yet.</div>}
         {activeReference && <section className="sp-endpoint-page"><button type="button" className="sp-back" onClick={() => navigate()}>← API overview</button><DocumentReference activeKey={activeReference} document={model.document} /></section>}
       </main>

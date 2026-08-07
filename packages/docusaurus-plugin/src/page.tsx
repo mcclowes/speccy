@@ -17,5 +17,5 @@ interface ReferenceData {
 }
 
 export default function SpeccyPage({ reference }: { reference: ReferenceData }) {
-  return <OpenAPI spec={reference.spec} basePath={reference.route} showSidebar {...reference.renderer} />;
+  return <OpenAPI spec={reference.spec} basePath={reference.route} showSidebar showDeveloperHints={process.env.NODE_ENV !== 'production'} {...reference.renderer} />;
 }

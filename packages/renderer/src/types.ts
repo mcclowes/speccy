@@ -231,6 +231,8 @@ export interface SpeccyProps {
   /** Creates link targets in controlled mode. */
   hrefForRoute?: (route: SpeccyRoute) => string;
   onError?: (error: Error) => void;
+  /** Shows contextual authoring suggestions that are omitted from published previews. */
+  showDeveloperHints?: boolean;
   /** PROTOTYPE: separates required parameters from optional parameters added on demand. */
   parameterPrototype?: boolean;
 }

@@ -20,6 +20,22 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('shows missing-description hints only when authoring hints are enabled', () => {
+    const { rerender } = render(<Speccy spec={spec} />);
+
+    expect(screen.queryByText('You’re missing a description for this API.')).not.toBeInTheDocument();
+    rerender(<Speccy spec={spec} showDeveloperHints />);
+    expect(screen.getByText('You’re missing a description for this API.')).toBeInTheDocument();
+  });
+
+  it('shows contextual hints on tag and operation pages', () => {
+    const { rerender } = render(<Speccy spec={spec} route={{ page: 'tag', tag: 'companies' }} showDeveloperHints />);
+
+    expect(screen.getByText('You’re missing a description for this tag.')).toBeInTheDocument();
+    rerender(<Speccy spec={spec} route={{ page: 'operation', operationId: 'get-companies' }} showDeveloperHints />);
+    expect(screen.getByText('You’re missing a description for this operation.')).toBeInTheDocument();
+  });
+
   it('does not render a default brand icon', () => {
     const { container } = render(<Speccy spec={spec} />);
 
