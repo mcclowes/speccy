@@ -95,8 +95,10 @@
 .sp-markdown code { padding: 0.12em 0.35em; color: var(--sp-text); background: var(--sp-surface-soft); border-radius: 4px; font-size: 0.9em; }
 .sp-markdown pre { overflow-x: auto; margin: 0 0 0.8em; padding: 14px; color: var(--sp-code-text); background: var(--sp-code); border-radius: 8px; }
 .sp-markdown pre code { padding: 0; color: inherit; background: transparent; }
-.sp-markdown table { width: 100%; margin: 0 0 0.8em; border-collapse: collapse; color: var(--sp-text); font-size: 0.9em; }
-.sp-markdown th, .sp-markdown td { padding: 8px 10px; border: 1px solid var(--sp-line); text-align: left; vertical-align: top; }
+.sp-markdown table { width: 100%; margin: 0 0 0.8em; overflow: hidden; border: 1px solid var(--sp-line); border-collapse: separate; border-spacing: 0; border-radius: 8px; color: var(--sp-text); font-size: 0.9em; }
+.sp-markdown th, .sp-markdown td { padding: 8px 10px; border: 0; border-right: 1px solid var(--sp-line); border-bottom: 1px solid var(--sp-line); text-align: left; vertical-align: top; }
+.sp-markdown tr:last-child > * { border-bottom: 0; }
+.sp-markdown tr > :last-child { border-right: 0; }
 .sp-markdown th { background: var(--sp-surface-soft); font-weight: 600; }
 .sp-hero > .sp-markdown { font-size: 16px; line-height: 1.75; }
 .sp-server { width: fit-content; max-width: 100%; margin-top: 30px; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
