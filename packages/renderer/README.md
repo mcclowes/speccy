@@ -53,13 +53,22 @@ Developer hints are off by default, excluded from print output, and should stay 
 
 ## Present an API diff
 
-`SpecDiff` presents a normalized semantic diff produced by a tool such as [oasdiff](https://github.com/oasdiff/oasdiff). Run the comparison outside the browser, translate its machine-readable output into a `DiffReport`, then pass the report to the renderer:
+`SpecDiff` presents a normalized semantic diff produced outside the browser. Speccy includes an adapter for the stable JSON emitted by `oasdiff changelog`:
+
+```sh
+oasdiff changelog base.yaml revision.yaml --format json > changes.json
+```
 
 ```tsx
-import {SpecDiff, type DiffReport} from 'speccy-renderer';
+import {adaptOasdiffChangelog, SpecDiff} from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
-export function ApiDiff({report}: {report: DiffReport}) {
+const report = adaptOasdiffChangelog(changes, {
+  base: {source: 'base.yaml', version: '1.4.0'},
+  revision: {source: 'revision.yaml', version: '2.0.0'},
+});
+
+export function ApiDiff() {
   return (
     <SpecDiff
       report={report}
@@ -69,6 +78,6 @@ export function ApiDiff({report}: {report: DiffReport}) {
 }
 ```
 
-The view summarizes breaking, warning, compatible, and documentation changes. Changes can be filtered, are grouped by tag, and expose their before and after values. Keeping comparison outside the component avoids shipping a platform-specific diff engine to the browser and keeps remote `$ref` loading behind the host's security boundary.
+The adapter maps oasdiff levels, rule IDs, operation details, fingerprints, and source locations. Use `operationMetadata` when you want to add tags or a more specific object location from your OpenAPI document. The view supports severity and area filters, text search, deep links, source locations, and expandable before-and-after values. Keeping comparison outside the component avoids shipping a platform-specific diff engine to the browser and keeps remote `$ref` loading behind the host's security boundary.
 
 See the [Speccy documentation](https://github.com/mcclowes/speccy#readme) for renderer options, Docusaurus integration, and standalone reference sites.
