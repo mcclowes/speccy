@@ -28,6 +28,7 @@ struct SpeccyWebView: NSViewRepresentable {
     func makeNSView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        configuration.setURLSchemeHandler(context.coordinator.resourceHandler, forURLScheme: WebResourceHandler.appScheme)
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -42,6 +43,9 @@ struct SpeccyWebView: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, WKNavigationDelegate {
         private weak var webView: WKWebView?
+        let resourceHandler = WebResourceHandler(
+            directory: Bundle.module.url(forResource: "Web", withExtension: nil)
+        )
         nonisolated(unsafe) private var observers: [NSObjectProtocol] = []
 
         func attach(_ webView: WKWebView) {
@@ -61,12 +65,11 @@ struct SpeccyWebView: NSViewRepresentable {
         }
 
         func loadApp() {
-            guard let directory = Bundle.module.url(forResource: "Web", withExtension: nil),
-                  let index = Bundle.module.url(forResource: "index", withExtension: "html", subdirectory: "Web") else {
+            guard resourceHandler.isAvailable else {
                 loadMissingBundlePage()
                 return
             }
-            webView?.loadFileURL(index, allowingReadAccessTo: directory)
+            webView?.load(URLRequest(url: URL(string: "\(WebResourceHandler.appScheme)://app/index.html")!))
         }
 
         func openDocument() {
@@ -123,6 +126,66 @@ struct SpeccyWebView: NSViewRepresentable {
 
         deinit {
             observers.forEach(NotificationCenter.default.removeObserver)
+        }
+    }
+}
+
+final class WebResourceHandler: NSObject, WKURLSchemeHandler {
+    static let appScheme = "speccy"
+
+    private let directory: URL?
+    var isAvailable: Bool { directory != nil }
+
+    init(directory: URL?) {
+        self.directory = directory
+    }
+
+    func webView(_ webView: WKWebView, start urlSchemeTask: any WKURLSchemeTask) {
+        guard let requestURL = urlSchemeTask.request.url,
+              let directory,
+              let resourceURL = Self.resourceURL(for: requestURL, in: directory) else {
+            urlSchemeTask.didFailWithError(URLError(.fileDoesNotExist))
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: resourceURL)
+            let response = URLResponse(
+                url: requestURL,
+                mimeType: Self.mimeType(for: resourceURL),
+                expectedContentLength: data.count,
+                textEncodingName: nil
+            )
+            urlSchemeTask.didReceive(response)
+            urlSchemeTask.didReceive(data)
+            urlSchemeTask.didFinish()
+        } catch {
+            urlSchemeTask.didFailWithError(error)
+        }
+    }
+
+    func webView(_ webView: WKWebView, stop urlSchemeTask: any WKURLSchemeTask) {}
+
+    static func resourceURL(for requestURL: URL, in directory: URL) -> URL? {
+        guard requestURL.scheme == appScheme, requestURL.host == "app" else { return nil }
+        let relativePath = String(requestURL.path.drop(while: { $0 == "/" }))
+        let root = directory.standardizedFileURL
+        let candidate = root.appendingPathComponent(relativePath).standardizedFileURL
+        guard candidate.path.hasPrefix(root.path + "/"), FileManager.default.fileExists(atPath: candidate.path) else {
+            return nil
+        }
+        return candidate
+    }
+
+    static func mimeType(for url: URL) -> String {
+        switch url.pathExtension.lowercased() {
+        case "html": "text/html"
+        case "css": "text/css"
+        case "js": "text/javascript"
+        case "json", "map": "application/json"
+        case "svg": "image/svg+xml"
+        case "png": "image/png"
+        default: "application/octet-stream"
         }
     }
 }
