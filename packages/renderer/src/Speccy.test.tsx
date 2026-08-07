@@ -48,6 +48,13 @@ describe('Speccy navigation', () => {
     const { container } = render(<Speccy spec={spec} />);
 
     expect(container.querySelector('.sp-brand-mark')).not.toBeInTheDocument();
+    expect(container.querySelector('.sp-brand')).not.toHaveClass('has-logo');
+  });
+
+  it('keeps the taller brand row when a logo is provided', () => {
+    const { container } = render(<Speccy spec={spec} logo={<span aria-label="Logo">S</span>} />);
+
+    expect(container.querySelector('.sp-brand')).toHaveClass('has-logo');
   });
 
   it('delegates routing to a controlling host without changing browser history', () => {

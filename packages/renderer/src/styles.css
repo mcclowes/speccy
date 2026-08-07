@@ -50,7 +50,8 @@ related:
 
 .sp-with-sidebar { display: grid; grid-template-columns: 280px minmax(0, 1fr); }
 .sp-sidebar { position: sticky; top: 0; height: 100vh; border-right: 1px solid var(--sp-line); background: color-mix(in srgb, var(--sp-bg) 94%, transparent); backdrop-filter: blur(14px); display: flex; flex-direction: column; z-index: 10; }
-.sp-brand { min-height: 72px; padding: 17px 20px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid var(--sp-line); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.sp-brand { min-height: 56px; padding: 11px 20px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid var(--sp-line); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.sp-brand.has-logo { min-height: 72px; padding-block: 17px; }
 .sp-brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: white; border-radius: 10px; background: var(--sp-accent); box-shadow: 0 7px 20px color-mix(in srgb, var(--sp-accent) 26%, transparent); }
 .sp-sidebar-search { height: 39px; display: flex; align-items: center; flex: none; gap: 8px; margin: 8px 16px 16px; padding: 0 6px 0 11px; color: var(--sp-muted); background: var(--sp-surface); border: 1px solid var(--sp-line); border-radius: 9px; font-size: 12px; transition: border-color 140ms ease; }
 .sp-sidebar-search:focus-within { border-color: color-mix(in srgb, var(--sp-accent) 45%, var(--sp-line)); }
