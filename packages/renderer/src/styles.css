@@ -31,8 +31,8 @@
 .sp-brand { min-height: 72px; padding: 17px 20px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid var(--sp-line); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
 .sp-brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: white; border-radius: 10px; background: var(--sp-accent); box-shadow: 0 7px 20px color-mix(in srgb, var(--sp-accent) 26%, transparent); }
 .sp-search { margin: 16px 16px 8px; height: 39px; display: flex; align-items: center; gap: 8px; padding: 0 11px; color: var(--sp-muted); background: var(--sp-surface); border: 1px solid var(--sp-line); border-radius: 9px; }
-.sp-search input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--sp-text); background: transparent; font-size: 12px; }
-.sp-search-clear { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; color: var(--sp-muted); background: transparent; cursor: pointer; font-size: 18px; line-height: 1; }
+.sp-search input { min-width: 0; height: 100%; flex: 1; padding: 0; border: 0; outline: 0; color: var(--sp-text); background: transparent; font-size: 12px; }
+.sp-search-clear { display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 22px; padding: 0; border: 0; border-radius: 50%; color: var(--sp-muted); background: transparent; cursor: pointer; font-size: 18px; line-height: 1; }
 .sp-search-clear:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-nav-scroll { overflow: auto; padding: 8px 12px 32px; scrollbar-width: thin; }
 .sp-nav-group { margin: 14px 0 20px; }
