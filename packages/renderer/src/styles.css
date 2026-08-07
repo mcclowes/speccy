@@ -92,7 +92,8 @@
 .sp-method-post .sp-method { color: #087653; background: #e2f8ef; } .sp-method-put .sp-method, .sp-method-patch .sp-method { color: #9a5d09; background: #fff2dd; } .sp-method-delete .sp-method { color: #b82c40; background: #ffe8ec; }
 .sp-path { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .sp-operation-name { color: var(--sp-muted); font-size: 12px; }
-.sp-chevron { justify-self: end; color: var(--sp-muted); font-size: 16px; font-weight: 400; }
+.sp-chevron { width: 7px; height: 7px; justify-self: end; margin-right: 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; color: var(--sp-muted); transform: rotate(45deg); transition: transform 140ms ease; }
+[aria-expanded='false'] > .sp-chevron { transform: rotate(-45deg); }
 .sp-deprecated { color: #a8525e; font-size: 9px; text-transform: uppercase; }
 .sp-operation-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr); border-top: 1px solid var(--sp-line); }
 .sp-operation-main { min-width: 0; padding: 28px; }

@@ -139,7 +139,7 @@ function ResponseView({ code, response }: { code: string; response: ResponseObje
       <button type="button" className="sp-response-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className={`sp-status ${code.startsWith('2') ? 'is-success' : ''}`}>{code}</span>
         <span>Response</span>
-        <span className="sp-chevron">{open ? '−' : '+'}</span>
+        <span className="sp-chevron" aria-hidden="true" />
       </button>
       {open && (
         <div className="sp-response-body">
@@ -179,7 +179,7 @@ function OperationCard({ item, server, defaultExpanded }: {
         <code className="sp-path">{item.path}</code>
         <span className="sp-operation-name">{item.operation.summary ?? item.operation.operationId ?? 'Untitled operation'}</span>
         {item.operation.deprecated && <span className="sp-deprecated">deprecated</span>}
-        <span className="sp-chevron">{open ? '−' : '+'}</span>
+        <span className="sp-chevron" aria-hidden="true" />
       </button>
       {open && (
         <div className="sp-operation-body">
