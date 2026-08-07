@@ -66,8 +66,6 @@ describe('SpecDiff', () => {
     const impact = screen.getByLabelText('Operation impact');
     expect(within(impact).getByText('Parameters').parentElement).toHaveTextContent('1 changed');
     expect(within(impact).getByText('Request body').parentElement).toHaveTextContent('Unchanged');
-    expect(screen.getByText('No other changes were reported for this operation.')).toBeInTheDocument();
-
     fireEvent.click(screen.getByText('Added optional query parameter status'));
     expect(screen.getByText('After')).toBeInTheDocument();
     expect(screen.getByText(/"required": false/)).toBeInTheDocument();
@@ -100,6 +98,48 @@ describe('SpecDiff', () => {
   it('shows an empty state when the selected filter has no matches', () => {
     render(<SpecDiff report={{ ...report, changes: report.changes.filter((change) => change.severity !== 'warning') }} />);
     fireEvent.click(screen.getByRole('button', { name: /Warnings 0/ }));
-    expect(screen.getByText('No warning changes.')).toBeInTheDocument();
+    expect(screen.getByText('No matching changes.')).toBeInTheDocument();
+  });
+
+  it('keeps navigation separate from the disclosure control', () => {
+    render(<SpecDiff report={report} hrefForChange={() => '/reference/get-company'} />);
+
+    fireEvent.click(screen.getByText('Added optional query parameter status'));
+    expect(screen.getByText('After')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'View operation' })[0]).toHaveAttribute('href', '/reference/get-company');
+  });
+
+  it('renders severity, anchors, source locations, and a configurable heading level', () => {
+    const sourcedReport: DiffReport = {
+      ...report,
+      changes: [{
+        ...report.changes[0]!,
+        source: { base: { source: 'old.yaml', line: 12, column: 4 } },
+      }],
+    };
+    const { container } = render(<SpecDiff report={sourcedReport} headingLevel={3} />);
+
+    expect(screen.getByRole('heading', { level: 3, name: 'API changes' })).toBeInTheDocument();
+    expect(container.querySelector('.sp-diff-severity-breaking')).toHaveTextContent('breaking');
+    expect(container.querySelector('#remove-company')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Removed operation GET /companies/{id}'));
+    expect(screen.getByText('old.yaml:12:4')).toBeInTheDocument();
+  });
+
+  it('rejects malformed serialized reports', () => {
+    expect(() => render(<SpecDiff report={{ ...report, changes: [{ ...report.changes[0]!, severity: 'urgent' as 'breaking' }] }} />))
+      .toThrow('unknown severity "urgent"');
+  });
+
+  it('uses the operation-level add or remove change for the whole-operation banner', () => {
+    const mixed: DiffReport = {
+      ...report,
+      changes: [
+        { ...report.changes[1]!, method: 'get', path: '/companies' },
+        { ...report.changes[0]!, id: 'remove-companies', path: '/companies', scope: { area: 'operation' } },
+      ],
+    };
+    render(<SpecDiff report={mixed} />);
+    expect(screen.getByText('The entire operation was removed.')).toBeInTheDocument();
   });
 });
