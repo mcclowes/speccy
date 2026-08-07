@@ -7,7 +7,7 @@
  * ---
  */
 
-import { Speccy, type SpeccyProps } from '@mcclowes/speccy-renderer';
+import { Speccy, type SpeccyProps } from 'speccy-renderer';
 
 export type OpenAPIProps = SpeccyProps;
 
@@ -15,5 +15,5 @@ export function OpenAPI({ showSidebar = false, ...props }: OpenAPIProps) {
   return <Speccy showSidebar={showSidebar} {...props} />;
 }
 
-export { Speccy } from '@mcclowes/speccy-renderer';
-export type { OpenAPIDocument, SpeccyProps } from '@mcclowes/speccy-renderer';
+export { Speccy } from 'speccy-renderer';
+export type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';

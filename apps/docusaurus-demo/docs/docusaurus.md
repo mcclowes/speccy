@@ -5,7 +5,7 @@ description: Generate an API reference route or embed Speccy directly in an MDX 
 
 # Docusaurus
 
-`@mcclowes/speccy-docusaurus` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options.
+`mcclowes/speccy-docusaurus` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options.
 
 ## Generate a reference route
 
@@ -15,7 +15,7 @@ Point the plugin at a local document:
 export default {
   plugins: [
     [
-      '@mcclowes/speccy-docusaurus',
+      'speccy-docusaurus',
       {
         route: '/api',
         spec: './static/openapi.yaml',
@@ -47,7 +47,7 @@ The build environment must be able to reach that URL.
 Use the client component when the reference belongs inside a guide or a custom docs layout:
 
 ```mdx
-import {OpenAPI} from '@mcclowes/speccy-docusaurus/client';
+import {OpenAPI} from 'speccy-docusaurus/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} showSidebar={false} />

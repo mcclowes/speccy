@@ -29,7 +29,7 @@ export async function createReference(directory) {
 async function main() {
   const directory = process.argv[2];
   if (!directory || directory === '--help' || directory === '-h') {
-    console.log('Usage: npm create @mcclowes/speccy-reference <directory>');
+    console.log('Usage: npx github:mcclowes/create-speccy-reference <directory>');
     process.exitCode = directory ? 0 : 1;
     return;
   }

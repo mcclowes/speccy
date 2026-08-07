@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mcclowes/speccy-renderer": "^0.1.0",
+    "speccy-renderer": "github:mcclowes/speccy-renderer",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

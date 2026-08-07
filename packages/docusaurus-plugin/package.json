@@ -1,7 +1,8 @@
 {
-  "name": "@mcclowes/speccy-docusaurus",
+  "name": "speccy-docusaurus",
   "version": "0.1.0",
   "description": "Render elegant OpenAPI reference pages in Docusaurus.",
+  "repository": "github:mcclowes/speccy-docusaurus",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,17 +20,15 @@
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external @mcclowes/speccy-renderer && cp ../renderer/dist/styles.css dist/styles.css",
+    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --clean --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external speccy-renderer && cp ../renderer/dist/styles.css dist/styles.css",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@mcclowes/speccy-renderer": "*"
   },
   "peerDependencies": {
     "@docusaurus/core": ">=3.0.0",
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "speccy-renderer": ">=0.1.0"
   },
   "publishConfig": { "access": "public" },
   "devDependencies": {

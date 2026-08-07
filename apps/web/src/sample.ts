@@ -1,4 +1,4 @@
-import type { OpenAPIDocument } from '@mcclowes/speccy-renderer';
+import type { OpenAPIDocument } from 'speccy-renderer';
 
 export const SAMPLE_SPEC: OpenAPIDocument = {
   openapi: '3.1.0',

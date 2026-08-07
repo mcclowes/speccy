@@ -5,7 +5,7 @@ Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a ful
 ## Install
 
 ```sh
-npm install @mcclowes/speccy-docusaurus
+npm install github:mcclowes/speccy-docusaurus
 ```
 
 Add the plugin to `docusaurus.config.ts`:
@@ -14,7 +14,7 @@ Add the plugin to `docusaurus.config.ts`:
 export default {
   plugins: [
     [
-      '@mcclowes/speccy-docusaurus',
+      'speccy-docusaurus',
       {
         route: '/api',
         spec: './static/openapi.yaml',
@@ -33,7 +33,7 @@ The reference is now available at `/api`.
 To embed a reference in MDX:
 
 ```mdx
-import {OpenAPI} from '@mcclowes/speccy-docusaurus/client';
+import {OpenAPI} from 'speccy-docusaurus/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} />

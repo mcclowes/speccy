@@ -1,4 +1,4 @@
-import { Speccy } from '@mcclowes/speccy-renderer';
+import { Speccy } from 'speccy-renderer';
 import { config, spec } from 'virtual:speccy-reference';
 
 export function App() {

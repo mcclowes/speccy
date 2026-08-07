@@ -1,7 +1,8 @@
 {
-  "name": "@mcclowes/create-speccy-reference",
+  "name": "create-speccy-reference",
   "version": "0.1.0",
   "description": "Create a standalone Speccy API reference site.",
+  "repository": "github:mcclowes/create-speccy-reference",
   "type": "module",
   "bin": {
     "create-speccy-reference": "./index.js"

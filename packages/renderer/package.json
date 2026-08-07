@@ -1,7 +1,8 @@
 {
-  "name": "@mcclowes/speccy-renderer",
+  "name": "speccy-renderer",
   "version": "0.1.0",
   "description": "Clean, accessible OpenAPI reference rendering for React.",
+  "repository": "github:mcclowes/speccy-renderer",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

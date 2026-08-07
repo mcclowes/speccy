@@ -16,7 +16,7 @@ const config: Config = {
   customFields: { studioUrl },
   plugins: [
     [
-      '@mcclowes/speccy-docusaurus',
+      'speccy-docusaurus',
       {
         route: isVercel ? '/api' : '/speccy/api',
         spec: './static/openapi.yaml',
