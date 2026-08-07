@@ -110,7 +110,9 @@
 .sp-server { width: fit-content; max-width: 100%; margin-top: 30px; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-server > span { color: var(--sp-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .sp-server code { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; }
-.sp-copy { border: 0; border-radius: 6px; padding: 5px 8px; color: var(--sp-muted); background: var(--sp-surface-soft); cursor: pointer; font-size: 10px; }
+.sp-copy { border: 0; border-radius: 6px; padding: 5px 8px; color: var(--sp-muted); background: var(--sp-surface-soft); cursor: pointer; font-size: 10px; transition: color 120ms ease, background-color 120ms ease, transform 80ms ease; }
+.sp-copy:active { transform: translateY(1px); }
+.sp-copy.is-copied { color: var(--sp-accent); background: color-mix(in srgb, var(--sp-accent) 12%, var(--sp-surface-soft)); }
 
 .sp-tag { max-width: 1120px; padding: 70px 0 20px; scroll-margin-top: 20px; }
 .sp-tag-heading { display: grid; grid-template-columns: minmax(180px, 0.65fr) minmax(280px, 1fr); gap: 40px; align-items: end; margin-bottom: 24px; }
@@ -288,7 +290,7 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 .sp-endpoint-section > .sp-markdown + .sp-media-list { margin-top: 18px; }
 .sp-example { position: relative; overflow: auto; max-height: 320px; margin-top: 10px; padding: 12px; border-radius: 7px; }
 .sp-example .sp-code-title-copy-only { position: absolute; top: 50%; right: 12px; margin: 0; transform: translateY(-50%); }
-.sp-example .sp-copy { width: 28px; height: 28px; justify-content: center; gap: 0; padding: 0; font-size: 0; }
+.sp-example .sp-copy { width: 26px; height: 26px; justify-content: center; gap: 0; padding: 0; font-size: 0; }
 .sp-named-example { margin-top: 12px; }
 .sp-detail-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--sp-line); font-size: 11px; }
 .sp-security-requirements { display: grid; gap: 6px; }
@@ -384,3 +386,4 @@ button.sp-schema-head-named:focus-visible { outline: 2px solid color-mix(in srgb
 
 .sp-copy { display: inline-flex; align-items: center; gap: 7px; }
 .sp-copy::before { content: ''; width: 13px; height: 13px; flex: 0 0 13px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat; }
+.sp-copy.is-copied::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E"); }

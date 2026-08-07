@@ -18,7 +18,7 @@ export function CopyButton({ value }: { value: string }) {
     window.setTimeout(() => setCopied(false), 1200);
   }
 
-  return <button className="sp-copy" type="button" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>;
+  return <button className={`sp-copy${copied ? ' is-copied' : ''}`} type="button" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>;
 }
 
 export function CodeBlock({

@@ -11,7 +11,7 @@ describe('CodeBlock', () => {
     expect(screen.getByText('Request sample')).toBeInTheDocument();
     expect(screen.getByText('curl /things?key=••••••••')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
-    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Copied' })).toHaveClass('is-copied');
     expect(writeText).toHaveBeenCalledWith('curl /things?key=secret');
 
     rerender(<CodeBlock value="example" />);
