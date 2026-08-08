@@ -4,6 +4,9 @@ build/
 .docusaurus/
 .DS_Store
 coverage/
+storybook-static/
+playwright-report/
+test-results/
 *.log
 apps/macos/.build/
 apps/macos/Speccy.app/

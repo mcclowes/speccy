@@ -18,10 +18,17 @@
     },
     "./styles.css": "./dist/styles.css"
   },
-  "files": ["dist"],
-  "publishConfig": { "access": "public" },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --sourcemap --external react --external react-dom && cp src/styles.css dist/styles.css",
+    "storybook": "storybook dev --port 6006",
+    "build:storybook": "storybook build",
+    "test:visual": "playwright test",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -36,6 +43,9 @@
     "yaml": "^2.8.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@storybook/addon-a11y": "^10.5.7",
+    "@storybook/react-vite": "^10.5.7",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.9",
@@ -43,6 +53,7 @@
     "jsdom": "^26.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "storybook": "^10.5.7",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

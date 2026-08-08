@@ -114,6 +114,27 @@ npm run check
 
 This typechecks every TypeScript package, runs the renderer, plugin, and studio tests, builds all packages, and performs a real Docusaurus production build. Run `npm run build:mac` separately for the native target.
 
+## Develop and test the renderer UI
+
+Run the renderer stories in Storybook:
+
+```sh
+npm run storybook
+```
+
+The stories cover representative overview and endpoint states in light, dark, desktop, and mobile layouts. Build the static Storybook with `npm run build:storybook`.
+
+Playwright compares those stories with committed screenshots:
+
+```sh
+npx playwright install chromium
+npm run test:visual
+```
+
+When a deliberate UI change affects a baseline, review the diff and update it with `npm run test:visual -- --update-snapshots`.
+
+The screenshot set is small, so it stays in regular Git. Git LFS would add an extra install and download requirement for contributors and source checkouts without saving meaningful repository space. Revisit that choice if the baseline set grows into tens of megabytes.
+
 ## Project structure
 
 ```text
