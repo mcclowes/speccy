@@ -164,6 +164,8 @@ npm run check
 
 This typechecks every TypeScript package, runs the renderer, plugin, and studio tests, builds all packages, and performs a real Docusaurus production build. Run `npm run build:mac` separately for the native target.
 
+Package changes use Changesets for versions and changelogs. See the [release checklist](docs/releases.md) for npm provenance, GitHub releases, and maintenance of the `v1` Action tag.
+
 ## Develop and test the renderer UI
 
 Run the renderer stories in Storybook:
