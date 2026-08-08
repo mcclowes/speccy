@@ -1,11 +1,14 @@
 # Release checklist
 
-Changesets owns package versions and changelogs. The release workflow opens or updates a `Version packages` pull request whenever changesets land on `main`. Merging that pull request publishes to npm, creates GitHub releases, and moves the `v1` Action tag to the published commit.
+Changesets owns package versions and changelogs. The release workflow opens or updates a `Version packages` pull request whenever changesets land on `main`. Merging that pull request publishes to npm through trusted publishing with OIDC, creates GitHub releases, and moves the `v1` Action tag to the published commit.
 
 ## One-time setup
 
-- [ ] Add an npm automation or granular access token as the `NPM_TOKEN` repository secret. It must be allowed to publish every public package in this monorepo.
-- [ ] Keep `id-token: write` on the release job. npm uses the resulting OIDC statement to attach provenance to each package published with `NPM_CONFIG_PROVENANCE=true`.
+- [ ] Bootstrap any package name that doesn't exist on npm with one interactive `npm publish --access public` using 2FA. npm can't attach a trusted publisher until the package exists.
+- [ ] In every package's npm settings, add a GitHub Actions trusted publisher for user `mcclowes`, repository `speccy`, and workflow `release.yml`. Allow `npm publish`.
+- [ ] Keep Node 24 or newer and npm 11.5.1 or newer in the release job. Older npm clients can't exchange the GitHub OIDC identity for short-lived npm credentials.
+- [ ] Keep `id-token: write` on the release job. No npm publish token or repository secret is needed.
+- [ ] Confirm trusted publishing creates provenance automatically. Don't add a separate provenance token or disable provenance in package configuration.
 - [ ] Allow GitHub Actions to create pull requests in the repository settings.
 - [ ] Protect `main`, and require CI before merging the release pull request.
 - [ ] Confirm the workflow has `contents: write` so Changesets can create package tags and GitHub releases, and so the workflow can move `v1`.
@@ -28,7 +31,7 @@ Changesets owns package versions and changelogs. The release workflow opens or u
 
 ## After publication
 
-- [ ] Confirm each expected version appears on npm and carries provenance. The npm package page should show a provenance badge and link the package to this repository and workflow run.
+- [ ] Confirm each expected version appears on npm and carries provenance. Trusted publishing generates the attestation automatically, and the npm package page should link it to this repository and workflow run.
 - [ ] Confirm the install surface with `npm view <package>@<version>` for `speccy-core`, `speccy-spectral`, `speccy-cli`, `speccy-renderer`, `docusaurus-plugin-speccy`, and `create-speccy-reference` as applicable.
 - [ ] Confirm Changesets created a GitHub release and immutable package tag for every published package.
 - [ ] Confirm the mutable `v1` tag points at the release commit: `git rev-parse v1` must match the commit that published the packages.
