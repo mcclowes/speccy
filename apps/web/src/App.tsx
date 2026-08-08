@@ -4,13 +4,12 @@
  * related:
  *   - ./sample.ts - Default document used for the first-run preview.
  *   - ./studio.css - Viewer chrome and reference workspace styling.
- *   - ../../../packages/renderer/src/Speccy.tsx - Shared reference view embedded by the studio.
+ *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { OpenAPIDocument, SpeccyRoute, SpectralDiagnosticInput } from '@speccy/renderer';
-import { Speccy } from '../../../packages/renderer/src/Speccy';
+import { Speccy, type OpenAPIDocument, type SpeccyRoute, type SpectralDiagnosticInput } from 'speccy-renderer';
 import { bundleFragmentedSpec, parseSpec } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
