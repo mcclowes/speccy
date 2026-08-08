@@ -54,6 +54,10 @@ jobs:
             apps/web/public/examples/managed-cards.yaml \
             --format markdown \
             --fail-on never > "$RUNNER_TEMP/speccy-health.md"
+          node packages/cli/dist/cli.js lint \
+            apps/web/public/examples/managed-cards.yaml \
+            --format json \
+            --fail-on never > "$RUNNER_TEMP/speccy-health.json"
           tail -n +2 "$RUNNER_TEMP/speccy-health.md" >> "$RUNNER_TEMP/speccy-diff.md"
           cat "$RUNNER_TEMP/speccy-diff.md" >> "$GITHUB_STEP_SUMMARY"
           echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
@@ -76,6 +80,14 @@ jobs:
               "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
               -F "body=@$REPORT_PATH"
           fi
+      - name: Publish health findings on changed lines
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          SPEC_PATH: apps/web/public/examples/managed-cards.yaml
+          REPORT_PATH: ${{ runner.temp }}/speccy-health.json
+        run: node .github/scripts/publish-speccy-health.mjs
       - name: Enforce the breaking-change threshold
         if: steps.diff.outputs.exit_code != '0'
         run: exit "${{ steps.diff.outputs.exit_code }}"
