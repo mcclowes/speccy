@@ -7,10 +7,10 @@ description: Generate an API reference route or embed Speccy directly in an MDX 
 
 `docusaurus-plugin-speccy` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options.
 
-Install the [plugin](https://www.npmjs.com/package/docusaurus-plugin-speccy) and its renderer peer dependency:
+Install the [plugin](https://www.npmjs.com/package/docusaurus-plugin-speccy):
 
 ```sh
-npm install docusaurus-plugin-speccy speccy-renderer
+npm install docusaurus-plugin-speccy
 ```
 
 ## Generate a reference route

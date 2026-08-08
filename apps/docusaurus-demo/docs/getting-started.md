@@ -41,10 +41,10 @@ export function ApiReference({spec}) {
 
 ## Docusaurus
 
-Install the plugin and renderer:
+Install the plugin:
 
 ```sh
-npm install docusaurus-plugin-speccy speccy-renderer
+npm install docusaurus-plugin-speccy
 ```
 
 Add a generated reference route to `docusaurus.config.ts`:

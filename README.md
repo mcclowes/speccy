@@ -4,14 +4,21 @@ Speccy is an OpenAPI renderer for React, the web, macOS, and Docusaurus. It uses
 
 The design stays quiet around the content. Color identifies methods, status, required fields, and interactive state rather than decorating every surface.
 
-## What’s included
+## Choose an entry point
 
-- [`speccy-core`](https://www.npmjs.com/package/speccy-core) - headless parsing, analysis, and diffing with no React and no DOM
 - [`speccy-cli`](https://www.npmjs.com/package/speccy-cli) - `speccy lint` and `speccy diff` for CI
 - [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer) - the shared React renderer
-- `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
 - [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy) - generated reference routes and an embeddable MDX component
 - [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference) - a standalone static reference starter
+
+[`speccy-core`](https://www.npmjs.com/package/speccy-core) provides the headless parsing, analysis, and diffing API for advanced integrations. Most users don't need to install it directly.
+
+The repository also contains `@speccy/web`, the standalone studio, and `apps/macos`, the offline SwiftUI and WebKit app.
+
+See the [public package decision](docs/decisions/001-public-package-surface.md) for how these entry points map to the internal packages.
+
+## What’s included
+
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
@@ -67,7 +74,7 @@ tags:
 ## Use the Docusaurus plugin
 
 ```sh
-npm install docusaurus-plugin-speccy speccy-renderer
+npm install docusaurus-plugin-speccy
 ```
 
 ```ts

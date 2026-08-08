@@ -5,7 +5,7 @@ Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a ful
 ## Install
 
 ```sh
-npm install docusaurus-plugin-speccy speccy-renderer
+npm install docusaurus-plugin-speccy
 ```
 
 Add the plugin to `docusaurus.config.ts`:
