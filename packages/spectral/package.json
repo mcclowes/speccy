@@ -8,18 +8,20 @@
     "directory": "packages/spectral"
   },
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": ["dist"],
   "publishConfig": { "access": "public" },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
