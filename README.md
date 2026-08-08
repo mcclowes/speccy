@@ -118,6 +118,8 @@ Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not ru
 
 Each spec argument accepts a file path, a git ref, or an https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
 
+Speccy's own CI dogfoods this command on pull requests. It builds the CLI from the proposed changes, compares the repository's managed cards example with the base branch, and publishes the Markdown report in the workflow summary.
+
 ## Check everything
 
 ```sh
