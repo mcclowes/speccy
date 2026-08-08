@@ -1,6 +1,8 @@
 export { Speccy } from './Speccy';
 export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
+export { parseRoutePath, routePath } from './routing';
+export type { RoutePathOptions } from './routing';
 export {
   adaptOasdiffChangelog,
   adaptSpectralDiagnostics,

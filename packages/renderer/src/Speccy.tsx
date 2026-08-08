@@ -34,6 +34,7 @@ import { Markdown } from './Markdown';
 import { OpenApiDownload } from './OpenApiDownload';
 import { CodeSample, EndpointResponses, GroupedParameterList, RequestRail, SecurityRequirements } from './OperationDetails';
 import { componentAnchorId, DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
+import { parseRoutePath, routePath } from './routing';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type { SpeccyProps, SpeccyRoute } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
@@ -214,29 +215,8 @@ function CallbackList({ callbacks, server }: { callbacks: NonNullable<OperationM
   ))}</section>;
 }
 
-function normalizeBasePath(path: string): string {
-  if (!path || path === '/') return '';
-  return `/${path.replace(/^\/+|\/+$/g, '')}`;
-}
-
-function operationHref(basePath: string, operationId: string): string {
-  return `${basePath}/${encodeURIComponent(operationId)}`;
-}
-
 function tagSlug(tag: TagModel): string {
   return slugify(tag.name) || tag.name;
-}
-
-function referenceHref(basePath: string, key: ReferenceKey): string {
-  const slug = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-  return `${basePath}/reference/${encodeURIComponent(slug)}`;
-}
-
-function legacyHrefForRoute(basePath: string, route: SpeccyRoute): string {
-  if (route.page === 'operation') return operationHref(basePath, route.operationId);
-  if (route.page === 'tag') return `${basePath}/tags/${encodeURIComponent(route.tag)}`;
-  if (route.page === 'reference') return referenceHref(basePath, route.section as ReferenceKey);
-  return basePath || '/';
 }
 
 function routeKey(route: SpeccyRoute): string | undefined {
@@ -248,11 +228,6 @@ function routeKey(route: SpeccyRoute): string | undefined {
 
 function isReferenceKey(value: string): value is ReferenceKey {
   return value === 'webhooks' || REFERENCE_GROUPS.some(([key]) => key === value);
-}
-
-function referenceKeyFromSlug(value: string): ReferenceKey | undefined {
-  const key = value.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-  return isReferenceKey(key) ? key : undefined;
 }
 
 type SearchResult = {
@@ -559,7 +534,7 @@ export function Speccy({
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>('speccy:theme', theme);
-  const basePath = normalizeBasePath(basePathProp);
+  const basePath = basePathProp;
   const storageScope = `speccy:${basePath || '/'}:${result.model?.document.info?.title ?? 'api'}`;
   const [showInlineHints, setShowInlineHints] = useLocalState(`${storageScope}:show-inline-hints`, true);
   const previousTheme = useRef(theme);
@@ -573,20 +548,13 @@ export function Speccy({
 
   const routeFromPath = () => {
     if (typeof window === 'undefined') return undefined;
-    const prefix = `${basePath}/`;
-    if (!window.location.pathname.startsWith(prefix)) return undefined;
-    const remainder = window.location.pathname.slice(prefix.length);
-    if (!remainder) return undefined;
-    const [segment, value, extra] = remainder.split('/').map(decodeURIComponent);
-    if (extra) return undefined;
-    const referenceKey = value ? referenceKeyFromSlug(value) : undefined;
-    if (segment === 'reference' && referenceKey) return `reference/${referenceKey}`;
-    if (segment === 'tags' && value) return `tags/${value}`;
-    return !value ? segment : undefined;
+    const parsed = parseRoutePath(window.location.pathname, basePath, { operationSegment: '' });
+    if (parsed?.page === 'reference' && !isReferenceKey(parsed.section)) return undefined;
+    return parsed ? routeKey(parsed) : undefined;
   };
   const [internalRoute, setInternalRoute] = useState(routeFromPath);
   const activeRoute = route ? routeKey(route) : internalRoute;
-  const hrefForRoute = (nextRoute: SpeccyRoute) => controlledHrefForRoute?.(nextRoute) ?? legacyHrefForRoute(basePath, nextRoute);
+  const hrefForRoute = (nextRoute: SpeccyRoute) => controlledHrefForRoute?.(nextRoute) ?? routePath(nextRoute, basePath, { operationSegment: '' });
 
   useEffect(() => {
     if (result.error) onError?.(result.error);
