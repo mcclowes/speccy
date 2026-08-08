@@ -11,8 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { OpenAPIDocument, SpeccyRoute, SpectralDiagnosticInput } from '@speccy/renderer';
 import { Speccy } from '../../../packages/renderer/src/Speccy';
-import { bundleFragmentedSpec } from '../../../packages/renderer/src/fragmentedSpec';
-import { parseSpec } from '../../../packages/renderer/src/model';
+import { bundleFragmentedSpec, parseSpec } from '@speccy/core';
 import { SAMPLE_SPEC } from './sample';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 

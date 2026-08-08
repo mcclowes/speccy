@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Speccy } from './Speccy';
-import type { OpenAPIDocument } from './types';
+import type { OpenAPIDocument } from '@speccy/core';
 
 const exampleSpec: OpenAPIDocument = {
   openapi: '3.1.0',

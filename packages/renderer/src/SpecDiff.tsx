@@ -3,66 +3,12 @@
  * purpose: Presents a normalized semantic diff between two OpenAPI descriptions.
  * related:
  *   - ./styles.css - Styles the diff summary, filters, groups, and change details.
- *   - ./index.ts - Exposes the component and report contract as public renderer API.
+ *   - ../../core/src/diff.ts - Defines the report contract rendered here.
  * ---
  */
 
 import { useMemo, useState } from 'react';
-import type { HttpMethod } from './types';
-
-export type DiffSeverity = 'breaking' | 'warning' | 'compatible' | 'documentation';
-export type DiffKind = 'added' | 'removed' | 'changed' | 'deprecated';
-export type DiffArea = 'operation' | 'parameters' | 'request-body' | 'response-body' | 'headers' | 'security' | 'documentation';
-
-export interface DiffSpecVersion {
-  title?: string;
-  version?: string;
-  source?: string;
-}
-
-export interface DiffSourceLocation {
-  source?: string;
-  line?: number;
-  column?: number;
-}
-
-export interface DiffOperation {
-  method: HttpMethod;
-  path: string;
-  operationId?: string;
-  tag?: string;
-}
-
-export interface ApiChange {
-  id: string;
-  severity: DiffSeverity;
-  kind: DiffKind;
-  method?: HttpMethod;
-  path?: string;
-  operationId?: string;
-  tag?: string;
-  /** Operations affected by a shared component change. The change is counted once. */
-  affectedOperations?: DiffOperation[];
-  scope?: {
-    area: DiffArea;
-    /** Human-readable detail such as "200 · application/json · Loan.status". */
-    label?: string;
-  };
-  location: string[];
-  message: string;
-  before?: unknown;
-  after?: unknown;
-  source?: {
-    base?: DiffSourceLocation;
-    revision?: DiffSourceLocation;
-  };
-}
-
-export interface DiffReport {
-  base: DiffSpecVersion;
-  revision: DiffSpecVersion;
-  changes: ApiChange[];
-}
+import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from '@speccy/core';
 
 export interface SpecDiffProps {
   report: DiffReport;

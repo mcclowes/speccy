@@ -16,28 +16,32 @@ import {
   useRef,
   useState,
 } from 'react';
+import {
+  analyzeOpenApi,
+  createReferenceModel,
+  operationsInDeclarationOrder,
+  parseSpec,
+  slugify,
+  type MediaType,
+  type OpenAPIDocument,
+  type OperationModel,
+  type Parameter,
+  type ResponseObject,
+  type SchemaObject,
+  type SecurityRequirement,
+  type SecurityScheme,
+  type TagModel,
+} from '@speccy/core';
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { DeveloperDiagnostics, InlineDiagnostics } from './DeveloperDiagnostics';
-import { analyzeOpenApi } from './diagnostics';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
-import { createReferenceModel, operationsInDeclarationOrder, parseSpec, slugify, type OperationModel, type TagModel } from './model';
 import { OpenApiDownload } from './OpenApiDownload';
 import { componentAnchorId, DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
 import { RequestSample } from './RequestSample';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
-import type {
-  MediaType,
-  Parameter,
-  OpenAPIDocument,
-  ResponseObject,
-  SchemaObject,
-  SecurityRequirement,
-  SecurityScheme,
-  SpeccyProps,
-  SpeccyRoute,
-} from './types';
+import type { SpeccyProps, SpeccyRoute } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';
 import { WebhookIcon } from './WebhookIcon';

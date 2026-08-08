@@ -3,7 +3,7 @@
  * purpose: Parses OpenAPI input and creates the stable navigation and operation model used by the UI.
  * related:
  *   - ./types.ts - Source OpenAPI types.
- *   - ./Speccy.tsx - Renders the resulting reference model.
+ *   - ../../renderer/src/Speccy.tsx - Renders the resulting reference model.
  * ---
  */
 

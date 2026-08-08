@@ -2,7 +2,7 @@
  * ---
  * purpose: Analyzes OpenAPI documents for correctness, documentation, design, security, and compatibility problems.
  * related:
- *   - ./DeveloperDiagnostics.tsx - Presents these findings and manages local suppressions.
+ *   - ../../renderer/src/DeveloperDiagnostics.tsx - Presents these findings and manages local suppressions.
  *   - ./types.ts - Defines the OpenAPI source shapes inspected here.
  * ---
  */

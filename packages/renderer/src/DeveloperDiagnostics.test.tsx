@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DeveloperDiagnostics, InlineDiagnostics, diagnosticsAsCsv, diagnosticsAsText } from './DeveloperDiagnostics';
-import type { ApiDiagnostic } from './diagnostics';
+import type { ApiDiagnostic } from '@speccy/core';
 
 const findings: ApiDiagnostic[] = [{
   id: 'missing-description',

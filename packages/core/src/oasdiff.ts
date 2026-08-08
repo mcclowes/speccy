@@ -1,6 +1,6 @@
 /** Converts `oasdiff changelog --format json` output into the renderer contract. */
 
-import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from './SpecDiff';
+import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from './diff';
 import type { HttpMethod } from './types';
 
 export interface OasdiffSource {
