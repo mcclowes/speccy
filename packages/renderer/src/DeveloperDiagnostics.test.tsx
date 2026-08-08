@@ -45,6 +45,15 @@ describe('developer diagnostics layout', () => {
     expect(css).not.toMatch(/\.sp-inline-diagnostics \{[^}]*margin-top:/);
   });
 
+  it('renders the actions menu with a fixed icon instead of font glyphs', () => {
+    render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" showInlineHints onShowInlineHintsChange={() => undefined} />);
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+
+    const actions = screen.getByLabelText('API health actions');
+    expect(actions.querySelector('svg')).toBeInTheDocument();
+    expect(actions).not.toHaveTextContent('•••');
+  });
+
   it('formats every finding for copying and CSV export', () => {
     expect(diagnosticsAsText(findings)).toContain('0 issues, 1 warning, 0 suggestions');
     expect(diagnosticsAsText(findings)).toContain('Suggested fix: Describe the operation.');
