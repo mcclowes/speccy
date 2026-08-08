@@ -50,6 +50,11 @@ jobs:
             --format markdown > "$RUNNER_TEMP/speccy-diff.md"
           exit_code=$?
           set -e
+          node packages/cli/dist/cli.js lint \
+            apps/web/public/examples/managed-cards.yaml \
+            --format markdown \
+            --fail-on never > "$RUNNER_TEMP/speccy-health.md"
+          tail -n +2 "$RUNNER_TEMP/speccy-health.md" >> "$RUNNER_TEMP/speccy-diff.md"
           cat "$RUNNER_TEMP/speccy-diff.md" >> "$GITHUB_STEP_SUMMARY"
           echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
       - name: Publish diff on the pull request

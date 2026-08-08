@@ -177,7 +177,7 @@ describe('diffSpecs', () => {
       const base = document({ '/loans': { get: operation({ responses: { '200': { description: 'OK', ...jsonBody({ type: 'object', properties: { id: { type: 'string' } } }) } } }) } });
       const revision = document({ '/loans': { get: operation({ responses: { '200': { description: 'OK', ...jsonBody({ type: 'object', properties: { id: { type: 'string' }, rate: { type: 'number' } } }) } } }) } });
 
-      expect(find(diffSpecs(base, revision), 'response-field-added')[0]).toMatchObject({ severity: 'compatible' });
+      expect(find(diffSpecs(base, revision), 'response-field-added')[0]).toMatchObject({ severity: 'compatible', after: { type: 'number' } });
     });
 
     it('flags a response field that is no longer guaranteed', () => {

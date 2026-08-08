@@ -37,22 +37,22 @@ describe('formatDiff', () => {
     expect(JSON.parse(formatDiff(report, 'json'))).toEqual(JSON.parse(JSON.stringify(report)));
   });
 
-  it('leads the markdown with the verdict and both versions', () => {
+  it('leads the markdown with the merge verdict and severity totals', () => {
     const markdown = formatDiff(report, 'markdown');
 
     expect(markdown.split('\n')[0]).toBe(COMMENT_MARKER);
-    expect(markdown).toMatch(/### Speccy found 2 breaking changes/);
+    expect(markdown).toContain('### ❌ API compatibility check failed');
+    expect(markdown).toContain('**2 breaking · 0 warning');
     expect(markdown).toContain('Lending 1.0.0');
     expect(markdown).toContain('2.0.0');
   });
 
-  it('puts breaking changes in the open and the rest behind a fold', () => {
+  it('shows operation, area, and OpenAPI location details', () => {
     const markdown = formatDiff(report, 'markdown');
-    const breakingIndex = markdown.indexOf('POST /loans was removed.');
-    const detailsIndex = markdown.indexOf('<details>');
 
-    expect(breakingIndex).toBeGreaterThan(-1);
-    expect(detailsIndex).toBeGreaterThan(breakingIndex);
+    expect(markdown).toContain('| Impact | Operation | Area | Change |');
+    expect(markdown).toContain('`POST /loans`');
+    expect(markdown).toContain('OpenAPI location: `paths › /loans › post`');
   });
 
   it('says so plainly when nothing changed', () => {
@@ -60,6 +60,12 @@ describe('formatDiff', () => {
 
     expect(markdown).toContain('No API changes');
     expect(markdown).not.toContain('<details>');
+  });
+
+  it('shows source refs when the host supplies them', () => {
+    const sourced = diffSpecs(base, revision, { base: { source: 'origin/main:openapi.yaml' }, revision: { source: 'openapi.yaml' } });
+
+    expect(formatDiff(sourced, 'markdown')).toContain('`origin/main:openapi.yaml` → `openapi.yaml`');
   });
 
   it('names the operations a shared component change reaches', () => {
@@ -94,7 +100,8 @@ describe('formatLint', () => {
     const markdown = formatLint(diagnostics, 'markdown');
 
     expect(markdown.split('\n')[0]).toBe(COMMENT_MARKER);
-    expect(markdown).toMatch(/1 issue, 1 warning, 1 suggestion/);
+    expect(markdown).toMatch(/API health: 1 issue, 1 warning, 1 suggestion/);
+    expect(markdown).toContain('advisory');
   });
 
   it('reports a clean document without a findings table', () => {
