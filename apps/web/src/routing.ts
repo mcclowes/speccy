@@ -7,7 +7,7 @@
  * ---
  */
 
-import type { SpeccyRoute } from '@speccy/renderer';
+import { parseRoutePath, routePath, type SpeccyRoute } from 'speccy-renderer';
 
 export type StudioRoute =
   | { page: 'home' }
@@ -27,15 +27,9 @@ export function parseStudioRoute(location: LocationValue): StudioRoute {
   const segments = location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
   if (segments[0] !== 'references' || !segments[1]) return { page: 'home' };
 
-  const [, referenceId, section, value, extra] = segments;
-  if (extra) return { page: 'home' };
-
-  let referenceRoute: SpeccyRoute;
-  if (!section) referenceRoute = { page: 'overview' };
-  else if (section === 'operations' && value) referenceRoute = { page: 'operation', operationId: value };
-  else if (section === 'tags' && value) referenceRoute = { page: 'tag', tag: value };
-  else if (section === 'reference' && value) referenceRoute = { page: 'reference', section: value };
-  else return { page: 'home' };
+  const [, referenceId, ...routeSegments] = segments;
+  const referenceRoute = parseRoutePath(`/${routeSegments.map(encodeURIComponent).join('/')}`);
+  if (!referenceRoute) return { page: 'home' };
 
   return {
     page: 'reference',
@@ -47,10 +41,7 @@ export function parseStudioRoute(location: LocationValue): StudioRoute {
 
 export function referenceHref(referenceId: string, route: SpeccyRoute, sourceUrl?: string): string {
   const root = `/references/${encodeURIComponent(referenceId)}`;
-  let pathname = root;
-  if (route.page === 'operation') pathname += `/operations/${encodeURIComponent(route.operationId)}`;
-  if (route.page === 'tag') pathname += `/tags/${encodeURIComponent(route.tag)}`;
-  if (route.page === 'reference') pathname += `/reference/${encodeURIComponent(route.section)}`;
+  const pathname = routePath(route, root);
 
   if (!sourceUrl) return pathname;
   const query = new URLSearchParams({ source: sourceUrl });

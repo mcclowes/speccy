@@ -1,16 +1,41 @@
 export { Speccy } from './Speccy';
 export { SpecDiff } from './SpecDiff';
-export { adaptOasdiffChangelog } from './oasdiff';
 export { WebhookIcon } from './WebhookIcon';
-export { adaptSpectralDiagnostics, analyzeOpenApi } from './diagnostics';
-export { createReferenceModel, normalizeDocument, parseSpec, resolveRefs } from './model';
+export { parseRoutePath, routePath } from './routing';
+export type { RoutePathOptions } from './routing';
+export {
+  adaptOasdiffChangelog,
+  adaptSpectralDiagnostics,
+  analyzeOpenApi,
+  createReferenceModel,
+  normalizeDocument,
+  parseSpec,
+  resolveRefs,
+} from 'speccy-core';
+export type { SpeccyProps, SpeccyRoute } from './types';
+export type { SpecDiffProps } from './SpecDiff';
 export type {
+  ApiChange,
+  ApiDiagnostic,
   CallbackObject,
+  DiagnosticCategory,
+  DiagnosticSeverity,
+  DiagnosticSource,
+  DiffArea,
+  DiffKind,
+  DiffOperation,
+  DiffReport,
+  DiffSeverity,
+  DiffSourceLocation,
+  DiffSpecVersion,
   ExampleObject,
   HeaderObject,
   HttpMethod,
   LinkObject,
   MediaType,
+  OasdiffAdapterOptions,
+  OasdiffChange,
+  OasdiffSource,
   OpenAPIDocument,
   Operation,
   Parameter,
@@ -19,19 +44,5 @@ export type {
   SchemaObject,
   SecurityRequirement,
   SecurityScheme,
-  SpeccyProps,
-  SpeccyRoute,
-} from './types';
-export type { ApiDiagnostic, DiagnosticCategory, DiagnosticSeverity, DiagnosticSource, SpectralDiagnosticInput } from './diagnostics';
-export type {
-  ApiChange,
-  DiffArea,
-  DiffKind,
-  DiffOperation,
-  DiffReport,
-  DiffSeverity,
-  DiffSourceLocation,
-  DiffSpecVersion,
-  SpecDiffProps,
-} from './SpecDiff';
-export type { OasdiffAdapterOptions, OasdiffChange, OasdiffSource } from './oasdiff';
+  SpectralDiagnosticInput,
+} from 'speccy-core';

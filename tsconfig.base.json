@@ -12,7 +12,10 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "speccy-core": ["./packages/core/src/index.ts"],
+      "speccy-spectral": ["./packages/spectral/src/index.ts"]
+    }
   }
 }
-

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DeveloperDiagnostics, InlineDiagnostics, diagnosticsAsCsv, diagnosticsAsText } from './DeveloperDiagnostics';
-import type { ApiDiagnostic } from './diagnostics';
+import type { ApiDiagnostic } from 'speccy-core';
 
 const findings: ApiDiagnostic[] = [{
   id: 'missing-description',
@@ -43,6 +43,15 @@ describe('developer diagnostics layout', () => {
     expect(css).toMatch(/\.sp-inline-diagnostics \{[^}]*position: fixed;[^}]*right: 20px;[^}]*bottom: 72px;/);
     expect(css).toMatch(/\.sp-inline-diagnostics \{[^}]*width: min\(380px, calc\(100vw - 40px\)\);[^}]*max-height: calc\(100vh - 112px\);/);
     expect(css).not.toMatch(/\.sp-inline-diagnostics \{[^}]*margin-top:/);
+  });
+
+  it('renders the actions menu with a fixed icon instead of font glyphs', () => {
+    render(<DeveloperDiagnostics diagnostics={findings} storageScope="test" showInlineHints onShowInlineHintsChange={() => undefined} />);
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+
+    const actions = screen.getByLabelText('API health actions');
+    expect(actions.querySelector('svg')).toBeInTheDocument();
+    expect(actions).not.toHaveTextContent('•••');
   });
 
   it('formats every finding for copying and CSV export', () => {

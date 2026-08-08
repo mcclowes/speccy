@@ -2,13 +2,13 @@
  * ---
  * purpose: Renders contextual API authoring hints and a filterable health drawer with local rule suppressions.
  * related:
- *   - ./diagnostics.ts - Produces the normalized findings shown here.
+ *   - ../../core/src/diagnostics.ts - Produces the normalized findings shown here.
  *   - ./Speccy.tsx - Places the trigger, drawer, and contextual findings in the reference.
  * ---
  */
 
 import { useMemo, useState } from 'react';
-import type { ApiDiagnostic, DiagnosticSeverity } from './diagnostics';
+import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
 
@@ -115,7 +115,9 @@ export function DeveloperDiagnostics({ diagnostics, storageScope, showInlineHint
           <div><span className="sp-eyebrow">Developer view</span><h2>API health</h2><p>Contract checks and design guidance. No opaque score.</p></div>
           <div className="sp-diagnostics-header-actions">
             <details className="sp-diagnostics-menu">
-              <summary aria-label="API health actions"><span aria-hidden="true">•••</span></summary>
+              <summary aria-label="API health actions">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.75" /><circle cx="12" cy="12" r="1.75" /><circle cx="19" cy="12" r="1.75" /></svg>
+              </summary>
               <div>
                 <button type="button" onClick={() => onShowInlineHintsChange(!showInlineHints)}>{showInlineHints ? 'Hide hints' : 'Show hints'}</button>
                 <button type="button" onClick={copyAll} disabled={visible.length === 0}>{copied ? 'Copied' : 'Copy all'}</button>

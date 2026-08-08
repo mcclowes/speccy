@@ -6,7 +6,8 @@ import { App } from './App';
 
 const { previewRender } = vi.hoisted(() => ({ previewRender: vi.fn() }));
 
-vi.mock('../../../packages/renderer/src/Speccy', () => ({
+vi.mock('speccy-renderer', async (importOriginal) => ({
+  ...await importOriginal<typeof import('speccy-renderer')>(),
   Speccy: ({ onNavigate, hrefForRoute, theme }: {
     onNavigate?: (route: { page: 'operation'; operationId: string }) => void;
     hrefForRoute?: (route: { page: 'operation'; operationId: string }) => string;

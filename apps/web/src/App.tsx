@@ -3,17 +3,19 @@
  * purpose: Provides the standalone API reference viewer with file, URL, paste, theme, and preview controls.
  * related:
  *   - ./sample.ts - Default document used for the first-run preview.
+ *   - ./recentReferences.ts - Owns recent-reference identity and persistence.
+ *   - ./previewUrls.ts - Creates and parses shareable preview links.
  *   - ./studio.css - Viewer chrome and reference workspace styling.
- *   - ../../../packages/renderer/src/Speccy.tsx - Shared reference view embedded by the studio.
+ *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { OpenAPIDocument, SpeccyRoute, SpectralDiagnosticInput } from '@speccy/renderer';
-import { Speccy } from '../../../packages/renderer/src/Speccy';
-import { bundleFragmentedSpec } from '../../../packages/renderer/src/fragmentedSpec';
-import { parseSpec } from '../../../packages/renderer/src/model';
+import { Speccy, type OpenAPIDocument, type SpeccyRoute, type SpectralDiagnosticInput } from 'speccy-renderer';
+import { bundleFragmentedSpec, parseSpec } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
+import { parseInitialLocation, previewHref } from './previewUrls';
+import { addRecentReference, readRecentReferences, recentReferenceLabel, type RecentReference, writeRecentReferences } from './recentReferences';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 
 declare global {
@@ -25,36 +27,8 @@ declare global {
 
 type Theme = 'light' | 'dark' | 'system';
 
-type RecentReference = {
-  id: string;
-  name: string;
-  source: string;
-  sourceUrl?: string;
-  openedAt: number;
-};
-
 const THEME_STORAGE_KEY = 'speccy-theme';
 const URL_STORAGE_KEY = 'speccy-oas-url';
-const RECENTS_STORAGE_KEY = 'speccy-recent-references';
-const MAX_RECENTS = 6;
-
-type InitialLocation = {
-  preview: boolean;
-  source?: string;
-  name?: string;
-  url?: string;
-};
-
-function initialLocation(): InitialLocation {
-  const search = new URLSearchParams(window.location.search);
-  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  return {
-    preview: search.get('preview') === '1',
-    source: fragment.get('source') ?? undefined,
-    name: fragment.get('name') ?? undefined,
-    url: search.get('url') ?? undefined,
-  };
-}
 
 function storageItem(key: string) {
   try {
@@ -77,25 +51,6 @@ function storedTheme(): Theme {
   return theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
 }
 
-function storedRecents(): RecentReference[] {
-  try {
-    const references = JSON.parse(storageItem(RECENTS_STORAGE_KEY) ?? '[]');
-    return Array.isArray(references) ? references.slice(0, MAX_RECENTS) : [];
-  } catch {
-    return [];
-  }
-}
-
-function referenceId(name: string, openedAt: number) {
-  return `${name}-${openedAt}`;
-}
-
-function referenceLabel(reference: RecentReference, references: RecentReference[]) {
-  if (references.filter((item) => item.name === reference.name).length < 2) return reference.name;
-  const imported = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(reference.openedAt);
-  return `${reference.name} — ${imported}`;
-}
-
 function Mark() {
   return (
     <span className="studio-mark" aria-hidden="true">
@@ -113,17 +68,17 @@ function ShareIcon() {
 }
 
 export function App() {
-  const [location] = useState(initialLocation);
-  const [spec, setSpec] = useState<OpenAPIDocument | string>(() => location.source ?? (location.url ? '' : SAMPLE_SPEC));
-  const [source, setSource] = useState(() => location.source ?? JSON.stringify(SAMPLE_SPEC, null, 2));
+  const [location] = useState(() => parseInitialLocation(window.location));
+  const [spec, setSpec] = useState<OpenAPIDocument | string>(() => location.source || (location.sourceUrl ? '' : SAMPLE_SPEC));
+  const [source, setSource] = useState(() => location.source || JSON.stringify(SAMPLE_SPEC, null, 2));
   const [fileName, setFileName] = useState(() => location.source ? (location.name ?? 'Shared API reference') : '');
-  const [sourceUrl, setSourceUrl] = useState(() => location.url ?? '');
+  const [sourceUrl, setSourceUrl] = useState(() => location.sourceUrl ?? '');
   const [activeId, setActiveId] = useState('');
-  const [recents, setRecents] = useState<RecentReference[]>(storedRecents);
+  const [recents, setRecents] = useState<RecentReference[]>(readRecentReferences);
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const [urlOpen, setUrlOpen] = useState(false);
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
-  const [loading, setLoading] = useState(Boolean(location.url));
+  const [loading, setLoading] = useState(Boolean(location.sourceUrl));
   const [message, setMessage] = useState('');
   const [shareMessage, setShareMessage] = useState('');
   const [route, setRoute] = useState<StudioRoute>(() => parseStudioRoute(window.location));
@@ -138,13 +93,13 @@ export function App() {
       setSpectralDiagnostics([]);
       return () => { active = false; };
     }
-    void import('./spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
+    void import('speccy-spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
     return () => { active = false; };
   }, [spec, fileName, location.preview]);
 
   useEffect(() => {
     if (location.preview) {
-      const initialUrl = location.url ?? '';
+      const initialUrl = location.sourceUrl ?? '';
       if (initialUrl) {
         setUrl(initialUrl);
         void loadUrl(initialUrl, undefined, { page: 'overview' }, false);
@@ -231,19 +186,19 @@ export function App() {
     referenceRoute: SpeccyRoute = { page: 'overview' },
     historyMode: 'push' | 'replace' | false = 'push',
   ) {
-    const existing = existingId
-      ? recentsRef.current.find((item) => item.id === existingId)
-      : recentsRef.current.find((item) => item.name === name && item.source === next);
-    const openedAt = existing?.openedAt ?? Date.now();
-    const id = existing?.id ?? existingId ?? referenceId(name, openedAt);
-    const reference = { id, name, source: next, sourceUrl: nextSourceUrl === null ? undefined : nextSourceUrl ?? existing?.sourceUrl, openedAt };
+    const current = existingId ? recentsRef.current.find((item) => item.id === existingId) : undefined;
+    const added = addRecentReference(recentsRef.current, {
+      name,
+      source: next,
+      sourceUrl: nextSourceUrl === null ? undefined : nextSourceUrl ?? current?.sourceUrl,
+    }, existingId);
+    const { reference, references: updated } = added;
     displayReference(reference);
-    const updated = [reference, ...recentsRef.current.filter((item) => item.id !== id)].slice(0, MAX_RECENTS);
     recentsRef.current = updated;
-    storeItem(RECENTS_STORAGE_KEY, JSON.stringify(updated));
+    writeRecentReferences(updated);
     setRecents(updated);
     if (historyMode) {
-      setBrowserRoute({ page: 'reference', referenceId: id, referenceRoute, sourceUrl: reference.sourceUrl }, historyMode);
+      setBrowserRoute({ page: 'reference', referenceId: reference.id, referenceRoute, sourceUrl: reference.sourceUrl }, historyMode);
     }
   }
 
@@ -301,11 +256,7 @@ export function App() {
 
   function rendererHref(nextRoute: SpeccyRoute) {
     if (!location.preview) return referenceHref(activeId, nextRoute, sourceUrl || undefined);
-    const target = new URL(referenceHref('preview', nextRoute), window.location.origin);
-    target.searchParams.set('preview', '1');
-    if (sourceUrl) target.searchParams.set('url', sourceUrl);
-    else target.hash = new URLSearchParams({ source, name: fileName || 'API reference' }).toString();
-    return `${target.pathname}${target.search}${target.hash}`;
+    return previewHref(nextRoute, { source, sourceUrl: sourceUrl || undefined, name: fileName }, window.location.origin);
   }
 
   function navigateRenderer(nextRoute: SpeccyRoute) {
@@ -318,17 +269,7 @@ export function App() {
   }
 
   function previewUrl() {
-    const preview = new URL(referenceHref('preview', { page: 'overview' }), window.location.origin);
-    preview.search = '';
-    preview.hash = '';
-    preview.searchParams.set('preview', '1');
-    if (sourceUrl) {
-      preview.searchParams.set('url', sourceUrl);
-    } else {
-      const fragment = new URLSearchParams({ source, name: fileName || 'API reference' });
-      preview.hash = fragment.toString();
-    }
-    return preview.toString();
+    return previewHref({ page: 'overview' }, { source, sourceUrl: sourceUrl || undefined, name: fileName }, window.location.origin, true);
   }
 
   async function sharePreview() {
@@ -365,7 +306,7 @@ export function App() {
               const reference = recents.find((item) => item.id === event.target.value);
               if (reference) openRecent(reference);
             }}>
-              {recents.map((reference) => <option key={reference.id} value={reference.id}>{referenceLabel(reference, recents)}</option>)}
+              {recents.map((reference) => <option key={reference.id} value={reference.id}>{recentReferenceLabel(reference, recents)}</option>)}
             </select>
             <span className="studio-chevron" aria-hidden="true">⌄</span>
           </label>

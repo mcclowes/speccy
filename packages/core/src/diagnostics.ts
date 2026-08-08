@@ -2,13 +2,14 @@
  * ---
  * purpose: Analyzes OpenAPI documents for correctness, documentation, design, security, and compatibility problems.
  * related:
- *   - ./DeveloperDiagnostics.tsx - Presents these findings and manages local suppressions.
+ *   - ../../renderer/src/DeveloperDiagnostics.tsx - Presents these findings and manages local suppressions.
  *   - ./types.ts - Defines the OpenAPI source shapes inspected here.
  * ---
  */
 
+import { diffSpecs } from './diffSpecs';
 import { operationsInDeclarationOrder } from './model';
-import type { HttpMethod, OpenAPIDocument, Operation, Parameter, ResponseObject, SchemaObject, SecurityRequirement } from './types';
+import type { HttpMethod, OpenAPIDocument, Operation, Parameter, ResponseObject, SchemaObject } from './types';
 
 export type DiagnosticSeverity = 'issue' | 'warning' | 'suggestion';
 export type DiagnosticSource = 'speccy' | 'spectral';
@@ -51,10 +52,6 @@ function text(value: unknown): value is string {
 
 function operationKey(method: HttpMethod, path: string, operation: Operation) {
   return operation.operationId ?? `${method}-${path}`.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
-}
-
-function securityNames(requirements?: SecurityRequirement[]) {
-  return new Set((requirements ?? []).flatMap((requirement) => Object.keys(requirement)));
 }
 
 function responseSchema(response: ResponseObject): SchemaObject | undefined {
@@ -124,40 +121,25 @@ function inspectErrors(responses: Record<string, ResponseObject>, basePath: Arra
   }
 }
 
-function compareDocuments(current: OpenAPIDocument, previous: OpenAPIDocument, add: AddDiagnostic) {
-  for (const [path, oldPathItem] of Object.entries(previous.paths ?? {})) {
-    const currentPathItem = current.paths?.[path];
-    for (const [method, oldOperation] of operationsInDeclarationOrder(oldPathItem)) {
-      const operationPath = ['paths', path, method];
-      const nextOperation = currentPathItem?.[method];
-      const context = { operationId: operationKey(method, path, oldOperation), tag: oldOperation.tags?.[0] };
-      if (!nextOperation) {
-        add({ ruleId: 'operation-removed', severity: 'issue', category: 'change-safety', message: `${method.toUpperCase()} ${path} was removed.`, rationale: 'Existing clients may still call this operation.', suggestion: 'Restore it, version the breaking change, or provide a migration path.', path: operationPath, ...context });
-        continue;
-      }
-      const oldParameters = [...(oldPathItem.parameters ?? []), ...(oldOperation.parameters ?? [])];
-      const nextParameters = [...(currentPathItem.parameters ?? []), ...(nextOperation.parameters ?? [])];
-      for (const parameter of nextParameters.filter((item) => item.required)) {
-        const old = oldParameters.find((item) => item.name === parameter.name && item.in === parameter.in);
-        if (!old || !old.required) add({ ruleId: 'required-parameter-added', severity: 'issue', category: 'change-safety', message: `${parameter.name} is now required.`, rationale: 'Existing requests will fail without it.', suggestion: 'Keep it optional or introduce the requirement in a new API version.', path: [...operationPath, 'parameters'], ...context });
-      }
-      const oldRequestSchema = Object.values(oldOperation.requestBody?.content ?? {})[0]?.schema;
-      const nextRequestSchema = Object.values(nextOperation.requestBody?.content ?? {})[0]?.schema;
-      for (const name of nextRequestSchema?.required ?? []) if (!oldRequestSchema?.required?.includes(name)) add({ ruleId: 'required-request-field-added', severity: 'issue', category: 'change-safety', message: `${name} is now required in the request body.`, rationale: 'Existing request payloads will fail validation.', suggestion: 'Keep it optional or introduce the requirement in a new version.', path: [...operationPath, 'requestBody'], ...context });
-      for (const [name, nextProperty] of Object.entries(nextRequestSchema?.properties ?? {})) {
-        const oldEnum = oldRequestSchema?.properties?.[name]?.enum;
-        if (oldEnum && nextProperty.enum && oldEnum.some((value) => !nextProperty.enum?.includes(value))) add({ ruleId: 'enum-narrowed', severity: 'issue', category: 'change-safety', message: `Accepted values for ${name} were narrowed.`, rationale: 'Existing clients may still send a removed value.', suggestion: 'Restore the value or version the contract change.', path: [...operationPath, 'requestBody', name], ...context });
-      }
-      for (const [code, oldResponse] of Object.entries(oldOperation.responses ?? {})) {
-        const nextResponse = nextOperation.responses?.[code];
-        if (!nextResponse) add({ ruleId: 'response-removed', severity: 'issue', category: 'change-safety', message: `Response ${code} was removed.`, path: [...operationPath, 'responses', code], ...context });
-        else if (schemaSignature(responseSchema(oldResponse)) !== schemaSignature(responseSchema(nextResponse))) add({ ruleId: 'response-schema-changed', severity: 'warning', category: 'change-safety', message: `Response ${code} changed shape.`, rationale: 'Generated clients and deployed parsers may no longer accept it.', suggestion: 'Check the semantic diff and version incompatible changes.', path: [...operationPath, 'responses', code], ...context });
-      }
-      const oldSecurity = securityNames(oldOperation.security ?? previous.security);
-      const nextSecurity = securityNames(nextOperation.security ?? current.security);
-      if ([...nextSecurity].some((name) => !oldSecurity.has(name))) add({ ruleId: 'authentication-changed', severity: 'issue', category: 'change-safety', message: 'Authentication requirements became stricter.', suggestion: 'Treat this as a breaking change and provide a migration path.', path: [...operationPath, 'security'], ...context });
-    }
-  }
+/** Reports the risky half of a semantic diff as diagnostics. Compatible and documentation changes belong in the diff, not the health panel. */
+function changeSafetyDiagnostics(previous: OpenAPIDocument, current: OpenAPIDocument): ApiDiagnostic[] {
+  return diffSpecs(previous, current).changes.flatMap((change) => {
+    if (change.severity !== 'breaking' && change.severity !== 'warning') return [];
+    const ruleId = change.id.slice(0, change.id.indexOf(':'));
+    return [{
+      id: `speccy:${change.id}`,
+      ruleId,
+      source: 'speccy' as const,
+      severity: change.severity === 'breaking' ? ('issue' as const) : ('warning' as const),
+      category: 'change-safety' as const,
+      message: change.message,
+      rationale: change.severity === 'breaking' ? 'Existing clients depend on the previous contract.' : undefined,
+      suggestion: 'Restore the previous behavior, or version the change and document a migration path.',
+      path: change.location,
+      operationId: change.operationId,
+      tag: change.tag,
+    }];
+  });
 }
 
 export function adaptSpectralDiagnostics(inputs: SpectralDiagnosticInput[]): ApiDiagnostic[] {
@@ -261,7 +243,7 @@ export function analyzeOpenApi(document: OpenAPIDocument, options: { previousDoc
       ] as const) if (!candidates.some((name) => name in properties)) add({ ruleId, severity: ruleId === 'webhook-event-id' ? 'warning' : 'suggestion', category: 'lifecycle', message: `Webhook ${eventName} has no ${label}.`, rationale: ruleId === 'webhook-event-id' ? 'Consumers need a stable key to deduplicate retried deliveries.' : undefined, suggestion: `Add ${label} to the webhook envelope.`, path: ['webhooks', eventName, method, 'requestBody'], ...context });
     }
   }
-  if (options.previousDocument) compareDocuments(document, options.previousDocument, add);
+  if (options.previousDocument) diagnostics.push(...changeSafetyDiagnostics(options.previousDocument, document));
   diagnostics.push(...adaptSpectralDiagnostics(options.spectral ?? []));
   return diagnostics;
 }
