@@ -6,6 +6,8 @@ The design stays quiet around the content. Color identifies methods, status, req
 
 ## What’s included
 
+- [`@speccy/core`](https://www.npmjs.com/package/@speccy/core) - headless parsing, analysis, and diffing with no React and no DOM
+- [`@speccy/cli`](https://www.npmjs.com/package/@speccy/cli) - `speccy lint` and `speccy diff` for CI
 - [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer) - the shared React renderer
 - `@speccy/web` - a standalone studio with file, URL, paste, drag-and-drop, and theme controls
 - [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy) - generated reference routes and an embeddable MDX component
@@ -106,6 +108,16 @@ npm run dev
 
 The generated project keeps its OpenAPI source, branding, and base path in `speccy.config.ts`. `npm run build` produces static assets for Cloudflare Pages, Netlify, Vercel, S3, or another static host. Use Docusaurus instead when the site also needs guides, tutorials, or other prose documentation.
 
+## Review an API in CI
+
+```sh
+npx @speccy/cli diff origin/main:openapi.yaml openapi.yaml
+```
+
+Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` reports documentation, design, error, auth, pagination, and data modeling problems from the same rule set the renderer shows in its developer view. Add `--format markdown` for output ready to post as a pull request comment.
+
+Each spec argument accepts a file path, a git ref, or an https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
+
 ## Check everything
 
 ```sh
@@ -143,7 +155,9 @@ apps/
   macos/              Native SwiftUI shell and packager
   docusaurus-demo/    Integration fixture
 packages/
-  renderer/           Shared parser, model, React UI, and styles
+  core/               Headless parser, model, diagnostics, and diff engine
+  cli/                speccy lint and speccy diff
+  renderer/           Shared React UI and styles
   docusaurus-plugin/  Docusaurus build plugin and MDX component
   create-speccy-reference/ Standalone reference project generator
 ```
