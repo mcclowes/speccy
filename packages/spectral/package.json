@@ -1,0 +1,36 @@
+{
+  "name": "speccy-spectral",
+  "version": "0.3.0",
+  "description": "Optional Spectral linting integration for Speccy.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcclowes/speccy.git",
+    "directory": "packages/spectral"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": { "access": "public" },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stoplight/spectral-core": "^1.23.1",
+    "@stoplight/spectral-rulesets": "^1.22.7",
+    "speccy-core": "^0.3.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

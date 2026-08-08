@@ -13,7 +13,7 @@ import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
 import type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';
-import { runSpectral } from './spectral';
+import { runSpectral } from 'speccy-spectral';
 
 const require = createRequire(import.meta.url);
 

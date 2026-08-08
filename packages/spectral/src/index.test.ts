@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { runSpectral } from './spectral';
+import { runSpectral } from './index';
 
 describe('runSpectral', () => {
   it('runs the standard OAS ruleset against source text', async () => {

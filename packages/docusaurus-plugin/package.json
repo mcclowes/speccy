@@ -24,7 +24,7 @@
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --clean --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external speccy-renderer && cp ../renderer/dist/styles.css dist/styles.css",
+    "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --clean --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external speccy-renderer --external speccy-spectral && cp ../renderer/dist/styles.css dist/styles.css",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -47,7 +47,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@stoplight/spectral-core": "^1.23.1",
-    "@stoplight/spectral-rulesets": "^1.22.7"
+    "speccy-spectral": "^0.3.0"
   }
 }

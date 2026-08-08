@@ -6,6 +6,7 @@
     "paths": {
       "speccy-core": ["../../packages/core/src/index.ts"],
       "speccy-renderer": ["../../packages/renderer/src/index.ts"],
+      "speccy-spectral": ["../../packages/spectral/src/index.ts"],
       "@speccy/renderer": ["../../packages/renderer/src/index.ts"]
     },
     "types": ["vite/client"]

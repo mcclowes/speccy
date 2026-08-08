@@ -10,9 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@stoplight/spectral-core": "^1.23.1",
-    "@stoplight/spectral-rulesets": "^1.22.7",
     "speccy-renderer": "*",
+    "speccy-spectral": "*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

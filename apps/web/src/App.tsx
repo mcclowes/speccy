@@ -137,7 +137,7 @@ export function App() {
       setSpectralDiagnostics([]);
       return () => { active = false; };
     }
-    void import('./spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
+    void import('speccy-spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
     return () => { active = false; };
   }, [spec, fileName, location.preview]);
 
