@@ -10,7 +10,7 @@ export default defineConfig({
       { find: /^speccy-renderer\/styles\.css$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/styles.css', import.meta.url)) },
       { find: /^speccy-renderer$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/index.ts', import.meta.url)) },
       { find: /^speccy-spectral$/, replacement: fileURLToPath(new URL('../../packages/spectral/src/index.ts', import.meta.url)) },
-      { find: /^@speccy\/core$/, replacement: fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)) },
+      { find: /^speccy-core$/, replacement: fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)) },
     ],
   },
   build: {
