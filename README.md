@@ -120,6 +120,26 @@ Each spec argument accepts a file path, a git ref, or an https URL. See [`packag
 
 Speccy's own CI dogfoods this command on pull requests. It builds the CLI from the proposed changes, compares the repository's managed cards example with the base branch, and publishes the Markdown report in the workflow summary.
 
+For several specs and a persistent pull request comment, use the GitHub Action:
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+
+steps:
+  - uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+  - uses: mcclowes/speccy@v1
+    with:
+      specs: |
+        Admin=reference/admin.yml
+        Multi=reference/multi.yml
+```
+
+Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. The repository remains responsible for generating any spec files before this step.
+
 ## Check everything
 
 ```sh

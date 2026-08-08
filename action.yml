@@ -1,0 +1,37 @@
+name: Speccy API review
+description: Review one or more OpenAPI documents and publish the result on a pull request.
+inputs:
+  specs:
+    description: Named spec paths, one per line in the form "name=path".
+    required: true
+  version:
+    description: The speccy-cli version to run.
+    default: latest
+  fail-on:
+    description: The diff severity that fails the action.
+    default: breaking
+  health-fail-on:
+    description: The health severity that fails the action.
+    default: never
+  comment:
+    description: Publish or update a pull request comment.
+    default: "true"
+  github-token:
+    description: Token used to publish the pull request comment.
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - name: Review OpenAPI documents
+      shell: bash
+      env:
+        SPECCY_SPECS: ${{ inputs.specs }}
+        SPECCY_VERSION: ${{ inputs.version }}
+        SPECCY_FAIL_ON: ${{ inputs.fail-on }}
+        SPECCY_HEALTH_FAIL_ON: ${{ inputs.health-fail-on }}
+        SPECCY_COMMENT: ${{ inputs.comment }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: node "$GITHUB_ACTION_PATH/action/review.mjs"
+branding:
+  icon: file-text
+  color: purple
