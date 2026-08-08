@@ -1,4 +1,6 @@
 export { adaptSpectralDiagnostics, analyzeOpenApi } from './diagnostics';
+export { diffSpecs } from './diffSpecs';
+export type { DiffSpecsOptions } from './diffSpecs';
 export { adaptOasdiffChangelog } from './oasdiff';
 export { bundleFragmentedSpec } from './fragmentedSpec';
 export {
