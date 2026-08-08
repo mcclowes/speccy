@@ -58,7 +58,7 @@ export async function readSource(source: string, io: SourceIO): Promise<string |
     return await io.git(ref, path);
   } catch (error) {
     if (error instanceof MissingRefError) {
-      throw new Error(`Cannot reach the git ref ${ref}. In CI, check out enough history for it, for example with fetch-depth: 0.`);
+      throw new Error(`Cannot reach the git ref ${ref}. In CI, check out enough history for it, for example with fetch-depth: 0.`, { cause: error });
     }
     throw error;
   }

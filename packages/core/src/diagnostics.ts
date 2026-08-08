@@ -9,7 +9,7 @@
 
 import { diffSpecs } from './diffSpecs';
 import { operationsInDeclarationOrder } from './model';
-import type { HttpMethod, OpenAPIDocument, Operation, Parameter, ResponseObject, SchemaObject, SecurityRequirement } from './types';
+import type { HttpMethod, OpenAPIDocument, Operation, Parameter, ResponseObject, SchemaObject } from './types';
 
 export type DiagnosticSeverity = 'issue' | 'warning' | 'suggestion';
 export type DiagnosticSource = 'speccy' | 'spectral';

@@ -701,11 +701,7 @@ function normalizeBasePath(path: string): string {
 }
 
 function operationHref(basePath: string, operationId: string): string {
-  return `${basePath}/${encodeURIComponent(operationId)}` || '/';
-}
-
-function tagHref(basePath: string, tag: TagModel): string {
-  return `${basePath}/tags/${encodeURIComponent(tagSlug(tag))}`;
+  return `${basePath}/${encodeURIComponent(operationId)}`;
 }
 
 function tagSlug(tag: TagModel): string {
@@ -1011,7 +1007,7 @@ function ErrorState({ error }: { error: Error }) {
 export function Speccy({
   spec,
   className = '',
-  defaultExpanded = false,
+  defaultExpanded: _defaultExpanded = false,
   showSidebar = true,
   showThemeToggle = true,
   theme = 'system',

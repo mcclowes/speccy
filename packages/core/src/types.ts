@@ -132,7 +132,7 @@ export interface MediaType extends SpecificationExtensions {
   encoding?: Record<string, Record<string, unknown>>;
 }
 
-export interface HeaderObject extends Omit<Parameter, 'name' | 'in'> {}
+export type HeaderObject = Omit<Parameter, 'name' | 'in'>;
 
 export interface ExampleObject extends SpecificationExtensions {
   summary?: string;

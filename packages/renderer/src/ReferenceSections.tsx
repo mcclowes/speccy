@@ -21,8 +21,8 @@ export const REFERENCE_GROUPS = [
 
 export type ReferenceKey = typeof REFERENCE_GROUPS[number][0];
 
-function entries(value: unknown): [string, any][] {
-  return value && typeof value === 'object' ? Object.entries(value) : [];
+function entries<T>(value: Record<string, T> | undefined): Array<[string, T]> {
+  return value ? Object.entries(value) : [];
 }
 
 export function ReferenceNavigation({ document, activeKey, hrefFor, onNavigate, storageKey }: {
@@ -33,7 +33,7 @@ export function ReferenceNavigation({ document, activeKey, hrefFor, onNavigate, 
   storageKey: string;
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
-  const available = REFERENCE_GROUPS.filter(([key]) => entries(document.components?.[key]).length > 0);
+  const available = REFERENCE_GROUPS.filter(([key]) => Object.keys(document.components?.[key] ?? {}).length > 0);
   if (available.length === 0) return null;
   return <div className="sp-nav-group sp-reference-nav">
     <button type="button" className="sp-nav-tag" onClick={() => setOpen(!open)} aria-expanded={open}>
@@ -96,6 +96,12 @@ function Card({ id, name, children }: { id: string; name: string; children: Reac
   return <article className="sp-component-card" id={id}><h3>{name}</h3>{children}</article>;
 }
 
+function operationLabel(value: unknown): string {
+  if (!value || typeof value !== 'object') return '';
+  if ('summary' in value && typeof value.summary === 'string') return value.summary;
+  return 'operationId' in value && typeof value.operationId === 'string' ? value.operationId : '';
+}
+
 function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
   const flows = scheme.flows ?? (scheme.flow ? { [scheme.flow]: { authorizationUrl: scheme.authorizationUrl, tokenUrl: scheme.tokenUrl, scopes: scheme.scopes } } : undefined);
   return <><div className="sp-schema-head"><span className="sp-type">{scheme.type ?? 'unknown'}</span>{scheme.scheme && <code>{scheme.scheme}</code>}{scheme.in && <span>{scheme.in}: <code>{scheme.name}</code></span>}</div>
@@ -111,19 +117,19 @@ export function DocumentReference({ document, activeKey }: {
   activeKey: ReferenceKey;
 }) {
   const components = document.components ?? {};
-  const renderCards = (key: ReferenceKey, render: (name: string, value: any) => ReactNode) => {
-    const items = entries(components[key]);
+  const renderCards = <T,>(key: ReferenceKey, values: Record<string, T> | undefined, render: (name: string, value: T) => ReactNode) => {
+    const items = entries(values);
     return <Section id={`components-${key}`} title={REFERENCE_GROUPS.find(([item]) => item === key)?.[1] ?? key} activeKey={key} names={items.map(([name]) => name)}>{items.map(([name, value]) => <Card id={componentAnchorId(key, name)} name={name} key={name}>{render(name, value)}</Card>)}</Section>;
   };
   return <>
-    {activeKey === 'schemas' && renderCards('schemas', (_name, schema) => <SchemaView schema={schema} />)}
-    {activeKey === 'parameters' && renderCards('parameters', (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required" title="Required">*</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
-    {activeKey === 'requestBodies' && renderCards('requestBodies', (_name, body) => <><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></>)}
-    {activeKey === 'responses' && renderCards('responses', (_name, response) => <><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></>)}
-    {activeKey === 'headers' && renderCards('headers', (_name, header) => <><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></>)}
-    {activeKey === 'examples' && renderCards('examples', (_name, example) => <><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></>)}
-    {activeKey === 'links' && renderCards('links', (_name, link) => <><Markdown>{link.description}</Markdown><p>Operation: <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code></p>{entries(link.parameters).map(([parameter, value]) => <div key={parameter}><code>{parameter}</code>: <code>{JSON.stringify(value)}</code></div>)}</>)}
-    {activeKey === 'callbacks' && renderCards('callbacks', (_name, callback) => <>{entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => <div key={expression}><code>{expression}</code><div>{entries(pathItem).filter(([method]) => ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'].includes(method)).map(([method, operation]) => <span className="sp-callback-method" key={method}>{method.toUpperCase()} {operation.summary ?? operation.operationId}</span>)}</div></div>)}</>)}
-    {activeKey === 'securitySchemes' && renderCards('securitySchemes', (_name, scheme) => <SecuritySchemeView scheme={scheme} />)}
+    {activeKey === 'schemas' && renderCards('schemas', components.schemas, (_name, schema) => <SchemaView schema={schema} />)}
+    {activeKey === 'parameters' && renderCards('parameters', components.parameters, (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required" title="Required">*</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
+    {activeKey === 'requestBodies' && renderCards('requestBodies', components.requestBodies, (_name, body) => <><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></>)}
+    {activeKey === 'responses' && renderCards('responses', components.responses, (_name, response) => <><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></>)}
+    {activeKey === 'headers' && renderCards('headers', components.headers, (_name, header) => <><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></>)}
+    {activeKey === 'examples' && renderCards('examples', components.examples, (_name, example) => <><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></>)}
+    {activeKey === 'links' && renderCards('links', components.links, (_name, link) => <><Markdown>{link.description}</Markdown><p>Operation: <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code></p>{entries(link.parameters).map(([parameter, value]) => <div key={parameter}><code>{parameter}</code>: <code>{JSON.stringify(value)}</code></div>)}</>)}
+    {activeKey === 'callbacks' && renderCards('callbacks', components.callbacks, (_name, callback) => <>{entries(callback).filter(([expression]) => expression !== '$ref').map(([expression, pathItem]) => typeof pathItem === 'string' ? null : <div key={expression}><code>{expression}</code><div>{entries(pathItem).filter(([method]) => ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'].includes(method)).map(([method, operation]) => <span className="sp-callback-method" key={method}>{method.toUpperCase()} {operationLabel(operation)}</span>)}</div></div>)}</>)}
+    {activeKey === 'securitySchemes' && renderCards('securitySchemes', components.securitySchemes, (_name, scheme) => <SecuritySchemeView scheme={scheme} />)}
   </>;
 }

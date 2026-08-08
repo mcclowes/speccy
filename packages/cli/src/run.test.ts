@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { run } from './run';
 import type { SourceIO } from './sources';
 
@@ -19,7 +19,7 @@ paths:
       responses: {"201": {description: Created}, "400": {description: Bad request}}
 `;
 
-const REVISION = BASE.replace(/    post:[\s\S]*$/, '');
+const REVISION = BASE.replace(/ {4}post:[\s\S]*$/, '');
 
 function harness(files: Record<string, string | undefined> = {}) {
   const out: string[] = [];
