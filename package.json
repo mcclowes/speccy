@@ -13,12 +13,16 @@
     "dev": "npm run dev -w @speccy/web",
     "storybook": "npm run storybook -w speccy-renderer",
     "build:storybook": "npm run build:storybook -w speccy-renderer",
+    "changeset": "changeset",
+    "changeset:status": "changeset status --since=origin/main",
     "test:visual": "npm run test:visual -w speccy-renderer",
     "test": "npm run test:action && npm run test -w speccy-core && npm run test -w speccy-spectral && npm run test -w speccy-cli && npm run test -w speccy-renderer && npm run test -w docusaurus-plugin-speccy && npm run test -w @speccy/web && npm run test -w create-speccy-reference",
     "test:action": "node --test action/*.test.mjs",
     "pretypecheck": "npm run build -w speccy-core && npm run build -w speccy-renderer",
     "typecheck": "npm run typecheck -w speccy-core && npm run typecheck -w speccy-spectral && npm run typecheck -w speccy-cli && npm run typecheck -w speccy-renderer && npm run typecheck -w docusaurus-plugin-speccy && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo && npm run typecheck -w create-speccy-reference",
     "lint": "eslint . --max-warnings 0",
+    "release": "npm run build && changeset publish",
+    "version-packages": "changeset version",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
@@ -26,6 +30,8 @@
     "node": ">=20.19"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.1",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.1",
     "eslint-plugin-react-hooks": "^7.1.1",
