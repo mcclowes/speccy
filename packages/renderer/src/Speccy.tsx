@@ -2,7 +2,9 @@
  * ---
  * purpose: Renders a complete, searchable OpenAPI reference from the normalized model.
  * related:
- *   - ./model.ts - Parses input and builds tag and operation groups.
+ *   - ../../core/src/model.ts - Parses input and builds tag and operation groups.
+ *   - ./OperationDetails.tsx - Owns request execution and operation detail presentation.
+ *   - ./QuickSearch.tsx - Owns searchable keyboard navigation.
  *   - ./styles.css - Owns the visual system and responsive layout.
  *   - ./types.ts - Declares the public component API.
  * ---

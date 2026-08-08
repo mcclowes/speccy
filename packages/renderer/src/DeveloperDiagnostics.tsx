@@ -2,7 +2,7 @@
  * ---
  * purpose: Renders contextual API authoring hints and a filterable health drawer with local rule suppressions.
  * related:
- *   - ./diagnostics.ts - Produces the normalized findings shown here.
+ *   - ../../core/src/diagnostics.ts - Produces the normalized findings shown here.
  *   - ./Speccy.tsx - Places the trigger, drawer, and contextual findings in the reference.
  * ---
  */

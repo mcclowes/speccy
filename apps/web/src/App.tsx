@@ -3,6 +3,8 @@
  * purpose: Provides the standalone API reference viewer with file, URL, paste, theme, and preview controls.
  * related:
  *   - ./sample.ts - Default document used for the first-run preview.
+ *   - ./recentReferences.ts - Owns recent-reference identity and persistence.
+ *   - ./previewUrls.ts - Creates and parses shareable preview links.
  *   - ./studio.css - Viewer chrome and reference workspace styling.
  *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
