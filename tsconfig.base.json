@@ -14,7 +14,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "paths": {
-      "@speccy/core": ["./packages/core/src/index.ts"]
+      "speccy-core": ["./packages/core/src/index.ts"]
     }
   }
 }

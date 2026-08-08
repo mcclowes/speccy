@@ -9,7 +9,7 @@ export {
   normalizeDocument,
   parseSpec,
   resolveRefs,
-} from '@speccy/core';
+} from 'speccy-core';
 export type { SpeccyProps, SpeccyRoute } from './types';
 export type { SpecDiffProps } from './SpecDiff';
 export type {
@@ -43,4 +43,4 @@ export type {
   SecurityRequirement,
   SecurityScheme,
   SpectralDiagnosticInput,
-} from '@speccy/core';
+} from 'speccy-core';

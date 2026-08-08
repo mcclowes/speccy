@@ -8,7 +8,7 @@
  */
 
 import { parseArgs } from 'node:util';
-import { analyzeOpenApi, diffSpecs, parseSpec } from '@speccy/core';
+import { analyzeOpenApi, diffSpecs, parseSpec } from 'speccy-core';
 import { diffExitCode, formatDiff, formatLint, lintExitCode, type DiffThreshold, type Format, type LintThreshold } from './report';
 import { readSource, type SourceIO } from './sources';
 

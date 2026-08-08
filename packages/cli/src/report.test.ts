@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { diffSpecs } from '@speccy/core';
-import type { ApiDiagnostic, DiffReport, OpenAPIDocument } from '@speccy/core';
+import { diffSpecs } from 'speccy-core';
+import type { ApiDiagnostic, DiffReport, OpenAPIDocument } from 'speccy-core';
 import { COMMENT_MARKER, diffExitCode, formatDiff, formatLint, lintExitCode } from './report';
 
 const base: OpenAPIDocument = {

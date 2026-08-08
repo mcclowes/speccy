@@ -37,7 +37,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@speccy/core": "^0.3.0",
+    "speccy-core": "^0.3.0",
     "react-markdown": "^10.1.0",
     "remark-directive": "^3.0.1",
     "remark-gfm": "^4.0.1",

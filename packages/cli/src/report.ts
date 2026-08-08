@@ -6,7 +6,7 @@
  * ---
  */
 
-import type { ApiChange, ApiDiagnostic, DiagnosticSeverity, DiffReport, DiffSeverity, DiffSpecVersion } from '@speccy/core';
+import type { ApiChange, ApiDiagnostic, DiagnosticSeverity, DiffReport, DiffSeverity, DiffSpecVersion } from 'speccy-core';
 
 export type Format = 'pretty' | 'json' | 'markdown';
 export type DiffThreshold = DiffSeverity | 'never';

@@ -1,5 +1,5 @@
 {
-  "name": "@speccy/core",
+  "name": "speccy-core",
   "version": "0.3.0",
   "description": "Headless OpenAPI parsing, analysis, and diffing for Speccy.",
   "repository": {

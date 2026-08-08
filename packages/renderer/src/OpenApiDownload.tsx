@@ -8,7 +8,7 @@
  */
 
 import { stringify as stringifyYaml } from 'yaml';
-import type { OpenAPIDocument } from '@speccy/core';
+import type { OpenAPIDocument } from 'speccy-core';
 
 type DownloadFormat = 'json' | 'yaml';
 

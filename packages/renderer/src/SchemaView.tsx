@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { Markdown } from './Markdown';
-import type { MediaType, SchemaObject } from '@speccy/core';
+import type { MediaType, SchemaObject } from 'speccy-core';
 
 function schemaLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';

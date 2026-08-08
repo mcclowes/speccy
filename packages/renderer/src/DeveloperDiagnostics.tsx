@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import type { ApiDiagnostic, DiagnosticSeverity } from '@speccy/core';
+import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
 

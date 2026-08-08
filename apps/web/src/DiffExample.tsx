@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import { diffSpecs } from '@speccy/core';
+import { diffSpecs } from 'speccy-core';
 import { SpecDiff } from 'speccy-renderer';
 import { LIBRARY_V1, LIBRARY_V2 } from './diffExampleSpecs';
 

@@ -1,9 +1,9 @@
-# @speccy/cli
+# speccy-cli
 
 Lint OpenAPI documents and report breaking changes from the command line, so the same analysis the [Speccy renderer](https://www.npmjs.com/package/speccy-renderer) shows in the browser can run in CI.
 
 ```sh
-npm install --save-dev @speccy/cli
+npm install --save-dev speccy-cli
 ```
 
 ## Commands
@@ -52,7 +52,7 @@ Code 2 is deliberately separate: a spec that will not parse is a different probl
 - uses: actions/checkout@v4
   with:
     fetch-depth: 0
-- run: npx @speccy/cli diff origin/main:openapi.yaml openapi.yaml --format markdown >> "$GITHUB_STEP_SUMMARY"
+- run: npx speccy-cli diff origin/main:openapi.yaml openapi.yaml --format markdown >> "$GITHUB_STEP_SUMMARY"
 ```
 
 `fetch-depth: 0` matters. The default shallow checkout has no `origin/main` to read the base from.

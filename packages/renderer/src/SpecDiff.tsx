@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from '@speccy/core';
+import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from 'speccy-core';
 
 export interface SpecDiffProps {
   report: DiffReport;

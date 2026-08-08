@@ -10,7 +10,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Markdown } from './Markdown';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
-import type { OpenAPIDocument, SecurityScheme } from '@speccy/core';
+import type { OpenAPIDocument, SecurityScheme } from 'speccy-core';
 import { useLocalState } from './useLocalState';
 
 export const REFERENCE_GROUPS = [

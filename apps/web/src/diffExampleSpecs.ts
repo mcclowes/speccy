@@ -6,7 +6,7 @@
  * ---
  */
 
-import type { OpenAPIDocument } from '@speccy/core';
+import type { OpenAPIDocument } from 'speccy-core';
 
 const bookSchema = {
   type: 'object',

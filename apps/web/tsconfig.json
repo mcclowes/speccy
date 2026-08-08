@@ -4,7 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "@speccy/core": ["../../packages/core/src/index.ts"],
+      "speccy-core": ["../../packages/core/src/index.ts"],
       "speccy-renderer": ["../../packages/renderer/src/index.ts"],
       "@speccy/renderer": ["../../packages/renderer/src/index.ts"]
     },

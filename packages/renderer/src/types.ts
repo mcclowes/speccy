@@ -7,7 +7,7 @@
  * ---
  */
 
-import type { OpenAPIDocument, SpectralDiagnosticInput } from '@speccy/core';
+import type { OpenAPIDocument, SpectralDiagnosticInput } from 'speccy-core';
 
 export type SpeccyRoute =
   | { page: 'overview' }

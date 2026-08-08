@@ -8,14 +8,14 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @speccy/core && npm run build -w @speccy/cli && npm run build -w speccy-renderer && npm run build -w docusaurus-plugin-speccy && npm run build -w @speccy/web && npm run build -w @speccy/docusaurus-demo && npm run build -w create-speccy-reference",
+    "build": "npm run build -w speccy-core && npm run build -w speccy-cli && npm run build -w speccy-renderer && npm run build -w docusaurus-plugin-speccy && npm run build -w @speccy/web && npm run build -w @speccy/docusaurus-demo && npm run build -w create-speccy-reference",
     "build:mac": "bash apps/macos/scripts/build-app.sh",
     "dev": "npm run dev -w @speccy/web",
     "storybook": "npm run storybook -w speccy-renderer",
     "build:storybook": "npm run build:storybook -w speccy-renderer",
     "test:visual": "npm run test:visual -w speccy-renderer",
-    "test": "npm run test -w @speccy/core && npm run test -w @speccy/cli && npm run test -w speccy-renderer && npm run test -w docusaurus-plugin-speccy && npm run test -w @speccy/web && npm run test -w create-speccy-reference",
-    "typecheck": "npm run typecheck -w @speccy/core && npm run typecheck -w @speccy/cli && npm run typecheck -w speccy-renderer && npm run typecheck -w docusaurus-plugin-speccy && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo && npm run typecheck -w create-speccy-reference",
+    "test": "npm run test -w speccy-core && npm run test -w speccy-cli && npm run test -w speccy-renderer && npm run test -w docusaurus-plugin-speccy && npm run test -w @speccy/web && npm run test -w create-speccy-reference",
+    "typecheck": "npm run typecheck -w speccy-core && npm run typecheck -w speccy-cli && npm run typecheck -w speccy-renderer && npm run typecheck -w docusaurus-plugin-speccy && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo && npm run typecheck -w create-speccy-reference",
     "check": "npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },

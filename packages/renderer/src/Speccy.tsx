@@ -31,7 +31,7 @@ import {
   type SecurityRequirement,
   type SecurityScheme,
   type TagModel,
-} from '@speccy/core';
+} from 'speccy-core';
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { DeveloperDiagnostics, InlineDiagnostics } from './DeveloperDiagnostics';
 import { EyeIcon } from './EyeIcon';
