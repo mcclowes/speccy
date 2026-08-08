@@ -7,7 +7,7 @@
  * ---
  */
 
-import { HTTP_METHODS, operationsInDeclarationOrder } from './model';
+import { operationsInDeclarationOrder } from './model';
 import type { HttpMethod, OpenAPIDocument, Operation, Parameter, ResponseObject, SchemaObject, SecurityRequirement } from './types';
 
 export type DiagnosticSeverity = 'issue' | 'warning' | 'suggestion';

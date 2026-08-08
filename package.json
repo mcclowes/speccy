@@ -16,10 +16,19 @@
     "test:visual": "npm run test:visual -w speccy-renderer",
     "test": "npm run test -w speccy-renderer && npm run test -w docusaurus-plugin-speccy && npm run test -w @speccy/web && npm run test -w create-speccy-reference",
     "typecheck": "npm run typecheck -w speccy-renderer && npm run typecheck -w docusaurus-plugin-speccy && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo && npm run typecheck -w create-speccy-reference",
-    "check": "npm run typecheck && npm test && npm run build",
+    "lint": "eslint . --max-warnings 0",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.9.0",
+    "typescript-eslint": "^8.66.0"
   }
 }
