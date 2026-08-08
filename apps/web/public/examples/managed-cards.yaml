@@ -28,6 +28,9 @@ components:
       properties:
         mode:
           type: string
+        status:
+          type: string
+          enum: [active, suspended]
       discriminator:
         propertyName: mode
         mapping:
