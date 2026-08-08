@@ -236,8 +236,8 @@ function compareSchemas(
       emit({ ruleId: 'request-field-required', severity: 'breaking', kind: 'added', context, location: fieldLocation, label: fieldLabel, message: `${fieldLabel} is now required.` });
     } else {
       emit(direction === 'request'
-        ? { ruleId: 'request-field-added', severity: 'compatible', kind: 'added', context, location: fieldLocation, label: fieldLabel, message: `${fieldLabel} is now accepted.` }
-        : { ruleId: 'response-field-added', severity: 'compatible', kind: 'added', context, location: fieldLocation, label: fieldLabel, message: `${fieldLabel} is now returned.` });
+        ? { ruleId: 'request-field-added', severity: 'compatible', kind: 'added', context, location: fieldLocation, label: fieldLabel, message: `${fieldLabel} is now accepted.`, after: rightProperties[name] }
+        : { ruleId: 'response-field-added', severity: 'compatible', kind: 'added', context, location: fieldLocation, label: fieldLabel, message: `${fieldLabel} is now returned.`, after: rightProperties[name] });
     }
   }
 

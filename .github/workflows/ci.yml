@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   check:
@@ -40,8 +41,53 @@ jobs:
           npm run build -w speccy-core
           npm run build -w speccy-cli
       - name: Compare Speccy's example API
+        id: diff
         run: |
+          set +e
           node packages/cli/dist/cli.js diff \
             "origin/${{ github.base_ref }}:apps/web/public/examples/managed-cards.yaml" \
             apps/web/public/examples/managed-cards.yaml \
-            --format markdown >> "$GITHUB_STEP_SUMMARY"
+            --format markdown > "$RUNNER_TEMP/speccy-diff.md"
+          exit_code=$?
+          set -e
+          node packages/cli/dist/cli.js lint \
+            apps/web/public/examples/managed-cards.yaml \
+            --format markdown \
+            --fail-on never > "$RUNNER_TEMP/speccy-health.md"
+          node packages/cli/dist/cli.js lint \
+            apps/web/public/examples/managed-cards.yaml \
+            --format json \
+            --fail-on never > "$RUNNER_TEMP/speccy-health.json"
+          tail -n +2 "$RUNNER_TEMP/speccy-health.md" >> "$RUNNER_TEMP/speccy-diff.md"
+          cat "$RUNNER_TEMP/speccy-diff.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+      - name: Publish diff on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT_PATH: ${{ runner.temp }}/speccy-diff.md
+        run: |
+          comment_id=$(gh api \
+            "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            --paginate \
+            --jq '.[] | select(.body | startswith("<!-- speccy-report -->")) | .id' \
+            | head -n 1)
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH \
+              "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              -F "body=@$REPORT_PATH"
+          else
+            gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+              -F "body=@$REPORT_PATH"
+          fi
+      - name: Publish health findings on changed lines
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          SPEC_PATH: apps/web/public/examples/managed-cards.yaml
+          REPORT_PATH: ${{ runner.temp }}/speccy-health.json
+        run: node .github/scripts/publish-speccy-health.mjs
+      - name: Enforce the breaking-change threshold
+        if: steps.diff.outputs.exit_code != '0'
+        run: exit "${{ steps.diff.outputs.exit_code }}"

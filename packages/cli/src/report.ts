@@ -17,6 +17,7 @@ export const COMMENT_MARKER = '<!-- speccy-report -->';
 
 const DIFF_ORDER: DiffSeverity[] = ['breaking', 'warning', 'compatible', 'documentation'];
 const DIFF_LABELS: Record<DiffSeverity, string> = { breaking: 'Breaking', warning: 'Warning', compatible: 'Compatible', documentation: 'Documentation' };
+const AREA_LABELS: Record<string, string> = { operation: 'Operation', parameters: 'Parameters', 'request-body': 'Request body', 'response-body': 'Response body', headers: 'Headers', security: 'Security', documentation: 'Documentation' };
 const LINT_ORDER: DiagnosticSeverity[] = ['issue', 'warning', 'suggestion'];
 const LINT_LABELS: Record<DiagnosticSeverity, string> = { issue: 'Issue', warning: 'Warning', suggestion: 'Suggestion' };
 
@@ -59,6 +60,28 @@ function diffHeadline(report: DiffReport) {
   return `Speccy found ${plural(report.changes.length, 'API change')}`;
 }
 
+function markdownCell(value: string) {
+  return value.replace(/\|/g, '\\|').replace(/\n/g, '<br>');
+}
+
+function operationCell(change: ApiChange) {
+  if (change.method && change.path) {
+    const route = `\`${change.method.toUpperCase()} ${change.path}\``;
+    return change.operationId ? `${route}<br>\`${change.operationId}\`` : route;
+  }
+  const affected = change.affectedOperations ?? [];
+  if (affected.length) return affected.map((item) => {
+    const route = `\`${item.method.toUpperCase()} ${item.path}\``;
+    return item.operationId ? `${route}<br>\`${item.operationId}\`` : route;
+  }).join('<br>');
+  return 'API';
+}
+
+function markdownValue(value: unknown) {
+  const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+  return `\`${String(serialized).replace(/`/g, '\\`')}\``;
+}
+
 function paint(text: string, severity: string, color: boolean) {
   return color && COLORS[severity] ? `${COLORS[severity]}${text}[0m` : text;
 }
@@ -71,17 +94,30 @@ export function formatDiff(report: DiffReport, format: Format, options: FormatOp
   const grouped = DIFF_ORDER.map((severity) => [severity, report.changes.filter((change) => change.severity === severity)] as const).filter(([, changes]) => changes.length > 0);
 
   if (format === 'markdown') {
-    const lines = [COMMENT_MARKER, '', `### ${diffHeadline(report)}`, ''];
+    const breaking = report.changes.some((change) => change.severity === 'breaking');
+    const verdict = breaking ? '❌ API compatibility check failed' : '✅ API compatibility check passed';
+    const allCounts = countBy(report.changes.map((change) => change.severity), DIFF_ORDER);
+    const lines = [COMMENT_MARKER, '', `### ${verdict}`, '', `**${allCounts.map(([severity, count]) => `${count} ${severity}`).join(' · ')}**`, ''];
+    if (report.base.source || report.revision.source) {
+      lines.push(`${report.base.source ? `\`${report.base.source}\`` : 'Base'} → ${report.revision.source ? `\`${report.revision.source}\`` : 'Revision'}`, '');
+    } else {
+      lines.push(`Comparing ${versions}.`, '');
+    }
     if (report.changes.length === 0) {
-      lines.push(`Comparing ${versions} found nothing to report.`, '');
+      lines.push('No API changes found.', '');
       return lines.join('\n');
     }
-    lines.push(`Comparing ${versions}.`, '', counts.map(([severity, count]) => `${DIFF_LABELS[severity]} ${count}`).join(' · '), '');
-    for (const [severity, changes] of grouped) {
-      const body = changes.map((change) => `- ${describe(change, (text) => `**${text}**`)}`);
-      if (severity === 'breaking') lines.push(`#### ${DIFF_LABELS[severity]}`, '', ...body, '');
-      else lines.push('<details>', `<summary>${plural(changes.length, `${DIFF_LABELS[severity].toLowerCase()} change`)}</summary>`, '', ...body, '', '</details>', '');
+    lines.push('| Impact | Operation | Area | Change |', '| --- | --- | --- | --- |');
+    for (const change of report.changes) {
+      lines.push(`| ${DIFF_LABELS[change.severity]} | ${operationCell(change)} | ${AREA_LABELS[change.scope?.area ?? ''] ?? 'API'} | ${markdownCell(change.message)} |`);
     }
+    lines.push('', '<details>', '<summary>Technical details</summary>', '');
+    for (const change of report.changes) {
+      lines.push(`- **${markdownCell(change.message)}**`, `  - OpenAPI location: \`${change.location.join(' › ')}\``);
+      if (change.before !== undefined) lines.push(`  - Before: ${markdownValue(change.before)}`);
+      if (change.after !== undefined) lines.push(`  - After: ${markdownValue(change.after)}`);
+    }
+    lines.push('', '</details>', '', 'Breaking changes fail this check.', '');
     return lines.join('\n');
   }
 
@@ -106,8 +142,8 @@ export function formatLint(diagnostics: ApiDiagnostic[], format: Format, options
 
   if (format === 'markdown') {
     const lines = [COMMENT_MARKER, ''];
-    if (diagnostics.length === 0) return [...lines, '### Speccy: No problems found', ''].join('\n');
-    lines.push(`### Speccy found ${summary}`, '');
+    if (diagnostics.length === 0) return [...lines, '### ✅ API health: No problems found', ''].join('\n');
+    lines.push(`### API health: ${summary}`, '', 'Health findings are advisory and do not fail this check.', '');
     for (const [severity, items] of grouped) {
       const body = items.map((item) => `- \`${item.ruleId}\` **${where(item)}** — ${item.message}${item.suggestion ? ` ${item.suggestion}` : ''}`);
       if (severity === 'issue') lines.push(`#### ${LINT_LABELS[severity]}s`, '', ...body, '');

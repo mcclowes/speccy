@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
-    "prebuild": "npm run build -w speccy-core && npm run build -w speccy-renderer && npm run build -w docusaurus-plugin-speccy",
+    "prebuild": "npm run build -w speccy-core && npm run build -w speccy-spectral && npm run build -w speccy-renderer && npm run build -w docusaurus-plugin-speccy",
     "build": "docusaurus build",
     "typecheck": "tsc --noEmit"
   },
