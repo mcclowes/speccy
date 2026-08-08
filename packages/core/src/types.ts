@@ -205,4 +205,3 @@ export interface SchemaObject extends SpecificationExtensions {
   $ref?: string;
   [key: string]: unknown;
 }
-

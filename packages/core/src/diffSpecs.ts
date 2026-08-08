@@ -76,8 +76,15 @@ function parameterKey(parameter: Parameter) {
   return `${parameter.in ?? 'query'}:${parameter.name ?? ''}`;
 }
 
-function securityNames(requirements: SecurityRequirement[] | undefined): Set<string> {
-  return new Set((requirements ?? []).flatMap((requirement) => Object.keys(requirement)));
+function securityAlternatives(requirements: SecurityRequirement[] | undefined): Set<string>[] {
+  if (!requirements?.length) return [new Set()];
+  return requirements.map((requirement) => new Set(
+    Object.entries(requirement).flatMap(([scheme, scopes]) => [scheme, ...scopes.map((scope) => `${scheme}:${scope}`)]),
+  ));
+}
+
+function includesAlternative(alternatives: Set<string>[], candidate: Set<string>) {
+  return alternatives.some((alternative) => [...alternative].every((item) => candidate.has(item)));
 }
 
 function pathTemplate(path: string) {
@@ -97,8 +104,13 @@ function describeOperation(method: HttpMethod, path: string) {
 }
 
 /** Records which operations reach each reusable schema, so a shared change is reported once. */
-function componentUsage(document: OpenAPIDocument): Map<string, DiffOperation[]> {
-  const usage = new Map<string, DiffOperation[]>();
+interface ComponentUsage {
+  operations: DiffOperation[];
+  directions: Set<Direction>;
+}
+
+function componentUsage(document: OpenAPIDocument): Map<string, ComponentUsage> {
+  const usage = new Map<string, ComponentUsage>();
   const schemas = componentSchemas(document);
 
   const collect = (node: unknown, into: Set<string>, seen: Set<unknown>) => {
@@ -128,12 +140,19 @@ function componentUsage(document: OpenAPIDocument): Map<string, DiffOperation[]>
 
   for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
     for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
-      const names = new Set<string>();
-      collect(operation, names, new Set());
-      for (const name of names) {
-        const operations = usage.get(name) ?? [];
-        operations.push({ method, path, operationId: operation.operationId, tag: operation.tags?.[0] });
-        usage.set(name, operations);
+      const requestNames = new Set<string>();
+      const responseNames = new Set<string>();
+      collect([...parametersFor(pathItem, operation), operation.requestBody], requestNames, new Set());
+      collect(operation.responses, responseNames, new Set());
+      for (const [direction, names] of [['request', requestNames], ['response', responseNames]] as const) {
+        for (const name of names) {
+          const entry = usage.get(name) ?? { operations: [], directions: new Set<Direction>() };
+          if (!entry.operations.some((item) => item.method === method && item.path === path)) {
+            entry.operations.push({ method, path, operationId: operation.operationId, tag: operation.tags?.[0] });
+          }
+          entry.directions.add(direction);
+          usage.set(name, entry);
+        }
       }
     }
   }
@@ -300,6 +319,27 @@ function compareOperation(
     'request', [...location, 'requestBody'], 'The request body', at('request-body'), emit, seen,
   );
 
+  const baseRequestBody = baseOperation.requestBody;
+  const revisionRequestBody = revisionOperation.requestBody;
+  if (!baseRequestBody && revisionRequestBody) {
+    emit({
+      ruleId: revisionRequestBody.required ? 'request-body-required' : 'request-body-added',
+      severity: revisionRequestBody.required ? 'breaking' : 'compatible',
+      kind: 'added', context: at('request-body'), location: [...location, 'requestBody'],
+      message: revisionRequestBody.required ? `${name} now requires a request body.` : `${name} now accepts a request body.`,
+    });
+  } else if (baseRequestBody && !revisionRequestBody) {
+    emit({
+      ruleId: 'request-body-removed', severity: 'breaking', kind: 'removed', context: at('request-body'),
+      location: [...location, 'requestBody'], message: `${name} no longer accepts a request body.`,
+    });
+  } else if (baseRequestBody && revisionRequestBody && !baseRequestBody.required && revisionRequestBody.required) {
+    emit({
+      ruleId: 'request-body-required', severity: 'breaking', kind: 'changed', context: at('request-body'),
+      location: [...location, 'requestBody', 'required'], message: `${name} now requires a request body.`,
+    });
+  }
+
   const baseResponses = baseOperation.responses ?? {};
   const revisionResponses = revisionOperation.responses ?? {};
   for (const [code, response] of Object.entries(baseResponses)) {
@@ -317,15 +357,15 @@ function compareOperation(
     emit({ ruleId: 'response-added', severity: 'compatible', kind: 'added', context: at('response-body'), location: [...location, 'responses', code], label: code, message: `${name} documents a new ${code} response.` });
   }
 
-  const baseSecurity = securityNames(baseOperation.security ?? baseDocument.security);
-  const revisionSecurity = securityNames(revisionOperation.security ?? revisionDocument.security);
-  const addedSchemes = [...revisionSecurity].filter((scheme) => !baseSecurity.has(scheme));
-  const removedSchemes = [...baseSecurity].filter((scheme) => !revisionSecurity.has(scheme));
-  if (addedSchemes.length) {
-    emit({ ruleId: 'security-tightened', severity: 'breaking', kind: 'changed', context: at('security'), location: [...location, 'security'], message: `${name} now requires ${addedSchemes.join(', ')}.` });
+  const baseSecurity = securityAlternatives(baseOperation.security ?? baseDocument.security);
+  const revisionSecurity = securityAlternatives(revisionOperation.security ?? revisionDocument.security);
+  const tightened = baseSecurity.some((alternative) => !includesAlternative(revisionSecurity, alternative));
+  const relaxed = revisionSecurity.some((alternative) => !includesAlternative(baseSecurity, alternative));
+  if (tightened) {
+    emit({ ruleId: 'security-tightened', severity: 'breaking', kind: 'changed', context: at('security'), location: [...location, 'security'], message: `${name} has stricter authentication requirements.` });
   }
-  if (removedSchemes.length) {
-    emit({ ruleId: 'security-relaxed', severity: 'compatible', kind: 'changed', context: at('security'), location: [...location, 'security'], message: `${name} no longer requires ${removedSchemes.join(', ')}.` });
+  if (relaxed) {
+    emit({ ruleId: 'security-relaxed', severity: 'compatible', kind: 'changed', context: at('security'), location: [...location, 'security'], message: `${name} has less restrictive authentication requirements.` });
   }
 }
 
@@ -355,15 +395,18 @@ function compareServers(base: OpenAPIDocument, revision: OpenAPIDocument, emit: 
   }
 }
 
-function compareComponents(base: OpenAPIDocument, revision: OpenAPIDocument, usage: Map<string, DiffOperation[]>, emit: Emit, seen: Set<string>) {
+function compareComponents(base: OpenAPIDocument, revision: OpenAPIDocument, usage: Map<string, ComponentUsage>, emit: Emit, seen: Set<string>) {
   const baseSchemas = componentSchemas(base);
   const revisionSchemas = componentSchemas(revision);
   for (const [name, schema] of Object.entries(baseSchemas)) {
     const next = revisionSchemas[name];
     if (!next) continue;
-    const context: Context = { area: 'response-body', component: name };
-    // Components are compared as responses, the stricter of the two directions.
-    compareSchemas(schema, next, base, revision, 'response', ['components', 'schemas', name], name, context, emit, seen);
+    const directions = usage.get(name)?.directions ?? new Set<Direction>(['response']);
+    for (const direction of directions) {
+      const context: Context = { area: direction === 'request' ? 'request-body' : 'response-body', component: name };
+      compareSchemas(schema, next, base, revision, direction, ['components', 'schemas', name], name, context, emit, new Set());
+    }
+    seen.add(['components', 'schemas', name].join('/'));
   }
 }
 
@@ -411,7 +454,7 @@ export function diffSpecs(base: OpenAPIDocument | string, revision: OpenAPIDocum
       id, severity, kind, message, location,
       method: context.method, path: context.path, operationId: context.operationId, tag: context.tag,
       scope: { area: context.area, ...(label ? { label } : {}) },
-      ...(context.component ? { affectedOperations: usage.get(context.component) ?? [] } : {}),
+      ...(context.component ? { affectedOperations: usage.get(context.component)?.operations ?? [] } : {}),
       ...(before === undefined ? {} : { before }),
       ...(after === undefined ? {} : { after }),
     });

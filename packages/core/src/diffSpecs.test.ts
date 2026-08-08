@@ -125,6 +125,13 @@ describe('diffSpecs', () => {
   });
 
   describe('request bodies', () => {
+    it('flags a newly required request body as breaking', () => {
+      const base = document({ '/loans': { post: operation() } });
+      const revision = document({ '/loans': { post: operation({ requestBody: { ...jsonBody({ type: 'object' }), required: true } }) } });
+
+      expect(find(diffSpecs(base, revision), 'request-body-required')[0]).toMatchObject({ severity: 'breaking' });
+    });
+
     it('flags a newly required request field as breaking', () => {
       const base = document({ '/loans': { post: operation({ requestBody: jsonBody({ type: 'object', properties: { amount: { type: 'integer' } } }) }) } });
       const revision = document({ '/loans': { post: operation({ requestBody: jsonBody({ type: 'object', required: ['amount'], properties: { amount: { type: 'integer' } } }) }) } });
@@ -219,6 +226,22 @@ describe('diffSpecs', () => {
 
       expect(find(diffSpecs(base, revision), 'security-tightened')).toHaveLength(1);
     });
+
+    it('treats an added authentication alternative as relaxed', () => {
+      const base = document({ '/loans': { get: operation({ security: [{ oauth: [] }] }) } });
+      const revision = document({ '/loans': { get: operation({ security: [{ oauth: [] }, { apiKey: [] }] }) } });
+      const report = diffSpecs(base, revision);
+
+      expect(find(report, 'security-relaxed')).toHaveLength(1);
+      expect(find(report, 'security-tightened')).toHaveLength(0);
+    });
+
+    it('flags an added requirement within one alternative as tightened', () => {
+      const base = document({ '/loans': { get: operation({ security: [{ oauth: [] }] }) } });
+      const revision = document({ '/loans': { get: operation({ security: [{ oauth: [], apiKey: [] }] }) } });
+
+      expect(find(diffSpecs(base, revision), 'security-tightened')).toHaveLength(1);
+    });
   });
 
   describe('servers', () => {
@@ -254,6 +277,19 @@ describe('diffSpecs', () => {
       const spec = withErrorSchema({ code: { type: 'string' } });
 
       expect(diffSpecs(spec, spec).changes).toEqual([]);
+    });
+
+    it('uses request compatibility rules for a request-only component', () => {
+      const withInput = (schema: SchemaObject) => document(
+        { '/loans': { post: operation({ requestBody: jsonBody({ $ref: '#/components/schemas/Input' }) }) } },
+        { components: { schemas: { Input: schema } } },
+      );
+      const base = withInput({ type: 'object', properties: {} });
+      const revision = withInput({ type: 'object', required: ['token'], properties: { token: { type: 'string' } } });
+      const report = diffSpecs(base, revision);
+
+      expect(find(report, 'request-field-required')[0]).toMatchObject({ severity: 'breaking' });
+      expect(find(report, 'response-field-added')).toHaveLength(0);
     });
 
     it('compares inline against referenced schemas rather than reporting a false type change', () => {
