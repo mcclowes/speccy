@@ -140,6 +140,15 @@ steps:
 
 Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. The repository remains responsible for generating any spec files before this step.
 
+Generated documents can provide their base and revision artifacts explicitly:
+
+```yaml
+with:
+  specs: |
+    Admin=.speccy/base/_build/admin.yml => _build/admin.yml
+    Multi=.speccy/base/_build/multi.yml => _build/multi.yml
+```
+
 ## Check everything
 
 ```sh

@@ -2,7 +2,7 @@ name: Speccy API review
 description: Review one or more OpenAPI documents and publish the result on a pull request.
 inputs:
   specs:
-    description: Named spec paths, one per line in the form "name=path".
+    description: Named spec paths, one per line as "name=path" or "name=base-path=>revision-path".
     required: true
   version:
     description: The speccy-cli version to run.

@@ -13,7 +13,14 @@ export function parseSpecs(value) {
       if (separator < 1 || separator === line.length - 1) {
         throw new Error(`Invalid spec "${line}". Use name=path.`);
       }
-      return { name: line.slice(0, separator).trim(), path: line.slice(separator + 1).trim() };
+      const name = line.slice(0, separator).trim();
+      const paths = line.slice(separator + 1).split('=>').map((path) => path.trim());
+      if (paths.length > 2 || paths.some((path) => !path)) {
+        throw new Error(`Invalid spec "${line}". Use name=path or name=base-path=>revision-path.`);
+      }
+      return paths.length === 1
+        ? { name, revisionPath: paths[0] }
+        : { name, basePath: paths[0], revisionPath: paths[1] };
     });
   if (specs.length === 0) throw new Error('At least one spec is required.');
   return specs;
@@ -76,11 +83,11 @@ export async function review({ specs, version, baseRef, failOn, healthFailOn }) 
   let exitCode = 0;
   for (const spec of specs) {
     const diff = runCli(
-      ['diff', `${baseRef}:${spec.path}`, spec.path, '--format', 'markdown', '--fail-on', failOn],
+      ['diff', spec.basePath ?? `${baseRef}:${spec.revisionPath}`, spec.revisionPath, '--format', 'markdown', '--fail-on', failOn],
       version,
     );
     const health = runCli(
-      ['lint', spec.path, '--format', 'markdown', '--fail-on', healthFailOn],
+      ['lint', spec.revisionPath, '--format', 'markdown', '--fail-on', healthFailOn],
       version,
     );
     exitCode = Math.max(exitCode, diff.status, health.status);
