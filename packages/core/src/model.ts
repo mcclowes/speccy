@@ -16,6 +16,7 @@ import type {
   Parameter,
   PathItem,
   ResponseObject,
+  ServerVariableObject,
 } from './types';
 
 export const HTTP_METHODS: HttpMethod[] = [
@@ -79,6 +80,16 @@ export function parseSpec(input: OpenAPIDocument | string): OpenAPIDocument {
     throw new Error('The OpenAPI document must be an object.');
   }
   return parsed as OpenAPIDocument;
+}
+
+export function expandServerUrl(
+  url: string,
+  variables?: Record<string, ServerVariableObject>,
+): string {
+  return url.replace(/\{([^{}]+)\}/g, (placeholder, name: string) => {
+    const value = variables?.[name]?.default;
+    return value === undefined ? placeholder : value;
+  });
 }
 
 /**

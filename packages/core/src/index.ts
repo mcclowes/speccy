@@ -6,6 +6,7 @@ export { bundleFragmentedSpec } from './fragmentedSpec';
 export {
   HTTP_METHODS,
   createReferenceModel,
+  expandServerUrl,
   normalizeDocument,
   operationsInDeclarationOrder,
   parseSpec,
@@ -42,6 +43,7 @@ export type {
 } from './oasdiff';
 export type {
   CallbackObject,
+  ExternalDocumentationObject,
   ExampleObject,
   HeaderObject,
   HttpMethod,
@@ -56,4 +58,6 @@ export type {
   SchemaObject,
   SecurityRequirement,
   SecurityScheme,
+  ServerObject,
+  ServerVariableObject,
 } from './types';

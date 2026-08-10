@@ -18,15 +18,18 @@ export interface SpecificationExtensions {
 export interface OpenAPIDocument {
   openapi?: string;
   swagger?: string;
+  jsonSchemaDialect?: string;
   info?: {
     title?: string;
+    summary?: string;
     version?: string;
     description?: string;
     termsOfService?: string;
     contact?: { name?: string; url?: string; email?: string };
-    license?: { name?: string; url?: string };
+    license?: { name?: string; identifier?: string; url?: string };
   };
-  servers?: Array<{ url?: string; description?: string }>;
+  servers?: ServerObject[];
+  externalDocs?: ExternalDocumentationObject;
   host?: string;
   basePath?: string;
   schemes?: string[];
@@ -58,6 +61,23 @@ export interface OpenAPIDocument {
     securitySchemes?: Record<string, SecurityScheme>;
   };
   [key: string]: unknown;
+}
+
+export interface ExternalDocumentationObject extends SpecificationExtensions {
+  description?: string;
+  url?: string;
+}
+
+export interface ServerVariableObject extends SpecificationExtensions {
+  default?: string;
+  enum?: string[];
+  description?: string;
+}
+
+export interface ServerObject extends SpecificationExtensions {
+  url?: string;
+  description?: string;
+  variables?: Record<string, ServerVariableObject>;
 }
 
 export interface PathItem extends Partial<Record<HttpMethod, Operation>> {

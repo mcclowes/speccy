@@ -20,6 +20,7 @@ import {
 import {
   analyzeOpenApi,
   createReferenceModel,
+  expandServerUrl,
   operationsInDeclarationOrder,
   parseSpec,
   slugify,
@@ -1238,7 +1239,32 @@ export function Speccy({
                 </span>
               </div>
               <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
+              <Markdown>{model.document.info?.summary}</Markdown>
               <Markdown>{model.document.info?.description}</Markdown>
+              {model.document.info?.license && (
+                <p>
+                  License:{' '}
+                  {model.document.info.license.url ? (
+                    <a href={model.document.info.license.url}>
+                      {model.document.info.license.identifier ??
+                        model.document.info.license.name}
+                    </a>
+                  ) : (
+                    <span>
+                      {model.document.info.license.identifier ??
+                        model.document.info.license.name}
+                    </span>
+                  )}
+                </p>
+              )}
+              {model.document.externalDocs?.url && (
+                <p>
+                  <a href={model.document.externalDocs.url}>
+                    {model.document.externalDocs.description ??
+                      'External documentation'}
+                  </a>
+                </p>
+              )}
               <InlineDiagnostics
                 diagnostics={overviewDiagnostics}
                 onViewAll={viewAllDiagnostics}
@@ -1248,13 +1274,29 @@ export function Speccy({
               <OpenApiDownload document={result.document ?? model.document} />
               {model.document.servers?.map(
                 (item, index) =>
-                  item.url && (
-                    <div className="sp-server" key={`${item.url}-${index}`}>
-                      <span>{item.description ?? 'Base URL'}</span>
-                      <code>{item.url}</code>
-                      <CopyButton value={item.url} />
-                    </div>
-                  ),
+                  item.url &&
+                  (() => {
+                    const expandedUrl = expandServerUrl(
+                      item.url,
+                      item.variables,
+                    );
+                    return (
+                      <div className="sp-server" key={`${item.url}-${index}`}>
+                        <span>{item.description ?? 'Base URL'}</span>
+                        <code>{expandedUrl}</code>
+                        <CopyButton value={expandedUrl} />
+                        {Object.entries(item.variables ?? {}).map(
+                          ([name, variable]) => (
+                            <small key={name}>
+                              <code>{name}</code>
+                              {variable.description &&
+                                `: ${variable.description}`}
+                            </small>
+                          ),
+                        )}
+                      </div>
+                    );
+                  })(),
               )}
               <SecurityRequirements
                 requirements={model.document.security}
