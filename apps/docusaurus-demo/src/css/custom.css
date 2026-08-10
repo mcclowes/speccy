@@ -16,6 +16,7 @@
   --site-muted: #6f6f79;
   --site-line: #e8e7ec;
   --site-paper: #fbfaf8;
+  --site-success: #2f9b73;
 }
 
 [data-theme='dark'] {
@@ -280,7 +281,7 @@ body {
 }
 .preview-link b {
   margin-left: auto;
-  color: #2f9b73;
+  color: var(--site-success);
   font-size: 7px;
 }
 .preview-link.is-active {
@@ -314,7 +315,7 @@ body {
   padding: 5px 7px;
   color: white;
   border-radius: 4px;
-  background: #2f9b73;
+  background: var(--site-success);
   font-size: 7px;
 }
 .preview-path code {
@@ -368,9 +369,9 @@ body {
 }
 .preview-response b {
   padding: 4px 7px;
-  color: #2f9b73;
+  color: var(--site-success);
   border-radius: 5px;
-  background: color-mix(in srgb, #2f9b73 10%, transparent);
+  background: color-mix(in srgb, var(--site-success) 10%, transparent);
   font-size: 8px;
 }
 .preview-response i {
@@ -378,7 +379,7 @@ body {
   height: 5px;
   margin-left: auto;
   border-radius: 50%;
-  background: #2f9b73;
+  background: var(--site-success);
 }
 
 .home-section {
