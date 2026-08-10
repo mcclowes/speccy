@@ -438,7 +438,7 @@ describe('Speccy navigation', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows response descriptions in the spec browser without extra status context', () => {
+  it('shows the response spec browser without extra response context', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(
       <Speccy
@@ -463,13 +463,14 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    expect(screen.getByText('OK')).toBeInTheDocument();
+    expect(screen.queryByText('OK')).toBeNull();
     expect(document.querySelector('.sp-response-summary')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: '412' }));
-    const description = screen.getByText(
-      'The company data has changed since it was last read.',
-    );
-    expect(description.closest('.sp-endpoint-response-detail')).not.toBeNull();
+    expect(
+      screen.queryByText(
+        'The company data has changed since it was last read.',
+      ),
+    ).toBeNull();
     expect(screen.queryByText('Precondition Failed')).toBeNull();
   });
 
@@ -1617,7 +1618,7 @@ describe('Speccy navigation', () => {
       'aria-selected',
       'true',
     );
-    expect(screen.getByText('Company missing')).toBeInTheDocument();
+    expect(screen.queryByText('Company missing')).toBeNull();
     expect(screen.getAllByText(/"missing"/)).toHaveLength(1);
   });
 

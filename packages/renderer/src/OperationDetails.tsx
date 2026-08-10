@@ -709,7 +709,7 @@ function EndpointResponseBody({ response }: { response: ResponseObject }) {
       <div className="sp-response-content">
         <div className="sp-endpoint-response-detail" role="tabpanel">
           <ResponseDetails
-            response={response}
+            response={{ ...response, description: undefined }}
             collapseObjects
             showExamples={false}
             exampleValue={activeExample?.value}
