@@ -27,3 +27,4 @@ cp "Info.plist" "$APP_ROOT/Contents/Info.plist"
 test -f "$APP_ROOT/$RESOURCE_BUNDLE/Web/index.html"
 
 echo "Built $APP_ROOT"
+open "$APP_ROOT"
