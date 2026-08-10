@@ -144,11 +144,26 @@ describe('SpecDiff', () => {
       />,
     );
 
-    fireEvent.click(screen.getByText('Added optional query parameter status'));
+    const disclosure = screen.getByLabelText(
+      'Expand Added optional query parameter status',
+    );
+    fireEvent.click(disclosure);
     expect(screen.getByText('After')).toBeInTheDocument();
+    expect(disclosure).toHaveAccessibleName(
+      'Collapse Added optional query parameter status',
+    );
     expect(
       screen.getAllByRole('link', { name: 'View operation' })[0],
     ).toHaveAttribute('href', '/reference/get-company');
+  });
+
+  it('omits an empty operation header for general changes', () => {
+    const { container } = render(<SpecDiff report={report} />);
+    const generalChange = container.querySelector('#edit-description');
+
+    expect(generalChange?.closest('.sp-diff-operation')).not.toContainHTML(
+      'sp-diff-operation-heading',
+    );
   });
 
   it('renders severity, anchors, source locations, and a configurable heading level', () => {

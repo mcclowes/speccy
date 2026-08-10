@@ -310,6 +310,7 @@ function ChangeDetails({
     >
       <details open={expanded}>
         <summary
+          aria-label={`${expanded ? 'Collapse' : 'Expand'} ${change.message}`}
           onClick={(event) => {
             event.preventDefault();
             onExpandedChange(!expanded);
@@ -330,6 +331,11 @@ function ChangeDetails({
             )}
           </span>
           <span className="sp-diff-message">{change.message}</span>
+          <span className="sp-diff-disclosure" aria-hidden="true">
+            <svg viewBox="0 0 16 16" focusable="false">
+              <path d="m5.5 3.5 4.5 4.5-4.5 4.5" />
+            </svg>
+          </span>
         </summary>
         <div className="sp-diff-change-body">
           <div className="sp-diff-change-meta">
@@ -407,15 +413,17 @@ function OperationChanges({
 
   return (
     <article className={`sp-diff-operation sp-diff-operation-${severity}`}>
-      <header className="sp-diff-operation-heading">
-        <div>
-          {first.method && <MethodBadge method={first.method.toLowerCase()} />}
-          {first.path && <code className="sp-diff-path">{first.path}</code>}
-        </div>
-        <span>
-          {changes.length} {changes.length === 1 ? 'change' : 'changes'}
-        </span>
-      </header>
+      {isOperation && (
+        <header className="sp-diff-operation-heading">
+          <div>
+            <MethodBadge method={first.method!.toLowerCase()} />
+            <code className="sp-diff-path">{first.path}</code>
+          </div>
+          <span>
+            {changes.length} {changes.length === 1 ? 'change' : 'changes'}
+          </span>
+        </header>
+      )}
       {isOperation && !wholeOperation && (
         <div className="sp-diff-impact" aria-label="Operation impact">
           {OPERATION_AREAS.map(({ value, label }) => {
@@ -614,13 +622,18 @@ export function SpecDiff({
           </label>
           <button
             type="button"
+            disabled={visibleChanges.length === 0}
             onClick={() =>
               setExpandedIds(new Set(visibleChanges.map(({ id }) => id)))
             }
           >
             Expand all
           </button>
-          <button type="button" onClick={() => setExpandedIds(new Set())}>
+          <button
+            type="button"
+            disabled={expandedIds.size === 0}
+            onClick={() => setExpandedIds(new Set())}
+          >
             Collapse all
           </button>
         </div>

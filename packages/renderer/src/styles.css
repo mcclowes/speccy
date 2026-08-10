@@ -988,14 +988,15 @@ related:
   --sp-diff-breaking: #d24859;
   --sp-diff-warning: #c98722;
   --sp-diff-compatible: #168f6a;
-  padding: clamp(24px, 4vw, 56px);
+  min-height: 100%;
+  padding: clamp(24px, 4vw, 64px);
 }
 .sp-diff-hero {
-  max-width: 1200px;
+  max-width: 1360px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 48px;
-  align-items: end;
+  align-items: center;
   margin: 0 auto;
   padding-bottom: 42px;
   border-bottom: 1px solid var(--sp-line);
@@ -1018,8 +1019,8 @@ related:
   background: var(--sp-surface);
 }
 .sp-diff-summary > div {
-  min-width: 82px;
-  padding: 15px 16px;
+  min-width: 104px;
+  padding: 18px 20px;
   border-right: 1px solid var(--sp-line);
 }
 .sp-diff-summary > div:last-child {
@@ -1030,7 +1031,7 @@ related:
   display: block;
 }
 .sp-diff-summary strong {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.1;
 }
 .sp-diff-summary span {
@@ -1050,7 +1051,7 @@ related:
   color: var(--sp-diff-compatible);
 }
 .sp-diff-toolbar {
-  max-width: 1200px;
+  max-width: 1360px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -1090,7 +1091,7 @@ related:
   border-color: color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line));
 }
 .sp-diff-groups {
-  max-width: 1200px;
+  max-width: 1360px;
   display: grid;
   gap: 36px;
   margin: 38px auto 0;
@@ -1109,7 +1110,8 @@ related:
   background: var(--sp-surface);
   border: 1px solid var(--sp-line);
   border-left-width: 3px;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--sp-text) 3%, transparent);
 }
 .sp-diff-operation-breaking {
   border-left-color: var(--sp-diff-breaking);
@@ -1193,7 +1195,9 @@ related:
 .sp-diff-change-detail {
   --sp-change-color: var(--sp-muted);
   border-bottom: 1px solid var(--sp-line);
-  border-left: 3px solid var(--sp-change-color);
+}
+.sp-diff-change-detail:last-child {
+  border-bottom: 0;
 }
 .sp-diff-change-breaking {
   --sp-change-color: var(--sp-diff-breaking);
@@ -1205,6 +1209,10 @@ related:
   --sp-change-color: var(--sp-diff-compatible);
 }
 .sp-diff-change-detail summary {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  column-gap: 16px;
   list-style: none;
   cursor: pointer;
   transition: background-color 120ms ease;
@@ -1223,6 +1231,33 @@ related:
   align-items: center;
   gap: 9px;
   min-width: 0;
+}
+.sp-diff-change-heading,
+.sp-diff-message {
+  grid-column: 1;
+}
+.sp-diff-disclosure {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--sp-muted);
+  transition:
+    color 120ms ease,
+    transform 120ms ease;
+}
+.sp-diff-disclosure svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+.sp-diff-change-detail details[open] .sp-diff-disclosure {
+  color: var(--sp-text);
+  transform: rotate(90deg);
 }
 .sp-diff-kind,
 .sp-diff-severity {
@@ -1366,6 +1401,14 @@ related:
 .sp-diff-tools button {
   cursor: pointer;
 }
+.sp-diff-tools button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--sp-accent) 35%, var(--sp-line));
+  background: var(--sp-surface-soft);
+}
+.sp-diff-tools button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
 .sp-diff-search input {
   width: min(220px, 42vw);
 }
@@ -1449,6 +1492,18 @@ related:
   .sp-diff-toolbar {
     display: grid;
   }
+  .sp-diff-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+  }
+  .sp-diff-tools label:first-child,
+  .sp-diff-tools :is(select, input) {
+    width: 100%;
+  }
+  .sp-diff-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
   .sp-diff-impact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1460,6 +1515,33 @@ related:
   }
   .sp-diff-impact > div:last-child {
     border-bottom: 0;
+  }
+}
+@media (max-width: 520px) {
+  .sp-diff {
+    padding-inline: 16px;
+  }
+  .sp-diff-summary > div {
+    min-width: 0;
+    padding: 14px;
+  }
+  .sp-diff-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .sp-diff-filters button {
+    flex: none;
+  }
+  .sp-diff-operation-heading,
+  .sp-diff-change-detail summary {
+    padding-inline: 14px;
+  }
+  .sp-diff-change-heading {
+    flex-wrap: wrap;
+  }
+  .sp-diff-scope-detail {
+    flex-basis: 100%;
   }
 }
 
