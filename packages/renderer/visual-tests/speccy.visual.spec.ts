@@ -86,3 +86,33 @@ test('long response example expands on its initial render', async ({
     })
     .toBe(true);
 });
+
+test('long server details stay contained at every responsive size', async ({
+  page,
+}) => {
+  for (const width of [320, 390, 600, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(
+      '/iframe.html?id=renderer-speccy--long-server-details&viewMode=story',
+    );
+
+    const server = page.locator('.sp-server');
+    const url = server.locator('code');
+    const copy = server.getByRole('button', { name: 'Copy' });
+    await expect(server).toBeVisible();
+    await expect(url).toHaveCSS('white-space', 'nowrap');
+
+    const [serverBox, urlBox, copyBox] = await Promise.all([
+      server.boundingBox(),
+      url.boundingBox(),
+      copy.boundingBox(),
+    ]);
+    expect(serverBox).not.toBeNull();
+    expect(urlBox).not.toBeNull();
+    expect(copyBox).not.toBeNull();
+    expect(urlBox!.x).toBeGreaterThanOrEqual(serverBox!.x);
+    expect(copyBox!.x + copyBox!.width).toBeLessThanOrEqual(
+      serverBox!.x + serverBox!.width,
+    );
+  }
+});

@@ -750,7 +750,8 @@ related:
   width: 100%;
   max-width: 100%;
   padding: 8px 9px 8px 12px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   border: 1px solid var(--sp-line);
@@ -758,6 +759,7 @@ related:
   background: var(--sp-surface);
 }
 .sp-server > span {
+  min-width: 0;
   color: var(--sp-muted);
   font-size: 10px;
   font-weight: 700;
@@ -765,15 +767,16 @@ related:
   letter-spacing: 0.08em;
 }
 .sp-server code {
+  min-width: 0;
   overflow: hidden;
   color: var(--sp-text);
   font-size: 11px;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 .sp-server .sp-copy {
   width: 30px;
   height: 30px;
-  margin-left: auto;
   padding: 0;
   justify-content: center;
   gap: 0;
@@ -4122,10 +4125,6 @@ related:
   }
   .sp-endpoint-parameter {
     padding: 17px;
-  }
-  .sp-server {
-    align-items: flex-start;
-    flex-wrap: wrap;
   }
   .sp-inline-diagnostics {
     right: 12px;

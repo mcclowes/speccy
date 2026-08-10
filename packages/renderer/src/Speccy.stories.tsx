@@ -164,6 +164,22 @@ export const OverviewLight: Story = {
   },
 };
 
+export const LongServerDetails: Story = {
+  args: {
+    spec: {
+      ...exampleSpec,
+      servers: [
+        {
+          url: 'https://sandbox.weavr.io/multi/with/an/especially/long/base/path',
+          description: 'Weavr sandbox environment',
+        },
+      ],
+    },
+    theme: 'light',
+    route: { page: 'overview' },
+  },
+};
+
 export const EndpointLight: Story = {
   args: {
     theme: 'light',
