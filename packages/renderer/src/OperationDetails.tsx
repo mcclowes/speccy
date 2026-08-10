@@ -475,32 +475,46 @@ function responseExamples(
 function schemaExample(
   schema: SchemaObject,
   mode: 'request' | 'response' = 'response',
+  requiredOnly = false,
 ): unknown {
-  if (schema.example !== undefined) return schema.example;
-  if (schema.default !== undefined) return schema.default;
-  if (schema.enum?.length) return schema.enum[0];
+  const isObject = schema.type === 'object' || Boolean(schema.properties);
+  if (schema.example !== undefined && (!requiredOnly || !isObject))
+    return schema.example;
+  if (schema.default !== undefined && (!requiredOnly || !isObject))
+    return schema.default;
+  if (schema.enum?.length && (!requiredOnly || !isObject))
+    return schema.enum[0];
   if (schema.allOf?.length) {
     return Object.assign(
       {},
       ...schema.allOf
-        .map((member) => schemaExample(member, mode))
+        .map((member) => schemaExample(member, mode, requiredOnly))
         .filter(
           (value) =>
             value && typeof value === 'object' && !Array.isArray(value),
         ),
     );
   }
-  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0], mode);
-  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0], mode);
+  if (schema.oneOf?.[0])
+    return schemaExample(schema.oneOf[0], mode, requiredOnly);
+  if (schema.anyOf?.[0])
+    return schemaExample(schema.anyOf[0], mode, requiredOnly);
   if (schema.type === 'array' || schema.items)
-    return schema.items ? [schemaExample(schema.items, mode)] : [];
-  if (schema.type === 'object' || schema.properties) {
+    return schema.items
+      ? [schemaExample(schema.items, mode, requiredOnly)]
+      : [];
+  if (isObject) {
+    const requiredProperties = new Set(schema.required ?? []);
     return Object.fromEntries(
       Object.entries(schema.properties ?? {})
         .filter(([, property]) =>
           mode === 'request' ? !property.readOnly : !property.writeOnly,
         )
-        .map(([name, property]) => [name, schemaExample(property, mode)]),
+        .filter(([name]) => !requiredOnly || requiredProperties.has(name))
+        .map(([name, property]) => [
+          name,
+          schemaExample(property, mode, requiredOnly),
+        ]),
     );
   }
   if (schema.type === 'integer' || schema.type === 'number') return 0;
@@ -511,11 +525,16 @@ function schemaExample(
   return 'string';
 }
 
-function requestBodyValue(
+function requiredRequestBodyValue(
   contentType: string | undefined,
   media: MediaType | undefined,
 ): string {
-  return formatRequestBodyValue(requestBodyExampleValue(contentType, media));
+  const value = media?.schema
+    ? schemaExample(media.schema, 'request', true)
+    : contentType === 'application/json'
+      ? {}
+      : undefined;
+  return formatRequestBodyValue(value);
 }
 
 function requestBodyExampleValue(
@@ -546,6 +565,32 @@ function requestBodyExamples(media: MediaType | undefined) {
       ? []
       : [{ label: example.summary ?? name, value: example.value }],
   );
+}
+
+function requestBuilderBodyExamples(
+  contentType: string | undefined,
+  media: MediaType | undefined,
+) {
+  const examples: { label: string; value: unknown }[] = [];
+  if (media?.example !== undefined)
+    examples.push({ label: 'Example', value: media.example });
+  examples.push(...requestBodyExamples(media));
+  if (media?.schema)
+    examples.push({
+      label: 'Generated example',
+      value: schemaExample(media.schema, 'request'),
+    });
+  return [
+    {
+      label: 'Required fields',
+      value: media?.schema
+        ? schemaExample(media.schema, 'request', true)
+        : contentType === 'application/json'
+          ? {}
+          : undefined,
+    },
+    ...examples,
+  ];
 }
 
 function ResponseExamplePanel({
@@ -953,10 +998,13 @@ export function RequestRail({
   const optionalPickerRef = useRef<HTMLDivElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
-  const bodyExamples = requestBodyExamples(bodyMedia?.[1]);
+  const bodyExamples = requestBuilderBodyExamples(
+    bodyMedia?.[0],
+    bodyMedia?.[1],
+  );
   const [activeBodyExample, setActiveBodyExample] = useState(0);
   const [body, setBody] = useState(() =>
-    requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
+    requiredRequestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
   );
   const [result, setResult] = useState<{
     status?: number;

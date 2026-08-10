@@ -1108,7 +1108,7 @@ describe('Speccy navigation', () => {
       'https://api.example.com/companies',
       expect.objectContaining({
         method: 'POST',
-        body: '{\n  "name": "Acme"\n}',
+        body: '{}',
         headers: {
           'X-Trace-ID': 'trace-1',
           'Content-Type': 'application/json',
@@ -1139,8 +1139,16 @@ describe('Speccy navigation', () => {
                           id: { type: 'string', readOnly: true },
                           name: { type: 'string', example: 'Acme' },
                           active: { type: 'boolean', default: false },
-                          tags: { type: 'array', items: { type: 'string' } },
+                          profile: {
+                            type: 'object',
+                            required: ['email'],
+                            properties: {
+                              email: { type: 'string' },
+                              phone: { type: 'string' },
+                            },
+                          },
                         },
+                        required: ['name', 'profile'],
                       },
                     },
                   },
@@ -1163,14 +1171,29 @@ describe('Speccy navigation', () => {
       JSON.stringify(
         {
           name: 'Acme',
-          active: false,
-          tags: ['string'],
+          profile: { email: 'string' },
         },
         null,
         2,
       ),
     );
     expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
+
+    const exampleSelect = within(
+      screen.getByRole('complementary', { name: 'Request builder' }),
+    ).getByRole('combobox', { name: 'Request builder body example' });
+    fireEvent.change(exampleSelect, { target: { value: '1' } });
+    expect(requestBody).toHaveValue(
+      JSON.stringify(
+        {
+          name: 'Acme',
+          active: false,
+          profile: { email: 'string', phone: 'string' },
+        },
+        null,
+        2,
+      ),
+    );
   });
 
   it('shows the request example beside its schema', () => {
@@ -1350,9 +1373,9 @@ describe('Speccy navigation', () => {
     const exampleSelect = within(
       screen.getByRole('complementary', { name: 'Request builder' }),
     ).getByRole('combobox', { name: 'Request builder body example' });
-    expect(input).toHaveValue('{\n  "name": "Acme"\n}');
+    expect(input).toHaveValue('{}');
 
-    fireEvent.change(exampleSelect, { target: { value: '1' } });
+    fireEvent.change(exampleSelect, { target: { value: '2' } });
 
     expect(input).toHaveValue('{\n  "name": "Technicallium"\n}');
   });
