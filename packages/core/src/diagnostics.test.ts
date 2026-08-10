@@ -161,4 +161,46 @@ describe('OpenAPI diagnostics', () => {
       ),
     ).toBe(false);
   });
+
+  it('names missing-description diagnostics for referenced parameters', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Companies', version: '1' },
+      paths: {
+        '/companies': {
+          get: {
+            parameters: [
+              { $ref: '#/components/parameters/page' },
+              { $ref: '#/components/parameters/pageSize' },
+            ],
+          },
+        },
+      },
+      components: {
+        parameters: {
+          page: { name: 'page', in: 'query', schema: { type: 'integer' } },
+          pageSize: {
+            name: 'pageSize',
+            in: 'query',
+            schema: { type: 'integer' },
+          },
+        },
+      },
+    };
+
+    const diagnostics = analyzeOpenApi(document).filter(
+      (diagnostic) => diagnostic.ruleId === 'parameter-description',
+    );
+
+    expect(diagnostics).toEqual([
+      expect.objectContaining({
+        message: 'page has no description.',
+        path: ['paths', '/companies', 'get', 'parameters', 0],
+      }),
+      expect.objectContaining({
+        message: 'pageSize has no description.',
+        path: ['paths', '/companies', 'get', 'parameters', 1],
+      }),
+    ]);
+  });
 });

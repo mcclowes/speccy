@@ -8,7 +8,7 @@
  */
 
 import { diffSpecs } from './diffSpecs';
-import { operationsInDeclarationOrder } from './model';
+import { operationsInDeclarationOrder, resolveRefs } from './model';
 import type {
   HttpMethod,
   OpenAPIDocument,
@@ -419,6 +419,7 @@ export function analyzeOpenApi(
     spectral?: SpectralDiagnosticInput[];
   } = {},
 ): ApiDiagnostic[] {
+  const resolvedDocument = resolveRefs(document);
   const diagnostics: ApiDiagnostic[] = [];
   const add: AddDiagnostic = (diagnostic) => {
     const source = diagnostic.source ?? 'speccy';
@@ -594,9 +595,11 @@ export function analyzeOpenApi(
           path: [...operationPath, 'description'],
           ...context,
         });
+      const resolvedPathItem = resolvedDocument.paths?.[path];
+      const resolvedOperation = resolvedPathItem?.[method];
       const parameters = [
-        ...(pathItem.parameters ?? []),
-        ...(operation.parameters ?? []),
+        ...(resolvedPathItem?.parameters ?? pathItem.parameters ?? []),
+        ...(resolvedOperation?.parameters ?? operation.parameters ?? []),
       ];
       parameters.forEach((parameter, index) =>
         inspectParameter(
