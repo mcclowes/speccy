@@ -9,7 +9,9 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 import { Markdown } from './Markdown';
-import { JsonValue, MediaContent, SchemaView } from './SchemaView';
+import { DisclosureChevron } from './DesignSystem';
+import { ParameterDetails, RequestBodyDetails, ResponseDetails } from './ResourceDetails';
+import { JsonValue, SchemaView } from './SchemaView';
 import type { OpenAPIDocument, SecurityScheme } from 'speccy-core';
 import { useLocalState } from './useLocalState';
 
@@ -38,7 +40,7 @@ export function ReferenceNavigation({ document, activeKey, hrefFor, onNavigate, 
   return <div className="sp-nav-group sp-reference-nav">
     <button type="button" className="sp-nav-tag" onClick={() => setOpen(!open)} aria-expanded={open}>
       <span>Reference</span>
-      <span className="sp-nav-chevron" aria-hidden="true" />
+      <DisclosureChevron />
     </button>
     {open && <div>
       {available.map(([key, label]) => <a className={`sp-nav-operation ${activeKey === key ? 'is-active' : ''}`} aria-current={activeKey === key ? 'page' : undefined} href={hrefFor(key)} onClick={(event) => { event.preventDefault(); onNavigate(key); }} key={key}>{label}</a>)}
@@ -123,9 +125,9 @@ export function DocumentReference({ document, activeKey }: {
   };
   return <>
     {activeKey === 'schemas' && renderCards('schemas', components.schemas, (_name, schema) => <SchemaView schema={schema} />)}
-    {activeKey === 'parameters' && renderCards('parameters', components.parameters, (name, parameter) => <><div className="sp-schema-head"><code>{parameter.name ?? name}</code><span>{parameter.in}</span>{parameter.required && <span className="sp-required" title="Required">*</span>}</div><Markdown>{parameter.description}</Markdown><SchemaView schema={parameter.schema} />{parameter.example !== undefined && <JsonValue value={parameter.example} />}</>)}
-    {activeKey === 'requestBodies' && renderCards('requestBodies', components.requestBodies, (_name, body) => <><Markdown>{body.description}</Markdown><MediaContent content={body.content} /></>)}
-    {activeKey === 'responses' && renderCards('responses', components.responses, (_name, response) => <><Markdown>{response.description}</Markdown><MediaContent content={response.content} /></>)}
+    {activeKey === 'parameters' && renderCards('parameters', components.parameters, (name, parameter) => <ParameterDetails parameter={parameter} fallbackName={name} />)}
+    {activeKey === 'requestBodies' && renderCards('requestBodies', components.requestBodies, (_name, body) => <RequestBodyDetails body={body} />)}
+    {activeKey === 'responses' && renderCards('responses', components.responses, (_name, response) => <ResponseDetails response={response} />)}
     {activeKey === 'headers' && renderCards('headers', components.headers, (_name, header) => <><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></>)}
     {activeKey === 'examples' && renderCards('examples', components.examples, (_name, example) => <><Markdown>{example.description}</Markdown><JsonValue value={example.value ?? example.externalValue} /></>)}
     {activeKey === 'links' && renderCards('links', components.links, (_name, link) => <><Markdown>{link.description}</Markdown><p>Operation: <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code></p>{entries(link.parameters).map(([parameter, value]) => <div key={parameter}><code>{parameter}</code>: <code>{JSON.stringify(value)}</code></div>)}</>)}

@@ -25,68 +25,39 @@ import {
   slugify,
   type OpenAPIDocument,
   type OperationModel,
-  type Parameter,
   type ResponseObject,
   type TagModel,
 } from 'speccy-core';
 import { CopyButton } from './CodeBlock';
+import { ApiPath, DisclosureChevron, httpMethodLabel, MethodBadge, RequiredMark } from './DesignSystem';
 import { DeveloperDiagnostics, InlineDiagnostics } from './DeveloperDiagnostics';
 import { Markdown } from './Markdown';
 import { OpenApiDownload } from './OpenApiDownload';
 import { CodeSample, EndpointResponses, GroupedParameterList, RequestRail, SecurityRequirements } from './OperationDetails';
 import { QuickSearch, type SearchResult } from './QuickSearch';
 import { componentAnchorId, DocumentReference, ReferenceNavigation, REFERENCE_GROUPS, type ReferenceKey } from './ReferenceSections';
+import { ParameterDetails, RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 import { parseRoutePath, routePath } from './routing';
-import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 import type { SpeccyProps, SpeccyRoute } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';
-import { WebhookIcon } from './WebhookIcon';
-
-const METHOD_LABELS: Record<string, string> = {
-  get: 'GET', post: 'POST', put: 'PUT', patch: 'PATCH', delete: 'DELETE',
-  options: 'OPTIONS', head: 'HEAD', trace: 'TRACE',
-};
 
 function operationTitle(item: OperationModel): string {
   return item.operation.summary ?? item.operation.operationId ?? (item.source === 'webhook' ? item.path : 'Untitled operation');
 }
 
 function OperationBadge({ item, compact = false }: { item: OperationModel; compact?: boolean }) {
-  if (item.source === 'webhook') {
-    return <span className={compact ? 'sp-nav-method sp-webhook' : 'sp-method sp-webhook'} title="Webhook"><WebhookIcon /><span className="sp-visually-hidden">Webhook</span></span>;
-  }
-  return <span className={compact ? `sp-nav-method sp-nav-method-${item.method}` : `sp-method sp-method-${item.method}`}>{METHOD_LABELS[item.method]}</span>;
+  return <MethodBadge method={item.method} compact={compact} webhook={item.source === 'webhook'} />;
 }
 
-function Path({ value, className }: { value: string; className?: string }) {
-  const parts = value.split(/(\{[^{}]+\})/g);
-  return (
-    <code className={className}>
-      {parts.map((part, index) => part.startsWith('{') && part.endsWith('}')
-        ? <span className="sp-path-parameter" key={`${part}-${index}`}>{part}</span>
-        : part)}
-    </code>
-  );
-}
-
-function ParameterList({ parameters }: { parameters: Parameter[] }) {
+function ParameterList({ parameters }: { parameters: NonNullable<OperationModel['operation']['parameters']> }) {
   if (parameters.length === 0) return null;
   return (
     <section className="sp-section">
       <h4>Parameters</h4>
       <div className="sp-parameter-list">
         {parameters.map((parameter, index) => (
-          <div className="sp-parameter" key={`${parameter.in}-${parameter.name}-${index}`}>
-            <div className="sp-parameter-name">
-              <code>{parameter.name ?? 'unnamed'}</code>
-              <span>{parameter.in ?? 'query'}</span>
-              {parameter.required && <span className="sp-required" title="Required">*</span>}
-            </div>
-            <Markdown>{parameter.description}</Markdown>
-            <SchemaView schema={parameter.schema} />
-            {parameter.example !== undefined && <JsonValue value={parameter.example} />}
-          </div>
+          <ParameterDetails parameter={parameter} density="compact" key={`${parameter.in}-${parameter.name}-${index}`} />
         ))}
       </div>
     </section>
@@ -98,9 +69,8 @@ function RequestBodyView({ operation }: { operation: OperationModel['operation']
   if (!body) return null;
   return (
     <section className="sp-section">
-      <h4>Request body {body.required && <span className="sp-required" title="Required">*</span>}</h4>
-      <Markdown>{body.description}</Markdown>
-      <MediaContent content={body.content} />
+      <h4>Request body {body.required && <RequiredMark />}</h4>
+      <RequestBodyDetails body={body} density="compact" />
     </section>
   );
 }
@@ -112,14 +82,11 @@ function ResponseView({ code, response }: { code: string; response: ResponseObje
       <button type="button" className="sp-response-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className={`sp-status ${code.startsWith('2') ? 'is-success' : ''}`}>{code}</span>
         <span>Response</span>
-        <span className="sp-chevron" aria-hidden="true" />
+        <DisclosureChevron />
       </button>
       {open && (
         <div className="sp-response-body">
-          <Markdown>{response.description}</Markdown>
-          {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
-          <MediaContent content={response.content} collapseObjects />
-          {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
+          <ResponseDetails response={response} density="compact" collapseObjects />
         </div>
       )}
     </div>
@@ -139,7 +106,7 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
           onClick={(event) => { event.preventDefault(); onNavigateTag(tag); }}
         >{item.tag}</a>
         <h1>{operationTitle(item)}</h1>
-        <div className="sp-endpoint-address"><OperationBadge item={item} /><Path value={item.path} /></div>
+        <div className="sp-endpoint-address"><OperationBadge item={item} /><ApiPath value={item.path} /></div>
         <Markdown>{item.operation.description}</Markdown>
         {showInlineHints && <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.operationId === item.id)} onHide={onHideInlineHints} />}
       </header>
@@ -156,7 +123,7 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
             )}
           </section>}
           <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
-          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <span className="sp-required" title="Required">*</span>}</h2><Markdown>{item.operation.requestBody.description}</Markdown><MediaContent content={item.operation.requestBody.content} collapseObjects={isWebhook} /></section>}
+          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <RequiredMark />}</h2><RequestBodyDetails body={item.operation.requestBody} collapseObjects={isWebhook} /></section>}
         </div>
         {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototype={parameterPrototype} />}
       </div>
@@ -177,10 +144,10 @@ function OperationCard({ item, server, defaultExpanded }: {
     <article id={item.id} className={`sp-operation sp-method-${item.method}`}>
       <button type="button" className="sp-operation-summary" onClick={() => setOpen(!open)} aria-expanded={open}>
         <OperationBadge item={item} />
-        <code className="sp-path">{item.path}</code>
+        <ApiPath value={item.path} />
         <span className="sp-operation-name">{operationTitle(item)}</span>
         {item.operation.deprecated && <span className="sp-deprecated">deprecated</span>}
-        <span className="sp-chevron" aria-hidden="true" />
+        <DisclosureChevron />
       </button>
       {open && (
         <div className="sp-operation-body">
@@ -302,7 +269,7 @@ function NavigationGroup({
         aria-controls={operationListId}
       >
         <span className="sp-tag-label"><TagIcon tag={tag} />{tag.name}</span>
-        <span className="sp-nav-chevron" aria-hidden="true" />
+        <DisclosureChevron />
       </button>
       {expanded && (
         <div id={operationListId}>
@@ -362,7 +329,7 @@ function OperationLink({ item, onNavigate, hrefForRoute }: {
       <span className="sp-operation-link-summary">{operationTitle(item)}</span>
       <span className="sp-operation-link-address">
         <OperationBadge item={item} />
-        <Path className="sp-path" value={item.path} />
+        <ApiPath value={item.path} />
       </span>
     </a>
   );
@@ -575,7 +542,7 @@ export function Speccy({
     ...[...model.operations, ...model.webhooks].map((item) => ({
       id: `operation-${item.id}`, group: 'Endpoints' as const,
       label: item.operation.summary ?? item.operation.operationId ?? item.path,
-      detail: item.source === 'webhook' ? item.path : `${METHOD_LABELS[item.method]} ${item.path}`,
+      detail: item.source === 'webhook' ? item.path : `${httpMethodLabel(item.method)} ${item.path}`,
       webhook: item.source === 'webhook',
       terms: [item.path, item.method, item.operation.summary ?? '', item.operation.operationId ?? '', item.tag],
       navigate: () => navigate(item.id),

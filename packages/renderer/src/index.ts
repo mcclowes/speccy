@@ -1,6 +1,9 @@
 export { Speccy } from './Speccy';
 export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
+export { ApiPath, DisclosureChevron, httpMethodLabel, MethodBadge, RequiredMark, VisuallyHidden } from './DesignSystem';
+export { ParameterDetails, RequestBodyDetails, ResponseDetails } from './ResourceDetails';
+export type { ResourceDensity } from './ResourceDetails';
 export { parseRoutePath, routePath } from './routing';
 export type { RoutePathOptions } from './routing';
 export {

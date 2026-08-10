@@ -9,6 +9,7 @@
 
 import { useMemo, useState } from 'react';
 import type { ApiChange, DiffArea, DiffKind, DiffReport, DiffSeverity, DiffSourceLocation, DiffSpecVersion } from 'speccy-core';
+import { MethodBadge } from './DesignSystem';
 
 export interface SpecDiffProps {
   report: DiffReport;
@@ -200,7 +201,7 @@ function ChangeDetails({ change, href, expanded, onExpandedChange }: {
           {change.affectedOperations && change.affectedOperations.length > 0 && (
             <div className="sp-diff-affected-operations">
               <strong>Affects {change.affectedOperations.length} {change.affectedOperations.length === 1 ? 'operation' : 'operations'}</strong>
-              <ul>{change.affectedOperations.map((operation) => <li key={`${operation.method}:${operation.path}`}><span className={`sp-method sp-method-${operation.method}`}>{operation.method}</span> <code>{operation.path}</code></li>)}</ul>
+              <ul>{change.affectedOperations.map((operation) => <li key={`${operation.method}:${operation.path}`}><MethodBadge method={operation.method.toLowerCase()} /> <code>{operation.path}</code></li>)}</ul>
             </div>
           )}
           {expanded && <ChangeValues before={change.before} after={change.after} />}
@@ -225,7 +226,7 @@ function OperationChanges({ changes, hrefForChange, expandedIds, onExpandedChang
     <article className={`sp-diff-operation sp-diff-operation-${severity}`}>
       <header className="sp-diff-operation-heading">
         <div>
-          {first.method && <span className={`sp-method sp-method-${first.method}`}>{first.method}</span>}
+          {first.method && <MethodBadge method={first.method.toLowerCase()} />}
           {first.path && <code className="sp-diff-path">{first.path}</code>}
         </div>
         <span>{changes.length} {changes.length === 1 ? 'change' : 'changes'}</span>

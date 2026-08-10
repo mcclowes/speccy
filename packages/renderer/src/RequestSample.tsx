@@ -10,6 +10,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { useLocalState } from './useLocalState';
+import { DisclosureChevron } from './DesignSystem';
 
 export type RequestSampleLanguage = 'curl' | 'javascript' | 'node' | 'python' | 'java' | 'csharp' | 'php' | 'go';
 
@@ -99,7 +100,7 @@ export function RequestSample({ request, copyRequest = request, storageKey, clas
   };
   const title = (
     <details className="sp-sample-language" ref={languageMenuRef}>
-      <summary role="button" aria-label="Code sample language" aria-haspopup="listbox"><LanguageIcon language={selected.value} /><span>{selected.label}</span><span className="sp-sample-chevron" /></summary>
+      <summary role="button" aria-label="Code sample language" aria-haspopup="listbox"><LanguageIcon language={selected.value} /><span>{selected.label}</span><DisclosureChevron /></summary>
       <div className="sp-sample-language-menu" role="listbox" aria-label="Code sample language">
         {LANGUAGES.map((item) => <button type="button" role="option" aria-selected={item.value === selected.value} onClick={(event) => chooseLanguage(item.value, event.currentTarget)} key={item.value}><LanguageIcon language={item.value} /><span>{item.label}</span>{item.value === selected.value && <span className="sp-sample-check">✓</span>}</button>)}
       </div>

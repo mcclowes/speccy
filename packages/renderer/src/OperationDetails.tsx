@@ -18,17 +18,13 @@ import {
   type SecurityScheme,
 } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
+import { DisclosureChevron, HTTP_METHOD_LABELS, httpMethodLabel } from './DesignSystem';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { RequestSample } from './RequestSample';
-import { JsonValue, MediaContent, SchemaView } from './SchemaView';
+import { ParameterDetails, ResponseDetails } from './ResourceDetails';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
-
-const METHOD_LABELS: Record<string, string> = {
-  get: 'GET', post: 'POST', put: 'PUT', patch: 'PATCH', delete: 'DELETE',
-  options: 'OPTIONS', head: 'HEAD', trace: 'TRACE',
-};
 
 const HTTP_STATUS_PHRASES: Record<string, string> = {
   100: 'Continue', 101: 'Switching Protocols', 102: 'Processing', 103: 'Early Hints', 104: 'Upload Resumption Supported',
@@ -87,7 +83,7 @@ export function SecurityRequirements({ requirements, schemes }: {
 export function CodeSample({ item, server }: { item: OperationModel; server: string }) {
   const url = `${server.replace(/\/$/, '')}${item.path}`;
   const contentType = firstMedia(item.operation.requestBody?.content)?.[0];
-  const request = { method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url, headers: contentType ? [`Content-Type: ${contentType}`] : [] };
+  const request = { method: httpMethodLabel(item.method), url, headers: contentType ? [`Content-Type: ${contentType}`] : [] };
   return (
     <aside className="sp-code-panel">
       <RequestSample request={request} storageKey="speccy:request-language" />
@@ -107,15 +103,7 @@ const MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS = 3;
 
 function ParameterCard({ location, parameter, index }: { location: string; parameter: Parameter; index: number }) {
   return <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
-    <div className="sp-parameter-name">
-      <code>{parameter.name ?? 'unnamed'}</code>
-      <SchemaView schema={parameter.schema} showExample={false} summaryOnly />
-      {parameter.required && <span className="sp-required" title="Required">*</span>}
-    </div>
-    <Markdown>{parameter.description}</Markdown>
-    {(parameter.example !== undefined || parameter.schema?.example !== undefined) && (
-      <JsonValue value={parameter.example !== undefined ? parameter.example : parameter.schema?.example} />
-    )}
+    <ParameterDetails parameter={parameter} summaryOnly />
   </div>;
 }
 
@@ -138,7 +126,7 @@ function ParameterGroup({ location, items, parameterPrototype = false }: { locat
         {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && <div className="sp-optional-parameter-docs">
           <button type="button" className="sp-optional-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
             <span><strong>Optional {location} parameters</strong><small>Pagination, filtering, sorting, and related data</small></span>
-            <span>{optionalItems.length}<i className="sp-chevron" aria-hidden="true" /></span>
+            <span>{optionalItems.length}<DisclosureChevron /></span>
           </button>
           {expanded && <div className="sp-endpoint-parameters">{optionalItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
         </div>}
@@ -248,9 +236,7 @@ function EndpointResponseBody({ code, response }: { code: string; response: Resp
         {showDescription && <Markdown>{response.description}</Markdown>}
       </div>
       <div className="sp-endpoint-response-detail" role="tabpanel">
-        {response.headers && <div className="sp-detail-list"><strong>Headers</strong>{Object.entries(response.headers).map(([name, header]) => <div key={name}><code>{name}</code><Markdown>{header.description}</Markdown><SchemaView schema={header.schema} /></div>)}</div>}
-        <MediaContent content={response.content} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
-        {response.links && <div className="sp-detail-list"><strong>Links</strong>{Object.entries(response.links).map(([name, link]) => <div key={name}><code>{name}</code><Markdown>{link.description}</Markdown><span>{link.operationId ?? link.operationRef}</span></div>)}</div>}
+        <ResponseDetails response={{ ...response, description: undefined }} collapseObjects showExamples={false} exampleValue={activeExample?.value} />
       </div>
     </div>
     <ResponseExamplePanel examples={examples} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
@@ -425,7 +411,7 @@ export function RequestRail({
     setResult(undefined);
     try {
       const response = await fetch(requestUrl, {
-        method: METHOD_LABELS[item.method],
+        method: HTTP_METHOD_LABELS[item.method],
         headers: Object.fromEntries(headers.map((header) => {
           const separator = header.indexOf(':');
           return [header.slice(0, separator), header.slice(separator + 1).trim()];
@@ -491,8 +477,8 @@ export function RequestRail({
       <RequestSample
         className="sp-rail-code"
         storageKey="speccy:request-language"
-        request={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: maskedRequestUrl, headers: maskedHeaders, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
-        copyRequest={{ method: METHOD_LABELS[item.method] ?? item.method.toUpperCase(), url: requestUrl, headers, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
+        request={{ method: httpMethodLabel(item.method), url: maskedRequestUrl, headers: maskedHeaders, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
+        copyRequest={{ method: httpMethodLabel(item.method), url: requestUrl, headers, body: body && item.method !== 'get' && item.method !== 'head' ? body : undefined }}
       />
       <button type="button" className="sp-execute" disabled={executing} onClick={() => void executeRequest()}><SendIcon /> <span>{executing ? 'Sending…' : 'Send request'}</span></button>
       {result && (

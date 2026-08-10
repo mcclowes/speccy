@@ -107,7 +107,7 @@ describe('endpoint parameter layout', () => {
     }} basePath="/api" />);
 
     const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter');
-    const metadata = parameter?.querySelector<HTMLElement>('.sp-parameter-name');
+    const metadata = parameter?.querySelector<HTMLElement>('.sp-resource-heading');
     const example = screen.getByText('company-123').closest<HTMLElement>('.sp-example');
 
     expect(example).toBeInTheDocument();
