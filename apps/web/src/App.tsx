@@ -32,27 +32,12 @@ import {
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 
 declare global {
-  interface DiscoveredRepository {
-    name: string;
-    path: string;
-    documentCount: number;
-  }
-
   interface Window {
     speccyLoadSpec?: (source: string, name?: string) => void;
     speccyLoadSpecBundle?: (
       sources: Record<string, string>,
       entrypoint: string,
     ) => void;
-    speccySetDiscoveredRepositories?: (
-      repositories: DiscoveredRepository[],
-    ) => void;
-    speccyDiscoveredRepositories?: DiscoveredRepository[];
-    webkit?: {
-      messageHandlers?: {
-        speccyOpenRepository?: { postMessage(path: string): void };
-      };
-    };
   }
 }
 
@@ -129,9 +114,6 @@ export function App() {
   const [activeId, setActiveId] = useState('');
   const [recents, setRecents] =
     useState<RecentReference[]>(readRecentReferences);
-  const [discoveredRepositories, setDiscoveredRepositories] = useState<
-    DiscoveredRepository[]
-  >([]);
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const [urlOpen, setUrlOpen] = useState(false);
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
@@ -217,16 +199,6 @@ export function App() {
       restoreLocation();
     }
     return () => window.removeEventListener('popstate', restoreLocation);
-  }, []);
-
-  useEffect(() => {
-    window.speccySetDiscoveredRepositories = setDiscoveredRepositories;
-    if (window.speccyDiscoveredRepositories) {
-      setDiscoveredRepositories(window.speccyDiscoveredRepositories);
-    }
-    return () => {
-      delete window.speccySetDiscoveredRepositories;
-    };
   }, []);
 
   useEffect(() => {
@@ -627,55 +599,6 @@ export function App() {
               </button>
             </div>
           </section>
-          {discoveredRepositories.length > 0 && (
-            <section
-              className="studio-recents"
-              aria-labelledby="discovered-heading"
-            >
-              <div className="studio-section-heading">
-                <div>
-                  <span className="studio-eyebrow">Found on this Mac</span>
-                  <h2 id="discovered-heading">OpenAPI repositories</h2>
-                </div>
-                <span>
-                  {discoveredRepositories.length}{' '}
-                  {discoveredRepositories.length === 1
-                    ? 'repository'
-                    : 'repositories'}
-                </span>
-              </div>
-              <div className="studio-recent-grid">
-                {discoveredRepositories.map((repository) => (
-                  <button
-                    className="studio-recent-card"
-                    type="button"
-                    key={repository.path}
-                    onClick={() =>
-                      window.webkit?.messageHandlers?.speccyOpenRepository?.postMessage(
-                        repository.path,
-                      )
-                    }
-                  >
-                    <span className="studio-recent-icon">
-                      <Mark />
-                    </span>
-                    <span className="studio-recent-name">
-                      {repository.name}
-                    </span>
-                    <span className="studio-recent-meta">
-                      {repository.documentCount}{' '}
-                      {repository.documentCount === 1
-                        ? 'OpenAPI document'
-                        : 'OpenAPI documents'}
-                    </span>
-                    <span className="studio-recent-arrow" aria-hidden="true">
-                      ↗
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
           <section className="studio-recents" aria-labelledby="recent-heading">
             <div className="studio-section-heading">
               <div>
