@@ -1801,6 +1801,7 @@ related:
   align-self: start;
 }
 .sp-response-example .sp-code-title > span:first-child,
+.sp-request-body-example .sp-code-title > span:first-child,
 .sp-named-example .sp-code-title > span:first-child {
   display: flex;
   min-width: 0;
@@ -1818,7 +1819,7 @@ related:
   font: inherit;
   cursor: pointer;
 }
-.sp-response-example .sp-example-select {
+:is(.sp-response-example, .sp-request-body-example) .sp-example-select {
   background: var(--sp-bg);
 }
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section {
@@ -3720,7 +3721,7 @@ related:
   }
 }
 
-.sp-response-example pre {
+:is(.sp-response-example, .sp-request-body-example) pre {
   max-height: none;
 }
 
