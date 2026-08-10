@@ -516,9 +516,9 @@ related:
 .sp-code-block { min-width: 0; color: var(--sp-code-text); background: var(--sp-code); font-size: 10px; }
 .sp-code-block pre { overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
 .sp-code-block pre.sp-code-numbered { counter-reset: sp-line; padding-left: 10px; white-space: pre; }
-.sp-code-numbered .sp-code-line { position: relative; display: block; padding-left: 2.1em; }
+.sp-code-numbered .sp-code-line { position: relative; display: block; padding-left: 2.8em; }
 .sp-code-numbered .sp-code-line::before { content: counter(sp-line); counter-increment: sp-line; position: absolute; top: 0; left: 0; width: 1.7em; color: var(--sp-muted); text-align: right; user-select: none; }
-.sp-code-fold { display: inline-flex; width: 1em; margin: 0 0.15em 0 0; padding: 0; color: var(--sp-muted); background: transparent; border: 0; cursor: pointer; font: inherit; line-height: inherit; user-select: none; }
+.sp-code-fold { position: absolute; top: 0; left: 1.8em; width: 0.9em; padding: 0; color: var(--sp-muted); background: transparent; border: 0; cursor: pointer; font: inherit; line-height: inherit; text-align: center; user-select: none; }
 .sp-code-fold:hover { color: var(--sp-text); }
 .sp-code-fold-summary { padding: 0 0.3em; color: var(--sp-muted); font-style: italic; }
 .sp-json-key { color: var(--sp-json-key); }
