@@ -1,7 +1,10 @@
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 
 const globalStyles = await readFile('src/styles.css', 'utf8');
-const moduleStyles = await readFile('dist/index.css', 'utf8');
+const moduleStyles = (await readFile('dist/index.css', 'utf8')).replace(
+  /\n?\/\*# sourceMappingURL=.*?\*\/\s*$/,
+  '',
+);
 
 await writeFile(
   'dist/styles.css',
