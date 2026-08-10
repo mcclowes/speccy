@@ -36,7 +36,7 @@ body { overflow: hidden; background: #fbfbfd; }
 .studio-url label { color: var(--studio-muted); font-size: 10px; font-weight: 700; }
 .studio-url input { flex: 1; max-width: 620px; padding: 9px 11px; color: var(--studio-text); border: 1px solid var(--studio-line); border-radius: 7px; outline: none; background: color-mix(in srgb, var(--studio-bg) 70%, transparent); font: 11px 'DM Mono', monospace; }
 .studio-message { color: #ce4b5d; font-size: 10px; }
-.studio-workspace { min-height: 0; flex: 1; }
+.studio-workspace { min-height: 0; flex: 1; margin-top: 58px; }
 .studio-preview { min-width: 0; height: 100%; overflow-y: auto; background: #fbfbfd; scrollbar-color: var(--studio-muted) transparent; scrollbar-width: thin; }
 .studio-preview::-webkit-scrollbar { width: 10px; }
 .studio-preview::-webkit-scrollbar-track { background: transparent; }
