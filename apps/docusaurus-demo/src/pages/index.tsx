@@ -2,6 +2,15 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import styles from './index.module.css';
+
+function scoped(className: string) {
+  return className
+    .split(' ')
+    .flatMap((name) => (name ? [name, styles[name]] : []))
+    .filter(Boolean)
+    .join(' ');
+}
 
 const installCommand = 'npm install speccy-renderer';
 
@@ -15,9 +24,9 @@ export default function Home() {
       description="Speccy turns an OpenAPI document into clean, searchable reference documentation for React and Docusaurus."
     >
       <main>
-        <section className="home-hero">
-          <div className="home-hero-copy">
-            <span className="home-kicker">
+        <section className={scoped('home-hero')}>
+          <div className={scoped('home-hero-copy')}>
+            <span className={scoped('home-kicker')}>
               <i />
               OpenAPI, clearly presented
             </span>
@@ -31,27 +40,30 @@ export default function Home() {
               reference. Drop it into React, publish it with Docusaurus, or use
               the standalone studio.
             </p>
-            <div className="home-actions">
+            <div className={scoped('home-actions')}>
               <Link
-                className="home-button home-button-primary"
+                className={scoped('home-button home-button-primary')}
                 to="/docs/getting-started"
               >
                 Get started <span>→</span>
               </Link>
               {studioUrl ? (
                 <a
-                  className="home-button home-button-secondary"
+                  className={scoped('home-button home-button-secondary')}
                   href={studioUrl}
                 >
                   Open studio
                 </a>
               ) : (
-                <Link className="home-button home-button-secondary" to="/api">
+                <Link
+                  className={scoped('home-button home-button-secondary')}
+                  to="/api"
+                >
                   View live example
                 </Link>
               )}
             </div>
-            <div className="home-install">
+            <div className={scoped('home-install')}>
               <span>$</span>
               <code>{installCommand}</code>
             </div>
@@ -59,9 +71,9 @@ export default function Home() {
           <ReferencePreview />
         </section>
 
-        <section className="home-section home-intro">
+        <section className={scoped('home-section home-intro')}>
           <div>
-            <span className="home-section-number">01</span>
+            <span className={scoped('home-section-number')}>01</span>
             <h2>Your spec is already the source of truth.</h2>
           </div>
           <p>
@@ -71,7 +83,7 @@ export default function Home() {
           </p>
         </section>
 
-        <section className="home-features home-section">
+        <section className={scoped('home-features home-section')}>
           <Feature
             number="02"
             title="Built for readers"
@@ -89,15 +101,15 @@ export default function Home() {
           />
         </section>
 
-        <section className="home-section home-ways">
-          <div className="home-ways-heading">
-            <span className="home-kicker">
+        <section className={scoped('home-section home-ways')}>
+          <div className={scoped('home-ways-heading')}>
+            <span className={scoped('home-kicker')}>
               <i />
               Choose your surface
             </span>
             <h2>Start where your docs live.</h2>
           </div>
-          <div className="home-way-grid">
+          <div className={scoped('home-way-grid')}>
             <Way
               eyebrow="React"
               title="Own the whole page"
@@ -119,21 +131,21 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="home-cta">
-          <span className="home-kicker">
+        <section className={scoped('home-cta')}>
+          <span className={scoped('home-kicker')}>
             <i />
             Your API, less noisy
           </span>
           <h2>Give the contract some air.</h2>
-          <div className="home-actions">
+          <div className={scoped('home-actions')}>
             <Link
-              className="home-button home-button-primary"
+              className={scoped('home-button home-button-primary')}
               to="/docs/getting-started"
             >
               Read the docs <span>→</span>
             </Link>
             <a
-              className="home-button home-button-secondary"
+              className={scoped('home-button home-button-secondary')}
               href="https://github.com/mcclowes/speccy"
             >
               View on GitHub
@@ -155,9 +167,9 @@ function Feature({
   text: string;
 }) {
   return (
-    <article className="home-feature">
+    <article className={scoped('home-feature')}>
       <span>{number}</span>
-      <div className="home-feature-mark" />
+      <div className={scoped('home-feature-mark')} />
       <h3>{title}</h3>
       <p>{text}</p>
     </article>
@@ -176,7 +188,7 @@ function Way({
   href: string;
 }) {
   return (
-    <Link className="home-way" to={href}>
+    <Link className={scoped('home-way')} to={href}>
       <span>{eyebrow}</span>
       <h3>{title}</h3>
       <p>{text}</p>
@@ -189,9 +201,12 @@ function Way({
 
 function ReferencePreview() {
   return (
-    <div className="preview-shell" aria-label="Speccy API reference preview">
-      <aside className="preview-sidebar">
-        <div className="preview-brand">
+    <div
+      className={scoped('preview-shell')}
+      aria-label="Speccy API reference preview"
+    >
+      <aside className={scoped('preview-sidebar')}>
+        <div className={scoped('preview-brand')}>
           <span>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" />
@@ -202,34 +217,34 @@ function ReferencePreview() {
           Speccy Books
         </div>
         <small>Resources</small>
-        <div className="preview-tag is-active">
+        <div className={scoped('preview-tag is-active')}>
           <span>▱</span>Books <i>⌄</i>
         </div>
-        <div className="preview-link is-active">
+        <div className={scoped('preview-link is-active')}>
           List books <b>GET</b>
         </div>
-        <div className="preview-link">
+        <div className={scoped('preview-link')}>
           Add a book <b>POST</b>
         </div>
-        <div className="preview-tag">
+        <div className={scoped('preview-tag')}>
           <span>≡</span>Reading lists <i>›</i>
         </div>
       </aside>
-      <div className="preview-content">
-        <span className="preview-eyebrow">Books</span>
+      <div className={scoped('preview-content')}>
+        <span className={scoped('preview-eyebrow')}>Books</span>
         <h2>List books</h2>
-        <div className="preview-path">
+        <div className={scoped('preview-path')}>
           <b>GET</b>
           <code>/books</code>
         </div>
         <p>Returns the books currently available in the catalog.</p>
         <h3>Parameters</h3>
-        <div className="preview-parameter">
+        <div className={scoped('preview-parameter')}>
           <code>limit</code>
           <span>integer</span>
           <small>Maximum books to return</small>
         </div>
-        <div className="preview-response">
+        <div className={scoped('preview-response')}>
           <span>Responses</span>
           <b>200</b>
           <i />
