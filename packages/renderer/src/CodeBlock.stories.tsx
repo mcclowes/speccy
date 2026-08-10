@@ -18,7 +18,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const JSON: Story = {};
+export const JSONValue: Story = {};
 
 export const WithTitleAndLineNumbers: Story = {
   args: { title: 'Response', lineNumbers: true },

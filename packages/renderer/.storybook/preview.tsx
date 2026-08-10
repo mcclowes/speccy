@@ -4,7 +4,7 @@ import '../src/styles.css';
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="speccy sp-theme-light" style={{ minHeight: '100vh' }}>
         <Story />
       </div>
     ),
