@@ -2649,6 +2649,38 @@ related:
   color: var(--sp-muted);
   font-size: 11px;
 }
+.sp-markdown:is(
+    .sp-schema-description,
+    .sp-schema-explorer-root-description,
+    .sp-schema-explorer-description
+  )
+  h1 {
+  font-size: 2em;
+}
+.sp-markdown:is(
+    .sp-schema-description,
+    .sp-schema-explorer-root-description,
+    .sp-schema-explorer-description
+  )
+  h2 {
+  font-size: 1.5em;
+}
+.sp-markdown:is(
+    .sp-schema-description,
+    .sp-schema-explorer-root-description,
+    .sp-schema-explorer-description
+  )
+  h3 {
+  font-size: 1.25em;
+}
+.sp-markdown:is(
+    .sp-schema-description,
+    .sp-schema-explorer-root-description,
+    .sp-schema-explorer-description
+  )
+  :is(h4, h5, h6) {
+  font-size: 1em;
+}
 .sp-schema-explorer-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
