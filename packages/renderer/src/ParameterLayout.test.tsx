@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
@@ -18,7 +18,10 @@ describe('endpoint parameter layout', () => {
     }} basePath="/api" />);
 
     const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
-    expect(within(documentation).getByRole('heading', { name: 'Query parameters 8' })).toBeInTheDocument();
+    const requestHeading = container.querySelector<HTMLElement>('.sp-request-heading')!;
+    expect(within(requestHeading).getByRole('heading', { level: 2, name: 'Request' })).toBeInTheDocument();
+    expect(requestHeading.nextElementSibling).toHaveClass('sp-endpoint-layout');
+    expect(within(documentation).getByRole('heading', { level: 3, name: 'Query parameters' })).toBeInTheDocument();
     expect(within(documentation).getByText('filter5')).toBeInTheDocument();
     expect(within(documentation).queryByText('filter6')).not.toBeInTheDocument();
 
@@ -64,7 +67,7 @@ describe('endpoint parameter layout', () => {
     const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
     expect(within(documentation).getByText('cursor')).toBeInTheDocument();
     expect(within(documentation).getByText('limit')).toBeInTheDocument();
-    expect(within(documentation).queryByRole('button', { name: /Optional query parameters/ })).not.toBeInTheDocument();
+    expect(within(documentation).queryByRole('button', { name: /Pagination, filtering, sorting, and related data/ })).not.toBeInTheDocument();
   });
 
   it('keeps three optional parameters collapsed', () => {
@@ -81,7 +84,7 @@ describe('endpoint parameter layout', () => {
     }} basePath="/api" parameterPrototype />);
 
     const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
-    expect(within(documentation).getByRole('button', { name: /Optional query parameters/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(within(documentation).getByRole('button', { name: /Pagination, filtering, sorting, and related data/ })).toHaveAttribute('aria-expanded', 'false');
     expect(within(documentation).queryByText('filter1')).not.toBeInTheDocument();
   });
 

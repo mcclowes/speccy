@@ -118,14 +118,14 @@ function ParameterGroup({ location, items, parameterPrototype = false }: { locat
   if (parameterPrototype) {
     return (
       <section className="sp-endpoint-section sp-parameter-prototype">
-        <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
+        <h3>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h3>
         {requiredItems.length > 0 && <div className="sp-endpoint-parameters">{requiredItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
         {optionalItems.length > 0 && optionalItems.length < MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
           <div className="sp-endpoint-parameters">{optionalItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>
         )}
         {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && <div className="sp-optional-parameter-docs">
           <button type="button" className="sp-optional-parameter-summary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
-            <span><strong>Optional {location} parameters</strong><small>Pagination, filtering, sorting, and related data</small></span>
+            <span><strong>Pagination, filtering, sorting, and related data</strong><small>Optional {location} parameters</small></span>
             <span>{optionalItems.length}<DisclosureChevron /></span>
           </button>
           {expanded && <div className="sp-endpoint-parameters">{optionalItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}</div>}
@@ -136,7 +136,7 @@ function ParameterGroup({ location, items, parameterPrototype = false }: { locat
 
   return (
     <section className="sp-endpoint-section">
-      <h2>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'} <span className="sp-section-count">{items.length}</span></h2>
+      <h3>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h3>
       <div className="sp-endpoint-parameters">
         {visibleItems.map((parameter, index) => <ParameterCard location={location} parameter={parameter} index={index} key={`${location}-${parameter.name}-${index}`} />)}
         {collapsible && (

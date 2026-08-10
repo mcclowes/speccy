@@ -110,10 +110,10 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
         <Markdown>{item.operation.description}</Markdown>
         {showInlineHints && <InlineDiagnostics diagnostics={diagnostics.filter((diagnostic) => diagnostic.operationId === item.id)} onHide={onHideInlineHints} />}
       </header>
+      {!isWebhook && <div className="sp-request-heading"><h2>Request</h2></div>}
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
-          {!isWebhook && <section className="sp-endpoint-section sp-request-intro">
-            <h2>Request</h2>
+          {!isWebhook && <div className="sp-endpoint-section sp-request-intro">
             <SecurityRequirements requirements={requirements} schemes={document.components?.securitySchemes} />
             {parameters.length === 0 && !item.operation.requestBody && (
               <div className="sp-request-empty">
@@ -121,9 +121,12 @@ function EndpointPage({ item, tag, server, document, storageScope, parameterProt
                 <span>This endpoint doesn’t accept query parameters or a request body.</span>
               </div>
             )}
-          </section>}
+          </div>}
           <GroupedParameterList parameters={parameters} parameterPrototype={parameterPrototype} />
-          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body"><h2>{isWebhook ? 'Payload' : 'Request body'} {item.operation.requestBody.required && <RequiredMark />}</h2><RequestBodyDetails body={item.operation.requestBody} collapseObjects={isWebhook} /></section>}
+          {item.operation.requestBody && <section className="sp-endpoint-section sp-request-body">{isWebhook
+            ? <h2>Payload {item.operation.requestBody.required && <RequiredMark />}</h2>
+            : <h3>Request body {item.operation.requestBody.required && <RequiredMark />}</h3>}
+          <RequestBodyDetails body={item.operation.requestBody} collapseObjects={isWebhook} /></section>}
         </div>
         {!isWebhook && <RequestRail item={item} server={server} security={document.security} securitySchemes={document.components?.securitySchemes ?? document.securityDefinitions} storageScope={storageScope} parameterPrototype={parameterPrototype} />}
       </div>
