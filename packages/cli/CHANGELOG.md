@@ -1,5 +1,12 @@
 # speccy-cli
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - speccy-core@0.4.3
+
 ## 0.4.2
 
 ### Patch Changes
