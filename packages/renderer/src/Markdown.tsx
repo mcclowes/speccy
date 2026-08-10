@@ -10,6 +10,7 @@
 import MarkdownRenderer from 'react-markdown';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
+import styles from './Markdown.module.css';
 
 type MarkdownNode = {
   type?: string;
@@ -37,7 +38,12 @@ function remarkAdmonitions() {
           ...node.data,
           hName: 'aside',
           hProperties: {
-            className: ['sp-admonition', `sp-admonition-${node.name}`],
+            className: [
+              'sp-admonition',
+              styles.admonition,
+              `sp-admonition-${node.name}`,
+              styles[node.name],
+            ],
           },
         };
 
@@ -48,14 +54,18 @@ function remarkAdmonitions() {
           label.data = {
             ...label.data,
             hName: 'div',
-            hProperties: { className: 'sp-admonition-title' },
+            hProperties: {
+              className: `sp-admonition-title ${styles.admonitionTitle}`,
+            },
           };
         } else {
           node.children?.unshift({
             type: 'paragraph',
             data: {
               hName: 'div',
-              hProperties: { className: 'sp-admonition-title' },
+              hProperties: {
+                className: `sp-admonition-title ${styles.admonitionTitle}`,
+              },
             },
             children: [
               {
@@ -100,7 +110,7 @@ export function Markdown({
   if (!children) return null;
 
   return (
-    <div className={`sp-markdown ${className}`}>
+    <div className={`sp-markdown ${styles.markdown} ${className}`}>
       <MarkdownRenderer
         remarkPlugins={[
           remarkGfm,
