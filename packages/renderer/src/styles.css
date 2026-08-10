@@ -2684,7 +2684,7 @@ related:
 .sp-schema-explorer-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  overflow: hidden;
+  overflow: clip;
   border: 1px solid var(--sp-line);
   border-radius: 8px;
   background: var(--sp-surface);

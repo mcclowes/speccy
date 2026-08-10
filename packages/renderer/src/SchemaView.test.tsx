@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MediaContent, SchemaView } from './SchemaView';
@@ -5,6 +6,15 @@ import { MediaContent, SchemaView } from './SchemaView';
 afterEach(cleanup);
 
 describe('SchemaView composition', () => {
+  it('keeps the field inspector sticky within long schemas', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(/\.sp-schema-explorer-shell \{[^}]*overflow: clip;/);
+    expect(css).toMatch(
+      /\.sp-schema-explorer-details \{[^}]*position: sticky;[^}]*top: 24px;/,
+    );
+  });
+
   it('shows named media examples in an example payload selector', () => {
     render(
       <MediaContent
