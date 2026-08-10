@@ -16,6 +16,12 @@ const stories = [
     id: 'renderer-speccy--endpoint-dark',
     viewport: { width: 390, height: 844 },
   },
+  {
+    name: 'endpoint-dark-tablet-navigation',
+    id: 'renderer-speccy--endpoint-dark',
+    viewport: { width: 768, height: 1024 },
+    openNavigation: true,
+  },
 ] as const;
 
 for (const story of stories) {
@@ -24,8 +30,14 @@ for (const story of stories) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
     await expect(page.locator('.speccy.sp-with-sidebar')).toBeVisible();
+    if ('openNavigation' in story && story.openNavigation) {
+      await page.getByRole('button', { name: 'Open navigation' }).click();
+      await expect(
+        page.getByRole('navigation', { name: 'API reference' }),
+      ).toHaveClass(/is-open/);
+    }
     await expect(page).toHaveScreenshot(`${story.name}.png`, {
-      fullPage: true,
+      fullPage: !('openNavigation' in story && story.openNavigation),
     });
   });
 }
