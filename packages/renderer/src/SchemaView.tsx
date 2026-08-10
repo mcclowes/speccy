@@ -18,12 +18,15 @@ import type { MediaType, Schema, SchemaObject } from 'speccy-core';
 function schemaLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
+  const declaredType = Array.isArray(schema.type)
+    ? schema.type.join(' | ')
+    : schema.type;
   const type =
-    schema.type === 'array'
+    declaredType === 'array'
       ? `array<${schemaLabel(schema.items)}>`
       : schema.enum
         ? 'enum'
-        : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+        : [declaredType ?? 'object', schema.format].filter(Boolean).join(' · ');
   return [schema.title, type].filter(Boolean).join(' · ');
 }
 
@@ -167,17 +170,69 @@ export function SchemaView({
     schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues =
     schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
-  const constraints: Array<{ label: string; value: string | number }> = [];
+  const constraints: Array<{ label: string; value: unknown }> = [];
   if (schema.minimum !== undefined)
     constraints.push({ label: 'min', value: schema.minimum });
   if (schema.maximum !== undefined)
     constraints.push({ label: 'max', value: schema.maximum });
+  if (schema.exclusiveMinimum !== undefined)
+    constraints.push({
+      label: 'exclusive min',
+      value: schema.exclusiveMinimum,
+    });
+  if (schema.exclusiveMaximum !== undefined)
+    constraints.push({
+      label: 'exclusive max',
+      value: schema.exclusiveMaximum,
+    });
+  if (schema.multipleOf !== undefined)
+    constraints.push({ label: 'multiple of', value: schema.multipleOf });
   if (schema.minLength !== undefined)
     constraints.push({ label: 'min length', value: schema.minLength });
   if (schema.maxLength !== undefined)
     constraints.push({ label: 'max length', value: schema.maxLength });
   if (schema.pattern)
     constraints.push({ label: 'pattern', value: schema.pattern });
+  if (schema.minItems !== undefined)
+    constraints.push({ label: 'min items', value: schema.minItems });
+  if (schema.maxItems !== undefined)
+    constraints.push({ label: 'max items', value: schema.maxItems });
+  if (schema.minContains !== undefined)
+    constraints.push({ label: 'min contains', value: schema.minContains });
+  if (schema.maxContains !== undefined)
+    constraints.push({ label: 'max contains', value: schema.maxContains });
+  if (schema.uniqueItems !== undefined)
+    constraints.push({ label: 'unique items', value: schema.uniqueItems });
+  if (schema.minProperties !== undefined)
+    constraints.push({ label: 'min properties', value: schema.minProperties });
+  if (schema.maxProperties !== undefined)
+    constraints.push({ label: 'max properties', value: schema.maxProperties });
+  if (schema.dependentRequired)
+    constraints.push({
+      label: 'dependent required',
+      value: schema.dependentRequired,
+    });
+  if (schema.const !== undefined)
+    constraints.push({ label: 'const', value: schema.const });
+  if (schema.contentEncoding)
+    constraints.push({
+      label: 'content encoding',
+      value: schema.contentEncoding,
+    });
+  if (schema.contentMediaType)
+    constraints.push({
+      label: 'content media type',
+      value: schema.contentMediaType,
+    });
+  for (const [label, value] of [
+    ['schema dialect', schema.$schema],
+    ['schema id', schema.$id],
+    ['anchor', schema.$anchor],
+    ['dynamic anchor', schema.$dynamicAnchor],
+    ['dynamic reference', schema.$dynamicRef],
+  ] as const) {
+    if (value) constraints.push({ label, value });
+  }
   const hasFieldDetails = Boolean(
     name &&
     (schema.description ||
@@ -287,7 +342,13 @@ export function SchemaView({
         <p className="sp-schema-meta sp-schema-constraints">
           {constraints.map((constraint) => (
             <span className="sp-schema-constraint" key={constraint.label}>
-              <span>{constraint.label}</span> <code>{constraint.value}</code>
+              <span>{constraint.label}</span>{' '}
+              <code>
+                {typeof constraint.value === 'string' &&
+                constraint.label !== 'const'
+                  ? constraint.value
+                  : JSON.stringify(constraint.value)}
+              </code>
             </span>
           ))}
         </p>
@@ -296,6 +357,12 @@ export function SchemaView({
         <p className="sp-schema-meta">
           Default: <code>{JSON.stringify(schema.default)}</code>
         </p>
+      )}
+      {schema.examples && (
+        <div className="sp-schema-meta">
+          <span>Examples</span>
+          <JsonValue value={schema.examples} />
+        </div>
       )}
       {(name || depth === 0) &&
         exampleValue !== undefined &&
@@ -319,6 +386,52 @@ export function SchemaView({
         )}
     </div>
   );
+  const applicators: Array<[string, Schema]> = [
+    ...Object.entries(schema.$defs ?? {}).map(
+      ([definition, value]) =>
+        [`Definition ${definition}`, value] as [string, Schema],
+    ),
+    ...(schema.prefixItems ?? []).map(
+      (item, index) => [`Prefix item ${index + 1}`, item] as [string, Schema],
+    ),
+    ...(schema.contains === undefined
+      ? []
+      : ([['Contains', schema.contains]] as Array<[string, Schema]>)),
+    ...Object.entries(schema.patternProperties ?? {}).map(
+      ([pattern, value]) => [`Pattern ${pattern}`, value] as [string, Schema],
+    ),
+    ...Object.entries(schema.dependentSchemas ?? {}).map(
+      ([property, value]) =>
+        [`Depends on ${property}`, value] as [string, Schema],
+    ),
+    ...(schema.propertyNames === undefined
+      ? []
+      : ([['Property names', schema.propertyNames]] as Array<
+          [string, Schema]
+        >)),
+    ...(schema.if === undefined
+      ? []
+      : ([['If', schema.if]] as Array<[string, Schema]>)),
+    ...(schema.then === undefined
+      ? []
+      : ([['Then', schema.then]] as Array<[string, Schema]>)),
+    ...(schema.else === undefined
+      ? []
+      : ([['Else', schema.else]] as Array<[string, Schema]>)),
+    ...(schema.not === undefined
+      ? []
+      : ([['Not', schema.not]] as Array<[string, Schema]>)),
+    ...(schema.unevaluatedProperties === undefined
+      ? []
+      : ([['Unevaluated properties', schema.unevaluatedProperties]] as Array<
+          [string, Schema]
+        >)),
+    ...(schema.unevaluatedItems === undefined
+      ? []
+      : ([['Unevaluated items', schema.unevaluatedItems]] as Array<
+          [string, Schema]
+        >)),
+  ];
   const structuralBody = (
     <>
       {Object.entries(properties).length > 0 && (
@@ -400,6 +513,21 @@ export function SchemaView({
           </div>
         </div>
       )}
+      {applicators.length > 0 && (
+        <div className="sp-schema-properties">
+          {applicators.map(([label, value]) => (
+            <div key={label}>
+              <strong>{label}</strong>
+              <SchemaView
+                schema={value}
+                depth={depth + 1}
+                collapseObjects={collapseObjects}
+                showExample={showExample}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
   const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
@@ -432,6 +560,7 @@ export function SchemaView({
         {hasRootDetails && (
           <div className="sp-schema-primitive-details">{fieldDetails}</div>
         )}
+        {structuralBody}
       </section>
     );
   }

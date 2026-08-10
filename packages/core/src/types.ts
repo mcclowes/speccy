@@ -193,14 +193,31 @@ export interface OAuthFlow {
 export type Schema = boolean | SchemaObject;
 
 export interface SchemaObject extends SpecificationExtensions {
-  type?: string;
+  $schema?: string;
+  $id?: string;
+  $anchor?: string;
+  $dynamicRef?: string;
+  $dynamicAnchor?: string;
+  $comment?: string;
+  type?: string | string[];
   format?: string;
   title?: string;
   description?: string;
   required?: string[];
+  $defs?: Record<string, Schema>;
   properties?: Record<string, SchemaObject>;
+  patternProperties?: Record<string, Schema>;
+  dependentSchemas?: Record<string, Schema>;
+  dependentRequired?: Record<string, string[]>;
+  propertyNames?: Schema;
   items?: SchemaObject;
+  prefixItems?: Schema[];
+  contains?: Schema;
+  minContains?: number;
+  maxContains?: number;
   enum?: unknown[];
+  const?: unknown;
+  examples?: unknown[];
   example?: unknown;
   default?: unknown;
   nullable?: boolean;
@@ -210,14 +227,30 @@ export interface SchemaObject extends SpecificationExtensions {
   discriminator?:
     string | { propertyName?: string; mapping?: Record<string, string> };
   additionalProperties?: boolean | SchemaObject;
+  unevaluatedProperties?: Schema;
+  unevaluatedItems?: Schema;
   minimum?: number;
   maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
+  multipleOf?: number;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
+  minItems?: number;
+  maxItems?: number;
+  uniqueItems?: boolean;
+  minProperties?: number;
+  maxProperties?: number;
+  contentEncoding?: string;
+  contentMediaType?: string;
   allOf?: SchemaObject[];
   oneOf?: SchemaObject[];
   anyOf?: SchemaObject[];
+  not?: Schema;
+  if?: Schema;
+  then?: Schema;
+  else?: Schema;
   $ref?: string;
   [key: string]: unknown;
 }

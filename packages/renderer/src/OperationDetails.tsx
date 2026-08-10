@@ -1404,7 +1404,11 @@ export function RequestRail({
                           [key]: event.target.value,
                         })
                       }
-                      placeholder={parameter.schema?.type ?? 'value'}
+                      placeholder={
+                        Array.isArray(parameter.schema?.type)
+                          ? parameter.schema.type.join(' | ')
+                          : (parameter.schema?.type ?? 'value')
+                      }
                     />
                   </label>
                   {parameterPrototype && !parameter.required && (
