@@ -368,6 +368,14 @@ describe('SchemaView composition', () => {
     );
   });
 
+  it('does not present an untyped schema as a string', () => {
+    render(<SchemaView schema={{ title: 'DataIntegritySummaries' }} />);
+
+    expect(screen.getByText('DataIntegritySummaries · any')).toBeVisible();
+    expect(screen.getByText('?')).toBeVisible();
+    expect(screen.queryByText(/string/)).not.toBeInTheDocument();
+  });
+
   it('keeps required status compact and combines equal length constraints', () => {
     const { container } = render(
       <SchemaView
