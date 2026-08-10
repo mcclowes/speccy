@@ -929,6 +929,15 @@ related:
   font-size: 11px;
   text-overflow: ellipsis;
 }
+.sp-server .sp-copy {
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  font-size: 0;
+}
 .sp-copy {
   border: 0;
   border-radius: 6px;
