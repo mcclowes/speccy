@@ -10,6 +10,7 @@
 import type { Parameter, RequestBody, ResponseObject } from 'speccy-core';
 import { RequiredMark } from './DesignSystem';
 import { Markdown } from './Markdown';
+import { SchemaExplorer } from './SchemaExplorer';
 import { JsonValue, MediaContent, SchemaView } from './SchemaView';
 
 export type ResourceDensity = 'compact' | 'comfortable';
@@ -104,7 +105,7 @@ export function ResponseDetails({
       {response.headers && (
         <div className="sp-detail-list">
           <strong>Headers</strong>
-          <SchemaView
+          <SchemaExplorer
             schema={{
               type: 'object',
               properties: Object.fromEntries(
@@ -117,6 +118,8 @@ export function ResponseDetails({
                 .filter(([, header]) => header.required)
                 .map(([name]) => name),
             }}
+            showExample
+            showHeader={false}
           />
         </div>
       )}

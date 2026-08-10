@@ -1645,6 +1645,9 @@ describe('Speccy navigation', () => {
     ).toBeVisible();
     expect(within(headers as HTMLElement).getByText('string')).toBeVisible();
     expect(headers?.querySelector('.sp-schema-explorer')).toBeInTheDocument();
+    expect(
+      headers?.querySelector('.sp-schema-explorer-header'),
+    ).not.toBeInTheDocument();
     expect(within(responseBody as HTMLElement).getByText('Body')).toBeVisible();
     expect(
       within(responseBody as HTMLElement).getByText('application/json'),
