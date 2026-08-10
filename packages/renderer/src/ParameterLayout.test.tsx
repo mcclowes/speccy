@@ -155,8 +155,12 @@ describe('endpoint parameter layout', () => {
 
     const documentation =
       container.querySelector<HTMLElement>('.sp-endpoint-main')!;
-    expect(within(documentation).getByText('cursor')).toBeInTheDocument();
-    expect(within(documentation).getByText('limit')).toBeInTheDocument();
+    expect(
+      within(documentation).getByRole('button', { name: 'cursor string' }),
+    ).toBeVisible();
+    expect(
+      within(documentation).getByRole('button', { name: 'limit integer' }),
+    ).toBeVisible();
     expect(
       within(documentation).queryByRole('button', {
         name: /Pagination, filtering, sorting, and related data/,
@@ -201,6 +205,62 @@ describe('endpoint parameter layout', () => {
     expect(
       within(documentation).queryByText('filter1'),
     ).not.toBeInTheDocument();
+  });
+
+  it('uses schema explorers for path and query parameter documentation', () => {
+    window.history.replaceState({}, '', '/api/get-company');
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies/{companyId}': {
+              get: {
+                summary: 'Get company',
+                operationId: 'get-company',
+                parameters: [
+                  {
+                    name: 'companyId',
+                    in: 'path',
+                    required: true,
+                    description: 'Unique identifier for a company.',
+                    schema: { type: 'string', format: 'uuid' },
+                  },
+                  {
+                    name: 'include',
+                    in: 'query',
+                    description: 'Related records to include.',
+                    schema: { type: 'string', enum: ['accounts', 'contacts'] },
+                  },
+                ],
+              },
+            },
+          },
+        }}
+        basePath="/api"
+        parameterPrototype
+      />,
+    );
+
+    const documentation =
+      container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    expect(
+      within(documentation).getByRole('region', {
+        name: 'Path parameters schema',
+      }),
+    ).toBeVisible();
+    expect(
+      within(documentation).getByText('Unique identifier for a company.'),
+    ).toBeVisible();
+    expect(
+      within(documentation).getByRole('region', {
+        name: 'Query parameters schema',
+      }),
+    ).toBeVisible();
+    expect(
+      within(documentation).getByText('Related records to include.'),
+    ).toBeVisible();
   });
 
   it('keeps parameter details compact until requested', () => {

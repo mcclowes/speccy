@@ -30,6 +30,7 @@ import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { RequestSample } from './RequestSample';
 import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
+import { SchemaExplorer } from './SchemaExplorer';
 import { SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
@@ -285,6 +286,50 @@ function ParameterCard({
   );
 }
 
+function ParameterExplorer({
+  location,
+  items,
+}: {
+  location: string;
+  items: Parameter[];
+}) {
+  const title = PARAMETER_GROUP_LABELS[location] ?? 'Parameters';
+  const properties = Object.fromEntries(
+    items.map((parameter) => [
+      parameter.name ?? 'unnamed',
+      {
+        ...parameter.schema,
+        description: parameter.description ?? parameter.schema?.description,
+      },
+    ]),
+  );
+  const examples = Object.fromEntries(
+    items.flatMap((parameter) => {
+      const example = parameter.example ?? parameter.schema?.example;
+      return parameter.name && example !== undefined
+        ? [[parameter.name, example]]
+        : [];
+    }),
+  );
+
+  return (
+    <SchemaExplorer
+      schema={{
+        title,
+        type: 'object',
+        properties,
+        required: items
+          .filter((parameter) => parameter.required)
+          .map((parameter) => parameter.name)
+          .filter((name): name is string => Boolean(name)),
+      }}
+      showExample
+      showHeader={false}
+      exampleValue={examples}
+    />
+  );
+}
+
 function ParameterGroup({
   location,
   items,
@@ -304,34 +349,17 @@ function ParameterGroup({
   const hiddenCount = items.length - visibleItems.length;
 
   if (parameterPrototype) {
+    const visibleTogether =
+      optionalItems.length < MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS;
     return (
       <section className="sp-endpoint-section sp-parameter-prototype">
         <h3>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h3>
-        {requiredItems.length > 0 && (
-          <div className="sp-endpoint-parameters">
-            {requiredItems.map((parameter, index) => (
-              <ParameterCard
-                location={location}
-                parameter={parameter}
-                index={index}
-                key={`${location}-${parameter.name}-${index}`}
-              />
-            ))}
-          </div>
+        {visibleTogether && (
+          <ParameterExplorer location={location} items={items} />
         )}
-        {optionalItems.length > 0 &&
-          optionalItems.length < MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
-            <div className="sp-endpoint-parameters">
-              {optionalItems.map((parameter, index) => (
-                <ParameterCard
-                  location={location}
-                  parameter={parameter}
-                  index={index}
-                  key={`${location}-${parameter.name}-${index}`}
-                />
-              ))}
-            </div>
-          )}
+        {!visibleTogether && requiredItems.length > 0 && (
+          <ParameterExplorer location={location} items={requiredItems} />
+        )}
         {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
           <div className="sp-optional-parameter-docs">
             <button
@@ -352,16 +380,7 @@ function ParameterGroup({
               </span>
             </button>
             {expanded && (
-              <div className="sp-endpoint-parameters">
-                {optionalItems.map((parameter, index) => (
-                  <ParameterCard
-                    location={location}
-                    parameter={parameter}
-                    index={index}
-                    key={`${location}-${parameter.name}-${index}`}
-                  />
-                ))}
-              </div>
+              <ParameterExplorer location={location} items={optionalItems} />
             )}
           </div>
         )}

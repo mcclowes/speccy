@@ -300,10 +300,12 @@ function ExplorerFieldDetails({
 export function SchemaExplorer({
   schema,
   showExample,
+  showHeader = true,
   exampleValue,
 }: {
   schema: SchemaObject;
   showExample: boolean;
+  showHeader?: boolean;
   exampleValue?: unknown;
 }) {
   const structuralSchema = structuralObjectSchema(schema);
@@ -355,16 +357,18 @@ export function SchemaExplorer({
           className="sp-schema-explorer-tree"
           aria-label={`${rootName} schema`}
         >
-          <header className="sp-schema-explorer-header">
-            <span className="sp-schema-explorer-object-icon">{'{}'}</span>
-            <div>
-              <strong>{rootName}</strong>
-              <span>
-                {schemaLabel(structuralSchema)} · {fields.length}{' '}
-                {fields.length === 1 ? 'field' : 'fields'}
-              </span>
-            </div>
-          </header>
+          {showHeader && (
+            <header className="sp-schema-explorer-header">
+              <span className="sp-schema-explorer-object-icon">{'{}'}</span>
+              <div>
+                <strong>{rootName}</strong>
+                <span>
+                  {schemaLabel(structuralSchema)} · {fields.length}{' '}
+                  {fields.length === 1 ? 'field' : 'fields'}
+                </span>
+              </div>
+            </header>
+          )}
           <div className="sp-schema-explorer-rows">
             <ExplorerTree
               fields={fields}
