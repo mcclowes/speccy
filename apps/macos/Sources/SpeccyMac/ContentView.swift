@@ -29,6 +29,7 @@ struct SpeccyWebView: NSViewRepresentable {
         let configuration = WKWebViewConfiguration()
         configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
         configuration.setURLSchemeHandler(context.coordinator.resourceHandler, forURLScheme: WebResourceHandler.appScheme)
+        configuration.userContentController.add(context.coordinator, name: Coordinator.openRepositoryMessage)
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -41,8 +42,10 @@ struct SpeccyWebView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {}
 
     @MainActor
-    final class Coordinator: NSObject, WKNavigationDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+        static let openRepositoryMessage = "speccyOpenRepository"
         private weak var webView: WKWebView?
+        private var discoveredRepositories: [String: DiscoveredRepository] = [:]
         let resourceHandler = WebResourceHandler(
             directory: Bundle.module.url(forResource: "Web", withExtension: nil)
         )
@@ -70,6 +73,35 @@ struct SpeccyWebView: NSViewRepresentable {
                 return
             }
             webView?.load(URLRequest(url: URL(string: "\(WebResourceHandler.appScheme)://app/index.html")!))
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            Task { await discoverRepositories() }
+        }
+
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard message.name == Self.openRepositoryMessage,
+                  let path = message.body as? String,
+                  let repository = discoveredRepositories[path]
+            else { return }
+            openRepository(at: URL(fileURLWithPath: repository.path))
+        }
+
+        func discoverRepositories(roots: [String] = RepositoryScan.defaultRoots) async {
+            let repositories = await Task.detached(priority: .utility) {
+                RepositoryScan.scan(roots: roots)
+            }.value
+            discoveredRepositories = Dictionary(uniqueKeysWithValues: repositories.map { ($0.path, $0) })
+            guard let webView else { return }
+            do {
+                _ = try await webView.callAsyncJavaScript(
+                    "window.speccyDiscoveredRepositories = repositories; window.speccySetDiscoveredRepositories?.(repositories)",
+                    arguments: ["repositories": repositories],
+                    contentWorld: .page
+                )
+            } catch {
+                // Discovery is optional; opening files manually remains available.
+            }
         }
 
         func openDocument() {
@@ -100,6 +132,29 @@ struct SpeccyWebView: NSViewRepresentable {
             }
         }
 
+        private func openRepository(at url: URL) {
+            do {
+                let bundle = try Self.loadFragments(from: url)
+                let documentPaths = Set(RepositoryScan.openAPIDocuments(in: url).map { documentURL in
+                    String(documentURL.resolvingSymlinksInPath().path.dropFirst(url.resolvingSymlinksInPath().path.count))
+                        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                })
+                let candidates = bundle.sources.keys.filter(documentPaths.contains).sorted()
+                let entrypoint = try chooseEntrypoint(from: bundle.sources, candidates: candidates)
+                guard let entrypoint, let webView else { return }
+                Task { [weak self, weak webView] in
+                    guard let self, let webView else { return }
+                    do {
+                        try await Self.load(bundle.sources, entrypoint: entrypoint, into: webView)
+                    } catch {
+                        showError(error)
+                    }
+                }
+            } catch {
+                showError(error)
+            }
+        }
+
         static func load(_ sources: [String: String], entrypoint: String, into webView: WKWebView) async throws {
             _ = try await webView.callAsyncJavaScript(
                 "window.speccyLoadSpecBundle?.(sources, entrypoint)",
@@ -108,12 +163,13 @@ struct SpeccyWebView: NSViewRepresentable {
             )
         }
 
-        private func chooseEntrypoint(from sources: [String: String]) throws -> String? {
+        private func chooseEntrypoint(from sources: [String: String], candidates suppliedCandidates: [String]? = nil) throws -> String? {
             let paths = sources.keys.sorted()
-            let candidates = paths.filter { path in
+            let detectedCandidates = paths.filter { path in
                 guard let source = sources[path] else { return false }
-                return source.contains("openapi:") || source.contains("swagger:") || source.contains("\"openapi\"") || source.contains("\"swagger\"")
+                return RepositoryScan.isOpenAPIDocument(source)
             }
+            let candidates = suppliedCandidates ?? detectedCandidates
             let choices = candidates.isEmpty ? paths : candidates
             guard !choices.isEmpty else { throw FragmentError.noDocuments }
             if choices.count == 1 { return choices[0] }
