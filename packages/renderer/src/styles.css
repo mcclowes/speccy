@@ -3178,10 +3178,6 @@ related:
   border: 0;
   background: transparent;
 }
-.sp-endpoint-responses .sp-media-type {
-  top: 1px;
-  right: 1px;
-}
 .sp-endpoint-section > .sp-markdown + .sp-media-list {
   margin-top: 18px;
 }
