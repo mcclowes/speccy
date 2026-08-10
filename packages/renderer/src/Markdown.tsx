@@ -40,9 +40,9 @@ function remarkAdmonitions() {
           hProperties: {
             className: [
               'sp-admonition',
-              styles.admonition,
+              styles.admonition!,
               `sp-admonition-${node.name}`,
-              styles[node.name],
+              styles[node.name]!,
             ],
           },
         };
