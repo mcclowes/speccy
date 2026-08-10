@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
+import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import type { MediaType, SchemaObject } from 'speccy-core';
 
@@ -53,18 +54,15 @@ function NamedMediaExamples({
     entries.length > 1 ? (
       <>
         <span>Example payload</span>
-        <select
-          className="sp-example-select"
-          aria-label="Example payload"
+        <ExampleSelect
+          label="Example payload"
           value={activeIndex}
-          onChange={(event) => setActiveIndex(Number(event.target.value))}
-        >
-          {entries.map(([exampleName, example], index) => (
-            <option value={index} key={exampleName}>
-              {example.summary ?? exampleName}
-            </option>
-          ))}
-        </select>
+          onChange={setActiveIndex}
+          options={entries.map(([exampleName, example]) => ({
+            key: exampleName,
+            label: example.summary ?? exampleName,
+          }))}
+        />
       </>
     ) : (
       `Example payload: ${label}`

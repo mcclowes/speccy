@@ -19,6 +19,7 @@ import {
   type SecurityScheme,
 } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
+import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
   HTTP_METHOD_LABELS,
@@ -538,18 +539,12 @@ function ResponseExamplePanel({
     examples.length > 1 ? (
       <>
         <span>Response example</span>
-        <select
-          className="sp-example-select"
-          aria-label="Response example"
+        <ExampleSelect
+          label="Response example"
           value={activeIndex}
-          onChange={(event) => setActiveIndex(Number(event.target.value))}
-        >
-          {examples.map((example, index) => (
-            <option value={index} key={`${example.label}-${index}`}>
-              {example.label}
-            </option>
-          ))}
-        </select>
+          onChange={setActiveIndex}
+          options={examples}
+        />
       </>
     ) : (
       'Response example'
@@ -583,18 +578,12 @@ export function EndpointRequestBody({ body }: { body: RequestBody }) {
     examples.length > 1 ? (
       <>
         <span>Request body example</span>
-        <select
-          className="sp-example-select"
-          aria-label="Request body example"
+        <ExampleSelect
+          label="Request body example"
           value={activeIndex}
-          onChange={(event) => setActiveIndex(Number(event.target.value))}
-        >
-          {examples.map((example, index) => (
-            <option value={index} key={`${example.label}-${index}`}>
-              {example.label}
-            </option>
-          ))}
-        </select>
+          onChange={setActiveIndex}
+          options={examples}
+        />
       </>
     ) : (
       'Request body example'
@@ -1154,22 +1143,15 @@ export function RequestRail({
               Body <small>{contentType}</small>
             </h3>
             {bodyExamples.length > 1 && (
-              <select
-                className="sp-example-select"
-                aria-label="Request builder body example"
+              <ExampleSelect
+                label="Request builder body example"
                 value={activeBodyExample}
-                onChange={(event) => {
-                  const index = Number(event.target.value);
+                onChange={(index) => {
                   setActiveBodyExample(index);
                   setBody(formatRequestBodyValue(bodyExamples[index]?.value));
                 }}
-              >
-                {bodyExamples.map((example, index) => (
-                  <option value={index} key={`${example.label}-${index}`}>
-                    {example.label}
-                  </option>
-                ))}
-              </select>
+                options={bodyExamples}
+              />
             )}
           </div>
           <label className="sp-field">
