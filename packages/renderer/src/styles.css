@@ -2658,14 +2658,11 @@ related:
   background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface));
 }
 .sp-schema-explorer-row.is-deprecated {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, #a8525e 8%, transparent),
-    transparent 55%
-  );
+  opacity: 0.48;
 }
 .sp-schema-explorer-row.is-deprecated:hover {
-  background: color-mix(in srgb, #a8525e 10%, var(--sp-surface));
+  background: var(--sp-surface-soft);
+  opacity: 0.7;
 }
 .sp-schema-explorer-toggle,
 .sp-schema-explorer-toggle-spacer {
@@ -2729,10 +2726,10 @@ related:
 }
 .sp-schema-explorer-deprecated {
   padding: 2px 5px;
-  color: #8f3442;
-  border: 1px solid color-mix(in srgb, #a8525e 32%, transparent);
+  color: var(--sp-muted);
+  border: 1px solid color-mix(in srgb, var(--sp-muted) 28%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, #a8525e 9%, var(--sp-surface));
+  background: color-mix(in srgb, var(--sp-muted) 7%, var(--sp-surface));
   font-family: inherit;
   font-size: 7px;
   font-weight: 700;
