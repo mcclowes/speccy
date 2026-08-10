@@ -303,6 +303,8 @@ export function CodeBlock({
   title,
   className = '',
   copyable = true,
+  copyPlacement = 'title',
+  copyLabel = 'Copy',
   lineNumbers = false,
   collapsibleValue,
   truncateLabel,
@@ -312,6 +314,8 @@ export function CodeBlock({
   title?: ReactNode;
   className?: string;
   copyable?: boolean;
+  copyPlacement?: 'title' | 'body';
+  copyLabel?: string;
   lineNumbers?: boolean;
   /** Raw (pre-serialization) JSON value. When set, renders as a foldable tree instead of the flat `value` text; `value` still drives copying. */
   collapsibleValue?: unknown;
@@ -339,16 +343,23 @@ export function CodeBlock({
           className={`sp-code-title${!title && copyable ? ' sp-code-title-copy-only' : ''}`}
         >
           <span>{title}</span>
-          {copyable && <CopyButton value={copyValue} />}
+          {copyable && copyPlacement === 'title' && (
+            <CopyButton value={copyValue} label={copyLabel} />
+          )}
         </div>
       )}
-      {truncateLabel ? (
-        <TruncatedCode value={value} label={truncateLabel}>
-          {code}
-        </TruncatedCode>
-      ) : (
-        code
-      )}
+      <div className="sp-code-body">
+        {copyable && copyPlacement === 'body' && (
+          <CopyButton value={copyValue} label={copyLabel} compact />
+        )}
+        {truncateLabel ? (
+          <TruncatedCode value={value} label={truncateLabel}>
+            {code}
+          </TruncatedCode>
+        ) : (
+          code
+        )}
+      </div>
     </div>
   );
 }

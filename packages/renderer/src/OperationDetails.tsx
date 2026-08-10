@@ -628,6 +628,8 @@ function ResponseExamplePanel({
       className="sp-rail-code sp-response-example"
       title={title}
       value={JSON.stringify(activeExample.value, null, 2)}
+      copyPlacement="body"
+      copyLabel="Copy response"
       lineNumbers
       collapsibleValue={activeExample.value}
       truncateLabel="response"

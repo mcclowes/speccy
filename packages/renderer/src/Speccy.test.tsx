@@ -1855,6 +1855,13 @@ describe('Speccy navigation', () => {
       .getByText('Response example')
       .closest('.sp-code-block');
     expect(responseExample).toBeInTheDocument();
+    const responseCopy = within(responseExample as HTMLElement).getByRole(
+      'button',
+      { name: 'Copy response' },
+    );
+    expect(responseCopy).toHaveClass('sp-copy-compact');
+    expect(responseCopy.closest('.sp-code-body')).toBeInTheDocument();
+    expect(responseCopy.closest('.sp-code-title')).not.toBeInTheDocument();
     expect(responseExample?.textContent).toContain('"name": "Apple"');
     expect(responseExample?.textContent).toContain('"variety": "Discovery"');
     expect(responseExample?.textContent).toContain(

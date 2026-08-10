@@ -2280,6 +2280,17 @@ related:
   color: var(--sp-code-text);
   background: var(--sp-code-control);
 }
+.sp-code-body {
+  position: relative;
+}
+.sp-code-body > .sp-copy {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
+  color: var(--sp-code-text);
+  background: transparent;
+}
 .sp-rail-code pre {
   max-height: 360px;
   padding: 18px;
