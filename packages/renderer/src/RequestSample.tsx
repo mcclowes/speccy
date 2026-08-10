@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { useLocalState } from './useLocalState';
-import { DisclosureChevron } from './DesignSystem';
+import { DisclosureChevron, DisclosureContent } from './DesignSystem';
 import styles from './RequestSample.module.css';
 
 export type RequestSampleLanguage =
@@ -265,10 +265,10 @@ export function RequestSample({
         {languagePicker}
       </header>
       {expanded && (
-        <div className={`sp-request-sample-code ${styles.code}`}>
+        <DisclosureContent className={`sp-request-sample-code ${styles.code}`}>
           <CopyButton value={copySample} compact />
           <CodeBlock value={sample} copyable={false} />
-        </div>
+        </DisclosureContent>
       )}
     </section>
   );

@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
+import { DisclosureContent } from './DesignSystem';
 
 const SEVERITY_LABELS: Record<DiagnosticSeverity, string> = {
   issue: 'Issues',
@@ -187,7 +188,7 @@ export function InlineDiagnostics({
         </button>
       </div>
       {expanded && (
-        <>
+        <DisclosureContent>
           {diagnostics.slice(0, 3).map((diagnostic) => {
             const route = routeForDiagnostic?.(diagnostic);
             return (
@@ -205,7 +206,7 @@ export function InlineDiagnostics({
               And {diagnostics.length - 3} more
             </span>
           )}
-        </>
+        </DisclosureContent>
       )}
     </div>
   );

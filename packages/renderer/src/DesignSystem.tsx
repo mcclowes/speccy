@@ -38,6 +38,20 @@ export function DisclosureChevron({ className = '' }: { className?: string }) {
   );
 }
 
+export function DisclosureContent({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`sp-disclosure-content ${className}`.trim()}>
+      {children}
+    </div>
+  );
+}
+
 export function RequiredMark() {
   return (
     <span className="sp-required" title="Required" aria-label="Required">

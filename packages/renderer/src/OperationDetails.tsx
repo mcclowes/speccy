@@ -28,6 +28,7 @@ import {
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
+  DisclosureContent,
   HTTP_METHOD_LABELS,
   RequiredMark,
   httpMethodLabel,
@@ -195,7 +196,7 @@ export function SecurityRequirements({
         </button>
       </h4>
       {expanded && (
-        <div className="sp-security-requirements">
+        <DisclosureContent className="sp-security-requirements">
           {requirements.map((requirement, index) => (
             <div className="sp-security-option" key={index}>
               {index > 0 && <span className="sp-security-operator">or</span>}
@@ -222,7 +223,7 @@ export function SecurityRequirements({
               </div>
             </div>
           ))}
-        </div>
+        </DisclosureContent>
       )}
     </section>
   );
@@ -389,7 +390,9 @@ function ParameterGroup({
               </span>
             </button>
             {expanded && (
-              <ParameterExplorer location={location} items={optionalItems} />
+              <DisclosureContent>
+                <ParameterExplorer location={location} items={optionalItems} />
+              </DisclosureContent>
             )}
           </div>
         )}

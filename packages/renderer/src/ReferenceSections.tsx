@@ -9,7 +9,7 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 import { Markdown } from './Markdown';
-import { DisclosureChevron } from './DesignSystem';
+import { DisclosureChevron, DisclosureContent } from './DesignSystem';
 import {
   ParameterDetails,
   RequestBodyDetails,
@@ -67,7 +67,7 @@ export function ReferenceNavigation({
         <DisclosureChevron />
       </button>
       {open && (
-        <div>
+        <DisclosureContent>
           {available.map(([key, label]) => (
             <a
               className={`sp-nav-operation ${activeKey === key ? 'is-active' : ''}`}
@@ -82,7 +82,7 @@ export function ReferenceNavigation({
               {label}
             </a>
           ))}
-        </div>
+        </DisclosureContent>
       )}
     </div>
   );
