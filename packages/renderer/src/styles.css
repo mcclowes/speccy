@@ -2021,6 +2021,7 @@ related:
   color: var(--sp-text);
   background: var(--sp-bg);
   border-color: var(--sp-line);
+  font-size: 10px;
 }
 .sp-rail-card-description {
   margin: -6px 0 14px;
