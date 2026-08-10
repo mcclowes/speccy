@@ -236,7 +236,15 @@ function CollapsibleJson({ value }: { value: unknown }) {
   );
 }
 
-export function CopyButton({ value }: { value: string }) {
+export function CopyButton({
+  value,
+  label = 'Copy',
+  compact = false,
+}: {
+  value: string;
+  label?: string;
+  compact?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -247,11 +255,13 @@ export function CopyButton({ value }: { value: string }) {
 
   return (
     <button
-      className={`sp-copy${copied ? ' is-copied' : ''}`}
+      className={`sp-copy${compact ? ' sp-copy-compact' : ''}${copied ? ' is-copied' : ''}`}
       type="button"
       onClick={copy}
+      aria-label={copied ? 'Copied' : label}
+      title={copied ? 'Copied' : label}
     >
-      {copied ? 'Copied' : 'Copy'}
+      {!compact && (copied ? 'Copied' : label)}
     </button>
   );
 }

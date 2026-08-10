@@ -18,7 +18,7 @@ import {
   type SecurityRequirement,
   type SecurityScheme,
 } from 'speccy-core';
-import { CodeBlock } from './CodeBlock';
+import { CodeBlock, CopyButton } from './CodeBlock';
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
@@ -561,54 +561,156 @@ function ResponseExamplePanel({
   );
 }
 
-export function EndpointRequestBody({ body }: { body: RequestBody }) {
-  const bodyMedia = firstMedia(body.content);
+function parameterExample(parameter: Parameter): unknown {
+  return (
+    parameter.example ??
+    parameter.schema?.example ??
+    parameter.schema?.default ??
+    (parameter.schema ? schemaExample(parameter.schema, 'request') : 'string')
+  );
+}
+
+function RequestExampleSection({
+  label,
+  value,
+  code = false,
+}: {
+  label: string;
+  value: string;
+  code?: boolean;
+}) {
+  return (
+    <section className="sp-request-example-section">
+      <header>
+        <span>{label}</span>
+        <CopyButton
+          value={value}
+          label={`Copy ${label.toLowerCase()}`}
+          compact
+        />
+      </header>
+      <pre className={code ? undefined : 'sp-code-numbered'}>
+        <code>
+          {code
+            ? value
+            : value.split('\n').map((line, index) => (
+                <span className="sp-code-line" key={index}>
+                  {line}
+                </span>
+              ))}
+        </code>
+      </pre>
+    </section>
+  );
+}
+
+export function EndpointRequestDetails({
+  path,
+  parameters,
+  body,
+  parameterPrototype,
+}: {
+  path: string;
+  parameters: Parameter[];
+  body?: RequestBody;
+  parameterPrototype?: boolean;
+}) {
+  const pathParameters = parameters.filter(
+    (parameter) => parameter.in === 'path',
+  );
+  const queryParameters = parameters.filter(
+    (parameter) => (parameter.in ?? 'query') === 'query',
+  );
+  const headerParameters = parameters.filter(
+    (parameter) => parameter.in === 'header',
+  );
+  const resolvedPath = pathParameters.reduce(
+    (result, parameter) =>
+      result.replace(
+        `{${parameter.name}}`,
+        encodeURIComponent(String(parameterExample(parameter))),
+      ),
+    path,
+  );
+  const parameterObject = (items: Parameter[]) =>
+    Object.fromEntries(
+      items.map((parameter) => [
+        parameter.name ?? 'unnamed',
+        parameterExample(parameter),
+      ]),
+    );
+  const bodyMedia = firstMedia(body?.content);
   const namedExamples = requestBodyExamples(bodyMedia?.[1]);
-  const examples = namedExamples.length
-    ? namedExamples
-    : [
-        {
-          label: 'Example',
-          value: requestBodyExampleValue(bodyMedia?.[0], bodyMedia?.[1]),
-        },
-      ];
+  const examples = body
+    ? namedExamples.length
+      ? namedExamples
+      : [
+          {
+            label: 'Example',
+            value: requestBodyExampleValue(bodyMedia?.[0], bodyMedia?.[1]),
+          },
+        ]
+    : [];
   const [activeIndex, setActiveIndex] = useState(0);
   const activeExample = examples[activeIndex];
   const title =
     examples.length > 1 ? (
       <>
-        <span>Request body example</span>
+        <span>Request example</span>
         <ExampleSelect
-          label="Request body example"
+          label="Request example"
           value={activeIndex}
           onChange={setActiveIndex}
           options={examples}
         />
       </>
     ) : (
-      'Request body example'
+      'Request example'
     );
 
   return (
-    <section className="sp-endpoint-section sp-request-body">
-      <h3>Request body {body.required && <RequiredMark />}</h3>
-      <div className="sp-endpoint-request-body-grid">
-        <RequestBodyDetails
-          body={body}
-          showExamples={false}
-          exampleValue={activeExample?.value}
+    <div className="sp-endpoint-request-grid">
+      <div className="sp-endpoint-request-details">
+        <GroupedParameterList
+          parameters={parameters}
+          parameterPrototype={parameterPrototype}
         />
-        {activeExample && (
-          <CodeBlock
-            className="sp-rail-code sp-request-body-example"
-            title={title}
-            value={formatRequestBodyValue(activeExample.value)}
-            lineNumbers
-            collapsibleValue={activeExample.value}
-          />
+        {body && (
+          <section className="sp-endpoint-section sp-request-body">
+            <h3>Request body {body.required && <RequiredMark />}</h3>
+            <RequestBodyDetails
+              body={body}
+              showExamples={false}
+              exampleValue={activeExample?.value}
+            />
+          </section>
         )}
       </div>
-    </section>
+      <aside className="sp-code-block sp-request-example">
+        <div className="sp-code-title">
+          <span>{title}</span>
+        </div>
+        <RequestExampleSection label="Path" value={resolvedPath} code />
+        {queryParameters.length > 0 && (
+          <RequestExampleSection
+            label="Query parameters"
+            value={JSON.stringify(parameterObject(queryParameters), null, 2)}
+          />
+        )}
+        {headerParameters.length > 0 && (
+          <RequestExampleSection
+            label="Headers"
+            value={JSON.stringify(parameterObject(headerParameters), null, 2)}
+          />
+        )}
+        {activeExample && (
+          <RequestExampleSection
+            label="Body"
+            value={formatRequestBodyValue(activeExample.value)}
+          />
+        )}
+      </aside>
+    </div>
   );
 }
 

@@ -1094,10 +1094,10 @@ describe('Speccy navigation', () => {
         2,
       ),
     );
-    expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
+    expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(3);
   });
 
-  it('shows the request body example beside its schema', () => {
+  it('shows the request example beside its schema', () => {
     window.history.replaceState({}, '', '/api/create-company');
     const { container } = render(
       <Speccy
@@ -1128,16 +1128,87 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    const grid = container.querySelector('.sp-endpoint-request-body-grid');
+    const grid = container.querySelector('.sp-endpoint-request-grid');
     const example = screen
-      .getByText('Request body example')
+      .getByText('Request example')
       .closest<HTMLElement>('.sp-code-block');
     expect(grid).toContainElement(example);
-    expect(example).toHaveClass('sp-request-body-example');
+    expect(example).toHaveClass('sp-request-example');
+    expect(within(example!).getByText('Path')).toBeInTheDocument();
+    expect(within(example!).getByText('/companies')).toBeInTheDocument();
+    expect(within(example!).getByText('Body')).toBeInTheDocument();
     expect(example).toHaveTextContent('"name": "Technicallium"');
     expect(
       container.querySelector('.sp-request-body-details .sp-schema-example'),
     ).not.toBeInTheDocument();
+  });
+
+  it('shows path, query, and header examples without a request body', () => {
+    window.history.replaceState({}, '', '/api/get-transaction-category');
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies/{companyId}/categories/{categoryId}': {
+              get: {
+                summary: 'Get transaction category',
+                operationId: 'get-transaction-category',
+                parameters: [
+                  {
+                    in: 'path',
+                    name: 'companyId',
+                    required: true,
+                    example: 'company-123',
+                    schema: { type: 'string' },
+                  },
+                  {
+                    in: 'path',
+                    name: 'categoryId',
+                    required: true,
+                    example: 'bank-fee',
+                    schema: { type: 'string' },
+                  },
+                  {
+                    in: 'query',
+                    name: 'pageSize',
+                    example: 25,
+                    schema: { type: 'integer' },
+                  },
+                  {
+                    in: 'header',
+                    name: 'X-Request-ID',
+                    example: 'request-456',
+                    schema: { type: 'string' },
+                  },
+                ],
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const example = screen
+      .getByText('Request example')
+      .closest<HTMLElement>('.sp-request-example');
+    expect(example).toBeInTheDocument();
+    expect(example).toHaveTextContent(
+      '/companies/company-123/categories/bank-fee',
+    );
+    expect(within(example!).getByText('Query parameters')).toBeInTheDocument();
+    expect(example).toHaveTextContent('"pageSize": 25');
+    expect(within(example!).getByText('Headers')).toBeInTheDocument();
+    expect(example).toHaveTextContent('"X-Request-ID": "request-456"');
+    expect(within(example!).queryByText('Body')).not.toBeInTheDocument();
+    expect(
+      within(example!).getByRole('button', { name: 'Copy path' }),
+    ).toHaveClass('sp-copy-compact');
+    expect(
+      within(example!).getByRole('button', { name: 'Copy query parameters' }),
+    ).toHaveClass('sp-copy-compact');
   });
 
   it('prefills the request body from a selected named example', () => {

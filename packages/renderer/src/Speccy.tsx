@@ -45,8 +45,7 @@ import { OpenApiDownload } from './OpenApiDownload';
 import {
   CodeSample,
   EndpointResponses,
-  EndpointRequestBody,
-  GroupedParameterList,
+  EndpointRequestDetails,
   RequestRail,
   SecurityRequirements,
 } from './OperationDetails';
@@ -264,10 +263,15 @@ function EndpointPage({
               )}
             </div>
           )}
-          <GroupedParameterList
-            parameters={parameters}
-            parameterPrototype={parameterPrototype}
-          />
+          {!isWebhook &&
+            (parameters.length > 0 || item.operation.requestBody) && (
+              <EndpointRequestDetails
+                path={item.path}
+                parameters={parameters}
+                body={item.operation.requestBody}
+                parameterPrototype={parameterPrototype}
+              />
+            )}
           {isWebhook && item.operation.requestBody && (
             <section className="sp-endpoint-section sp-request-body">
               <h2>
@@ -282,9 +286,6 @@ function EndpointPage({
           )}
         </div>
       </div>
-      {!isWebhook && item.operation.requestBody && (
-        <EndpointRequestBody body={item.operation.requestBody} />
-      )}
       {item.operation.responses && (
         <EndpointResponses responses={item.operation.responses} />
       )}
