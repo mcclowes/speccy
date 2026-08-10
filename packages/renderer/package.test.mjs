@@ -34,3 +34,11 @@ test('packs global and component styles in the public stylesheet', () => {
     rmSync(cache, { force: true, recursive: true });
   }
 });
+
+test('exports ESM entry points through the default condition', () => {
+  const rendererPackage = JSON.parse(readFileSync('package.json', 'utf8'));
+  const corePackage = JSON.parse(readFileSync('../core/package.json', 'utf8'));
+
+  assert.equal(rendererPackage.exports['.'].default, './dist/index.js');
+  assert.equal(corePackage.exports['.'].default, './dist/index.js');
+});
