@@ -1,6 +1,6 @@
 {
   "name": "create-speccy-reference",
-  "version": "0.3.0",
+  "version": "0.4.2",
   "description": "Create a standalone Speccy API reference site.",
   "repository": {
     "type": "git",

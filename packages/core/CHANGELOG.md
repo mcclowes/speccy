@@ -1,5 +1,12 @@
 # speccy-core
 
+## 0.4.2
+
+### Patch Changes
+
+- 8c0eba6: Allow server bundlers without the `import` condition to resolve the ESM entry points.
+- d6a8b35: Version all Speccy packages together so consumers can use one version across the package suite.
+
 ## 0.3.1
 
 ### Patch Changes

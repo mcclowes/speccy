@@ -1,5 +1,16 @@
 # speccy-renderer
 
+## 0.4.2
+
+### Patch Changes
+
+- 8c0eba6: Allow server bundlers without the `import` condition to resolve the ESM entry points.
+- 96a68fb: Let Docusaurus API references inherit the site's color mode, typography, and base font size.
+- d6a8b35: Version all Speccy packages together so consumers can use one version across the package suite.
+- Updated dependencies [8c0eba6]
+- Updated dependencies [d6a8b35]
+  - speccy-core@0.4.2
+
 ## 0.4.1
 
 ### Patch Changes
