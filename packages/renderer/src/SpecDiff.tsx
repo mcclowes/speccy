@@ -18,6 +18,15 @@ import type {
   DiffSpecVersion,
 } from 'speccy-core';
 import { MethodBadge } from './DesignSystem';
+import styles from './SpecDiff.module.css';
+
+function scoped(className: string) {
+  return className
+    .split(' ')
+    .flatMap((name) => (name ? [name, styles[name]] : []))
+    .filter(Boolean)
+    .join(' ');
+}
 
 export interface SpecDiffProps {
   report: DiffReport;
@@ -180,16 +189,14 @@ function DiffLine({
     : undefined;
   return (
     <div
-      className={[
-        'sp-diff-line',
-        line?.changed && `is-${side}`,
-        !line && 'is-empty',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={scoped(
+        ['sp-diff-line', line?.changed && `is-${side}`, !line && 'is-empty']
+          .filter(Boolean)
+          .join(' '),
+      )}
     >
-      <span className="sp-diff-line-number">{line?.number}</span>
-      <span className="sp-diff-line-marker" aria-hidden="true">
+      <span className={scoped('sp-diff-line-number')}>{line?.number}</span>
+      <span className={scoped('sp-diff-line-marker')} aria-hidden="true">
         {line?.changed ? (side === 'before' ? '−' : '+') : ' '}
       </span>
       {changeLabel && (
@@ -207,16 +214,16 @@ function ChangeValues({ before, after }: Pick<ApiChange, 'before' | 'after'>) {
   );
   if (before === undefined && after === undefined) return null;
   return (
-    <div className="sp-diff-values-scroll">
-      <div className="sp-diff-values">
-        <div className="sp-diff-value-heading">Before</div>
-        <div className="sp-diff-value-heading">After</div>
-        <div className="sp-diff-code" aria-label="Before value">
+    <div className={scoped('sp-diff-values-scroll')}>
+      <div className={scoped('sp-diff-values')}>
+        <div className={scoped('sp-diff-value-heading')}>Before</div>
+        <div className={scoped('sp-diff-value-heading')}>After</div>
+        <div className={scoped('sp-diff-code')} aria-label="Before value">
           {rows.map((row, index) => (
             <DiffLine key={index} side="before" line={row.before} />
           ))}
         </div>
-        <div className="sp-diff-code" aria-label="After value">
+        <div className={scoped('sp-diff-code')} aria-label="After value">
           {rows.map((row, index) => (
             <DiffLine key={index} side="after" line={row.after} />
           ))}
@@ -306,7 +313,9 @@ function ChangeDetails({
   return (
     <div
       id={change.id}
-      className={`sp-diff-change-detail sp-diff-change-${change.severity}`}
+      className={scoped(
+        `sp-diff-change-detail sp-diff-change-${change.severity}`,
+      )}
     >
       <details open={expanded}>
         <summary
@@ -316,40 +325,46 @@ function ChangeDetails({
             onExpandedChange(!expanded);
           }}
         >
-          <span className="sp-diff-change-heading">
+          <span className={scoped('sp-diff-change-heading')}>
             <span
-              className={`sp-diff-severity sp-diff-severity-${change.severity}`}
+              className={scoped(
+                `sp-diff-severity sp-diff-severity-${change.severity}`,
+              )}
             >
               {change.severity}
             </span>
-            <span className={`sp-diff-kind sp-diff-kind-${change.kind}`}>
+            <span
+              className={scoped(`sp-diff-kind sp-diff-kind-${change.kind}`)}
+            >
               {change.kind}
             </span>
-            <span className="sp-diff-area">{areaLabel(area)}</span>
+            <span className={scoped('sp-diff-area')}>{areaLabel(area)}</span>
             {change.scope?.label && (
-              <span className="sp-diff-scope-detail">{change.scope.label}</span>
+              <span className={scoped('sp-diff-scope-detail')}>
+                {change.scope.label}
+              </span>
             )}
           </span>
-          <span className="sp-diff-message">{change.message}</span>
-          <span className="sp-diff-disclosure" aria-hidden="true">
+          <span className={scoped('sp-diff-message')}>{change.message}</span>
+          <span className={scoped('sp-diff-disclosure')} aria-hidden="true">
             <svg viewBox="0 0 16 16" focusable="false">
               <path d="m5.5 3.5 4.5 4.5-4.5 4.5" />
             </svg>
           </span>
         </summary>
-        <div className="sp-diff-change-body">
-          <div className="sp-diff-change-meta">
-            <code className="sp-diff-location">
+        <div className={scoped('sp-diff-change-body')}>
+          <div className={scoped('sp-diff-change-meta')}>
+            <code className={scoped('sp-diff-location')}>
               {change.location.join(' › ')}
             </code>
             {href && (
-              <a className="sp-diff-change-link" href={href}>
+              <a className={scoped('sp-diff-change-link')} href={href}>
                 View operation
               </a>
             )}
           </div>
           {sources.length > 0 && (
-            <div className="sp-diff-sources">
+            <div className={scoped('sp-diff-sources')}>
               {sources.map(([label, location]) => (
                 <span key={label}>
                   {label}: <code>{sourceLabel(location)}</code>
@@ -359,7 +374,7 @@ function ChangeDetails({
           )}
           {change.affectedOperations &&
             change.affectedOperations.length > 0 && (
-              <div className="sp-diff-affected-operations">
+              <div className={scoped('sp-diff-affected-operations')}>
                 <strong>
                   Affects {change.affectedOperations.length}{' '}
                   {change.affectedOperations.length === 1
@@ -412,12 +427,14 @@ function OperationChanges({
   );
 
   return (
-    <article className={`sp-diff-operation sp-diff-operation-${severity}`}>
+    <article
+      className={scoped(`sp-diff-operation sp-diff-operation-${severity}`)}
+    >
       {isOperation && (
-        <header className="sp-diff-operation-heading">
+        <header className={scoped('sp-diff-operation-heading')}>
           <div>
             <MethodBadge method={first.method!.toLowerCase()} />
-            <code className="sp-diff-path">{first.path}</code>
+            <code className={scoped('sp-diff-path')}>{first.path}</code>
           </div>
           <span>
             {changes.length} {changes.length === 1 ? 'change' : 'changes'}
@@ -425,14 +442,16 @@ function OperationChanges({
         </header>
       )}
       {isOperation && !wholeOperation && (
-        <div className="sp-diff-impact" aria-label="Operation impact">
+        <div className={scoped('sp-diff-impact')} aria-label="Operation impact">
           {OPERATION_AREAS.map(({ value, label }) => {
             const affected = changes.filter(
               (change) => inferredArea(change) === value,
             );
             return (
               <div
-                className={affected.length ? 'is-affected' : 'is-unchanged'}
+                className={scoped(
+                  affected.length ? 'is-affected' : 'is-unchanged',
+                )}
                 key={value}
               >
                 <span>{label}</span>
@@ -445,11 +464,11 @@ function OperationChanges({
         </div>
       )}
       {wholeOperation && (
-        <div className="sp-diff-whole-operation">
+        <div className={scoped('sp-diff-whole-operation')}>
           The entire operation was {wholeOperation.kind}.
         </div>
       )}
-      <div className="sp-diff-change-list">
+      <div className={scoped('sp-diff-change-list')}>
         {changes.map((change) => (
           <ChangeDetails
             key={change.id}
@@ -543,16 +562,18 @@ export function SpecDiff({
 
   return (
     <section
-      className={['speccy', `sp-theme-${theme}`, 'sp-diff', className]
-        .filter(Boolean)
-        .join(' ')}
+      className={scoped(
+        ['speccy', `sp-theme-${theme}`, 'sp-diff', className]
+          .filter(Boolean)
+          .join(' '),
+      )}
       style={
         accentColor
           ? ({ '--sp-accent': accentColor } as React.CSSProperties)
           : undefined
       }
     >
-      <header className="sp-diff-hero">
+      <header className={scoped('sp-diff-hero')}>
         <div>
           <div className="sp-eyebrow">OpenAPI diff</div>
           <Title>{title}</Title>
@@ -562,9 +583,9 @@ export function SpecDiff({
             {formatVersion(report.revision, 'Revision')}
           </p>
         </div>
-        <div className="sp-diff-summary" aria-label="Change summary">
+        <div className={scoped('sp-diff-summary')} aria-label="Change summary">
           {SEVERITIES.map(({ value, label }) => (
-            <div key={value} className={`sp-diff-summary-${value}`}>
+            <div key={value} className={scoped(`sp-diff-summary-${value}`)}>
               <strong>{counts[value]}</strong>
               <span>{label.toLowerCase()}</span>
             </div>
@@ -572,11 +593,11 @@ export function SpecDiff({
         </div>
       </header>
 
-      <div className="sp-diff-toolbar">
-        <nav className="sp-diff-filters" aria-label="Filter changes">
+      <div className={scoped('sp-diff-toolbar')}>
+        <nav className={scoped('sp-diff-filters')} aria-label="Filter changes">
           <button
             type="button"
-            className={filter === 'all' ? 'is-active' : ''}
+            className={scoped(filter === 'all' ? 'is-active' : '')}
             aria-pressed={filter === 'all'}
             onClick={() => setFilter('all')}
           >
@@ -586,7 +607,7 @@ export function SpecDiff({
             <button
               key={value}
               type="button"
-              className={filter === value ? 'is-active' : ''}
+              className={scoped(filter === value ? 'is-active' : '')}
               aria-pressed={filter === value}
               onClick={() => setFilter(value)}
             >
@@ -594,7 +615,7 @@ export function SpecDiff({
             </button>
           ))}
         </nav>
-        <div className="sp-diff-tools">
+        <div className={scoped('sp-diff-tools')}>
           <label>
             <span className="sp-visually-hidden">Filter by area</span>
             <select
@@ -611,7 +632,7 @@ export function SpecDiff({
               ))}
             </select>
           </label>
-          <label className="sp-diff-search">
+          <label className={scoped('sp-diff-search')}>
             <span className="sp-visually-hidden">Search changes</span>
             <input
               type="search"
@@ -639,14 +660,14 @@ export function SpecDiff({
         </div>
       </div>
 
-      <div className="sp-diff-groups">
+      <div className={scoped('sp-diff-groups')}>
         {groups.size === 0 && (
-          <p className="sp-diff-empty">No matching changes.</p>
+          <p className={scoped('sp-diff-empty')}>No matching changes.</p>
         )}
         {[...groups].map(([group, operations]) => (
-          <section className="sp-diff-group" key={group}>
+          <section className={scoped('sp-diff-group')} key={group}>
             <GroupHeading>{group}</GroupHeading>
-            <div className="sp-diff-operation-list">
+            <div className={scoped('sp-diff-operation-list')}>
               {[...operations].map(([operation, changes]) => (
                 <OperationChanges
                   key={operation}
