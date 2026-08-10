@@ -2841,7 +2841,6 @@ related:
   top: 24px;
 }
 .sp-schema-explorer-path,
-.sp-schema-explorer-facts dt,
 .sp-schema-explorer-detail-section h4,
 .sp-schema-explorer-constraints dt {
   color: var(--sp-muted);
@@ -2859,15 +2858,39 @@ related:
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 7px 0 10px;
+  margin: 7px 0 3px;
 }
 .sp-schema-explorer-detail-heading > code {
   color: var(--sp-text);
   font-size: 17px;
   font-weight: 500;
 }
+.sp-schema-explorer-required {
+  color: #a33d4c;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sp-schema-explorer-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 13px;
+  color: var(--sp-muted);
+  font-size: 8px;
+}
+.sp-schema-explorer-detail-meta code {
+  font-size: 9px;
+}
+.sp-schema-explorer-detail-meta > * + *::before {
+  content: '·';
+  margin-right: 7px;
+  color: var(--sp-muted);
+}
 .sp-schema-explorer-description {
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   color: color-mix(in srgb, var(--sp-text) 76%, var(--sp-muted));
   font-size: 11px;
 }
@@ -2876,33 +2899,8 @@ related:
   color: var(--sp-muted);
   font-style: italic;
 }
-.sp-schema-explorer-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-  border-top: 1px solid var(--sp-line);
-}
-.sp-schema-explorer-facts > div {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--sp-line);
-}
-.sp-schema-explorer-facts > div:nth-child(even) {
-  padding-left: 14px;
-}
-.sp-schema-explorer-facts dt {
-  margin-bottom: 2px;
-}
-.sp-schema-explorer-facts dd {
-  margin: 0;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-}
-.sp-schema-explorer-facts .sp-schema-explorer-schema-name {
-  color: var(--sp-accent);
-  font-weight: 600;
-}
 .sp-schema-explorer-detail-section {
-  margin-top: 18px;
+  margin-top: 16px;
 }
 .sp-schema-explorer-detail-section h4 {
   margin: 0 0 7px;
@@ -2941,6 +2939,7 @@ related:
 }
 .sp-schema-explorer-detail-section .sp-example {
   margin-top: 0;
+  padding: 9px 10px;
 }
 @media (max-width: 720px) {
   .sp-schema-explorer-shell {

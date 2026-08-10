@@ -260,10 +260,10 @@ describe('SchemaView composition', () => {
       />,
     );
 
-    const facts = container.querySelector('.sp-schema-explorer-facts');
-    expect(facts).toHaveTextContent('SchemaLocation');
-    expect(facts).toHaveTextContent('Typeobject');
-    expect(facts).not.toHaveTextContent('TypeLocation · object');
+    const meta = container.querySelector('.sp-schema-explorer-detail-meta');
+    expect(meta).toHaveTextContent('Schema Location');
+    expect(meta).toHaveTextContent('object');
+    expect(meta).not.toHaveTextContent('Location · object');
   });
 
   it('labels deprecated fields in the explorer row', () => {
@@ -288,6 +288,35 @@ describe('SchemaView composition', () => {
     expect(field.closest('.sp-schema-explorer-row')).toHaveClass(
       'is-deprecated',
     );
+  });
+
+  it('keeps required status compact and combines equal length constraints', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          required: ['countryCode'],
+          properties: {
+            countryCode: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 2,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      container.querySelector('.sp-schema-explorer-detail-heading'),
+    ).toHaveTextContent('countryCodeRequired');
+    expect(
+      container.querySelector('.sp-schema-explorer-detail-meta'),
+    ).toHaveTextContent('string');
+    expect(container.querySelector('.sp-schema-explorer-facts')).toBeNull();
+    expect(
+      container.querySelector('.sp-schema-explorer-constraints'),
+    ).toHaveTextContent('LengthExactly 2 characters');
   });
 
   it('toggles structure and details from an object row while keeping its icon actions separate', () => {

@@ -189,10 +189,23 @@ function ExplorerFieldDetails({
     constraints.push({ label: 'Minimum', value: schema.minimum });
   if (schema.maximum !== undefined)
     constraints.push({ label: 'Maximum', value: schema.maximum });
-  if (schema.minLength !== undefined)
-    constraints.push({ label: 'Minimum length', value: schema.minLength });
-  if (schema.maxLength !== undefined)
-    constraints.push({ label: 'Maximum length', value: schema.maxLength });
+  if (schema.minLength !== undefined && schema.minLength === schema.maxLength) {
+    constraints.push({
+      label: 'Length',
+      value: `Exactly ${schema.minLength} characters`,
+    });
+  } else {
+    if (schema.minLength !== undefined)
+      constraints.push({
+        label: 'Length',
+        value: `At least ${schema.minLength} characters`,
+      });
+    if (schema.maxLength !== undefined)
+      constraints.push({
+        label: 'Length',
+        value: `At most ${schema.maxLength} characters`,
+      });
+  }
   if (schema.pattern)
     constraints.push({ label: 'Pattern', value: schema.pattern });
   const example = field.exampleValue ?? schema.example;
@@ -204,45 +217,21 @@ function ExplorerFieldDetails({
       </div>
       <div className="sp-schema-explorer-detail-heading">
         <code>{field.name}</code>
+        {field.required && (
+          <span className="sp-schema-explorer-required">Required</span>
+        )}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
+      </div>
+      <div className="sp-schema-explorer-detail-meta">
+        {schema.title && <span>Schema {schema.title}</span>}
+        <code>{schemaTypeLabel(schema)}</code>
+        {schema.nullable && <span>Nullable</span>}
+        {schema.readOnly && <span>Read only</span>}
+        {schema.writeOnly && <span>Write only</span>}
       </div>
       <Markdown className="sp-schema-explorer-description">
         {schema.description}
       </Markdown>
-      <dl className="sp-schema-explorer-facts">
-        {schema.title && (
-          <div>
-            <dt>Schema</dt>
-            <dd className="sp-schema-explorer-schema-name">{schema.title}</dd>
-          </div>
-        )}
-        <div>
-          <dt>Type</dt>
-          <dd>{schemaTypeLabel(schema)}</dd>
-        </div>
-        <div>
-          <dt>Required</dt>
-          <dd>{field.required ? 'Yes' : 'No'}</dd>
-        </div>
-        {schema.nullable && (
-          <div>
-            <dt>Nullable</dt>
-            <dd>Yes</dd>
-          </div>
-        )}
-        {schema.readOnly && (
-          <div>
-            <dt>Access</dt>
-            <dd>Read only</dd>
-          </div>
-        )}
-        {schema.writeOnly && (
-          <div>
-            <dt>Access</dt>
-            <dd>Write only</dd>
-          </div>
-        )}
-      </dl>
       {enumValues && (
         <section className="sp-schema-explorer-detail-section">
           <h4>Allowed values</h4>
