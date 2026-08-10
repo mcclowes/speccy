@@ -495,10 +495,22 @@ function requestBodyValue(
     namedExample ??
     (media?.schema ? schemaExample(media.schema, 'request') : undefined) ??
     (contentType === 'application/json' ? {} : undefined);
+  return formatRequestBodyValue(example);
+}
+
+function formatRequestBodyValue(example: unknown): string {
   if (example === undefined) return '';
   return typeof example === 'string'
     ? example
     : JSON.stringify(example, null, 2);
+}
+
+function requestBodyExamples(media: MediaType | undefined) {
+  return Object.entries(media?.examples ?? {}).flatMap(([name, example]) =>
+    example.value === undefined
+      ? []
+      : [{ label: example.summary ?? name, value: example.value }],
+  );
 }
 
 function ResponseExamplePanel({
@@ -691,6 +703,8 @@ export function RequestRail({
   const optionalPickerRef = useRef<HTMLDivElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
+  const bodyExamples = requestBodyExamples(bodyMedia?.[1]);
+  const [activeBodyExample, setActiveBodyExample] = useState(0);
   const [body, setBody] = useState(() =>
     requestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
   );
@@ -1070,9 +1084,29 @@ export function RequestRail({
       )}
       {bodyMedia && item.method !== 'get' && item.method !== 'head' && (
         <section className="sp-rail-card">
-          <h3>
-            Body <small>{contentType}</small>
-          </h3>
+          <div className="sp-rail-card-heading">
+            <h3>
+              Body <small>{contentType}</small>
+            </h3>
+            {bodyExamples.length > 1 && (
+              <select
+                className="sp-example-select"
+                aria-label="Request body example"
+                value={activeBodyExample}
+                onChange={(event) => {
+                  const index = Number(event.target.value);
+                  setActiveBodyExample(index);
+                  setBody(formatRequestBodyValue(bodyExamples[index]?.value));
+                }}
+              >
+                {bodyExamples.map((example, index) => (
+                  <option value={index} key={`${example.label}-${index}`}>
+                    {example.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
           <label className="sp-field">
             <span>Request body</span>
             <textarea

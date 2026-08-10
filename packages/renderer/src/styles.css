@@ -1990,6 +1990,22 @@ related:
   margin: 0 0 14px;
   font-size: 13px;
 }
+.sp-rail-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sp-rail-card-heading h3 {
+  margin-bottom: 0;
+}
+.sp-rail-card-heading .sp-example-select {
+  max-width: 190px;
+  color: var(--sp-text);
+  background: var(--sp-bg);
+  border-color: var(--sp-line);
+}
 .sp-rail-card-description {
   margin: -6px 0 14px;
   color: var(--sp-muted);

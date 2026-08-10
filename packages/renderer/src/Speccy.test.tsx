@@ -1053,6 +1053,50 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
   });
 
+  it('prefills the request body from a selected named example', () => {
+    window.history.replaceState({}, '', '/api/create-company');
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              post: {
+                summary: 'Create company',
+                operationId: 'create-company',
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        basic: { value: { name: 'Acme' } },
+                        described: {
+                          summary: 'With a description',
+                          value: { name: 'Technicallium' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const input = screen.getByRole('textbox', { name: 'Request body' });
+    const exampleSelect = screen.getByRole('combobox', {
+      name: 'Request body example',
+    });
+    expect(input).toHaveValue('{\n  "name": "Acme"\n}');
+
+    fireEvent.change(exampleSelect, { target: { value: '1' } });
+
+    expect(input).toHaveValue('{\n  "name": "Technicallium"\n}');
+  });
+
   it('sizes the request body input to its content', () => {
     window.history.replaceState({}, '', '/api/create-company');
     let scrollHeight = 96;
