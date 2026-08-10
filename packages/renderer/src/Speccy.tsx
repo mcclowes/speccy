@@ -1303,6 +1303,13 @@ export function Speccy({
       {showDeveloperHints && (
         <DeveloperDiagnostics
           diagnostics={diagnostics}
+          currentPageDiagnostics={
+            activeOperation
+              ? diagnostics.filter(
+                  (diagnostic) => diagnostic.operationId === activeOperation.id,
+                )
+              : undefined
+          }
           storageScope={storageScope}
           showInlineHints={showInlineHints}
           onShowInlineHintsChange={setShowInlineHints}

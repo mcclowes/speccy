@@ -196,6 +196,7 @@ export function InlineDiagnostics({
 
 export function DeveloperDiagnostics({
   diagnostics,
+  currentPageDiagnostics,
   storageScope,
   showInlineHints,
   onShowInlineHintsChange,
@@ -204,11 +205,13 @@ export function DeveloperDiagnostics({
   onNavigate,
 }: {
   diagnostics: ApiDiagnostic[];
+  currentPageDiagnostics?: ApiDiagnostic[];
   storageScope: string;
   showInlineHints: boolean;
   onShowInlineHintsChange: (show: boolean) => void;
 } & DiagnosticNavigationProps) {
   const [open, setOpen] = useState(false);
+  const [scope, setScope] = useState<'page' | 'all'>('all');
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState(false);
@@ -216,13 +219,21 @@ export function DeveloperDiagnostics({
     `${storageScope}:ignored-diagnostic-rules`,
     [],
   );
-  const visible = useMemo(
+  const allVisible = useMemo(
     () =>
       diagnostics.filter(
         (diagnostic) => !ignoredRules.includes(diagnostic.ruleId),
       ),
     [diagnostics, ignoredRules],
   );
+  const pageVisible = useMemo(
+    () =>
+      currentPageDiagnostics?.filter(
+        (diagnostic) => !ignoredRules.includes(diagnostic.ruleId),
+      ),
+    [currentPageDiagnostics, ignoredRules],
+  );
+  const visible = scope === 'page' && pageVisible ? pageVisible : allVisible;
   const filtered = visible.filter(
     (diagnostic) =>
       (filter === 'all' || diagnostic.severity === filter) &&
@@ -250,13 +261,16 @@ export function DeveloperDiagnostics({
     <>
       <button
         type="button"
-        className={`sp-diagnostics-trigger ${counts.issue ? 'has-issues' : ''}`}
-        onClick={() => setOpen(true)}
-        aria-label={`API health: ${visible.length} finding${visible.length === 1 ? '' : 's'}`}
+        className={`sp-diagnostics-trigger ${allVisible.some((diagnostic) => diagnostic.severity === 'issue') ? 'has-issues' : ''}`}
+        onClick={() => {
+          setScope(currentPageDiagnostics ? 'page' : 'all');
+          setOpen(true);
+        }}
+        aria-label={`API health: ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`}
       >
         <span aria-hidden="true">!</span>
         <strong>API health</strong>
-        <small>{visible.length}</small>
+        <small>{allVisible.length}</small>
       </button>
       {open && (
         <div
@@ -266,7 +280,7 @@ export function DeveloperDiagnostics({
           }}
         >
           <aside
-            className="sp-diagnostics-drawer"
+            className={`sp-diagnostics-drawer ${pageVisible ? 'has-tabs' : ''}`}
             aria-label="API health"
             aria-modal="true"
             role="dialog"
@@ -325,6 +339,28 @@ export function DeveloperDiagnostics({
                 </button>
               </div>
             </header>
+            {pageVisible && (
+              <div className="sp-diagnostics-tabs" role="tablist">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={scope === 'page'}
+                  className={scope === 'page' ? 'is-active' : ''}
+                  onClick={() => setScope('page')}
+                >
+                  This endpoint <span>{pageVisible.length}</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={scope === 'all'}
+                  className={scope === 'all' ? 'is-active' : ''}
+                  onClick={() => setScope('all')}
+                >
+                  All API <span>{allVisible.length}</span>
+                </button>
+              </div>
+            )}
             <div className="sp-diagnostics-summary">
               {(['issue', 'warning', 'suggestion'] as const).map((severity) => (
                 <button

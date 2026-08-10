@@ -3627,6 +3627,9 @@ related:
   background: var(--sp-bg);
   box-shadow: -20px 0 60px rgba(8, 9, 13, 0.2);
 }
+.sp-diagnostics-drawer.has-tabs {
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+}
 .sp-diagnostics-drawer > header {
   min-width: 0;
   display: flex;
@@ -3721,6 +3724,48 @@ related:
 .sp-diagnostics-menu button:disabled {
   cursor: default;
   opacity: 0.45;
+}
+.sp-diagnostics-tabs {
+  min-width: 0;
+  display: flex;
+  gap: 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-diagnostics-tabs button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 0 10px;
+  color: var(--sp-muted);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+}
+.sp-diagnostics-tabs button::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: transparent;
+  content: '';
+}
+.sp-diagnostics-tabs button.is-active {
+  color: var(--sp-text);
+}
+.sp-diagnostics-tabs button.is-active::after {
+  background: var(--sp-accent);
+}
+.sp-diagnostics-tabs span {
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--sp-surface-soft);
+  text-align: center;
+  font-size: 9px;
 }
 .sp-diagnostics-summary {
   min-width: 0;

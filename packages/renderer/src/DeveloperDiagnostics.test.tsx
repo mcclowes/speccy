@@ -23,6 +23,14 @@ const findings: ApiDiagnostic[] = [
   },
 ];
 
+const apiFinding: ApiDiagnostic = {
+  ...findings[0]!,
+  id: 'missing-api-description',
+  ruleId: 'info-description',
+  message: 'API has no description.',
+  path: ['info'],
+};
+
 afterEach(() => {
   cleanup();
   window.localStorage.clear();
@@ -120,6 +128,35 @@ describe('developer diagnostics layout', () => {
     expect(
       await screen.findByRole('button', { name: 'Copied' }),
     ).toBeInTheDocument();
+  });
+
+  it('opens on findings for the current endpoint and allows viewing all API findings', () => {
+    render(
+      <DeveloperDiagnostics
+        diagnostics={[...findings, apiFinding]}
+        currentPageDiagnostics={findings}
+        storageScope="test"
+        showInlineHints
+        onShowInlineHintsChange={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+
+    expect(screen.getByRole('tab', { name: /This endpoint/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(
+      screen.getByText('GET /companies has no description.'),
+    ).toBeVisible();
+    expect(
+      screen.queryByText('API has no description.'),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /All API/ }));
+
+    expect(screen.getByText('API has no description.')).toBeVisible();
   });
 
   it('lets users hide contextual hints and restore them from API health', () => {
