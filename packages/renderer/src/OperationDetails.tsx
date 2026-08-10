@@ -18,7 +18,7 @@ import {
   type SecurityRequirement,
   type SecurityScheme,
 } from 'speccy-core';
-import { CodeBlock, CodeLines, CopyButton } from './CodeBlock';
+import { CodeBlock, CodeLines, CopyButton, TruncatedCode } from './CodeBlock';
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
@@ -576,6 +576,7 @@ function ResponseExamplePanel({
       value={JSON.stringify(activeExample.value, null, 2)}
       lineNumbers
       collapsibleValue={activeExample.value}
+      truncateLabel="response"
     />
   );
 }
@@ -593,13 +594,21 @@ function RequestExampleSection({
   label,
   value,
   code = false,
+  truncateLabel,
   children,
 }: {
   label: string;
   value: string;
   code?: boolean;
+  truncateLabel?: string;
   children?: ReactNode;
 }) {
+  const content = (
+    <pre className={code ? undefined : 'sp-code-numbered'}>
+      <code>{children ?? (code ? value : <CodeLines value={value} />)}</code>
+    </pre>
+  );
+
   return (
     <section className="sp-request-example-section">
       <header>
@@ -610,9 +619,13 @@ function RequestExampleSection({
           compact
         />
       </header>
-      <pre className={code ? undefined : 'sp-code-numbered'}>
-        <code>{children ?? (code ? value : <CodeLines value={value} />)}</code>
-      </pre>
+      {truncateLabel ? (
+        <TruncatedCode value={value} label={truncateLabel}>
+          {content}
+        </TruncatedCode>
+      ) : (
+        content
+      )}
     </section>
   );
 }
@@ -757,6 +770,7 @@ export function EndpointRequestDetails({
           <RequestExampleSection
             label="Body"
             value={formatRequestBodyValue(activeExample.value)}
+            truncateLabel="body"
           />
         )}
       </aside>

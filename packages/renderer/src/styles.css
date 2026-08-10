@@ -3442,6 +3442,40 @@ related:
   color: var(--sp-muted);
   font-style: italic;
 }
+.sp-code-clip-window {
+  position: relative;
+}
+.sp-code-clip.is-truncated .sp-code-clip-window > pre {
+  max-height: 360px;
+  overflow: hidden;
+}
+.sp-code-clip.is-truncated .sp-code-clip-window::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 56px;
+  background: linear-gradient(transparent, var(--sp-code));
+  pointer-events: none;
+}
+.sp-code-expand {
+  width: 100%;
+  padding: 10px 14px;
+  color: var(--sp-code-text);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--sp-code-border);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 120ms ease;
+}
+.sp-code-expand:hover,
+.sp-code-expand:focus-visible {
+  background: var(--sp-code-control);
+}
 .sp-json-key {
   color: var(--sp-json-key);
 }

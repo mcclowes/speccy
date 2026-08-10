@@ -23,6 +23,11 @@ const stories = [
     openNavigation: true,
   },
   {
+    name: 'long-response-example',
+    id: 'renderer-speccy--long-response-example',
+    viewport: { width: 1440, height: 1000 },
+  },
+  {
     name: 'long-endpoint-path',
     id: 'renderer-speccy--long-endpoint-path',
     viewport: { width: 1440, height: 900 },

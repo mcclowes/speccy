@@ -179,6 +179,47 @@ export const EndpointDark: Story = {
   },
 };
 
+export const LongResponseExample: Story = {
+  args: {
+    spec: {
+      ...exampleSpec,
+      paths: {
+        ...exampleSpec.paths,
+        '/settlements': {
+          get: {
+            tags: ['Settlements'],
+            summary: 'List settlements',
+            operationId: 'listSettlements',
+            responses: {
+              '200': {
+                description: 'A page of settlements.',
+                content: {
+                  'application/json': {
+                    example: {
+                      pageNumber: 1,
+                      pageSize: 100,
+                      totalResults: 2194,
+                      results: Array.from({ length: 12 }, (_, index) => ({
+                        id: `setl_01J8Y${index}`,
+                        amount: 4200 + index * 100,
+                        currency: 'GBP',
+                        status: 'paid',
+                        reference: `INV-${2048 + index}`,
+                      })),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    theme: 'light',
+    route: { page: 'operation', operationId: 'listsettlements' },
+  },
+};
+
 export const LongEndpointPath: Story = {
   args: {
     spec: {

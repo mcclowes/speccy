@@ -236,6 +236,36 @@ function CollapsibleJson({ value }: { value: unknown }) {
   );
 }
 
+const TRUNCATE_LINE_THRESHOLD = 35;
+
+export function TruncatedCode({
+  value,
+  label,
+  children,
+}: {
+  value: string;
+  label: string;
+  children: ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  if (value.split('\n').length <= TRUNCATE_LINE_THRESHOLD)
+    return <>{children}</>;
+
+  return (
+    <div className={`sp-code-clip${expanded ? '' : ' is-truncated'}`}>
+      <div className="sp-code-clip-window">{children}</div>
+      <button
+        type="button"
+        className="sp-code-expand"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? 'Show less' : `Show full ${label}`}
+      </button>
+    </div>
+  );
+}
+
 export function CopyButton({
   value,
   label = 'Copy',
@@ -274,6 +304,7 @@ export function CodeBlock({
   copyable = true,
   lineNumbers = false,
   collapsibleValue,
+  truncateLabel,
 }: {
   value: string;
   copyValue?: string;
@@ -283,7 +314,23 @@ export function CodeBlock({
   lineNumbers?: boolean;
   /** Raw (pre-serialization) JSON value. When set, renders as a foldable tree instead of the flat `value` text; `value` still drives copying. */
   collapsibleValue?: unknown;
+  /** When set, long values start clipped behind a "Show full <label>" toggle. */
+  truncateLabel?: string;
 }) {
+  const code = (
+    <pre className={lineNumbers ? 'sp-code-numbered' : ''}>
+      <code>
+        {collapsibleValue !== undefined ? (
+          <CollapsibleJson value={collapsibleValue} />
+        ) : lineNumbers ? (
+          <CodeLines value={value} />
+        ) : (
+          highlightedJson(value)
+        )}
+      </code>
+    </pre>
+  );
+
   return (
     <div className={`sp-code-block ${className}`.trim()}>
       {(title || copyable) && (
@@ -294,17 +341,13 @@ export function CodeBlock({
           {copyable && <CopyButton value={copyValue} />}
         </div>
       )}
-      <pre className={lineNumbers ? 'sp-code-numbered' : ''}>
-        <code>
-          {collapsibleValue !== undefined ? (
-            <CollapsibleJson value={collapsibleValue} />
-          ) : lineNumbers ? (
-            <CodeLines value={value} />
-          ) : (
-            highlightedJson(value)
-          )}
-        </code>
-      </pre>
+      {truncateLabel ? (
+        <TruncatedCode value={value} label={truncateLabel}>
+          {code}
+        </TruncatedCode>
+      ) : (
+        code
+      )}
     </div>
   );
 }

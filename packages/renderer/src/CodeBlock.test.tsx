@@ -68,6 +68,45 @@ describe('CodeBlock', () => {
     expect(nameLine.querySelector('.sp-json-key')).toHaveTextContent('"name"');
   });
 
+  it('truncates long values behind a show-full toggle when truncateLabel is set', () => {
+    const value = JSON.stringify(
+      { items: Array.from({ length: 40 }, (_, index) => index) },
+      null,
+      2,
+    );
+    const { container } = render(
+      <CodeBlock value={value} lineNumbers truncateLabel="response" />,
+    );
+
+    const clip = container.querySelector('.sp-code-clip');
+    expect(clip).toHaveClass('is-truncated');
+    const toggle = screen.getByRole('button', { name: 'Show full response' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(toggle);
+    expect(clip).not.toHaveClass('is-truncated');
+    expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show less' }));
+    expect(clip).toHaveClass('is-truncated');
+  });
+
+  it('leaves short values untouched when truncateLabel is set', () => {
+    const { container } = render(
+      <CodeBlock
+        value={'{\n  "name": "Speccy"\n}'}
+        lineNumbers
+        truncateLabel="response"
+      />,
+    );
+
+    expect(container.querySelector('.sp-code-clip')).not.toBeInTheDocument();
+    expect(container.querySelector('.sp-code-expand')).not.toBeInTheDocument();
+  });
+
   it('folds and unfolds objects and arrays when collapsibleValue is set', () => {
     const value = {
       supplierRef: { id: '8Ge', name: 'Speccy' },
