@@ -3550,7 +3550,7 @@ related:
 .sp-code-numbered .sp-code-line {
   position: relative;
   display: block;
-  padding-left: 2.8em;
+  padding-left: 3.1em;
 }
 .sp-code-numbered .sp-code-line::before {
   content: counter(sp-line);
@@ -3566,7 +3566,7 @@ related:
 .sp-code-fold {
   position: absolute;
   top: 0;
-  left: 1.8em;
+  left: 2.1em;
   width: 0.9em;
   padding: 0;
   color: var(--sp-muted);
