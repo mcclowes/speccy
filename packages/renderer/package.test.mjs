@@ -15,6 +15,30 @@ test('packs global and component styles in the public stylesheet', () => {
   assert.match(css, /\.OpenApiDownload_card \{/);
   assert.match(css, /\.RequestSample_sample \{/);
   assert.match(css, /\.Markdown_markdown \{/);
+  assert.ok(
+    css.includes(`.speccy code {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;`),
+  );
+  assert.ok(
+    css.includes(`.speccy pre {
+  margin: 0;
+  padding: 0;
+  overflow: visible;`),
+  );
+  assert.ok(
+    css.includes(`.speccy :is(ul, ol) {
+  margin: 0;
+  padding: 0;`),
+  );
+  assert.ok(
+    css.includes(`.speccy table {
+  display: table;
+  margin: 0;
+  overflow: visible;`),
+  );
   assert.doesNotMatch(css, /sourceMappingURL=/);
   assert.match(
     javascript,
