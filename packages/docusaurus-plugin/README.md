@@ -20,7 +20,6 @@ export default {
         spec: './static/openapi.yaml',
         renderer: {
           accentColor: '#6d5dfc',
-          theme: 'system',
         },
       },
     ],
@@ -40,5 +39,7 @@ import spec from '@site/static/openapi.json';
 ```
 
 Embedded references hide their internal sidebar by default. Set `showSidebar` to add it.
+
+Speccy follows Docusaurus's selected color mode, typography, and base font size by default. Set `renderer.theme` or `showThemeToggle` if the reference needs its own theme controls instead.
 
 Generated references show Speccy's API health guidance during local Docusaurus development and hide it in production builds. Override this with `renderer.showDeveloperHints` when you need explicit control. You can also pass `previousSpec` and `spectralDiagnostics` through the renderer options.

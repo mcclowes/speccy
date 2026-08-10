@@ -11,8 +11,22 @@ import { Speccy, type SpeccyProps } from 'speccy-renderer';
 
 export type OpenAPIProps = SpeccyProps;
 
-export function OpenAPI({ showSidebar = false, ...props }: OpenAPIProps) {
-  return <Speccy showSidebar={showSidebar} {...props} />;
+export function OpenAPI({
+  className = '',
+  showSidebar = false,
+  showThemeToggle = false,
+  theme = 'inherit',
+  ...props
+}: OpenAPIProps) {
+  return (
+    <Speccy
+      className={`sp-docusaurus ${className}`.trim()}
+      showSidebar={showSidebar}
+      showThemeToggle={showThemeToggle}
+      theme={theme}
+      {...props}
+    />
+  );
 }
 
 export { Speccy } from 'speccy-renderer';

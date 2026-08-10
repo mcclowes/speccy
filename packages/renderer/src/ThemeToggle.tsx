@@ -1,6 +1,6 @@
 import styles from './ThemeToggle.module.css';
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'system' | 'inherit';
 
 function MoonIcon() {
   return (
@@ -33,7 +33,7 @@ export function ThemeToggle({
   label?: 'action' | 'current';
 }) {
   const currentTheme =
-    theme === 'system'
+    theme === 'system' || theme === 'inherit'
       ? typeof window !== 'undefined' &&
         typeof window.matchMedia === 'function' &&
         window.matchMedia('(prefers-color-scheme: dark)').matches

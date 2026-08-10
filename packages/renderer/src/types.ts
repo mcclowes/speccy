@@ -24,7 +24,8 @@ export interface SpeccyProps {
   singleExpandedSidebarGroup?: boolean;
   /** Shows the renderer's persistent light/dark theme control. */
   showThemeToggle?: boolean;
-  theme?: 'light' | 'dark' | 'system';
+  /** Uses Speccy's theme, the operating-system preference, or the host page's theme. */
+  theme?: 'light' | 'dark' | 'system' | 'inherit';
   accentColor?: string;
   logo?: React.ReactNode;
   /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/${operationId}`. */
