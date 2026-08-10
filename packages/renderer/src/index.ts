@@ -20,6 +20,8 @@ export type { ResourceDensity } from './ResourceDetails';
 export { parseRoutePath, routePath } from './routing';
 export { serializeParameter } from './parameterSerialization';
 export type { SerializedParameter } from './parameterSerialization';
+export { serializeRequestBody } from './requestBodySerialization';
+export type { SerializedRequestBody } from './requestBodySerialization';
 export type { RoutePathOptions } from './routing';
 export {
   adaptOasdiffChangelog,
@@ -46,6 +48,7 @@ export type {
   DiffReport,
   DiffSeverity,
   DiffSourceLocation,
+  EncodingObject,
   DiffSpecVersion,
   ExampleObject,
   HeaderObject,

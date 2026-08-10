@@ -44,6 +44,7 @@ export interface TagModel {
   name: string;
   description?: string;
   longDescription?: string;
+  externalDocs?: { description?: string; url?: string };
   icon?: { url: string; alt?: string };
   operations: OperationModel[];
 }
@@ -486,6 +487,7 @@ export function createReferenceModel(
         name,
         description: declaredTag?.description,
         longDescription: declaredTag?.['x-longDescription'],
+        externalDocs: declaredTag?.externalDocs,
         icon: icon?.url ? { url: icon.url, alt: icon.alt } : undefined,
         operations: taggedOperations.filter(
           (operation) => operation.tag === name,

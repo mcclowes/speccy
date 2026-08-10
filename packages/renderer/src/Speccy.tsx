@@ -253,6 +253,12 @@ function EndpointPage({
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
           <Markdown>{item.operation.description}</Markdown>
+          {item.operation.externalDocs?.url && (
+            <a href={item.operation.externalDocs.url}>
+              {item.operation.externalDocs.description ??
+                'External documentation'}
+            </a>
+          )}
           <InlineDiagnostics
             diagnostics={diagnostics.filter(
               (diagnostic) => diagnostic.operationId === item.id,
@@ -727,6 +733,11 @@ function TagOverview({
           {tag.name}
         </h1>
         <Markdown>{tag.description}</Markdown>
+        {tag.externalDocs?.url && (
+          <a href={tag.externalDocs.url}>
+            {tag.externalDocs.description ?? 'External documentation'}
+          </a>
+        )}
         <InlineDiagnostics
           diagnostics={diagnostics.filter(
             (diagnostic) =>

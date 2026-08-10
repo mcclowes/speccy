@@ -262,4 +262,82 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(screen.getByText('Shared pet operations')).toBeInTheDocument();
     expect(screen.getByText('GET List pets')).toBeInTheDocument();
   });
+
+  it('renders external documentation, encodings, and complete security schemes', () => {
+    const spec = {
+      openapi: '3.1.1',
+      info: { title: 'Remaining objects', version: '1.0.0' },
+      paths: {
+        '/upload': {
+          post: {
+            operationId: 'upload',
+            externalDocs: {
+              description: 'Upload guide',
+              url: 'https://docs.example.com/upload',
+            },
+            requestBody: {
+              content: {
+                'multipart/form-data': {
+                  schema: {
+                    type: 'object',
+                    properties: { file: { type: 'string' } },
+                  },
+                  encoding: {
+                    file: {
+                      contentType: 'image/png',
+                      headers: {
+                        'X-Checksum': { description: 'File checksum' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        securitySchemes: {
+          certificate: {
+            type: 'mutualTLS',
+            description: 'Client certificate',
+          },
+          oauth: {
+            type: 'oauth2',
+            flows: {
+              authorizationCode: {
+                authorizationUrl: 'https://example.com/authorize',
+                tokenUrl: 'https://example.com/token',
+                refreshUrl: 'https://example.com/refresh',
+                scopes: {},
+              },
+            },
+          },
+        },
+      },
+    } as const;
+    const { rerender } = render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'upload' }}
+        spec={spec}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Upload guide' })).toHaveAttribute(
+      'href',
+      'https://docs.example.com/upload',
+    );
+    expect(screen.getByText('Encoding')).toBeInTheDocument();
+    expect(screen.getByText(/content type: image\/png/)).toBeInTheDocument();
+    expect(screen.getByText('File checksum')).toBeInTheDocument();
+
+    rerender(
+      <Speccy
+        route={{ page: 'reference', section: 'securitySchemes' }}
+        spec={spec}
+      />,
+    );
+    expect(screen.getByText('mutualTLS')).toBeInTheDocument();
+    expect(screen.getByText('https://example.com/refresh')).toBeInTheDocument();
+  });
 });

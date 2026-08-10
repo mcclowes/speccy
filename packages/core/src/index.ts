@@ -45,6 +45,7 @@ export type {
 } from './oasdiff';
 export type {
   CallbackObject,
+  EncodingObject,
   ExternalDocumentationObject,
   ExampleObject,
   HeaderObject,

@@ -36,6 +36,7 @@ import {
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { serializeParameter } from './parameterSerialization';
+import { serializeRequestBody } from './requestBodySerialization';
 import { RequestSample } from './RequestSample';
 import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 import { SchemaExplorer } from './SchemaExplorer';
@@ -1179,9 +1180,13 @@ export function RequestRail({
     }
   }
   const contentType = bodyMedia?.[0];
+  const wireBody =
+    contentType && bodyMedia?.[1]
+      ? serializeRequestBody(contentType, bodyMedia[1], body)
+      : undefined;
   if (contentType) {
-    headers.push(`Content-Type: ${contentType}`);
-    maskedHeaders.push(`Content-Type: ${contentType}`);
+    headers.push(`Content-Type: ${wireBody?.contentType ?? contentType}`);
+    maskedHeaders.push(`Content-Type: ${wireBody?.contentType ?? contentType}`);
   }
   const queryString = (items: Array<[string, string, boolean]>) =>
     items
@@ -1240,7 +1245,7 @@ export function RequestRail({
         body:
           item.method === 'get' || item.method === 'head' || !body
             ? undefined
-            : body,
+            : (wireBody?.body ?? body),
       });
       const responseBody = await response.text();
       let formattedBody = responseBody;
@@ -1537,7 +1542,7 @@ export function RequestRail({
           headers: maskedHeaders,
           body:
             body && item.method !== 'get' && item.method !== 'head'
-              ? body
+              ? (wireBody?.body ?? body)
               : undefined,
         }}
         copyRequest={{
@@ -1546,7 +1551,7 @@ export function RequestRail({
           headers,
           body:
             body && item.method !== 'get' && item.method !== 'head'
-              ? body
+              ? (wireBody?.body ?? body)
               : undefined,
         }}
       />

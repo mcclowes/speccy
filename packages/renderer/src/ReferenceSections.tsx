@@ -289,6 +289,11 @@ function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
                 Token URL: <code>{flow.tokenUrl}</code>
               </p>
             )}
+            {flow.refreshUrl && (
+              <p>
+                Refresh URL: <code>{flow.refreshUrl}</code>
+              </p>
+            )}
             {entries(flow.scopes).map(([scope, description]) => (
               <div key={scope}>
                 <code>{scope}</code> — {description}

@@ -38,6 +38,7 @@ export interface OpenAPIDocument {
   tags?: Array<{
     name?: string;
     description?: string;
+    externalDocs?: ExternalDocumentationObject;
     'x-longDescription'?: string;
     'x-icon'?: { url?: string; alt?: string };
   }>;
@@ -153,7 +154,15 @@ export interface MediaType extends SpecificationExtensions {
   schema?: SchemaObject;
   example?: unknown;
   examples?: Record<string, ExampleObject>;
-  encoding?: Record<string, Record<string, unknown>>;
+  encoding?: Record<string, EncodingObject>;
+}
+
+export interface EncodingObject extends SpecificationExtensions {
+  contentType?: string;
+  headers?: Record<string, HeaderObject>;
+  style?: string;
+  explode?: boolean;
+  allowReserved?: boolean;
 }
 
 export type HeaderObject = Omit<Parameter, 'name' | 'in'>;
@@ -172,7 +181,7 @@ export interface LinkObject extends SpecificationExtensions {
   parameters?: Record<string, unknown>;
   requestBody?: unknown;
   description?: string;
-  server?: { url?: string; description?: string };
+  server?: ServerObject;
   $ref?: string;
 }
 
@@ -237,6 +246,14 @@ export interface SchemaObject extends SpecificationExtensions {
   deprecated?: boolean;
   discriminator?:
     string | { propertyName?: string; mapping?: Record<string, string> };
+  xml?: {
+    name?: string;
+    namespace?: string;
+    prefix?: string;
+    attribute?: boolean;
+    wrapped?: boolean;
+  };
+  externalDocs?: ExternalDocumentationObject;
   additionalProperties?: boolean | SchemaObject;
   unevaluatedProperties?: Schema;
   unevaluatedItems?: Schema;
