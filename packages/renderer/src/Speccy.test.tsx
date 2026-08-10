@@ -438,7 +438,7 @@ describe('Speccy navigation', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('labels responses with their standard HTTP status phrase without repeating the description', () => {
+  it('shows response descriptions in the spec browser without extra status context', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(
       <Speccy
@@ -464,11 +464,13 @@ describe('Speccy navigation', () => {
     );
 
     expect(screen.getByText('OK')).toBeInTheDocument();
+    expect(document.querySelector('.sp-response-summary')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: '412' }));
-    expect(screen.getByText('Precondition Failed')).toBeInTheDocument();
-    expect(
-      screen.getByText('The company data has changed since it was last read.'),
-    ).toBeInTheDocument();
+    const description = screen.getByText(
+      'The company data has changed since it was last read.',
+    );
+    expect(description.closest('.sp-endpoint-response-detail')).not.toBeNull();
+    expect(screen.queryByText('Precondition Failed')).toBeNull();
   });
 
   it('opens a tag overview from an explicit navigation item', () => {
@@ -1575,9 +1577,7 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('tabpanel').parentElement).toHaveClass(
       'sp-response-content',
     );
-    expect(
-      container.querySelector('.sp-response-summary')?.parentElement,
-    ).toHaveClass('sp-response-content');
+    expect(container.querySelector('.sp-response-summary')).toBeNull();
     const headers = screen.getByText('Headers').closest('.sp-detail-list');
     const responseBody = container.querySelector('.sp-media-list');
     expect(headers?.compareDocumentPosition(responseBody!)).toBe(
