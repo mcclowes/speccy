@@ -969,11 +969,6 @@ export function RequestRail({
       {activeSchemes.length > 0 && (
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
-          <p className="sp-rail-card-description">
-            Add the {activeSchemes.length === 1 ? 'credential' : 'credentials'}{' '}
-            below to send an authenticated request. See Request → Authorization
-            for the required format.
-          </p>
           {requirements && requirements.length > 1 && (
             <label className="sp-field sp-auth-method">
               <span>Authorization method</span>
@@ -995,10 +990,14 @@ export function RequestRail({
           <div className="sp-auth-fields">
             {activeSchemes.map(({ name: schemeName, scheme }) => (
               <label className="sp-field" key={schemeName}>
-                <span>{scheme?.name ?? schemeName}</span>
+                <span>
+                  {scheme?.name ?? schemeName} <RequiredMark />
+                </span>
                 <div className="sp-secret-field">
                   <input
                     type={credentialVisible ? 'text' : 'password'}
+                    aria-label={scheme?.name ?? schemeName}
+                    required
                     autoComplete="off"
                     data-1p-ignore
                     value={credentials[schemeName] ?? ''}

@@ -881,9 +881,7 @@ describe('Speccy navigation', () => {
       screen.getByRole('heading', { level: 3, name: 'Authorization API key' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Add the credential below to send an authenticated request. See Request → Authorization for the required format.',
-      ),
+      within(requestBuilder).getByLabelText('Required'),
     ).toBeInTheDocument();
     fireEvent.change(authorization, { target: { value: 'secret token' } });
 
