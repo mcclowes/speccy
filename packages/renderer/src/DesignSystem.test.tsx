@@ -20,7 +20,7 @@ describe('design system primitives', () => {
     expect(screen.getByText('{userId}')).toHaveClass('sp-path-parameter');
   });
 
-  it('adds wrap opportunities after path separators without splitting parameters', () => {
+  it('adds wrap opportunities before path separators without splitting parameters', () => {
     const { container } = render(
       <ApiPath
         value="/companies/{companyId}/connections/{connectionId}"
@@ -29,6 +29,8 @@ describe('design system primitives', () => {
     );
 
     expect(container.querySelectorAll('wbr')).toHaveLength(4);
+    expect(container.querySelector('code')?.innerHTML).not.toContain('/<wbr>');
+    expect(container.querySelector('code')?.innerHTML).toContain('<wbr>/');
     expect(screen.getByText('{companyId}')).toHaveClass('sp-path-parameter');
     expect(screen.getByText('{connectionId}')).toHaveClass('sp-path-parameter');
   });

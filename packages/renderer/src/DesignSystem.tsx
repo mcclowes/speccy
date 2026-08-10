@@ -97,7 +97,7 @@ export function ApiPath({
                   <Fragment key={`${segment}-${segmentIndex}`}>
                     {segmentIndex > 0 && (
                       <>
-                        /<wbr />
+                        <wbr />/
                       </>
                     )}
                     {segment}
