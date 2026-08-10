@@ -3679,6 +3679,9 @@ related:
   max-height: 360px;
   overflow: hidden;
 }
+.sp-code-clip:not(.is-truncated) .sp-code-clip-window > pre {
+  max-height: none;
+}
 .sp-code-clip.is-truncated .sp-code-clip-window::after {
   content: '';
   position: absolute;

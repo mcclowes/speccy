@@ -61,3 +61,28 @@ for (const story of stories) {
     });
   });
 }
+
+test('long response example expands on its initial render', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(
+    '/iframe.html?id=renderer-speccy--long-response-example&viewMode=story',
+  );
+  await page.getByRole('button', { name: 'Show full response' }).click();
+
+  const clip = page.locator('.sp-response-example .sp-code-clip');
+  const code = clip.locator('pre');
+  await expect(clip).not.toHaveClass(/is-truncated/);
+  await expect(code).toHaveCSS('max-height', 'none');
+  await expect
+    .poll(async () => {
+      const [clipBox, codeBox] = await Promise.all([
+        clip.boundingBox(),
+        code.boundingBox(),
+      ]);
+      if (!clipBox || !codeBox) return false;
+      return clipBox.height >= codeBox.height;
+    })
+    .toBe(true);
+});
