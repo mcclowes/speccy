@@ -67,7 +67,8 @@ related:
 .speccy select {
   font: inherit;
 }
-.speccy input::placeholder {
+.speccy input::placeholder,
+.speccy textarea::placeholder {
   color: color-mix(in srgb, var(--sp-muted) 38%, var(--sp-bg));
   opacity: 1;
 }
