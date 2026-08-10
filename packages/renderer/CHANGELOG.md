@@ -1,5 +1,11 @@
 # speccy-renderer
 
+## 0.4.0
+
+### Minor Changes
+
+- [`8f79a0e`](https://github.com/mcclowes/speccy/commit/8f79a0e6adda3c24953c4daacf1ee75483cffc29) Thanks [@mcclowes](https://github.com/mcclowes)! - Redesign operation details with schema explorers for parameters and response headers, focused request examples, collapsible code blocks, and clearer response content.
+
 ## 0.3.1
 
 ### Patch Changes
