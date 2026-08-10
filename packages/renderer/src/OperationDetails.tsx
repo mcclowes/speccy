@@ -293,7 +293,7 @@ export function RequestRail({
   const parameters = [...(item.pathItem.parameters ?? []), ...(item.operation.parameters ?? [])];
   const parameterDefaults = Object.fromEntries(parameters.map((parameter) => [
     `${parameter.in}-${parameter.name}`,
-    String(parameter.example ?? parameter.schema?.default ?? ''),
+    String(parameter.schema?.default ?? ''),
   ]));
   const [storedValues, setStoredValues] = useLocalState<Record<string, string>>(`${storageScope}:parameters`, {});
   const values = { ...parameterDefaults, ...storedValues };

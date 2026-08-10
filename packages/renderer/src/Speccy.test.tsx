@@ -435,6 +435,24 @@ describe('Speccy navigation', () => {
     expect(screen.getByText(/https:\/\/api\.example\.com\/companies\/co%20123\?page=1/)).toBeInTheDocument();
   });
 
+  it('leaves parameter examples out of request inputs', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Test API' }, servers: [{ url: 'https://api.example.com' }],
+      paths: { '/companies': { get: {
+        summary: 'Get companies', operationId: 'get-companies',
+        parameters: [
+          { name: 'tags', in: 'query', example: 'region=uk && team=invoice-finance', schema: { type: 'string' } },
+          { name: 'cursor', in: 'query', schema: { type: 'string', example: 'next-page' } },
+        ],
+      } } },
+    }} basePath="/api" />);
+
+    expect(screen.getByRole('textbox', { name: /tags/ })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: /cursor/ })).toHaveValue('');
+    expect(screen.getByText(/https:\/\/api\.example\.com\/companies/)).toBeInTheDocument();
+  });
+
   it('masks authorization in the request sample while preserving the copied request', async () => {
     window.history.replaceState({}, '', '/api/get-companies');
     const writeText = vi.fn().mockResolvedValue(undefined);
