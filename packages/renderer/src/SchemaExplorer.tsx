@@ -175,8 +175,20 @@ function ExplorerTree({
               )}
             </span>
             <span className="sp-schema-explorer-type">
-              {schemaLabel(field.schema)}
-              {field.schema.nullable && <span>?</span>}
+              {field.schema.title && (
+                <>
+                  <span
+                    className="sp-schema-explorer-model"
+                    title={field.schema.title}
+                  >
+                    {field.schema.title} ·&nbsp;
+                  </span>
+                </>
+              )}
+              <span className="sp-schema-explorer-primitive">
+                {schemaTypeLabel(field.schema)}
+                {field.schema.nullable && <span>?</span>}
+              </span>
             </span>
           </button>
         </div>

@@ -2877,15 +2877,15 @@ related:
 .sp-schema-explorer-name {
   display: flex;
   min-width: 0;
+  flex: 0 0 auto;
   align-items: center;
   gap: 7px;
 }
 .sp-schema-explorer-name code {
-  overflow: hidden;
   color: var(--sp-text);
   font-size: 10px;
   font-weight: 500;
-  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sp-schema-explorer-name .sp-required {
   font-size: 11px;
@@ -2904,15 +2904,22 @@ related:
   text-transform: uppercase;
 }
 .sp-schema-explorer-type {
+  display: flex;
+  min-width: 0;
   flex: 0 1 auto;
-  overflow: hidden;
   color: var(--sp-muted);
   font-family: 'DM Mono', monospace;
   font-size: 9px;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.sp-schema-explorer-type > span {
+.sp-schema-explorer-model {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sp-schema-explorer-primitive {
+  flex: 0 0 auto;
+}
+.sp-schema-explorer-primitive > span {
   color: var(--sp-accent);
 }
 .sp-schema-explorer-inspector {

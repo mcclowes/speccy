@@ -352,6 +352,27 @@ describe('SchemaView composition', () => {
     expect(meta).not.toHaveTextContent('Location · object');
   });
 
+  it('separates a field model from its non-shrinking primitive type', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            location: { title: 'Location', type: 'object' },
+          },
+        }}
+      />,
+    );
+
+    const rowType = container.querySelector('.sp-schema-explorer-type');
+    expect(
+      rowType?.querySelector('.sp-schema-explorer-model'),
+    ).toHaveTextContent('Location');
+    expect(
+      rowType?.querySelector('.sp-schema-explorer-primitive'),
+    ).toHaveTextContent('object');
+  });
+
   it('labels deprecated fields in the explorer row', () => {
     render(
       <SchemaView
