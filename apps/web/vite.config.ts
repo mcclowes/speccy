@@ -56,9 +56,11 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   build: {
+    chunkSizeWarningLimit: 600,
     sourcemap: true,
     rollupOptions: {
       output: {
+        onlyExplicitManualChunks: true,
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
@@ -70,11 +72,23 @@ export default defineConfig(({ mode }) => ({
             return 'react';
           }
 
-          if (id.includes('/yaml/')) {
-            return 'yaml';
+          if (id.includes('/@stoplight/spectral-rulesets/')) {
+            return 'spectral-rulesets';
           }
 
-          return 'vendor';
+          if (
+            id.includes('/ajv/') ||
+            id.includes('/ajv-formats/') ||
+            id.includes('/ajv-errors/')
+          ) {
+            return 'json-schema';
+          }
+
+          if (id.includes('/lodash/')) {
+            return 'lodash';
+          }
+
+          return undefined;
         },
       },
     },

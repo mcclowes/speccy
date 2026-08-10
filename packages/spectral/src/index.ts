@@ -7,7 +7,7 @@
  */
 
 import { Spectral } from '@stoplight/spectral-core';
-import { oas } from '@stoplight/spectral-rulesets';
+import oas from '@stoplight/spectral-rulesets/dist/oas';
 import type { OpenAPIDocument, SpectralDiagnosticInput } from 'speccy-core';
 
 export async function runSpectral(
