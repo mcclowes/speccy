@@ -55,6 +55,7 @@ export type {
   PathItem,
   RequestBody,
   ResponseObject,
+  Schema,
   SchemaObject,
   SecurityRequirement,
   SecurityScheme,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createReferenceModel, parseSpec, slugify } from './model';
+import type { SchemaObject } from './types';
 
 describe('parseSpec', () => {
   it('parses YAML and JSON input', () => {
@@ -567,7 +568,8 @@ paths:
 
     expect(model.document.servers?.[0]?.url).toBe('https://api.example.com/v2');
     expect(
-      model.document.components?.schemas?.Pet?.properties?.name?.type,
+      (model.document.components?.schemas?.Pet as SchemaObject)?.properties
+        ?.name?.type,
     ).toBe('string');
     expect(model.operations[0]?.operation.parameters).toEqual([]);
     expect(

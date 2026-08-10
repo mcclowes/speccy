@@ -45,12 +45,12 @@ export interface OpenAPIDocument {
   paths?: Record<string, PathItem>;
   webhooks?: Record<string, PathItem>;
   security?: SecurityRequirement[];
-  definitions?: Record<string, SchemaObject>;
+  definitions?: Record<string, Schema>;
   parameters?: Record<string, Parameter>;
   responses?: Record<string, ResponseObject>;
   securityDefinitions?: Record<string, SecurityScheme>;
   components?: {
-    schemas?: Record<string, SchemaObject>;
+    schemas?: Record<string, Schema>;
     parameters?: Record<string, Parameter>;
     requestBodies?: Record<string, RequestBody>;
     responses?: Record<string, ResponseObject>;
@@ -189,6 +189,8 @@ export interface OAuthFlow {
   refreshUrl?: string;
   scopes?: Record<string, string>;
 }
+
+export type Schema = boolean | SchemaObject;
 
 export interface SchemaObject extends SpecificationExtensions {
   type?: string;

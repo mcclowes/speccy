@@ -75,7 +75,10 @@ function schemaName(ref: string | undefined) {
 function componentSchemas(
   document: OpenAPIDocument,
 ): Record<string, SchemaObject> {
-  return document.components?.schemas ?? document.definitions ?? {};
+  return (document.components?.schemas ?? document.definitions ?? {}) as Record<
+    string,
+    SchemaObject
+  >;
 }
 
 /** Follows `$ref` chains within one document so inline and referenced schemas compare alike. */

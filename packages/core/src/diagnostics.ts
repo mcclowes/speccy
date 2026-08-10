@@ -999,7 +999,8 @@ export function analyzeOpenApi(
   for (const [name, schema] of Object.entries(
     document.components?.schemas ?? document.definitions ?? {},
   ))
-    visitSchema(schema, ['components', 'schemas', name], add, {});
+    if (typeof schema !== 'boolean')
+      visitSchema(schema, ['components', 'schemas', name], add, {});
   for (const [eventName, pathItem] of Object.entries(document.webhooks ?? {})) {
     if (
       !/[a-z0-9]+\.(?:created|updated|deleted|failed|completed|authorized|canceled)$/i.test(

@@ -13,7 +13,7 @@ import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer, structuralObjectSchema } from './SchemaExplorer';
-import type { MediaType, SchemaObject } from 'speccy-core';
+import type { MediaType, Schema, SchemaObject } from 'speccy-core';
 
 function schemaLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';
@@ -114,7 +114,7 @@ export function SchemaView({
   summaryOnly = false,
   exampleValue,
 }: {
-  schema?: SchemaObject;
+  schema?: Schema;
   name?: string;
   required?: boolean;
   depth?: number;
@@ -126,7 +126,14 @@ export function SchemaView({
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [structureOpen, setStructureOpen] = useState(!name);
-  if (!schema) return null;
+  if (schema === undefined) return null;
+  if (typeof schema === 'boolean') {
+    return (
+      <p className="sp-schema-boolean">
+        {schema ? 'Any value is allowed.' : 'No value is allowed.'}
+      </p>
+    );
+  }
   const explorerSchema = structuralObjectSchema(schema);
   const exampleSchema =
     exampleValue !== null &&

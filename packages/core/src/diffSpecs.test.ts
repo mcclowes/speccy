@@ -799,8 +799,9 @@ describe('diffSpecs', () => {
 
     it('counts a nested shared component change once and attributes it to the reaching operation', () => {
       const revision = clone(managedCards);
-      delete revision.components!.schemas!.ManagedInstrumentBalance!.properties!
-        .available;
+      delete (
+        revision.components!.schemas!.ManagedInstrumentBalance as SchemaObject
+      ).properties!.available;
       const changes = find(
         diffSpecs(managedCards, revision),
         'response-field-removed',
@@ -814,8 +815,9 @@ describe('diffSpecs', () => {
 
     it('reads a change through a discriminated union without repeating it per variant', () => {
       const revision = clone(managedCards);
-      revision.components!.schemas!.ManagedCard!.properties!.mode!.type =
-        'integer';
+      (
+        revision.components!.schemas!.ManagedCard as SchemaObject
+      ).properties!.mode!.type = 'integer';
       const changes = find(
         diffSpecs(managedCards, revision),
         'field-type-changed',

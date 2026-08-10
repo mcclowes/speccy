@@ -51,4 +51,25 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(screen.getByText('https://eu.example.com/v1')).toBeInTheDocument();
     expect(screen.getByText(/Deployment region/)).toBeInTheDocument();
   });
+
+  it('renders boolean schemas', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'schemas' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Boolean schemas', version: '1.0.0' },
+          components: {
+            schemas: {
+              Anything: true,
+              Never: false,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Any value is allowed.')).toBeInTheDocument();
+    expect(screen.getByText('No value is allowed.')).toBeInTheDocument();
+  });
 });
