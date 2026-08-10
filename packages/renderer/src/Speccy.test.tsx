@@ -1269,6 +1269,21 @@ describe('Speccy navigation', () => {
     );
     expect(within(example!).getByText('Query parameters')).toBeInTheDocument();
     expect(example).toHaveTextContent('"pageSize": 25');
+    const querySection = within(example!)
+      .getByText('Query parameters')
+      .closest<HTMLElement>('.sp-request-example-section')!;
+    const queryToggle = within(querySection).getByRole('button', {
+      name: 'Collapse',
+    });
+    expect(queryToggle).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(queryToggle);
+    expect(
+      within(querySection).getByRole('button', { name: 'Expand' }),
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(querySection).not.toHaveTextContent('"pageSize": 25');
+    fireEvent.click(
+      within(querySection).getByRole('button', { name: 'Expand' }),
+    );
     expect(within(example!).getByText('Headers')).toBeInTheDocument();
     expect(example).toHaveTextContent('"X-Request-ID": "request-456"');
     expect(example?.querySelectorAll('.sp-json-key')).toHaveLength(2);

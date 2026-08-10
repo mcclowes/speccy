@@ -3531,8 +3531,20 @@ related:
   text-align: center;
   user-select: none;
 }
+.sp-code-fold > span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  transition: transform 120ms ease;
+}
+.sp-code-fold[aria-expanded='false'] > span {
+  transform: translate(-1px, -1px) rotate(-45deg);
+}
 .sp-code-fold:hover {
-  color: var(--sp-text);
+  color: var(--sp-code-text);
 }
 .sp-code-fold-summary {
   padding: 0 0.3em;

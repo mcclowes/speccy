@@ -18,7 +18,13 @@ import {
   type SecurityRequirement,
   type SecurityScheme,
 } from 'speccy-core';
-import { CodeBlock, CodeLines, CopyButton, TruncatedCode } from './CodeBlock';
+import {
+  CodeBlock,
+  CodeLines,
+  CollapsibleJson,
+  CopyButton,
+  TruncatedCode,
+} from './CodeBlock';
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
@@ -594,18 +600,29 @@ function RequestExampleSection({
   label,
   value,
   code = false,
+  collapsibleValue,
   truncateLabel,
   children,
 }: {
   label: string;
   value: string;
   code?: boolean;
+  collapsibleValue?: unknown;
   truncateLabel?: string;
   children?: ReactNode;
 }) {
   const content = (
     <pre className={code ? undefined : 'sp-code-numbered'}>
-      <code>{children ?? (code ? value : <CodeLines value={value} />)}</code>
+      <code>
+        {children ??
+          (collapsibleValue !== undefined ? (
+            <CollapsibleJson value={collapsibleValue} />
+          ) : code ? (
+            value
+          ) : (
+            <CodeLines value={value} />
+          ))}
+      </code>
     </pre>
   );
 
@@ -758,18 +775,21 @@ export function EndpointRequestDetails({
           <RequestExampleSection
             label="Query parameters"
             value={JSON.stringify(parameterObject(queryParameters), null, 2)}
+            collapsibleValue={parameterObject(queryParameters)}
           />
         )}
         {headerParameters.length > 0 && (
           <RequestExampleSection
             label="Headers"
             value={JSON.stringify(parameterObject(headerParameters), null, 2)}
+            collapsibleValue={parameterObject(headerParameters)}
           />
         )}
         {activeExample && (
           <RequestExampleSection
             label="Body"
             value={formatRequestBodyValue(activeExample.value)}
+            collapsibleValue={activeExample.value}
             truncateLabel="body"
           />
         )}

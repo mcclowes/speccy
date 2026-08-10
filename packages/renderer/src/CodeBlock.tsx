@@ -91,9 +91,10 @@ function FoldToggle({
       type="button"
       className="sp-code-fold"
       aria-label={collapsed ? 'Expand' : 'Collapse'}
+      aria-expanded={!collapsed}
       onClick={onToggle}
     >
-      {collapsed ? '▸' : '▾'}
+      <span aria-hidden="true" />
     </button>
   );
 }
@@ -210,7 +211,7 @@ function jsonRows({
   return [openRow, ...childRows, closeRow];
 }
 
-function CollapsibleJson({ value }: { value: unknown }) {
+export function CollapsibleJson({ value }: { value: unknown }) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   function toggle(path: string) {

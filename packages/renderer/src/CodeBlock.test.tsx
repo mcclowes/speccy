@@ -135,7 +135,7 @@ describe('CodeBlock', () => {
 
     expect(
       within(supplierRefLine).getByRole('button', { name: 'Expand' }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute('aria-expanded', 'false');
     expect(supplierRefLine).toHaveTextContent('2 keys');
     expect(container.querySelectorAll('.sp-code-line').length).toBeLessThan(
       expandedLines.length,
