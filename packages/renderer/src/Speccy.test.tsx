@@ -1055,6 +1055,7 @@ describe('Speccy navigation', () => {
                 summary: 'Create company',
                 operationId: 'create-company',
                 requestBody: {
+                  required: true,
                   content: {
                     'application/json': {
                       schema: {
@@ -1077,7 +1078,12 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    expect(screen.getByRole('textbox', { name: 'Request body' })).toHaveValue(
+    const requestBody = screen.getByRole('textbox', { name: 'Request body' });
+    expect(requestBody).toBeRequired();
+    expect(
+      within(requestBody.closest('label')!).getByTitle('Required'),
+    ).toBeInTheDocument();
+    expect(requestBody).toHaveValue(
       JSON.stringify(
         {
           name: 'Acme',

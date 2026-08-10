@@ -1173,9 +1173,14 @@ export function RequestRail({
             )}
           </div>
           <label className="sp-field">
-            <span>Request body</span>
+            <span>
+              Request body{' '}
+              {item.operation.requestBody?.required && <RequiredMark />}
+            </span>
             <textarea
               ref={bodyInputRef}
+              aria-label="Request body"
+              required={item.operation.requestBody?.required}
               value={body}
               onChange={(event) => setBody(event.target.value)}
               placeholder={
