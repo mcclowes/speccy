@@ -11,6 +11,22 @@ import { useState, type ReactNode } from 'react';
 
 const JSON_TOKEN_PATTERN = /("(?:\\.|[^"\\])*")(?=\s*:)|("(?:\\.|[^"\\])*")|(-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b/g;
 
+function highlightedJsonLine(line: string): ReactNode {
+  const tokens: ReactNode[] = [];
+  let cursor = 0;
+
+  for (const match of line.matchAll(JSON_TOKEN_PATTERN)) {
+    const index = match.index;
+    if (index > cursor) tokens.push(line.slice(cursor, index));
+    const type = match[1] ? 'key' : match[2] ? 'string' : match[3] ? 'number' : 'literal';
+    tokens.push(<span className={`sp-json-${type}`} key={index}>{match[0]}</span>);
+    cursor = index + match[0].length;
+  }
+
+  if (cursor < line.length) tokens.push(line.slice(cursor));
+  return tokens;
+}
+
 function highlightedJson(value: string): ReactNode {
   try {
     JSON.parse(value);
@@ -18,19 +34,24 @@ function highlightedJson(value: string): ReactNode {
     return value;
   }
 
-  const tokens: ReactNode[] = [];
-  let cursor = 0;
+  return highlightedJsonLine(value);
+}
 
-  for (const match of value.matchAll(JSON_TOKEN_PATTERN)) {
-    const index = match.index;
-    if (index > cursor) tokens.push(value.slice(cursor, index));
-    const type = match[1] ? 'key' : match[2] ? 'string' : match[3] ? 'number' : 'literal';
-    tokens.push(<span className={`sp-json-${type}`} key={index}>{match[0]}</span>);
-    cursor = index + match[0].length;
+function CodeLines({ value }: { value: string }) {
+  let isJson = true;
+  try {
+    JSON.parse(value);
+  } catch {
+    isJson = false;
   }
 
-  if (cursor < value.length) tokens.push(value.slice(cursor));
-  return tokens;
+  return (
+    <>
+      {value.split('\n').map((line, index) => (
+        <span className="sp-code-line" key={index}>{isJson ? highlightedJsonLine(line) : line}</span>
+      ))}
+    </>
+  );
 }
 
 export function CopyButton({ value }: { value: string }) {
@@ -51,12 +72,14 @@ export function CodeBlock({
   title,
   className = '',
   copyable = true,
+  lineNumbers = false,
 }: {
   value: string;
   copyValue?: string;
   title?: ReactNode;
   className?: string;
   copyable?: boolean;
+  lineNumbers?: boolean;
 }) {
   return (
     <div className={`sp-code-block ${className}`.trim()}>
@@ -66,7 +89,9 @@ export function CodeBlock({
           {copyable && <CopyButton value={copyValue} />}
         </div>
       )}
-      <pre><code>{highlightedJson(value)}</code></pre>
+      <pre className={lineNumbers ? 'sp-code-numbered' : ''}>
+        <code>{lineNumbers ? <CodeLines value={value} /> : highlightedJson(value)}</code>
+      </pre>
     </div>
   );
 }

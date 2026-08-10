@@ -33,4 +33,15 @@ describe('CodeBlock', () => {
     rerender(<CodeBlock value="curl https://example.com" />);
     expect(container.querySelector('code span')).not.toBeInTheDocument();
   });
+
+  it('renders one numbered line per source line when lineNumbers is set', () => {
+    const { container } = render(<CodeBlock value={'{\n  "name": "Speccy"\n}'} lineNumbers />);
+
+    expect(container.querySelector('pre')).toHaveClass('sp-code-numbered');
+    const lines = container.querySelectorAll('.sp-code-line');
+    expect(lines).toHaveLength(3);
+    const nameLine = lines[1]!;
+    expect(nameLine).toHaveTextContent('"name": "Speccy"');
+    expect(nameLine.querySelector('.sp-json-key')).toHaveTextContent('"name"');
+  });
 });
