@@ -534,7 +534,6 @@ related:
   color: var(--sp-text);
   background: var(--sp-surface-soft);
   border-radius: 7px;
-  font-weight: 700;
 }
 .sp-nav-operations {
   margin: 3px 4px 10px 8px;
