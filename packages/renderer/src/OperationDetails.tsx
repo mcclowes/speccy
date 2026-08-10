@@ -458,11 +458,11 @@ function responseExamples(
   }
   if (media.schema?.example !== undefined)
     examples.push({ label: 'Generic example', value: media.schema.example });
-  if (examples.length === 0 && media.schema) {
-    const generated = schemaExample(media.schema);
-    if (generated !== undefined)
-      examples.push({ label: 'Generated example', value: generated });
-  }
+  if (examples.length === 0 && media.schema)
+    examples.push({
+      label: 'Generated example',
+      value: schemaExample(media.schema),
+    });
   return examples;
 }
 
@@ -502,8 +502,7 @@ function schemaExample(
   if (schema.format === 'date-time') return '2024-01-01T00:00:00Z';
   if (schema.format === 'date') return '2024-01-01';
   if (schema.format === 'uuid') return '00000000-0000-4000-8000-000000000000';
-  if (schema.type === 'string') return 'string';
-  return undefined;
+  return 'string';
 }
 
 function requestBodyValue(

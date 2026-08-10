@@ -22,17 +22,8 @@ function schemaLabel(schema?: SchemaObject): string {
       ? `array<${schemaLabel(schema.items)}>`
       : schema.enum
         ? 'enum'
-        : [schema.type ?? (schema.properties ? 'object' : 'any'), schema.format]
-            .filter(Boolean)
-            .join(' · ');
+        : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
   return [schema.title, type].filter(Boolean).join(' · ');
-}
-
-function primitiveIcon(schema: SchemaObject): string {
-  if (schema.type === 'string' || schema.enum) return 'Aa';
-  if (schema.type === 'number' || schema.type === 'integer') return '#';
-  if (schema.type === 'boolean') return '01';
-  return '?';
 }
 
 function alternativeName(schema: SchemaObject, index: number): string {
@@ -426,7 +417,7 @@ export function SchemaView({
       <section className={`${className} sp-schema-primitive`}>
         <header className="sp-schema-primitive-header">
           <span className="sp-schema-primitive-icon" aria-hidden="true">
-            {primitiveIcon(schema)}
+            Aa
           </span>
           <div>{header}</div>
         </header>
