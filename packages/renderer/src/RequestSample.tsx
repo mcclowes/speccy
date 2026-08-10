@@ -260,7 +260,7 @@ export function RequestSample({
       </header>
       {expanded && (
         <div className="sp-request-sample-code">
-          <CopyButton value={copySample} />
+          <CopyButton value={copySample} compact />
           <CodeBlock value={sample} copyable={false} />
         </div>
       )}

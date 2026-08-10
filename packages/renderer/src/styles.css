@@ -2147,10 +2147,6 @@ related:
   transition: transform 120ms ease;
 }
 
-.sp-request-sample-toggle[aria-expanded='true'] .sp-disclosure-chevron {
-  transform: rotate(180deg);
-}
-
 .sp-request-sample-code {
   position: relative;
   border-top: 1px solid var(--sp-code-border);
@@ -2164,7 +2160,7 @@ related:
 }
 
 .sp-request-sample .sp-request-sample-code pre {
-  padding-top: 50px;
+  padding: 18px 46px 18px 18px;
 }
 .sp-rail-card {
   overflow: hidden;
