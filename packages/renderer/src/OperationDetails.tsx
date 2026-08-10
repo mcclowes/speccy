@@ -457,6 +457,9 @@ export function RequestRail({
               </div>}
             </div>}
           </div>
+          {requestBuilderParameters.length === 0 && (
+            <p className="sp-rail-empty">No parameters selected. Add an optional parameter to include it in the request.</p>
+          )}
           <div className="sp-rail-fields">{requestBuilderParameters.map((parameter, index) => {
             const key = `${parameter.in}-${parameter.name}`;
             return <div className="sp-prototype-parameter-field" key={`${key}-${index}`}><label className="sp-field"><span>{parameter.name}{parameter.required && <b>*</b>} <small>{parameter.in}</small></span><input value={values[key] ?? ''} onChange={(event) => setStoredValues({ ...storedValues, [key]: event.target.value })} placeholder={parameter.schema?.type ?? 'value'} /></label>{parameterPrototype && !parameter.required && <button type="button" aria-label={`Remove ${parameter.name}`} onClick={() => setSelectedOptionalParameters(selectedOptionalParameters.filter((selected) => selected !== key))}>×</button>}</div>;

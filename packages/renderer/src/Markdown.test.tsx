@@ -87,6 +87,7 @@ Keep the [nested Markdown](https://example.com) intact.
     const navigation = screen.getByRole('navigation', { name: 'API reference' });
     fireEvent.click(within(navigation).getByRole('button', { name: 'Things' }));
     fireEvent.click(within(navigation).getByRole('link', { name: /Create thing/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Show details for filter' }));
 
     for (const name of ['Operation', 'Parameter', 'Request', 'Response', 'Schema']) {
       expect(screen.getByRole('link', { name })).toHaveAttribute('href', `https://example.com/${name.toLowerCase()}`);

@@ -213,6 +213,24 @@ describe('Speccy navigation', () => {
     expect(screen.queryByRole('textbox', { name: 'Find an optional parameter' })).not.toBeInTheDocument();
   });
 
+  it('explains when no optional parameters are selected in the request builder', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={{
+      ...spec,
+      paths: { '/companies': { get: {
+        summary: 'List companies',
+        parameters: [{ name: 'cursor', in: 'query', schema: { type: 'string' } }],
+      } } },
+    }} basePath="/api" parameterPrototype />);
+
+    expect(screen.getByText('No parameters selected. Add an optional parameter to include it in the request.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add optional parameter' }));
+    fireEvent.click(screen.getByRole('button', { name: 'cursor' }));
+
+    expect(screen.queryByText('No parameters selected. Add an optional parameter to include it in the request.')).not.toBeInTheDocument();
+  });
+
   it('labels responses with their standard HTTP status phrase without repeating the description', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={{
