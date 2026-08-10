@@ -17,6 +17,10 @@ body {
   overflow-y: auto;
 }
 .studio {
+  --studio-accent: #6d5dfc;
+  --studio-success: #27a477;
+  --studio-danger: #ce4b5d;
+  --studio-preview-bg: #fbfbfd;
   --studio-bg: color-mix(
     in srgb,
     var(--sp-palette-light-surface-soft) 80%,
@@ -40,6 +44,7 @@ body {
   color-scheme: light;
 }
 .studio-dark {
+  --studio-preview-bg: var(--sp-palette-dark-bg);
   --studio-bg: color-mix(in srgb, var(--sp-palette-dark-bg) 90%, black);
   --studio-bar: color-mix(
     in srgb,
@@ -53,6 +58,7 @@ body {
 }
 @media (prefers-color-scheme: dark) {
   .studio-system {
+    --studio-preview-bg: var(--sp-palette-dark-bg);
     --studio-bg: color-mix(in srgb, var(--sp-palette-dark-bg) 90%, black);
     --studio-bar: color-mix(
       in srgb,
@@ -100,8 +106,9 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: #6d5dfc;
-  box-shadow: 0 6px 18px rgba(109, 93, 252, 0.25);
+  background: var(--studio-accent);
+  box-shadow: 0 6px 18px
+    color-mix(in srgb, var(--studio-accent) 25%, transparent);
 }
 .studio-mark svg {
   width: 21px;
@@ -122,7 +129,7 @@ body {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #27a477;
+  background: var(--studio-success);
 }
 .studio-switcher {
   position: relative;
@@ -191,8 +198,12 @@ body {
   outline: 0;
 }
 .studio-actions button:focus-visible {
-  border-color: color-mix(in srgb, #6d5dfc 55%, var(--studio-line));
-  outline: 2px solid color-mix(in srgb, #6d5dfc 35%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--studio-accent) 55%,
+    var(--studio-line)
+  );
+  outline: 2px solid color-mix(in srgb, var(--studio-accent) 35%, transparent);
   outline-offset: 2px;
 }
 .studio-actions .studio-theme {
@@ -213,10 +224,10 @@ body {
   height: 100%;
   overflow-y: auto;
   color: var(--studio-text);
-  background: #fbfbfd;
+  background: var(--studio-preview-bg);
 }
 .studio-preview-only.studio-dark {
-  background: #111217;
+  background: var(--studio-preview-bg);
 }
 .studio-preview-only > .speccy {
   min-height: 100vh;
@@ -249,8 +260,12 @@ body {
   background: color-mix(in srgb, var(--studio-bar) 92%, var(--studio-text));
 }
 .studio-preview-theme:focus-visible {
-  border-color: color-mix(in srgb, #6d5dfc 55%, var(--studio-line));
-  outline: 2px solid color-mix(in srgb, #6d5dfc 35%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--studio-accent) 55%,
+    var(--studio-line)
+  );
+  outline: 2px solid color-mix(in srgb, var(--studio-accent) 35%, transparent);
   outline-offset: 2px;
 }
 .studio-preview-loading {
@@ -262,7 +277,7 @@ body {
 }
 @media (prefers-color-scheme: dark) {
   .studio-preview-only.studio-system {
-    background: #111217;
+    background: var(--studio-preview-bg);
   }
 }
 .studio-url {
@@ -297,7 +312,7 @@ body {
     monospace;
 }
 .studio-message {
-  color: #ce4b5d;
+  color: var(--studio-danger);
   font-size: 10px;
 }
 .studio-workspace {
@@ -308,7 +323,7 @@ body {
   min-width: 0;
   height: 100%;
   overflow-y: auto;
-  background: #fbfbfd;
+  background: var(--studio-preview-bg);
   scrollbar-color: var(--studio-muted) transparent;
   scrollbar-width: thin;
 }
@@ -325,11 +340,11 @@ body {
   background-clip: padding-box;
 }
 .studio-dark .studio-preview {
-  background: #111217;
+  background: var(--studio-preview-bg);
 }
 @media (prefers-color-scheme: dark) {
   .studio-system .studio-preview {
-    background: #111217;
+    background: var(--studio-preview-bg);
   }
 }
 .studio-preview > .speccy {
@@ -359,7 +374,7 @@ body {
   background:
     radial-gradient(
       circle at 50% -10%,
-      rgba(109, 93, 252, 0.12),
+      color-mix(in srgb, var(--studio-accent) 12%, transparent),
       transparent 37%
     ),
     var(--studio-bg);
@@ -370,7 +385,7 @@ body {
   text-align: center;
 }
 .studio-eyebrow {
-  color: #6d5dfc;
+  color: var(--studio-accent);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -413,13 +428,18 @@ body {
 }
 .studio-home-actions button:hover {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, #6d5dfc 50%, var(--studio-line));
+  border-color: color-mix(
+    in srgb,
+    var(--studio-accent) 50%,
+    var(--studio-line)
+  );
 }
 .studio-home-actions .is-primary {
   color: white;
-  border-color: #6d5dfc;
-  background: #6d5dfc;
-  box-shadow: 0 7px 20px rgba(109, 93, 252, 0.24);
+  border-color: var(--studio-accent);
+  background: var(--studio-accent);
+  box-shadow: 0 7px 20px
+    color-mix(in srgb, var(--studio-accent) 24%, transparent);
 }
 .studio-recents {
   width: min(1040px, 100%);
@@ -467,7 +487,11 @@ body {
 }
 .studio-recent-card:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, #6d5dfc 40%, var(--studio-line));
+  border-color: color-mix(
+    in srgb,
+    var(--studio-accent) 40%,
+    var(--studio-line)
+  );
   box-shadow: 0 12px 32px rgba(22, 22, 30, 0.07);
 }
 .studio-recent-icon .studio-mark {
