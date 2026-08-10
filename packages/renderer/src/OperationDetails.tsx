@@ -40,6 +40,7 @@ import { SchemaExplorer } from './SchemaExplorer';
 import { SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
+import styles from './OperationDetails.module.css';
 
 const HTTP_STATUS_PHRASES: Record<string, string> = {
   100: 'Continue',
@@ -367,10 +368,12 @@ function ParameterGroup({
           <ParameterExplorer location={location} items={requiredItems} />
         )}
         {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
-          <div className="sp-optional-parameter-docs">
+          <div
+            className={`sp-optional-parameter-docs ${styles.optionalParameterDocs}`}
+          >
             <button
               type="button"
-              className="sp-optional-parameter-summary"
+              className={`sp-optional-parameter-summary ${styles.optionalParameterSummary}`}
               onClick={() => setExpanded(!expanded)}
               aria-expanded={expanded}
             >
@@ -1308,16 +1311,18 @@ export function RequestRail({
       )}
       {parameters.length > 0 && (
         <section className="sp-rail-card">
-          <div className="sp-parameter-card-header">
+          <div
+            className={`sp-parameter-card-header ${styles.parameterCardHeader}`}
+          >
             <h3>Parameters</h3>
             {parameterPrototype && optionalParameters.length > 0 && (
               <div
-                className="sp-optional-parameter-picker"
+                className={`sp-optional-parameter-picker ${styles.optionalParameterPicker}`}
                 ref={optionalPickerRef}
               >
                 <button
                   type="button"
-                  className="sp-add-optional-parameter"
+                  className={`sp-add-optional-parameter ${styles.addOptionalParameter}`}
                   aria-label="Add optional parameter"
                   onClick={() => setOptionalPickerOpen(!optionalPickerOpen)}
                   aria-expanded={optionalPickerOpen}
@@ -1325,7 +1330,9 @@ export function RequestRail({
                   + Optional
                 </button>
                 {optionalPickerOpen && (
-                  <div className="sp-optional-parameter-menu">
+                  <div
+                    className={`sp-optional-parameter-menu ${styles.optionalParameterMenu}`}
+                  >
                     <input
                       autoFocus
                       value={optionalPickerQuery}
@@ -1375,7 +1382,7 @@ export function RequestRail({
               const key = `${parameter.in}-${parameter.name}`;
               return (
                 <div
-                  className="sp-prototype-parameter-field"
+                  className={`sp-prototype-parameter-field ${styles.prototypeParameterField}`}
                   key={`${key}-${index}`}
                 >
                   <label className="sp-field">

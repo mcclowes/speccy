@@ -25,11 +25,12 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --sourcemap --external react --external react-dom && cp src/styles.css dist/styles.css",
+    "build": "tsup && node scripts/assemble-styles.mjs && npm run test:package",
     "storybook": "storybook dev --port 6006",
     "build:storybook": "storybook build",
     "test:visual": "playwright test",
     "test": "vitest run",
+    "test:package": "node --test package.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
