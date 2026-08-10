@@ -2306,6 +2306,9 @@ related:
   padding: 18px;
   line-height: 1.75;
 }
+.sp-response-example pre {
+  padding-bottom: 10px;
+}
 .sp-operation {
   overflow: hidden;
   border: 1px solid var(--sp-line);
