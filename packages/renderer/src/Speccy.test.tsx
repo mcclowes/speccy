@@ -1094,7 +1094,7 @@ describe('Speccy navigation', () => {
         2,
       ),
     );
-    expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(3);
+    expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
   });
 
   it('shows the request example beside its schema', () => {
@@ -1202,6 +1202,11 @@ describe('Speccy navigation', () => {
     expect(example).toHaveTextContent('"pageSize": 25');
     expect(within(example!).getByText('Headers')).toBeInTheDocument();
     expect(example).toHaveTextContent('"X-Request-ID": "request-456"');
+    expect(example?.querySelectorAll('.sp-json-key')).toHaveLength(2);
+    expect(example?.querySelector('.sp-json-number')).toHaveTextContent('25');
+    expect(example?.querySelector('.sp-json-string')).toHaveTextContent(
+      '"request-456"',
+    );
     expect(within(example!).queryByText('Body')).not.toBeInTheDocument();
     expect(
       within(example!).getByRole('button', { name: 'Copy path' }),

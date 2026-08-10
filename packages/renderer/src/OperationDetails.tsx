@@ -18,7 +18,7 @@ import {
   type SecurityRequirement,
   type SecurityScheme,
 } from 'speccy-core';
-import { CodeBlock, CopyButton } from './CodeBlock';
+import { CodeBlock, CodeLines, CopyButton } from './CodeBlock';
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
@@ -590,15 +590,7 @@ function RequestExampleSection({
         />
       </header>
       <pre className={code ? undefined : 'sp-code-numbered'}>
-        <code>
-          {code
-            ? value
-            : value.split('\n').map((line, index) => (
-                <span className="sp-code-line" key={index}>
-                  {line}
-                </span>
-              ))}
-        </code>
+        <code>{code ? value : <CodeLines value={value} />}</code>
       </pre>
     </section>
   );

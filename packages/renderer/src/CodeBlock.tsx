@@ -48,7 +48,7 @@ function highlightedJson(value: string): ReactNode {
   return highlightedJsonLine(value);
 }
 
-function CodeLines({ value }: { value: string }) {
+export function CodeLines({ value }: { value: string }) {
   let isJson = true;
   try {
     JSON.parse(value);
