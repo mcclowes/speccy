@@ -49,10 +49,10 @@ npm install speccy-renderer
 ```
 
 ```tsx
-import {Speccy} from 'speccy-renderer';
+import { Speccy } from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
-export function Reference({spec}) {
+export function Reference({ spec }) {
   return <Speccy spec={spec} accentColor="#6d5dfc" theme="system" />;
 }
 ```
@@ -86,7 +86,7 @@ export default {
       {
         route: '/api',
         spec: './static/openapi.yaml',
-        renderer: {accentColor: '#6d5dfc'},
+        renderer: { accentColor: '#6d5dfc' },
       },
     ],
   ],
@@ -96,7 +96,7 @@ export default {
 Use `specUrl` instead of `spec` to fetch a remote document at build time. For MDX embedding:
 
 ```mdx
-import {OpenAPI} from 'docusaurus-plugin-speccy/client';
+import { OpenAPI } from 'docusaurus-plugin-speccy/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} />

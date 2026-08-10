@@ -7,6 +7,9 @@ describe('sample spec', () => {
     const model = createReferenceModel(SAMPLE_SPEC);
 
     expect(model.operations).toHaveLength(6);
-    expect(model.tags.map(({ name }) => name)).toEqual(['Books', 'Reading lists']);
+    expect(model.tags.map(({ name }) => name)).toEqual([
+      'Books',
+      'Reading lists',
+    ]);
   });
 });

@@ -22,7 +22,10 @@
     },
     "./styles.css": "./dist/styles.css"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts src/client.tsx src/page.tsx --format esm --dts --sourcemap --clean --external react --external react-dom --external @docusaurus/core --external @docusaurus/types --external speccy-renderer && cp ../renderer/dist/styles.css dist/styles.css",
     "test": "vitest run",
@@ -33,7 +36,9 @@
     "react": ">=18",
     "react-dom": ">=18"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@docusaurus/types": "^3.8.1",
     "@types/node": "^24.2.1",

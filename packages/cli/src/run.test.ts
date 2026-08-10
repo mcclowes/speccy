@@ -30,7 +30,13 @@ function harness(files: Record<string, string | undefined> = {}) {
     git: async (ref, path) => files[`${ref}:${path}`],
     fetch: async (url) => files[url] ?? '',
   };
-  return { out, err, io, write: (line: string) => out.push(line), writeError: (line: string) => err.push(line) };
+  return {
+    out,
+    err,
+    io,
+    write: (line: string) => out.push(line),
+    writeError: (line: string) => err.push(line),
+  };
 }
 
 describe('run', () => {
@@ -51,12 +57,18 @@ describe('run', () => {
     const code = await run(['lint', 'openapi.yaml', '--format', 'json'], h);
 
     expect(code).toBe(0);
-    expect(JSON.parse(h.out.join(''))).toEqual(expect.arrayContaining([expect.objectContaining({ ruleId: expect.any(String) })]));
+    expect(JSON.parse(h.out.join(''))).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ ruleId: expect.any(String) }),
+      ]),
+    );
   });
 
   it('fails the lint when findings reach the threshold', async () => {
     const h = harness({ 'openapi.yaml': BASE });
-    await expect(run(['lint', 'openapi.yaml', '--fail-on', 'suggestion'], h)).resolves.toBe(1);
+    await expect(
+      run(['lint', 'openapi.yaml', '--fail-on', 'suggestion'], h),
+    ).resolves.toBe(1);
   });
 
   it('diffs two documents and fails on a breaking change', async () => {
@@ -74,7 +86,9 @@ describe('run', () => {
 
   it('reads a base from a git ref', async () => {
     const h = harness({ 'main:openapi.yaml': BASE, 'openapi.yaml': REVISION });
-    await expect(run(['diff', 'main:openapi.yaml', 'openapi.yaml'], h)).resolves.toBe(1);
+    await expect(
+      run(['diff', 'main:openapi.yaml', 'openapi.yaml'], h),
+    ).resolves.toBe(1);
   });
 
   it('exits clean when the spec is new and has no base to compare', async () => {
@@ -100,17 +114,31 @@ describe('run', () => {
 
   it('rejects an unsupported format', async () => {
     const h = harness({ 'openapi.yaml': BASE });
-    await expect(run(['lint', 'openapi.yaml', '--format', 'xml'], h)).resolves.toBe(2);
+    await expect(
+      run(['lint', 'openapi.yaml', '--format', 'xml'], h),
+    ).resolves.toBe(2);
   });
 
   it('adds change-safety findings to a lint when given a previous document', async () => {
     const h = harness({ 'base.yaml': BASE, 'head.yaml': REVISION });
-    const code = await run(['lint', 'head.yaml', '--against', 'base.yaml', '--format', 'json'], h);
-    const findings = JSON.parse(h.out.join('')) as Array<{ category: string; ruleId: string }>;
+    const code = await run(
+      ['lint', 'head.yaml', '--against', 'base.yaml', '--format', 'json'],
+      h,
+    );
+    const findings = JSON.parse(h.out.join('')) as Array<{
+      category: string;
+      ruleId: string;
+    }>;
 
     // The removed operation is an issue, and lint fails on issues by default.
     expect(code).toBe(1);
-    expect(findings.some((finding) => finding.category === 'change-safety' && finding.ruleId === 'operation-removed')).toBe(true);
+    expect(
+      findings.some(
+        (finding) =>
+          finding.category === 'change-safety' &&
+          finding.ruleId === 'operation-removed',
+      ),
+    ).toBe(true);
   });
 
   it('writes markdown ready to post as a comment', async () => {

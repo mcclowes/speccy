@@ -7,12 +7,23 @@ import referenceConfig from './speccy.config';
 const virtualId = 'virtual:speccy-reference';
 const resolvedVirtualId = `\0${virtualId}`;
 
-type ReferenceConfig = typeof referenceConfig & { spec: string; specUrl?: string };
+type ReferenceConfig = typeof referenceConfig & {
+  spec: string;
+  specUrl?: string;
+};
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  })[character]!);
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[character]!,
+  );
 }
 
 function referencePlugin(config: ReferenceConfig): Plugin {
@@ -25,10 +36,18 @@ function referencePlugin(config: ReferenceConfig): Plugin {
       if (id !== resolvedVirtualId) return undefined;
       const spec = config.specUrl
         ? await fetch(config.specUrl).then((response) => {
-            if (!response.ok) throw new Error(`Could not load ${config.specUrl}: ${response.status} ${response.statusText}`);
+            if (!response.ok)
+              throw new Error(
+                `Could not load ${config.specUrl}: ${response.status} ${response.statusText}`,
+              );
             return response.text();
           })
-        : await readFile(isAbsolute(config.spec) ? config.spec : resolve(process.cwd(), config.spec), 'utf8');
+        : await readFile(
+            isAbsolute(config.spec)
+              ? config.spec
+              : resolve(process.cwd(), config.spec),
+            'utf8',
+          );
       return `export const spec = ${JSON.stringify(spec)}; export const config = ${JSON.stringify(config)};`;
     },
     transformIndexHtml(html) {

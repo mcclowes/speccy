@@ -21,9 +21,11 @@
     "pretypecheck": "npm run build -w speccy-core && npm run build -w speccy-renderer",
     "typecheck": "npm run typecheck -w speccy-core && npm run typecheck -w speccy-spectral && npm run typecheck -w speccy-cli && npm run typecheck -w speccy-renderer && npm run typecheck -w docusaurus-plugin-speccy && npm run typecheck -w @speccy/web && npm run typecheck -w @speccy/docusaurus-demo && npm run typecheck -w create-speccy-reference",
     "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "release": "npm run build && changeset publish",
     "version-packages": "changeset version",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
   "engines": {
@@ -37,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.9.0",
+    "prettier": "^3.9.6",
     "typescript-eslint": "^8.66.0"
   }
 }

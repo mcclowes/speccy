@@ -27,7 +27,11 @@ function referenceSection(slug: string): string {
   return slug.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
-export function routePath(route: SpeccyRoute, basePath = '', options: RoutePathOptions = {}): string {
+export function routePath(
+  route: SpeccyRoute,
+  basePath = '',
+  options: RoutePathOptions = {},
+): string {
   const root = normalizeBasePath(basePath);
   const operationSegment = options.operationSegment ?? 'operations';
   if (route.page === 'overview') return root || '/';
@@ -35,23 +39,40 @@ export function routePath(route: SpeccyRoute, basePath = '', options: RoutePathO
     const prefix = operationSegment ? `/${operationSegment}` : '';
     return `${root}${prefix}/${encodeURIComponent(route.operationId)}`;
   }
-  if (route.page === 'tag') return `${root}/tags/${encodeURIComponent(route.tag)}`;
+  if (route.page === 'tag')
+    return `${root}/tags/${encodeURIComponent(route.tag)}`;
   return `${root}/reference/${encodeURIComponent(referenceSlug(route.section))}`;
 }
 
-export function parseRoutePath(pathname: string, basePath = '', options: RoutePathOptions = {}): SpeccyRoute | undefined {
+export function parseRoutePath(
+  pathname: string,
+  basePath = '',
+  options: RoutePathOptions = {},
+): SpeccyRoute | undefined {
   const root = normalizeBasePath(basePath);
-  if (pathname === root || (!root && pathname === '/')) return { page: 'overview' };
+  if (pathname === root || (!root && pathname === '/'))
+    return { page: 'overview' };
   const prefix = `${root}/`;
   if (!pathname.startsWith(prefix)) return undefined;
 
-  const segments = pathname.slice(prefix.length).split('/').filter(Boolean).map(decodeURIComponent);
+  const segments = pathname
+    .slice(prefix.length)
+    .split('/')
+    .filter(Boolean)
+    .map(decodeURIComponent);
   const operationSegment = options.operationSegment ?? 'operations';
-  if (operationSegment && segments.length === 2 && segments[0] === operationSegment) {
+  if (
+    operationSegment &&
+    segments.length === 2 &&
+    segments[0] === operationSegment
+  ) {
     return { page: 'operation', operationId: segments[1]! };
   }
-  if (!operationSegment && segments.length === 1) return { page: 'operation', operationId: segments[0]! };
-  if (segments.length === 2 && segments[0] === 'tags') return { page: 'tag', tag: segments[1]! };
-  if (segments.length === 2 && segments[0] === 'reference') return { page: 'reference', section: referenceSection(segments[1]!) };
+  if (!operationSegment && segments.length === 1)
+    return { page: 'operation', operationId: segments[0]! };
+  if (segments.length === 2 && segments[0] === 'tags')
+    return { page: 'tag', tag: segments[1]! };
+  if (segments.length === 2 && segments[0] === 'reference')
+    return { page: 'reference', section: referenceSection(segments[1]!) };
   return undefined;
 }

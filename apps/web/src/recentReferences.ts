@@ -50,7 +50,9 @@ export function addRecentReference(
 ): { reference: RecentReference; references: RecentReference[] } {
   const existing = existingId
     ? references.find((item) => item.id === existingId)
-    : references.find((item) => item.name === input.name && item.source === input.source);
+    : references.find(
+        (item) => item.name === input.name && item.source === input.source,
+      );
   const timestamp = existing?.openedAt ?? openedAt;
   const id = existing?.id ?? existingId ?? `${input.name}-${timestamp}`;
   const reference = {
@@ -61,12 +63,22 @@ export function addRecentReference(
   };
   return {
     reference,
-    references: [reference, ...references.filter((item) => item.id !== id)].slice(0, MAX_RECENTS),
+    references: [
+      reference,
+      ...references.filter((item) => item.id !== id),
+    ].slice(0, MAX_RECENTS),
   };
 }
 
-export function recentReferenceLabel(reference: RecentReference, references: RecentReference[]): string {
-  if (references.filter((item) => item.name === reference.name).length < 2) return reference.name;
-  const imported = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(reference.openedAt);
+export function recentReferenceLabel(
+  reference: RecentReference,
+  references: RecentReference[],
+): string {
+  if (references.filter((item) => item.name === reference.name).length < 2)
+    return reference.name;
+  const imported = new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(reference.openedAt);
   return `${reference.name} — ${imported}`;
 }

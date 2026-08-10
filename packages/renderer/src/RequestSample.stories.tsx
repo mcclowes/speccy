@@ -9,8 +9,15 @@ const meta = {
     request: {
       method: 'POST',
       url: 'https://api.northstar.example/v1/payment-links',
-      headers: ['Authorization: Bearer sk_example', 'Content-Type: application/json'],
-      body: JSON.stringify({ amount: 4200, currency: 'GBP', reference: 'INV-2048' }, null, 2),
+      headers: [
+        'Authorization: Bearer sk_example',
+        'Content-Type: application/json',
+      ],
+      body: JSON.stringify(
+        { amount: 4200, currency: 'GBP', reference: 'INV-2048' },
+        null,
+        2,
+      ),
     },
     storageKey: 'storybook-request-language',
   },

@@ -6,7 +6,12 @@
  * ---
  */
 
-import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { WebhookIcon } from './WebhookIcon';
 
 export type SearchResult = {
@@ -19,13 +24,30 @@ export type SearchResult = {
   navigate: () => void;
 };
 
-export function QuickSearch({ results, onClose }: { results: SearchResult[]; onClose: () => void }) {
+export function QuickSearch({
+  results,
+  onClose,
+}: {
+  results: SearchResult[];
+  onClose: () => void;
+}) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const normalizedQuery = query.trim().toLowerCase();
-  const matches = useMemo(() => results.filter((result) => !normalizedQuery || result.terms
-    .some((term) => term.toLowerCase().includes(normalizedQuery))), [normalizedQuery, results]);
-  const grouped = matches.reduce<Array<[SearchResult['group'], SearchResult[]]>>((groups, result) => {
+  const matches = useMemo(
+    () =>
+      results.filter(
+        (result) =>
+          !normalizedQuery ||
+          result.terms.some((term) =>
+            term.toLowerCase().includes(normalizedQuery),
+          ),
+      ),
+    [normalizedQuery, results],
+  );
+  const grouped = matches.reduce<
+    Array<[SearchResult['group'], SearchResult[]]>
+  >((groups, result) => {
     const current = groups.at(-1);
     if (current?.[0] === result.group) current[1].push(result);
     else groups.push([result.group, [result]]);
@@ -37,7 +59,9 @@ export function QuickSearch({ results, onClose }: { results: SearchResult[]; onC
   useEffect(() => {
     const activeResult = matches[activeIndex];
     if (!activeResult) return;
-    document.getElementById(`sp-search-result-${activeResult.id}`)?.scrollIntoView?.({ block: 'nearest' });
+    document
+      .getElementById(`sp-search-result-${activeResult.id}`)
+      ?.scrollIntoView?.({ block: 'nearest' });
   }, [activeIndex, normalizedQuery]);
 
   function select(result?: SearchResult) {
@@ -49,10 +73,14 @@ export function QuickSearch({ results, onClose }: { results: SearchResult[]; onC
   function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setActiveIndex((index) => matches.length ? (index + 1) % matches.length : 0);
+      setActiveIndex((index) =>
+        matches.length ? (index + 1) % matches.length : 0,
+      );
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      setActiveIndex((index) => matches.length ? (index - 1 + matches.length) % matches.length : 0);
+      setActiveIndex((index) =>
+        matches.length ? (index - 1 + matches.length) % matches.length : 0,
+      );
     } else if (event.key === 'Enter') {
       event.preventDefault();
       select(matches[activeIndex]);
@@ -64,8 +92,19 @@ export function QuickSearch({ results, onClose }: { results: SearchResult[]; onC
 
   let resultIndex = 0;
   return (
-    <div className="sp-search-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="sp-search-dialog" role="dialog" aria-modal="true" aria-label="Search API reference">
+    <div
+      className="sp-search-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="sp-search-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search API reference"
+      >
         <div className="sp-search-input">
           <span aria-hidden="true">⌕</span>
           <input
@@ -76,30 +115,61 @@ export function QuickSearch({ results, onClose }: { results: SearchResult[]; onC
             placeholder="Search endpoints, tags, and reference"
             aria-label="Search API reference"
             aria-controls="sp-search-results"
-            aria-activedescendant={matches[activeIndex] ? `sp-search-result-${matches[activeIndex].id}` : undefined}
+            aria-activedescendant={
+              matches[activeIndex]
+                ? `sp-search-result-${matches[activeIndex].id}`
+                : undefined
+            }
           />
           <kbd>Esc</kbd>
         </div>
-        <div className="sp-search-results" id="sp-search-results" role="listbox">
-          {grouped.map(([group, items]) => <section className="sp-search-group" aria-label={group} key={group}>
-            <h2>{group}</h2>
-            {items.map((result) => {
-              const index = resultIndex++;
-              return <button
-                id={`sp-search-result-${result.id}`}
-                type="button"
-                role="option"
-                aria-selected={index === activeIndex}
-                className={index === activeIndex ? 'is-active' : ''}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => select(result)}
-                key={result.id}
-              ><span>{result.label}</span>{result.detail && <small>{result.webhook && <WebhookIcon />} {result.detail}</small>}</button>;
-            })}
-          </section>)}
-          {matches.length === 0 && <div className="sp-search-empty" role="status">No results for “{query}”.</div>}
+        <div
+          className="sp-search-results"
+          id="sp-search-results"
+          role="listbox"
+        >
+          {grouped.map(([group, items]) => (
+            <section className="sp-search-group" aria-label={group} key={group}>
+              <h2>{group}</h2>
+              {items.map((result) => {
+                const index = resultIndex++;
+                return (
+                  <button
+                    id={`sp-search-result-${result.id}`}
+                    type="button"
+                    role="option"
+                    aria-selected={index === activeIndex}
+                    className={index === activeIndex ? 'is-active' : ''}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => select(result)}
+                    key={result.id}
+                  >
+                    <span>{result.label}</span>
+                    {result.detail && (
+                      <small>
+                        {result.webhook && <WebhookIcon />} {result.detail}
+                      </small>
+                    )}
+                  </button>
+                );
+              })}
+            </section>
+          ))}
+          {matches.length === 0 && (
+            <div className="sp-search-empty" role="status">
+              No results for “{query}”.
+            </div>
+          )}
         </div>
-        <div className="sp-search-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Open</span></div>
+        <div className="sp-search-help">
+          <span>
+            <kbd>↑</kbd>
+            <kbd>↓</kbd> Navigate
+          </span>
+          <span>
+            <kbd>↵</kbd> Open
+          </span>
+        </div>
       </div>
     </div>
   );

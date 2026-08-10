@@ -13,11 +13,22 @@ describe('OpenApiDownload', () => {
     ['JSON', 'openapi.json', 'application/json'],
     ['YAML', 'openapi.yaml', 'application/yaml'],
   ])('downloads the document as %s', (_label, filename, contentType) => {
-    const createObjectURL = vi.fn<(value: Blob) => string>(() => 'blob:openapi');
+    const createObjectURL = vi.fn<(value: Blob) => string>(
+      () => 'blob:openapi',
+    );
     const revokeObjectURL = vi.fn();
-    vi.stubGlobal('URL', Object.assign(URL, { createObjectURL, revokeObjectURL }));
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
-    const document = { openapi: '3.1.0', info: { title: 'Catalog API' }, paths: {} };
+    vi.stubGlobal(
+      'URL',
+      Object.assign(URL, { createObjectURL, revokeObjectURL }),
+    );
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const document = {
+      openapi: '3.1.0',
+      info: { title: 'Catalog API' },
+      paths: {},
+    };
 
     render(<OpenApiDownload document={document} />);
     fireEvent.click(screen.getByRole('button', { name: new RegExp(filename) }));

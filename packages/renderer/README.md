@@ -11,10 +11,10 @@ npm install speccy-renderer
 ## Use
 
 ```tsx
-import {Speccy} from 'speccy-renderer';
+import { Speccy } from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
-export function ApiReference({spec}) {
+export function ApiReference({ spec }) {
   return <Speccy spec={spec} basePath="/api" />;
 }
 ```
@@ -36,11 +36,7 @@ paths:
 Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design, webhooks, and change safety.
 
 ```tsx
-<Speccy
-  spec={currentSpec}
-  previousSpec={publishedSpec}
-  showDeveloperHints
-/>
+<Speccy spec={currentSpec} previousSpec={publishedSpec} showDeveloperHints />
 ```
 
 Speccy runs Spectral's standard OAS ruleset automatically. Pass additional results from your own configured Spectral run through `spectralDiagnostics`. Speccy preserves the rule ID, severity, object path, and source range, and labels these findings separately from its own design guidance.
@@ -60,19 +56,21 @@ oasdiff changelog base.yaml revision.yaml --format json > changes.json
 ```
 
 ```tsx
-import {adaptOasdiffChangelog, SpecDiff} from 'speccy-renderer';
+import { adaptOasdiffChangelog, SpecDiff } from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
 const report = adaptOasdiffChangelog(changes, {
-  base: {source: 'base.yaml', version: '1.4.0'},
-  revision: {source: 'revision.yaml', version: '2.0.0'},
+  base: { source: 'base.yaml', version: '1.4.0' },
+  revision: { source: 'revision.yaml', version: '2.0.0' },
 });
 
 export function ApiDiff() {
   return (
     <SpecDiff
       report={report}
-      hrefForChange={(change) => change.operationId ? `/api/${change.operationId}` : undefined}
+      hrefForChange={(change) =>
+        change.operationId ? `/api/${change.operationId}` : undefined
+      }
     />
   );
 }

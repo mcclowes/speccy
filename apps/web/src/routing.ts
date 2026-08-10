@@ -12,7 +12,12 @@ import { parseRoutePath, routePath, type SpeccyRoute } from 'speccy-renderer';
 export type StudioRoute =
   | { page: 'home' }
   | { page: 'open'; url: string }
-  | { page: 'reference'; referenceId: string; referenceRoute: SpeccyRoute; sourceUrl?: string };
+  | {
+      page: 'reference';
+      referenceId: string;
+      referenceRoute: SpeccyRoute;
+      sourceUrl?: string;
+    };
 
 type LocationValue = Pick<Location, 'pathname' | 'search'>;
 
@@ -24,11 +29,16 @@ export function parseStudioRoute(location: LocationValue): StudioRoute {
     if (location.pathname === '/') return { page: 'home' };
   }
 
-  const segments = location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  const segments = location.pathname
+    .split('/')
+    .filter(Boolean)
+    .map(decodeURIComponent);
   if (segments[0] !== 'references' || !segments[1]) return { page: 'home' };
 
   const [, referenceId, ...routeSegments] = segments;
-  const referenceRoute = parseRoutePath(`/${routeSegments.map(encodeURIComponent).join('/')}`);
+  const referenceRoute = parseRoutePath(
+    `/${routeSegments.map(encodeURIComponent).join('/')}`,
+  );
   if (!referenceRoute) return { page: 'home' };
 
   return {
@@ -39,7 +49,11 @@ export function parseStudioRoute(location: LocationValue): StudioRoute {
   };
 }
 
-export function referenceHref(referenceId: string, route: SpeccyRoute, sourceUrl?: string): string {
+export function referenceHref(
+  referenceId: string,
+  route: SpeccyRoute,
+  sourceUrl?: string,
+): string {
   const root = `/references/${encodeURIComponent(referenceId)}`;
   const pathname = routePath(route, root);
 

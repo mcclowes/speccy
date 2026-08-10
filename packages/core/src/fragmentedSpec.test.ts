@@ -4,8 +4,9 @@ import { bundleFragmentedSpec } from './fragmentedSpec';
 
 describe('bundleFragmentedSpec', () => {
   it('resolves refs relative to the document that declares them', () => {
-    const document = bundleFragmentedSpec({
-      'reference/api.yml': `
+    const document = bundleFragmentedSpec(
+      {
+        'reference/api.yml': `
 openapi: 3.1.0
 info: { title: Fragmented API }
 paths:
@@ -16,7 +17,7 @@ paths:
         '200':
           $ref: './shared/responses.yml#/components/responses/Widgets'
 `,
-      'reference/shared/responses.yml': `
+        'reference/shared/responses.yml': `
 components:
   responses:
     Widgets:
@@ -28,14 +29,16 @@ components:
           schema:
             $ref: '../schemas.yml#/components/schemas/WidgetList'
 `,
-      'reference/schemas.yml': `
+        'reference/schemas.yml': `
 components:
   schemas:
     WidgetList:
       type: array
       items: { type: string }
 `,
-    }, 'reference/api.yml');
+      },
+      'reference/api.yml',
+    );
 
     const model = createReferenceModel(document);
     const response = model.operations[0]?.operation.responses?.['200'];
@@ -44,11 +47,17 @@ components:
   });
 
   it('leaves remote and missing refs unchanged', () => {
-    const document = bundleFragmentedSpec({
-      'api.yml': 'openapi: 3.1.0\ninfo: { title: API }\nexternal: { $ref: "https://example.com/common.yml#/Thing" }\nmissing: { $ref: "nope.yml#/Thing" }',
-    }, 'api.yml') as Record<string, unknown>;
+    const document = bundleFragmentedSpec(
+      {
+        'api.yml':
+          'openapi: 3.1.0\ninfo: { title: API }\nexternal: { $ref: "https://example.com/common.yml#/Thing" }\nmissing: { $ref: "nope.yml#/Thing" }',
+      },
+      'api.yml',
+    ) as Record<string, unknown>;
 
-    expect(document.external).toEqual({ $ref: 'https://example.com/common.yml#/Thing' });
+    expect(document.external).toEqual({
+      $ref: 'https://example.com/common.yml#/Thing',
+    });
     expect(document.missing).toEqual({ $ref: 'nope.yml#/Thing' });
   });
 });

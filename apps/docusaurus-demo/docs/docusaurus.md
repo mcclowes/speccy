@@ -53,7 +53,7 @@ The build environment must be able to reach that URL.
 Use the client component when the reference belongs inside a guide or a custom docs layout:
 
 ```mdx
-import {OpenAPI} from 'docusaurus-plugin-speccy/client';
+import { OpenAPI } from 'docusaurus-plugin-speccy/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} showSidebar={false} />

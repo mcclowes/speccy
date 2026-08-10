@@ -9,7 +9,7 @@ npm install speccy-core
 ## Parse and model
 
 ```ts
-import {parseSpec, createReferenceModel} from 'speccy-core';
+import { parseSpec, createReferenceModel } from 'speccy-core';
 
 const document = parseSpec(yamlOrJsonString);
 const model = createReferenceModel(document);
@@ -20,7 +20,7 @@ const model = createReferenceModel(document);
 ## Analyze
 
 ```ts
-import {analyzeOpenApi} from 'speccy-core';
+import { analyzeOpenApi } from 'speccy-core';
 
 const findings = analyzeOpenApi(document);
 ```
@@ -30,7 +30,7 @@ Returns `ApiDiagnostic[]` across documentation, operations, resource design, err
 ## Diff
 
 ```ts
-import {adaptOasdiffChangelog} from 'speccy-core';
+import { adaptOasdiffChangelog } from 'speccy-core';
 
 const report = adaptOasdiffChangelog(changelogJson);
 ```

@@ -10,11 +10,11 @@ Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference docum
 
 ## Choose a package
 
-| What you’re building | Start with |
-| --- | --- |
-| A reference inside a React application | [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer) |
+| What you’re building                       | Start with                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| A reference inside a React application     | [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer)                   |
 | A reference alongside guides in Docusaurus | [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy) |
-| A dedicated public API reference | [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference) |
+| A dedicated public API reference           | [`create-speccy-reference`](https://www.npmjs.com/package/create-speccy-reference)   |
 
 The Speccy Studio is for opening and reviewing specifications. It isn’t the production hosting shell.
 
@@ -29,10 +29,10 @@ npm install speccy-renderer
 Pass it a parsed OpenAPI object, a YAML string, or a JSON string:
 
 ```tsx
-import {Speccy} from 'speccy-renderer';
+import { Speccy } from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
-export function ApiReference({spec}) {
+export function ApiReference({ spec }) {
   return <Speccy spec={spec} basePath="/api" />;
 }
 ```

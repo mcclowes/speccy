@@ -33,7 +33,7 @@ The reference is now available at `/api`.
 To embed a reference in MDX:
 
 ```mdx
-import {OpenAPI} from 'docusaurus-plugin-speccy/client';
+import { OpenAPI } from 'docusaurus-plugin-speccy/client';
 import spec from '@site/static/openapi.json';
 
 <OpenAPI spec={spec} />

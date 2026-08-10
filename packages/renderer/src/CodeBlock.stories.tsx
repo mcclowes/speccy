@@ -1,12 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CodeBlock } from './CodeBlock';
 
-const jsonValue = JSON.stringify({
-  id: 'plink_01J8Y3',
-  status: 'open',
-  amount: 4200,
-  metadata: { invoice: 'INV-2048', retryable: false },
-}, null, 2);
+const jsonValue = JSON.stringify(
+  {
+    id: 'plink_01J8Y3',
+    status: 'open',
+    amount: 4200,
+    metadata: { invoice: 'INV-2048', retryable: false },
+  },
+  null,
+  2,
+);
 
 const meta = {
   title: 'Renderer/Primitives/Code block',

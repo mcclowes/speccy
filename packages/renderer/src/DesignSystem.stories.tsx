@@ -1,15 +1,52 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ApiPath, DisclosureChevron, MethodBadge, RequiredMark } from './DesignSystem';
+import {
+  ApiPath,
+  DisclosureChevron,
+  MethodBadge,
+  RequiredMark,
+} from './DesignSystem';
 
 const meta = {
   title: 'Design system/Primitives',
   parameters: { layout: 'centered' },
-  render: () => <div className="sp-story-stack">
-    <section><h2>Method badges</h2><div className="sp-story-row">{['get', 'post', 'put', 'patch', 'delete'].map((method) => <MethodBadge method={method} key={method} />)}<MethodBadge method="post" webhook /></div></section>
-    <section><h2>Compact method badges</h2><div className="sp-story-row">{['get', 'post', 'put', 'patch', 'delete'].map((method) => <MethodBadge method={method} compact key={method} />)}<MethodBadge method="post" compact webhook /></div></section>
-    <section><h2>API path</h2><ApiPath value="/customers/{customerId}/payments/{paymentId}" /></section>
-    <section><h2>Indicators</h2><div className="sp-story-row"><RequiredMark /><span aria-expanded="true"><DisclosureChevron /></span><span aria-expanded="false"><DisclosureChevron /></span></div></section>
-  </div>,
+  render: () => (
+    <div className="sp-story-stack">
+      <section>
+        <h2>Method badges</h2>
+        <div className="sp-story-row">
+          {['get', 'post', 'put', 'patch', 'delete'].map((method) => (
+            <MethodBadge method={method} key={method} />
+          ))}
+          <MethodBadge method="post" webhook />
+        </div>
+      </section>
+      <section>
+        <h2>Compact method badges</h2>
+        <div className="sp-story-row">
+          {['get', 'post', 'put', 'patch', 'delete'].map((method) => (
+            <MethodBadge method={method} compact key={method} />
+          ))}
+          <MethodBadge method="post" compact webhook />
+        </div>
+      </section>
+      <section>
+        <h2>API path</h2>
+        <ApiPath value="/customers/{customerId}/payments/{paymentId}" />
+      </section>
+      <section>
+        <h2>Indicators</h2>
+        <div className="sp-story-row">
+          <RequiredMark />
+          <span aria-expanded="true">
+            <DisclosureChevron />
+          </span>
+          <span aria-expanded="false">
+            <DisclosureChevron />
+          </span>
+        </div>
+      </section>
+    </div>
+  ),
 } satisfies Meta;
 
 export default meta;

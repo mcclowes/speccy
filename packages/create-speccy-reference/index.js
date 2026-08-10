@@ -7,16 +7,22 @@ import { fileURLToPath } from 'node:url';
 const packageDirectory = dirname(fileURLToPath(import.meta.url));
 
 export function packageNameFor(directory) {
-  return basename(resolve(directory))
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'speccy-reference';
+  return (
+    basename(resolve(directory))
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'speccy-reference'
+  );
 }
 
 export async function createReference(directory) {
   const target = resolve(directory);
   await mkdir(dirname(target), { recursive: true });
-  await cp(join(packageDirectory, 'template'), target, { recursive: true, errorOnExist: true, force: false });
+  await cp(join(packageDirectory, 'template'), target, {
+    recursive: true,
+    errorOnExist: true,
+    force: false,
+  });
   await rename(join(target, 'gitignore'), join(target, '.gitignore'));
 
   const packagePath = join(target, 'package.json');
@@ -39,13 +45,20 @@ async function main() {
     console.log(`Created a Speccy reference in ${target}`);
     console.log(`\n  cd ${directory}\n  npm install\n  npm run dev`);
   } catch (error) {
-    console.error(error?.code === 'ERR_FS_CP_EEXIST'
-      ? `Couldn’t create ${directory}: the directory contains files from the template.`
-      : error instanceof Error ? error.message : error);
+    console.error(
+      error?.code === 'ERR_FS_CP_EEXIST'
+        ? `Couldn’t create ${directory}: the directory contains files from the template.`
+        : error instanceof Error
+          ? error.message
+          : error,
+    );
     process.exitCode = 1;
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
   await main();
 }

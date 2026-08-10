@@ -9,7 +9,14 @@ function InteractiveThemeToggle({ initialTheme }: { initialTheme: Theme }) {
 
 function SystemThemeToggle() {
   const [theme, setTheme] = useState<Theme>('system');
-  return <ThemeToggle theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />;
+  return (
+    <ThemeToggle
+      theme={theme}
+      onChange={setTheme}
+      themes={['system', 'dark', 'light']}
+      label="current"
+    />
+  );
 }
 
 const meta = {

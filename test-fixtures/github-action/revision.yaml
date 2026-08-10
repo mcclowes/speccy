@@ -8,5 +8,5 @@ paths:
       operationId: listWidgets
       summary: List widgets
       responses:
-        "200":
+        '200':
           description: Widgets returned

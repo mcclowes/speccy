@@ -12,13 +12,25 @@ describe('renderer routing', () => {
 
   it('supports the renderer legacy operation path', () => {
     const options = { operationSegment: '' };
-    expect(routePath({ page: 'operation', operationId: 'list-companies' }, '/docs', options)).toBe('/docs/list-companies');
-    expect(parseRoutePath('/docs/list-companies', '/docs', options)).toEqual({ page: 'operation', operationId: 'list-companies' });
+    expect(
+      routePath(
+        { page: 'operation', operationId: 'list-companies' },
+        '/docs',
+        options,
+      ),
+    ).toBe('/docs/list-companies');
+    expect(parseRoutePath('/docs/list-companies', '/docs', options)).toEqual({
+      page: 'operation',
+      operationId: 'list-companies',
+    });
   });
 
   it('keeps reference keys readable in URLs', () => {
     const path = routePath({ page: 'reference', section: 'securitySchemes' });
     expect(path).toBe('/reference/security-schemes');
-    expect(parseRoutePath(path)).toEqual({ page: 'reference', section: 'securitySchemes' });
+    expect(parseRoutePath(path)).toEqual({
+      page: 'reference',
+      section: 'securitySchemes',
+    });
   });
 });

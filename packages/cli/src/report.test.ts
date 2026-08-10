@@ -1,15 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import { diffSpecs } from 'speccy-core';
 import type { ApiDiagnostic, DiffReport, OpenAPIDocument } from 'speccy-core';
-import { COMMENT_MARKER, diffExitCode, formatDiff, formatLint, lintExitCode } from './report';
+import {
+  COMMENT_MARKER,
+  diffExitCode,
+  formatDiff,
+  formatLint,
+  lintExitCode,
+} from './report';
 
 const base: OpenAPIDocument = {
   openapi: '3.1.0',
   info: { title: 'Lending', version: '1.0.0' },
   paths: {
     '/loans': {
-      get: { operationId: 'listLoans', tags: ['Loans'], summary: 'List loans', responses: { '200': { description: 'OK' } } },
-      post: { operationId: 'createLoan', tags: ['Loans'], summary: 'Create a loan', responses: { '201': { description: 'Created' } } },
+      get: {
+        operationId: 'listLoans',
+        tags: ['Loans'],
+        summary: 'List loans',
+        responses: { '200': { description: 'OK' } },
+      },
+      post: {
+        operationId: 'createLoan',
+        tags: ['Loans'],
+        summary: 'Create a loan',
+        responses: { '201': { description: 'Created' } },
+      },
     },
   },
 };
@@ -19,7 +35,13 @@ const revision: OpenAPIDocument = {
   info: { title: 'Lending', version: '2.0.0' },
   paths: {
     '/loans': {
-      get: { operationId: 'listLoans', tags: ['Loans'], summary: 'List every loan', responses: { '200': { description: 'OK' } }, parameters: [{ name: 'tenant', in: 'query', required: true }] },
+      get: {
+        operationId: 'listLoans',
+        tags: ['Loans'],
+        summary: 'List every loan',
+        responses: { '200': { description: 'OK' } },
+        parameters: [{ name: 'tenant', in: 'query', required: true }],
+      },
     },
   },
 };
@@ -27,14 +49,41 @@ const revision: OpenAPIDocument = {
 const report: DiffReport = diffSpecs(base, revision);
 
 const diagnostics: ApiDiagnostic[] = [
-  { id: 'a', ruleId: 'operation-id', source: 'speccy', severity: 'issue', category: 'oas', message: 'GET /loans has no operationId.', path: ['paths', '/loans', 'get'] },
-  { id: 'b', ruleId: 'error-response', source: 'speccy', severity: 'warning', category: 'errors', message: 'No error response is documented.', path: ['paths', '/loans', 'get'], suggestion: 'Add the likely 4xx responses.' },
-  { id: 'c', ruleId: 'tag-description', source: 'speccy', severity: 'suggestion', category: 'documentation', message: 'Loans has no description.', path: ['tags', 0] },
+  {
+    id: 'a',
+    ruleId: 'operation-id',
+    source: 'speccy',
+    severity: 'issue',
+    category: 'oas',
+    message: 'GET /loans has no operationId.',
+    path: ['paths', '/loans', 'get'],
+  },
+  {
+    id: 'b',
+    ruleId: 'error-response',
+    source: 'speccy',
+    severity: 'warning',
+    category: 'errors',
+    message: 'No error response is documented.',
+    path: ['paths', '/loans', 'get'],
+    suggestion: 'Add the likely 4xx responses.',
+  },
+  {
+    id: 'c',
+    ruleId: 'tag-description',
+    source: 'speccy',
+    severity: 'suggestion',
+    category: 'documentation',
+    message: 'Loans has no description.',
+    path: ['tags', 0],
+  },
 ];
 
 describe('formatDiff', () => {
   it('returns the report verbatim as JSON', () => {
-    expect(JSON.parse(formatDiff(report, 'json'))).toEqual(JSON.parse(JSON.stringify(report)));
+    expect(JSON.parse(formatDiff(report, 'json'))).toEqual(
+      JSON.parse(JSON.stringify(report)),
+    );
   });
 
   it('leads the markdown with the merge verdict and severity totals', () => {
@@ -63,23 +112,78 @@ describe('formatDiff', () => {
   });
 
   it('shows source refs when the host supplies them', () => {
-    const sourced = diffSpecs(base, revision, { base: { source: 'origin/main:openapi.yaml' }, revision: { source: 'openapi.yaml' } });
+    const sourced = diffSpecs(base, revision, {
+      base: { source: 'origin/main:openapi.yaml' },
+      revision: { source: 'openapi.yaml' },
+    });
 
-    expect(formatDiff(sourced, 'markdown')).toContain('`origin/main:openapi.yaml` → `openapi.yaml`');
+    expect(formatDiff(sourced, 'markdown')).toContain(
+      '`origin/main:openapi.yaml` → `openapi.yaml`',
+    );
   });
 
   it('names the operations a shared component change reaches', () => {
     const shared = diffSpecs(
-      { openapi: '3.1.0', info: { title: 'A', version: '1' }, paths: { '/a': { get: { operationId: 'getA', responses: { '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/E' } } } } } } } }, components: { schemas: { E: { type: 'object', properties: { code: { type: 'string' } } } } } },
-      { openapi: '3.1.0', info: { title: 'A', version: '2' }, paths: { '/a': { get: { operationId: 'getA', responses: { '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/E' } } } } } } } }, components: { schemas: { E: { type: 'object', properties: {} } } } },
+      {
+        openapi: '3.1.0',
+        info: { title: 'A', version: '1' },
+        paths: {
+          '/a': {
+            get: {
+              operationId: 'getA',
+              responses: {
+                '200': {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/E' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            E: { type: 'object', properties: { code: { type: 'string' } } },
+          },
+        },
+      },
+      {
+        openapi: '3.1.0',
+        info: { title: 'A', version: '2' },
+        paths: {
+          '/a': {
+            get: {
+              operationId: 'getA',
+              responses: {
+                '200': {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/E' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: { schemas: { E: { type: 'object', properties: {} } } },
+      },
     );
 
     expect(formatDiff(shared, 'markdown')).toContain('getA');
   });
 
   it('does not repeat the operation when the message already names it', () => {
-    expect(formatDiff(report, 'pretty', { color: false })).toContain('POST /loans was removed.');
-    expect(formatDiff(report, 'pretty', { color: false })).not.toContain('POST /loans — POST /loans');
+    expect(formatDiff(report, 'pretty', { color: false })).toContain(
+      'POST /loans was removed.',
+    );
+    expect(formatDiff(report, 'pretty', { color: false })).not.toContain(
+      'POST /loans — POST /loans',
+    );
   });
 
   it('renders plain text without markup for the terminal', () => {
@@ -109,7 +213,9 @@ describe('formatLint', () => {
   });
 
   it('includes the suggestion when a rule offers one', () => {
-    expect(formatLint(diagnostics, 'pretty', { color: false })).toContain('Add the likely 4xx responses.');
+    expect(formatLint(diagnostics, 'pretty', { color: false })).toContain(
+      'Add the likely 4xx responses.',
+    );
   });
 });
 
@@ -121,7 +227,19 @@ describe('exit codes', () => {
   });
 
   it('treats warnings as passing when the threshold is breaking', () => {
-    const warned: DiffReport = { base: {}, revision: {}, changes: [{ id: 'x:y', severity: 'warning', kind: 'changed', location: ['y'], message: 'Something shifted.' }] };
+    const warned: DiffReport = {
+      base: {},
+      revision: {},
+      changes: [
+        {
+          id: 'x:y',
+          severity: 'warning',
+          kind: 'changed',
+          location: ['y'],
+          message: 'Something shifted.',
+        },
+      ],
+    };
 
     expect(diffExitCode(warned, 'breaking')).toBe(0);
     expect(diffExitCode(warned, 'warning')).toBe(1);

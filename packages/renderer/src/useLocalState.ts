@@ -14,7 +14,7 @@ export function useLocalState<T>(key: string, initialValue: T) {
     if (typeof window === 'undefined') return initialValue;
     try {
       const stored = window.localStorage.getItem(key);
-      return stored === null ? initialValue : JSON.parse(stored) as T;
+      return stored === null ? initialValue : (JSON.parse(stored) as T);
     } catch {
       return initialValue;
     }

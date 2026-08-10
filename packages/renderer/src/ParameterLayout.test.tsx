@@ -18,44 +18,101 @@ describe('endpoint parameter layout', () => {
       description: `Filter ${index + 1}`,
       schema: { type: 'string' },
     }));
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: { '/companies': { get: { summary: 'List companies', operationId: 'list-companies', parameters } } },
-    }} basePath="/api" />);
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              get: {
+                summary: 'List companies',
+                operationId: 'list-companies',
+                parameters,
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
 
-    const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
-    const requestHeading = container.querySelector<HTMLElement>('.sp-request-heading')!;
-    expect(within(requestHeading).getByRole('heading', { level: 2, name: 'Request' })).toBeInTheDocument();
+    const documentation =
+      container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    const requestHeading = container.querySelector<HTMLElement>(
+      '.sp-request-heading',
+    )!;
+    expect(
+      within(requestHeading).getByRole('heading', {
+        level: 2,
+        name: 'Request',
+      }),
+    ).toBeInTheDocument();
     expect(requestHeading.nextElementSibling).toHaveClass('sp-endpoint-layout');
-    expect(within(documentation).getByRole('heading', { level: 3, name: 'Query parameters' })).toBeInTheDocument();
+    expect(
+      within(documentation).getByRole('heading', {
+        level: 3,
+        name: 'Query parameters',
+      }),
+    ).toBeInTheDocument();
     expect(within(documentation).getByText('filter5')).toBeInTheDocument();
-    expect(within(documentation).queryByText('filter6')).not.toBeInTheDocument();
+    expect(
+      within(documentation).queryByText('filter6'),
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(within(documentation).getByRole('button', { name: 'Show 3 more' }));
+    fireEvent.click(
+      within(documentation).getByRole('button', { name: 'Show 3 more' }),
+    );
     expect(within(documentation).getByText('filter8')).toBeInTheDocument();
 
-    fireEvent.click(within(documentation).getByRole('button', { name: 'Show fewer' }));
-    expect(within(documentation).queryByText('filter6')).not.toBeInTheDocument();
+    fireEvent.click(
+      within(documentation).getByRole('button', { name: 'Show fewer' }),
+    );
+    expect(
+      within(documentation).queryByText('filter6'),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps required request fields visible while collapsing optional fields', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const parameters = [
-      ...Array.from({ length: 6 }, (_, index) => ({ name: `required${index + 1}`, in: 'query', required: true, schema: { type: 'string' } })),
+      ...Array.from({ length: 6 }, (_, index) => ({
+        name: `required${index + 1}`,
+        in: 'query',
+        required: true,
+        schema: { type: 'string' },
+      })),
       { name: 'optional', in: 'query', schema: { type: 'string' } },
     ];
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: { '/companies': { get: { summary: 'Get company', operationId: 'get-company', parameters } } },
-    }} basePath="/api" />);
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              get: {
+                summary: 'Get company',
+                operationId: 'get-company',
+                parameters,
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
 
-    const requestBuilder = container.querySelector<HTMLElement>('.sp-request-rail')!;
+    const requestBuilder =
+      container.querySelector<HTMLElement>('.sp-request-rail')!;
     expect(within(requestBuilder).getByText('required6')).toBeInTheDocument();
-    expect(within(requestBuilder).queryByText('optional')).not.toBeInTheDocument();
+    expect(
+      within(requestBuilder).queryByText('optional'),
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(within(requestBuilder).getByRole('button', { name: 'Show 1 more' }));
+    fireEvent.click(
+      within(requestBuilder).getByRole('button', { name: 'Show 1 more' }),
+    );
     expect(within(requestBuilder).getByText('optional')).toBeInTheDocument();
   });
 
@@ -65,16 +122,35 @@ describe('endpoint parameter layout', () => {
       { name: 'cursor', in: 'query', schema: { type: 'string' } },
       { name: 'limit', in: 'query', schema: { type: 'integer' } },
     ];
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: { '/companies': { get: { summary: 'List companies', operationId: 'list-companies', parameters } } },
-    }} basePath="/api" parameterPrototype />);
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              get: {
+                summary: 'List companies',
+                operationId: 'list-companies',
+                parameters,
+              },
+            },
+          },
+        }}
+        basePath="/api"
+        parameterPrototype
+      />,
+    );
 
-    const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    const documentation =
+      container.querySelector<HTMLElement>('.sp-endpoint-main')!;
     expect(within(documentation).getByText('cursor')).toBeInTheDocument();
     expect(within(documentation).getByText('limit')).toBeInTheDocument();
-    expect(within(documentation).queryByRole('button', { name: /Pagination, filtering, sorting, and related data/ })).not.toBeInTheDocument();
+    expect(
+      within(documentation).queryByRole('button', {
+        name: /Pagination, filtering, sorting, and related data/,
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps three optional parameters collapsed', () => {
@@ -84,79 +160,132 @@ describe('endpoint parameter layout', () => {
       in: 'query',
       schema: { type: 'string' },
     }));
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: { '/companies': { get: { summary: 'List companies', operationId: 'list-companies', parameters } } },
-    }} basePath="/api" parameterPrototype />);
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              get: {
+                summary: 'List companies',
+                operationId: 'list-companies',
+                parameters,
+              },
+            },
+          },
+        }}
+        basePath="/api"
+        parameterPrototype
+      />,
+    );
 
-    const documentation = container.querySelector<HTMLElement>('.sp-endpoint-main')!;
-    expect(within(documentation).getByRole('button', { name: /Pagination, filtering, sorting, and related data/ })).toHaveAttribute('aria-expanded', 'false');
-    expect(within(documentation).queryByText('filter1')).not.toBeInTheDocument();
+    const documentation =
+      container.querySelector<HTMLElement>('.sp-endpoint-main')!;
+    expect(
+      within(documentation).getByRole('button', {
+        name: /Pagination, filtering, sorting, and related data/,
+      }),
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      within(documentation).queryByText('filter1'),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps parameter details compact until requested', () => {
     window.history.replaceState({}, '', '/api/get-company');
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: {
-        '/companies/{companyId}': {
-          get: {
-            summary: 'Get company',
-            operationId: 'get-company',
-            parameters: [{
-              name: 'companyId',
-              in: 'path',
-              description: 'Unique identifier for a company.',
-              schema: { type: 'string', format: 'uuid', default: 'company-123' },
-            }],
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies/{companyId}': {
+              get: {
+                summary: 'Get company',
+                operationId: 'get-company',
+                parameters: [
+                  {
+                    name: 'companyId',
+                    in: 'path',
+                    description: 'Unique identifier for a company.',
+                    schema: {
+                      type: 'string',
+                      format: 'uuid',
+                      default: 'company-123',
+                    },
+                  },
+                ],
+              },
+            },
           },
-        },
-      },
-    }} basePath="/api" />);
+        }}
+        basePath="/api"
+      />,
+    );
 
-    const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter');
+    const parameter = container.querySelector<HTMLElement>(
+      '.sp-endpoint-parameter',
+    );
     expect(within(parameter!).getByText('string · uuid')).toBeInTheDocument();
-    expect(within(parameter!).queryByText('Unique identifier for a company.')).not.toBeInTheDocument();
+    expect(
+      within(parameter!).queryByText('Unique identifier for a company.'),
+    ).not.toBeInTheDocument();
     expect(within(parameter!).queryByText('Default:')).not.toBeInTheDocument();
 
-    fireEvent.click(within(parameter!).getByRole('button', { name: 'Show details for companyId' }));
+    fireEvent.click(
+      within(parameter!).getByRole('button', {
+        name: 'Show details for companyId',
+      }),
+    );
 
-    expect(within(parameter!).getByText('Unique identifier for a company.')).toBeInTheDocument();
+    expect(
+      within(parameter!).getByText('Unique identifier for a company.'),
+    ).toBeInTheDocument();
     expect(within(parameter!).getByText('Default:')).toBeInTheDocument();
     expect(within(parameter!).getByText('"company-123"')).toBeInTheDocument();
   });
 
   it('summarizes array parameters without rendering a duplicate items row', () => {
     window.history.replaceState({}, '', '/api/list-instruments');
-    const { container } = render(<Speccy spec={{
-      openapi: '3.1.0',
-      info: { title: 'Test API' },
-      paths: {
-        '/instruments': {
-          get: {
-            summary: 'List instruments',
-            operationId: 'list-instruments',
-            parameters: [{
-              name: 'state',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
-                  title: 'InstrumentState',
-                  type: 'string',
-                  enum: ['ACTIVE', 'BLOCKED', 'DESTROYED', 'NOT_ENABLED'],
-                },
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/instruments': {
+              get: {
+                summary: 'List instruments',
+                operationId: 'list-instruments',
+                parameters: [
+                  {
+                    name: 'state',
+                    in: 'query',
+                    schema: {
+                      type: 'array',
+                      items: {
+                        title: 'InstrumentState',
+                        type: 'string',
+                        enum: ['ACTIVE', 'BLOCKED', 'DESTROYED', 'NOT_ENABLED'],
+                      },
+                    },
+                  },
+                ],
               },
-            }],
+            },
           },
-        },
-      },
-    }} basePath="/api" />);
+        }}
+        basePath="/api"
+      />,
+    );
 
-    const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter')!;
-    expect(within(parameter).getByText('array<InstrumentState · enum>')).toBeInTheDocument();
+    const parameter = container.querySelector<HTMLElement>(
+      '.sp-endpoint-parameter',
+    )!;
+    expect(
+      within(parameter).getByText('array<InstrumentState · enum>'),
+    ).toBeInTheDocument();
     expect(within(parameter).queryByText('items')).not.toBeInTheDocument();
   });
 });

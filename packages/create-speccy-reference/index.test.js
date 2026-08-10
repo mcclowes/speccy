@@ -15,10 +15,18 @@ test('creates a complete standalone project', async () => {
 
   try {
     await createReference(target);
-    const packageJson = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
+    const packageJson = JSON.parse(
+      await readFile(join(target, 'package.json'), 'utf8'),
+    );
     assert.equal(packageJson.name, 'payments-api');
-    assert.match(await readFile(join(target, 'speccy.config.ts'), 'utf8'), /openapi\.yaml/);
-    assert.match(await readFile(join(target, 'src', 'App.tsx'), 'utf8'), /<Speccy/);
+    assert.match(
+      await readFile(join(target, 'speccy.config.ts'), 'utf8'),
+      /openapi\.yaml/,
+    );
+    assert.match(
+      await readFile(join(target, 'src', 'App.tsx'), 'utf8'),
+      /<Speccy/,
+    );
     assert.match(await readFile(join(target, '.gitignore'), 'utf8'), /dist\//);
   } finally {
     await rm(parent, { recursive: true, force: true });

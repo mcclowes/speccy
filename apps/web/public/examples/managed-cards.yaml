@@ -12,14 +12,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ManagedCardRequest"
+              $ref: '#/components/schemas/ManagedCardRequest'
       responses:
-        "200":
+        '200':
           description: Managed card
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ManagedCard"
+                $ref: '#/components/schemas/ManagedCard'
 components:
   schemas:
     ManagedCard:
@@ -34,11 +34,11 @@ components:
       discriminator:
         propertyName: mode
         mapping:
-          PREPAID_MODE: "#/components/schemas/PrepaidModeCard"
-          DEBIT_MODE: "#/components/schemas/DebitModeCard"
+          PREPAID_MODE: '#/components/schemas/PrepaidModeCard'
+          DEBIT_MODE: '#/components/schemas/DebitModeCard'
     DebitModeCard:
       allOf:
-        - $ref: "#/components/schemas/ManagedCard"
+        - $ref: '#/components/schemas/ManagedCard'
         - type: object
           required: [parentManagedAccountId]
           properties:
@@ -50,11 +50,11 @@ components:
                 type: number
     PrepaidModeCard:
       allOf:
-        - $ref: "#/components/schemas/ManagedCard"
+        - $ref: '#/components/schemas/ManagedCard'
         - type: object
           properties:
             balances:
-              $ref: "#/components/schemas/ManagedInstrumentBalance"
+              $ref: '#/components/schemas/ManagedInstrumentBalance'
     ManagedInstrumentBalance:
       type: object
       properties:
@@ -71,11 +71,11 @@ components:
       discriminator:
         propertyName: mode
         mapping:
-          PREPAID_MODE: "#/components/schemas/PrepaidModeCardRequest"
-          DEBIT_MODE: "#/components/schemas/DebitModeCardRequest"
+          PREPAID_MODE: '#/components/schemas/PrepaidModeCardRequest'
+          DEBIT_MODE: '#/components/schemas/DebitModeCardRequest'
     PrepaidModeCardRequest:
       allOf:
-        - $ref: "#/components/schemas/ManagedCardRequest"
+        - $ref: '#/components/schemas/ManagedCardRequest'
         - type: object
           required: [currency]
           properties:
@@ -83,7 +83,7 @@ components:
               type: string
     DebitModeCardRequest:
       allOf:
-        - $ref: "#/components/schemas/ManagedCardRequest"
+        - $ref: '#/components/schemas/ManagedCardRequest'
         - type: object
           required: [parentManagedAccountId]
           properties:

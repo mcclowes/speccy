@@ -16,7 +16,9 @@ describe('loadSpec', () => {
     const siteDir = await mkdtemp(join(tmpdir(), 'speccy-'));
     await writeFile(join(siteDir, 'openapi.yaml'), 'openapi: 3.1.0');
 
-    await expect(loadSpec({ spec: 'openapi.yaml' }, siteDir)).resolves.toBe('openapi: 3.1.0');
+    await expect(loadSpec({ spec: 'openapi.yaml' }, siteDir)).resolves.toBe(
+      'openapi: 3.1.0',
+    );
   });
 
   it('returns inline documents without changing them', async () => {
@@ -28,4 +30,3 @@ describe('loadSpec', () => {
     await expect(loadSpec({}, '/tmp')).rejects.toThrow('needs either spec');
   });
 });
-

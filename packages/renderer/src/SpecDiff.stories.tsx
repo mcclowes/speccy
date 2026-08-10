@@ -26,7 +26,12 @@ const report: DiffReport = {
       scope: { area: 'parameters', label: 'Query parameter · status' },
       location: ['paths', '/payment-links', 'get', 'parameters', 'status'],
       message: 'Added optional query parameter status',
-      after: { name: 'status', in: 'query', required: false, schema: { type: 'string' } },
+      after: {
+        name: 'status',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' },
+      },
     },
     {
       id: 'change-description',

@@ -42,7 +42,7 @@ jobs:
         with:
           specs: Fixture=consumer/base.yaml=>consumer/revision.yaml
           version: 0.3.0
-          comment: "false"
+          comment: 'false'
 
   api-diff:
     name: Speccy diff

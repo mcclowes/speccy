@@ -8,7 +8,15 @@
  */
 
 import { parse as parseYaml } from 'yaml';
-import type { HttpMethod, MediaType, OpenAPIDocument, Operation, Parameter, PathItem, ResponseObject } from './types';
+import type {
+  HttpMethod,
+  MediaType,
+  OpenAPIDocument,
+  Operation,
+  Parameter,
+  PathItem,
+  ResponseObject,
+} from './types';
 
 export const HTTP_METHODS: HttpMethod[] = [
   'get',
@@ -52,7 +60,9 @@ export interface ReferenceModel {
   webhooks: OperationModel[];
 }
 
-export function operationsInDeclarationOrder(pathItem: PathItem): Array<[HttpMethod, Operation]> {
+export function operationsInDeclarationOrder(
+  pathItem: PathItem,
+): Array<[HttpMethod, Operation]> {
   return Object.keys(pathItem).flatMap((key) => {
     const method = key as HttpMethod;
     if (!HTTP_METHODS.includes(method)) return [];
@@ -80,7 +90,9 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
   const resolved = new Map<string, unknown>();
 
   function schemaTitle(ref: string): string | undefined {
-    const match = ref.match(/^#\/(?:components\/schemas|definitions)\/([^/]+)$/);
+    const match = ref.match(
+      /^#\/(?:components\/schemas|definitions)\/([^/]+)$/,
+    );
     return match?.[1]?.replace(/~1/g, '/').replace(/~0/g, '~');
   }
 
@@ -99,7 +111,8 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
   }
 
   function resolve(node: unknown, activeRefs: Set<string>): unknown {
-    if (Array.isArray(node)) return node.map((item) => resolve(item, activeRefs));
+    if (Array.isArray(node))
+      return node.map((item) => resolve(item, activeRefs));
     if (!node || typeof node !== 'object') return node;
 
     const ref = (node as { $ref?: unknown }).$ref;
@@ -110,9 +123,13 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
       if (target === undefined) return node;
       const resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
       const inferredTitle = schemaTitle(ref);
-      const value = inferredTitle && resolvedTarget && typeof resolvedTarget === 'object' && !Array.isArray(resolvedTarget)
-        ? { title: inferredTitle, ...resolvedTarget }
-        : resolvedTarget;
+      const value =
+        inferredTitle &&
+        resolvedTarget &&
+        typeof resolvedTarget === 'object' &&
+        !Array.isArray(resolvedTarget)
+          ? { title: inferredTitle, ...resolvedTarget }
+          : resolvedTarget;
       resolved.set(ref, value);
       return value;
     }
@@ -134,14 +151,26 @@ function expandDiscriminatorMappings(node: unknown): unknown {
 
   const source = node as Record<string, unknown>;
   const discriminator = source.discriminator;
-  const mapping = discriminator && typeof discriminator === 'object' && !Array.isArray(discriminator)
-    ? (discriminator as { mapping?: unknown }).mapping
-    : undefined;
+  const mapping =
+    discriminator &&
+    typeof discriminator === 'object' &&
+    !Array.isArray(discriminator)
+      ? (discriminator as { mapping?: unknown }).mapping
+      : undefined;
   const result = Object.fromEntries(
-    Object.entries(source).map(([key, value]) => [key, expandDiscriminatorMappings(value)]),
+    Object.entries(source).map(([key, value]) => [
+      key,
+      expandDiscriminatorMappings(value),
+    ]),
   );
 
-  if (!source.oneOf && !source.anyOf && mapping && typeof mapping === 'object' && !Array.isArray(mapping)) {
+  if (
+    !source.oneOf &&
+    !source.anyOf &&
+    mapping &&
+    typeof mapping === 'object' &&
+    !Array.isArray(mapping)
+  ) {
     const refs = Object.values(mapping)
       .filter((ref): ref is string => typeof ref === 'string')
       .map((ref) => ({ $ref: ref }));
@@ -154,36 +183,49 @@ function expandDiscriminatorMappings(node: unknown): unknown {
 /** Removes objects marked as internal before they can contribute to the public reference model. */
 function removeInternalNodes(node: unknown): unknown {
   if (Array.isArray(node)) {
-    return node
-      .map(removeInternalNodes)
-      .filter((item) => item !== undefined);
+    return node.map(removeInternalNodes).filter((item) => item !== undefined);
   }
   if (!node || typeof node !== 'object') return node;
 
   const source = node as Record<string, unknown>;
   if (source['x-internal'] === true) return undefined;
 
-  const literalValueKeys = new Set(['const', 'default', 'enum', 'example', 'value']);
+  const literalValueKeys = new Set([
+    'const',
+    'default',
+    'enum',
+    'example',
+    'value',
+  ]);
 
   return Object.fromEntries(
     Object.entries(source)
-      .map(([key, value]) => [
-        key,
-        literalValueKeys.has(key) || (key.startsWith('x-') && key !== 'x-internal')
-          ? value
-          : removeInternalNodes(value),
-      ] as const)
-      .filter((entry): entry is readonly [string, Exclude<unknown, undefined>] => entry[1] !== undefined),
+      .map(
+        ([key, value]) =>
+          [
+            key,
+            literalValueKeys.has(key) ||
+            (key.startsWith('x-') && key !== 'x-internal')
+              ? value
+              : removeInternalNodes(value),
+          ] as const,
+      )
+      .filter(
+        (entry): entry is readonly [string, Exclude<unknown, undefined>] =>
+          entry[1] !== undefined,
+      ),
   );
 }
 
 function swaggerSchema(parameter: Parameter) {
-  return parameter.schema ?? {
-    type: parameter.type,
-    format: parameter.format,
-    items: parameter.items,
-    enum: parameter.enum,
-  };
+  return (
+    parameter.schema ?? {
+      type: parameter.type,
+      format: parameter.format,
+      items: parameter.items,
+      enum: parameter.enum,
+    }
+  );
 }
 
 function normalizeSwaggerOperation(
@@ -195,37 +237,68 @@ function normalizeSwaggerOperation(
   const body = allParameters.find((parameter) => parameter.in === 'body');
   const form = allParameters.filter((parameter) => parameter.in === 'formData');
   const parameters = (operation.parameters ?? [])
-    .filter((parameter) => parameter.in !== 'body' && parameter.in !== 'formData')
+    .filter(
+      (parameter) => parameter.in !== 'body' && parameter.in !== 'formData',
+    )
     .map((parameter) => ({ ...parameter, schema: swaggerSchema(parameter) }));
-  const consumes = operation.consumes ?? document.consumes ?? ['application/json'];
+  const consumes = operation.consumes ??
+    document.consumes ?? ['application/json'];
   let requestBody = operation.requestBody;
   if (!requestBody && body) {
     requestBody = {
       description: body.description,
       required: body.required,
-      content: Object.fromEntries(consumes.map((mediaType) => [mediaType, { schema: swaggerSchema(body) }])),
+      content: Object.fromEntries(
+        consumes.map((mediaType) => [
+          mediaType,
+          { schema: swaggerSchema(body) },
+        ]),
+      ),
     };
   } else if (!requestBody && form.length > 0) {
     requestBody = {
-      content: Object.fromEntries(consumes.map((mediaType) => [mediaType, {
-        schema: {
-          type: 'object',
-          required: form.filter((parameter) => parameter.required).map((parameter) => parameter.name).filter(Boolean) as string[],
-          properties: Object.fromEntries(form.filter((parameter) => parameter.name).map((parameter) => [parameter.name as string, swaggerSchema(parameter)])),
-        },
-      }])),
+      content: Object.fromEntries(
+        consumes.map((mediaType) => [
+          mediaType,
+          {
+            schema: {
+              type: 'object',
+              required: form
+                .filter((parameter) => parameter.required)
+                .map((parameter) => parameter.name)
+                .filter(Boolean) as string[],
+              properties: Object.fromEntries(
+                form
+                  .filter((parameter) => parameter.name)
+                  .map((parameter) => [
+                    parameter.name as string,
+                    swaggerSchema(parameter),
+                  ]),
+              ),
+            },
+          },
+        ]),
+      ),
     };
   }
 
-  const produces = operation.produces ?? document.produces ?? ['application/json'];
-  const responses = Object.fromEntries(Object.entries(operation.responses ?? {}).map(([code, response]) => {
-    if (response.content || !response.schema) return [code, response];
-    const content = Object.fromEntries(produces.map((mediaType) => [mediaType, {
-      schema: response.schema,
-      example: response.examples?.[mediaType],
-    } satisfies MediaType]));
-    return [code, { ...response, content } satisfies ResponseObject];
-  }));
+  const produces = operation.produces ??
+    document.produces ?? ['application/json'];
+  const responses = Object.fromEntries(
+    Object.entries(operation.responses ?? {}).map(([code, response]) => {
+      if (response.content || !response.schema) return [code, response];
+      const content = Object.fromEntries(
+        produces.map((mediaType) => [
+          mediaType,
+          {
+            schema: response.schema,
+            example: response.examples?.[mediaType],
+          } satisfies MediaType,
+        ]),
+      );
+      return [code, { ...response, content } satisfies ResponseObject];
+    }),
+  );
 
   return { ...operation, parameters, requestBody, responses };
 }
@@ -237,18 +310,38 @@ export function normalizeDocument(document: OpenAPIDocument): OpenAPIDocument {
     schemas: { ...document.definitions, ...document.components?.schemas },
     parameters: { ...document.parameters, ...document.components?.parameters },
     responses: { ...document.responses, ...document.components?.responses },
-    securitySchemes: { ...document.securityDefinitions, ...document.components?.securitySchemes },
+    securitySchemes: {
+      ...document.securityDefinitions,
+      ...document.components?.securitySchemes,
+    },
   };
-  const servers = document.servers?.length ? document.servers : document.host ? (document.schemes?.length ? document.schemes : ['https'])
-    .map((scheme) => ({ url: `${scheme}://${document.host}${document.basePath ?? ''}` })) : undefined;
-  const paths = Object.fromEntries(Object.entries(document.paths ?? {}).map(([path, pathItem]) => {
-    const normalized: PathItem = { ...pathItem };
-    normalized.parameters = (pathItem.parameters ?? []).map((parameter) => ({ ...parameter, schema: swaggerSchema(parameter) }));
-    for (const method of HTTP_METHODS) {
-      if (pathItem[method]) normalized[method] = normalizeSwaggerOperation(pathItem[method], pathItem.parameters ?? [], document);
-    }
-    return [path, normalized];
-  }));
+  const servers = document.servers?.length
+    ? document.servers
+    : document.host
+      ? (document.schemes?.length ? document.schemes : ['https']).map(
+          (scheme) => ({
+            url: `${scheme}://${document.host}${document.basePath ?? ''}`,
+          }),
+        )
+      : undefined;
+  const paths = Object.fromEntries(
+    Object.entries(document.paths ?? {}).map(([path, pathItem]) => {
+      const normalized: PathItem = { ...pathItem };
+      normalized.parameters = (pathItem.parameters ?? []).map((parameter) => ({
+        ...parameter,
+        schema: swaggerSchema(parameter),
+      }));
+      for (const method of HTTP_METHODS) {
+        if (pathItem[method])
+          normalized[method] = normalizeSwaggerOperation(
+            pathItem[method],
+            pathItem.parameters ?? [],
+            document,
+          );
+      }
+      return [path, normalized];
+    }),
+  );
   return { ...document, servers, components, paths };
 }
 
@@ -260,17 +353,29 @@ export function slugify(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceModel {
+export function createReferenceModel(
+  rawDocument: OpenAPIDocument,
+): ReferenceModel {
   if (!rawDocument.openapi && !rawDocument.swagger) {
-    throw new Error('This does not look like an OpenAPI document. Add an openapi or swagger version.');
+    throw new Error(
+      'This does not look like an OpenAPI document. Add an openapi or swagger version.',
+    );
   }
 
   const publicDocument = removeInternalNodes(rawDocument) as OpenAPIDocument;
-  const document = normalizeDocument(resolveRefs(expandDiscriminatorMappings(publicDocument) as OpenAPIDocument));
+  const document = normalizeDocument(
+    resolveRefs(expandDiscriminatorMappings(publicDocument) as OpenAPIDocument),
+  );
 
   const declaredTags = new Map(
     (document.tags ?? [])
-      .filter((tag): tag is NonNullable<OpenAPIDocument['tags']>[number] & { name: string } => Boolean(tag.name))
+      .filter(
+        (
+          tag,
+        ): tag is NonNullable<OpenAPIDocument['tags']>[number] & {
+          name: string;
+        } => Boolean(tag.name),
+      )
       .map((tag) => [tag.name, tag]),
   );
   const operations: OperationModel[] = [];
@@ -279,7 +384,8 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
     for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
       const tag = operation.tags?.[0] ?? 'Other';
-      const baseId = slugify(operation.operationId ?? `${method}-${path}`) || 'operation';
+      const baseId =
+        slugify(operation.operationId ?? `${method}-${path}`) || 'operation';
       const count = usedIds.get(baseId) ?? 0;
       usedIds.set(baseId, count + 1);
       operations.push({
@@ -297,8 +403,18 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
   const webhooks: OperationModel[] = [];
   for (const [path, pathItem] of Object.entries(document.webhooks ?? {})) {
     for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
-      const baseId = slugify(`webhook-${operation.operationId ?? `${method}-${path}`}`) || 'webhook';
-      webhooks.push({ id: baseId, method, path, operation, pathItem, tag: operation.tags?.[0] ?? 'Other webhooks', source: 'webhook' });
+      const baseId =
+        slugify(`webhook-${operation.operationId ?? `${method}-${path}`}`) ||
+        'webhook';
+      webhooks.push({
+        id: baseId,
+        method,
+        path,
+        operation,
+        pathItem,
+        tag: operation.tags?.[0] ?? 'Other webhooks',
+        source: 'webhook',
+      });
     }
   }
 
@@ -317,13 +433,16 @@ export function createReferenceModel(rawDocument: OpenAPIDocument): ReferenceMod
         description: declaredTag?.description,
         longDescription: declaredTag?.['x-longDescription'],
         icon: icon?.url ? { url: icon.url, alt: icon.alt } : undefined,
-        operations: taggedOperations.filter((operation) => operation.tag === name),
+        operations: taggedOperations.filter(
+          (operation) => operation.tag === name,
+        ),
       };
     })
     .filter((tag) => tag.operations.length > 0);
 
-  const configuredTagGroups = (document['x-tagGroups'] ?? [])
-    .filter((group): group is { name: string; tags?: string[] } => Boolean(group.name));
+  const configuredTagGroups = (document['x-tagGroups'] ?? []).filter(
+    (group): group is { name: string; tags?: string[] } => Boolean(group.name),
+  );
   const tagGroups = configuredTagGroups.map((group) => ({
     name: group.name,
     tags: (group.tags ?? [])

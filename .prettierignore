@@ -1,0 +1,9 @@
+**/build/**
+**/dist/**
+**/.build/**
+**/.docusaurus/**
+**/node_modules/**
+**/storybook-static/**
+apps/macos/Speccy.app/**
+apps/macos/Sources/SpeccyMac/Resources/Web/**
+package-lock.json

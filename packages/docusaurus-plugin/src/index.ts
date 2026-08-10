@@ -47,11 +47,16 @@ export async function loadSpec(
 ): Promise<string | OpenAPIDocument> {
   if (options.specUrl) {
     const response = await fetcher(options.specUrl);
-    if (!response.ok) throw new Error(`Could not load OpenAPI document from ${options.specUrl}: ${response.status} ${response.statusText}`);
+    if (!response.ok)
+      throw new Error(
+        `Could not load OpenAPI document from ${options.specUrl}: ${response.status} ${response.statusText}`,
+      );
     return response.text();
   }
   if (typeof options.spec === 'string') {
-    const path = isAbsolute(options.spec) ? options.spec : resolve(siteDir, options.spec);
+    const path = isAbsolute(options.spec)
+      ? options.spec
+      : resolve(siteDir, options.spec);
     return readFile(path, 'utf8');
   }
   if (options.spec) return options.spec;
@@ -70,8 +75,14 @@ export default function speccyPlugin(
     async loadContent() {
       const spec = await loadSpec(options, context.siteDir);
       const renderer = options.renderer ?? {};
-      if (process.env.NODE_ENV !== 'production' && renderer.showDeveloperHints !== false) {
-        renderer.spectralDiagnostics = [...(renderer.spectralDiagnostics ?? []), ...await runSpectral(spec)];
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        renderer.showDeveloperHints !== false
+      ) {
+        renderer.spectralDiagnostics = [
+          ...(renderer.spectralDiagnostics ?? []),
+          ...(await runSpectral(spec)),
+        ];
       }
       return {
         spec,
@@ -80,11 +91,14 @@ export default function speccyPlugin(
       };
     },
     async contentLoaded({ content, actions }) {
-      const dataPath = await actions.createData('speccy-reference.json', JSON.stringify({
-        spec: content.spec,
-        route: content.route,
-        renderer: content.renderer,
-      }));
+      const dataPath = await actions.createData(
+        'speccy-reference.json',
+        JSON.stringify({
+          spec: content.spec,
+          route: content.route,
+          renderer: content.renderer,
+        }),
+      );
       actions.addRoute({
         path: content.route,
         exact: false,

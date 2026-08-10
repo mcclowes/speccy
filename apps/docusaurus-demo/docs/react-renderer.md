@@ -16,7 +16,7 @@ npm install speccy-renderer
 ## Basic use
 
 ```tsx
-import {Speccy} from 'speccy-renderer';
+import { Speccy } from 'speccy-renderer';
 import 'speccy-renderer/styles.css';
 
 export function Reference() {
@@ -69,10 +69,7 @@ Configure your host to serve the React application for these routes. Static host
 Use `logo` for the brand mark in the sidebar header:
 
 ```tsx
-<Speccy
-  spec={spec}
-  logo={<img src="/mark.svg" alt="Acme" />}
-/>
+<Speccy spec={spec} logo={<img src="/mark.svg" alt="Acme" />} />
 ```
 
 The API title comes from `info.title`. Use the [`x-icon` extension](./openapi-extensions.md#tag-icons) for icons beside individual tags.

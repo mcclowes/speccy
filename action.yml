@@ -15,7 +15,7 @@ inputs:
     default: never
   comment:
     description: Publish or update a pull request comment.
-    default: "true"
+    default: 'true'
   github-token:
     description: Token used to publish the pull request comment.
     default: ${{ github.token }}

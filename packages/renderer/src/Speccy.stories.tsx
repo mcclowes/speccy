@@ -7,13 +7,22 @@ const exampleSpec: OpenAPIDocument = {
   info: {
     title: 'Northstar payments',
     version: '2026-08-01',
-    description: 'Create payment links, collect funds, and track settlement from one API.',
+    description:
+      'Create payment links, collect funds, and track settlement from one API.',
   },
-  servers: [{ url: 'https://api.northstar.example/v1', description: 'Production' }],
+  servers: [
+    { url: 'https://api.northstar.example/v1', description: 'Production' },
+  ],
   security: [{ bearerAuth: [] }],
   tags: [
-    { name: 'Payment links', description: 'Hosted checkout sessions for one-time payments.' },
-    { name: 'Settlements', description: 'Transfers from your balance to a bank account.' },
+    {
+      name: 'Payment links',
+      description: 'Hosted checkout sessions for one-time payments.',
+    },
+    {
+      name: 'Settlements',
+      description: 'Transfers from your balance to a bank account.',
+    },
   ],
   paths: {
     '/payment-links': {
@@ -21,9 +30,17 @@ const exampleSpec: OpenAPIDocument = {
         tags: ['Payment links'],
         summary: 'Create a payment link',
         operationId: 'createPaymentLink',
-        description: 'Creates a hosted checkout page that expires after 24 hours.',
+        description:
+          'Creates a hosted checkout page that expires after 24 hours.',
         parameters: [
-          { name: 'Idempotency-Key', in: 'header', required: true, description: 'A unique key for this request.', schema: { type: 'string' }, example: 'order_8f391' },
+          {
+            name: 'Idempotency-Key',
+            in: 'header',
+            required: true,
+            description: 'A unique key for this request.',
+            schema: { type: 'string' },
+            example: 'order_8f391',
+          },
         ],
         requestBody: {
           required: true,
@@ -37,7 +54,11 @@ const exampleSpec: OpenAPIDocument = {
         responses: {
           '201': {
             description: 'The payment link was created.',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/PaymentLink' } } },
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/PaymentLink' },
+              },
+            },
           },
           '422': { description: 'The request could not be processed.' },
         },
@@ -49,9 +70,18 @@ const exampleSpec: OpenAPIDocument = {
         summary: 'Get a payment link',
         operationId: 'getPaymentLink',
         parameters: [
-          { name: 'paymentLinkId', in: 'path', required: true, description: 'The payment link identifier.', schema: { type: 'string' } },
+          {
+            name: 'paymentLinkId',
+            in: 'path',
+            required: true,
+            description: 'The payment link identifier.',
+            schema: { type: 'string' },
+          },
         ],
-        responses: { '200': { description: 'The payment link.' }, '404': { description: 'No payment link was found.' } },
+        responses: {
+          '200': { description: 'The payment link.' },
+          '404': { description: 'No payment link was found.' },
+        },
       },
     },
     '/settlements': {
@@ -65,15 +95,27 @@ const exampleSpec: OpenAPIDocument = {
   },
   components: {
     securitySchemes: {
-      bearerAuth: { type: 'http', scheme: 'bearer', description: 'Use a server-side API token.' },
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Use a server-side API token.',
+      },
     },
     schemas: {
       PaymentLinkRequest: {
         type: 'object',
         required: ['amount', 'currency'],
         properties: {
-          amount: { type: 'integer', description: 'Amount in the currency minor unit.', example: 4200 },
-          currency: { type: 'string', enum: ['GBP', 'EUR', 'USD'], example: 'GBP' },
+          amount: {
+            type: 'integer',
+            description: 'Amount in the currency minor unit.',
+            example: 4200,
+          },
+          currency: {
+            type: 'string',
+            enum: ['GBP', 'EUR', 'USD'],
+            example: 'GBP',
+          },
           reference: { type: 'string', example: 'INV-2048' },
         },
       },
@@ -82,7 +124,11 @@ const exampleSpec: OpenAPIDocument = {
         required: ['id', 'url', 'status'],
         properties: {
           id: { type: 'string', example: 'plink_01J8Y3' },
-          url: { type: 'string', format: 'uri', example: 'https://pay.northstar.example/plink_01J8Y3' },
+          url: {
+            type: 'string',
+            format: 'uri',
+            example: 'https://pay.northstar.example/plink_01J8Y3',
+          },
           status: { type: 'string', enum: ['open', 'paid', 'expired'] },
         },
       },
@@ -96,7 +142,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'The complete OpenAPI reference renderer in representative routes and themes.',
+        component:
+          'The complete OpenAPI reference renderer in representative routes and themes.',
       },
     },
   },

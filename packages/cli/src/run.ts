@@ -9,15 +9,34 @@
 
 import { parseArgs } from 'node:util';
 import { analyzeOpenApi, diffSpecs, parseSpec } from 'speccy-core';
-import { diffExitCode, formatDiff, formatLint, lintExitCode, type DiffThreshold, type Format, type LintThreshold } from './report';
+import {
+  diffExitCode,
+  formatDiff,
+  formatLint,
+  lintExitCode,
+  type DiffThreshold,
+  type Format,
+  type LintThreshold,
+} from './report';
 import { readSource, type SourceIO } from './sources';
 
 /** Reserved for the tool itself failing, so CI can tell a broken spec from a breaking change. */
 const TOOL_FAILURE = 2;
 
 const FORMATS: Format[] = ['pretty', 'json', 'markdown'];
-const DIFF_THRESHOLDS: DiffThreshold[] = ['breaking', 'warning', 'compatible', 'documentation', 'never'];
-const LINT_THRESHOLDS: LintThreshold[] = ['issue', 'warning', 'suggestion', 'never'];
+const DIFF_THRESHOLDS: DiffThreshold[] = [
+  'breaking',
+  'warning',
+  'compatible',
+  'documentation',
+  'never',
+];
+const LINT_THRESHOLDS: LintThreshold[] = [
+  'issue',
+  'warning',
+  'suggestion',
+  'never',
+];
 
 const USAGE = `speccy - OpenAPI review for the command line
 
@@ -48,13 +67,24 @@ export interface RunIO {
   color?: boolean;
 }
 
-function choose<T extends string>(value: string | undefined, allowed: T[], fallback: T, flag: string): T {
+function choose<T extends string>(
+  value: string | undefined,
+  allowed: T[],
+  fallback: T,
+  flag: string,
+): T {
   if (value === undefined) return fallback;
-  if (!allowed.includes(value as T)) throw new Error(`Unsupported ${flag} "${value}". Use one of ${allowed.join(', ')}.`);
+  if (!allowed.includes(value as T))
+    throw new Error(
+      `Unsupported ${flag} "${value}". Use one of ${allowed.join(', ')}.`,
+    );
   return value as T;
 }
 
-export async function run(argv: string[], { io, write, writeError, color = false }: RunIO): Promise<number> {
+export async function run(
+  argv: string[],
+  { io, write, writeError, color = false }: RunIO,
+): Promise<number> {
   let positionals: string[];
   let values: Record<string, unknown>;
   try {
@@ -81,39 +111,67 @@ export async function run(argv: string[], { io, write, writeError, color = false
   }
 
   try {
-    const format = choose(values.format as string | undefined, FORMATS, 'pretty', '--format');
+    const format = choose(
+      values.format as string | undefined,
+      FORMATS,
+      'pretty',
+      '--format',
+    );
     const options = { color: color && values.color !== false };
 
     if (command === 'lint') {
       const [target] = rest;
       if (!target) throw new Error('speccy lint needs a spec. See --help.');
-      const threshold = choose(values['fail-on'] as string | undefined, LINT_THRESHOLDS, 'issue', '--fail-on');
+      const threshold = choose(
+        values['fail-on'] as string | undefined,
+        LINT_THRESHOLDS,
+        'issue',
+        '--fail-on',
+      );
       const source = await readSource(target, io);
       if (source === undefined) throw new Error(`No spec at ${target}.`);
 
-      const previousSource = values.against ? await readSource(values.against as string, io) : undefined;
-      const diagnostics = analyzeOpenApi(parseSpec(source), previousSource ? { previousDocument: parseSpec(previousSource) } : {});
+      const previousSource = values.against
+        ? await readSource(values.against as string, io)
+        : undefined;
+      const diagnostics = analyzeOpenApi(
+        parseSpec(source),
+        previousSource ? { previousDocument: parseSpec(previousSource) } : {},
+      );
       write(formatLint(diagnostics, format, options));
       return lintExitCode(diagnostics, threshold);
     }
 
     if (command === 'diff') {
       const [baseTarget, revisionTarget] = rest;
-      if (!baseTarget || !revisionTarget) throw new Error('speccy diff needs a base and a revision. See --help.');
-      const threshold = choose(values['fail-on'] as string | undefined, DIFF_THRESHOLDS, 'breaking', '--fail-on');
+      if (!baseTarget || !revisionTarget)
+        throw new Error('speccy diff needs a base and a revision. See --help.');
+      const threshold = choose(
+        values['fail-on'] as string | undefined,
+        DIFF_THRESHOLDS,
+        'breaking',
+        '--fail-on',
+      );
 
       const baseSource = await readSource(baseTarget, io);
       if (baseSource === undefined) {
-        write(`No base spec at ${baseTarget}, so there is nothing to compare. Treating this as a new document.\n`);
+        write(
+          `No base spec at ${baseTarget}, so there is nothing to compare. Treating this as a new document.\n`,
+        );
         return 0;
       }
       const revisionSource = await readSource(revisionTarget, io);
-      if (revisionSource === undefined) throw new Error(`No spec at ${revisionTarget}.`);
+      if (revisionSource === undefined)
+        throw new Error(`No spec at ${revisionTarget}.`);
 
-      const report = diffSpecs(parseSpec(baseSource), parseSpec(revisionSource), {
-        base: { source: baseTarget },
-        revision: { source: revisionTarget },
-      });
+      const report = diffSpecs(
+        parseSpec(baseSource),
+        parseSpec(revisionSource),
+        {
+          base: { source: baseTarget },
+          revision: { source: revisionTarget },
+        },
+      );
       write(formatDiff(report, format, options));
       return diffExitCode(report, threshold);
     }

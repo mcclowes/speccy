@@ -37,13 +37,19 @@ export interface SourceIO {
   fetch: (url: string) => Promise<string>;
 }
 
-export async function resolveSourceKind(source: string, exists: (path: string) => Promise<boolean>): Promise<SourceKind> {
+export async function resolveSourceKind(
+  source: string,
+  exists: (path: string) => Promise<boolean>,
+): Promise<SourceKind> {
   if (/^https?:\/\//i.test(source)) return 'url';
   if (await exists(source)) return 'file';
   return source.includes(':') ? 'git' : 'file';
 }
 
-export async function readSource(source: string, io: SourceIO): Promise<string | undefined> {
+export async function readSource(
+  source: string,
+  io: SourceIO,
+): Promise<string | undefined> {
   const kind = await resolveSourceKind(source, io.exists);
   if (kind === 'url') return io.fetch(source);
   if (kind === 'file') {
@@ -58,7 +64,10 @@ export async function readSource(source: string, io: SourceIO): Promise<string |
     return await io.git(ref, path);
   } catch (error) {
     if (error instanceof MissingRefError) {
-      throw new Error(`Cannot reach the git ref ${ref}. In CI, check out enough history for it, for example with fetch-depth: 0.`, { cause: error });
+      throw new Error(
+        `Cannot reach the git ref ${ref}. In CI, check out enough history for it, for example with fetch-depth: 0.`,
+        { cause: error },
+      );
     }
     throw error;
   }
@@ -81,7 +90,9 @@ export const nodeSourceIO: SourceIO = {
       throw new MissingRefError(ref);
     }
     try {
-      const { stdout } = await run('git', ['show', `${ref}:${path}`], { maxBuffer: 64 * 1024 * 1024 });
+      const { stdout } = await run('git', ['show', `${ref}:${path}`], {
+        maxBuffer: 64 * 1024 * 1024,
+      });
       return stdout;
     } catch {
       // The ref is reachable but does not carry this file, so the spec is new on this branch.
@@ -90,7 +101,10 @@ export const nodeSourceIO: SourceIO = {
   },
   fetch: async (url) => {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Fetching ${url} failed with ${response.status} ${response.statusText}.`);
+    if (!response.ok)
+      throw new Error(
+        `Fetching ${url} failed with ${response.status} ${response.statusText}.`,
+      );
     return response.text();
   },
 };

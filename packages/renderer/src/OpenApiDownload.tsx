@@ -13,12 +13,15 @@ import type { OpenAPIDocument } from 'speccy-core';
 type DownloadFormat = 'json' | 'yaml';
 
 function downloadDocument(document: OpenAPIDocument, format: DownloadFormat) {
-  const content = format === 'json'
-    ? `${JSON.stringify(document, null, 2)}\n`
-    : stringifyYaml(document);
-  const url = URL.createObjectURL(new Blob([content], {
-    type: format === 'json' ? 'application/json' : 'application/yaml',
-  }));
+  const content =
+    format === 'json'
+      ? `${JSON.stringify(document, null, 2)}\n`
+      : stringifyYaml(document);
+  const url = URL.createObjectURL(
+    new Blob([content], {
+      type: format === 'json' ? 'application/json' : 'application/yaml',
+    }),
+  );
   const link = window.document.createElement('a');
   link.href = url;
   link.download = `openapi.${format}`;
@@ -27,7 +30,21 @@ function downloadDocument(document: OpenAPIDocument, format: DownloadFormat) {
 }
 
 function DownloadIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>;
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 21h14" />
+    </svg>
+  );
 }
 
 export function OpenApiDownload({ document }: { document: OpenAPIDocument }) {
@@ -36,8 +53,14 @@ export function OpenApiDownload({ document }: { document: OpenAPIDocument }) {
       <h2 id="sp-download-heading">Download OpenAPI description</h2>
       <div className="sp-download-options">
         {(['json', 'yaml'] as const).map((format) => (
-          <button type="button" onClick={() => downloadDocument(document, format)} key={format}>
-            <span className={`sp-download-format sp-download-format-${format}`}>{format}</span>
+          <button
+            type="button"
+            onClick={() => downloadDocument(document, format)}
+            key={format}
+          >
+            <span className={`sp-download-format sp-download-format-${format}`}>
+              {format}
+            </span>
             <strong>openapi.{format}</strong>
             <DownloadIcon />
           </button>

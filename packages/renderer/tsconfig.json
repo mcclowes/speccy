@@ -1,6 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src", ".storybook", "visual-tests", "playwright.config.ts", "vitest.config.ts"],
+  "include": [
+    "src",
+    ".storybook",
+    "visual-tests",
+    "playwright.config.ts",
+    "vitest.config.ts"
+  ],
   "compilerOptions": {
     "noEmit": true
   }

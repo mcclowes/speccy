@@ -7,10 +7,30 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: [
-      { find: /^speccy-renderer\/styles\.css$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/styles.css', import.meta.url)) },
-      { find: /^speccy-renderer$/, replacement: fileURLToPath(new URL('../../packages/renderer/src/index.ts', import.meta.url)) },
-      { find: /^speccy-spectral$/, replacement: fileURLToPath(new URL('../../packages/spectral/src/index.ts', import.meta.url)) },
-      { find: /^speccy-core$/, replacement: fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)) },
+      {
+        find: /^speccy-renderer\/styles\.css$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/renderer/src/styles.css', import.meta.url),
+        ),
+      },
+      {
+        find: /^speccy-renderer$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/renderer/src/index.ts', import.meta.url),
+        ),
+      },
+      {
+        find: /^speccy-spectral$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/spectral/src/index.ts', import.meta.url),
+        ),
+      },
+      {
+        find: /^speccy-core$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/core/src/index.ts', import.meta.url),
+        ),
+      },
     ],
   },
   build: {
@@ -20,7 +40,11 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
-          if (id.includes('react-dom') || id.includes('/react/') || id.includes('/scheduler/')) {
+          if (
+            id.includes('react-dom') ||
+            id.includes('/react/') ||
+            id.includes('/scheduler/')
+          ) {
             return 'react';
           }
 

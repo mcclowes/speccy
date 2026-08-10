@@ -27,18 +27,26 @@ function normalizePath(path: string) {
 }
 
 function resolvePath(from: string, target: string) {
-  const directory = from.includes('/') ? from.slice(0, from.lastIndexOf('/') + 1) : '';
+  const directory = from.includes('/')
+    ? from.slice(0, from.lastIndexOf('/') + 1)
+    : '';
   return normalizePath(`${directory}${target}`);
 }
 
-function rewriteRefs(node: unknown, documentPath: string, available: Set<string>): unknown {
-  if (Array.isArray(node)) return node.map((item) => rewriteRefs(item, documentPath, available));
+function rewriteRefs(
+  node: unknown,
+  documentPath: string,
+  available: Set<string>,
+): unknown {
+  if (Array.isArray(node))
+    return node.map((item) => rewriteRefs(item, documentPath, available));
   if (!node || typeof node !== 'object') return node;
 
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(node)) {
     if (key === '$ref' && typeof value === 'string' && value.startsWith('#')) {
-      result[key] = `#/${FRAGMENTS_KEY}/${pointerSegment(documentPath)}${value.length > 1 ? `/${value.slice(1).replace(/^\//, '')}` : ''}`;
+      result[key] =
+        `#/${FRAGMENTS_KEY}/${pointerSegment(documentPath)}${value.length > 1 ? `/${value.slice(1).replace(/^\//, '')}` : ''}`;
       continue;
     }
     if (key === '$ref' && typeof value === 'string') {
@@ -47,10 +55,15 @@ function rewriteRefs(node: unknown, documentPath: string, available: Set<string>
       const fragment = hash === -1 ? '' : value.slice(hash + 1);
       if (!/^[a-z][a-z\d+.-]*:/i.test(file)) {
         let decodedFile = file;
-        try { decodedFile = decodeURIComponent(file); } catch { /* Keep malformed paths unresolved. */ }
+        try {
+          decodedFile = decodeURIComponent(file);
+        } catch {
+          /* Keep malformed paths unresolved. */
+        }
         const target = resolvePath(documentPath, decodedFile);
         if (available.has(target)) {
-          result[key] = `#/${FRAGMENTS_KEY}/${pointerSegment(target)}${fragment ? `/${fragment.replace(/^\//, '')}` : ''}`;
+          result[key] =
+            `#/${FRAGMENTS_KEY}/${pointerSegment(target)}${fragment ? `/${fragment.replace(/^\//, '')}` : ''}`;
           continue;
         }
       }
@@ -60,20 +73,30 @@ function rewriteRefs(node: unknown, documentPath: string, available: Set<string>
   return result;
 }
 
-export function bundleFragmentedSpec(sources: Record<string, string>, entrypoint: string): OpenAPIDocument {
+export function bundleFragmentedSpec(
+  sources: Record<string, string>,
+  entrypoint: string,
+): OpenAPIDocument {
   const normalizedSources = Object.fromEntries(
-    Object.entries(sources).map(([path, source]) => [normalizePath(path), source]),
+    Object.entries(sources).map(([path, source]) => [
+      normalizePath(path),
+      source,
+    ]),
   );
   const normalizedEntrypoint = normalizePath(entrypoint);
   if (!normalizedSources[normalizedEntrypoint]) {
-    throw new Error(`The entry document ${entrypoint} wasn't included in the selected folder.`);
+    throw new Error(
+      `The entry document ${entrypoint} wasn't included in the selected folder.`,
+    );
   }
 
   const available = new Set(Object.keys(normalizedSources));
-  const documents = Object.fromEntries(Object.entries(normalizedSources).map(([path, source]) => [
-    path,
-    rewriteRefs(parseSpec(source), path, available),
-  ]));
+  const documents = Object.fromEntries(
+    Object.entries(normalizedSources).map(([path, source]) => [
+      path,
+      rewriteRefs(parseSpec(source), path, available),
+    ]),
+  );
   const root = documents[normalizedEntrypoint] as OpenAPIDocument;
   return {
     ...root,

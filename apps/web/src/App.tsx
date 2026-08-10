@@ -11,17 +11,33 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Speccy, ThemeToggle, type OpenAPIDocument, type SpeccyRoute, type SpectralDiagnosticInput, type Theme } from 'speccy-renderer';
+import {
+  Speccy,
+  ThemeToggle,
+  type OpenAPIDocument,
+  type SpeccyRoute,
+  type SpectralDiagnosticInput,
+  type Theme,
+} from 'speccy-renderer';
 import { bundleFragmentedSpec, parseSpec } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
 import { parseInitialLocation, previewHref } from './previewUrls';
-import { addRecentReference, readRecentReferences, recentReferenceLabel, type RecentReference, writeRecentReferences } from './recentReferences';
+import {
+  addRecentReference,
+  readRecentReferences,
+  recentReferenceLabel,
+  type RecentReference,
+  writeRecentReferences,
+} from './recentReferences';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
 
 declare global {
   interface Window {
     speccyLoadSpec?: (source: string, name?: string) => void;
-    speccyLoadSpecBundle?: (sources: Record<string, string>, entrypoint: string) => void;
+    speccyLoadSpecBundle?: (
+      sources: Record<string, string>,
+      entrypoint: string,
+    ) => void;
   }
 }
 
@@ -46,7 +62,9 @@ function storeItem(key: string, value: string) {
 
 function storedTheme(): Theme {
   const theme = storageItem(THEME_STORAGE_KEY);
-  return theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
+  return theme === 'light' || theme === 'dark' || theme === 'system'
+    ? theme
+    : 'system';
 }
 
 function Mark() {
@@ -62,25 +80,52 @@ function Mark() {
 }
 
 function ShareIcon() {
-  return <svg className="studio-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>;
+  return (
+    <svg
+      className="studio-share-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" />
+    </svg>
+  );
 }
 
 export function App() {
   const [location] = useState(() => parseInitialLocation(window.location));
-  const [spec, setSpec] = useState<OpenAPIDocument | string>(() => location.source || (location.sourceUrl ? '' : SAMPLE_SPEC));
-  const [source, setSource] = useState(() => location.source || JSON.stringify(SAMPLE_SPEC, null, 2));
-  const [fileName, setFileName] = useState(() => location.source ? (location.name ?? 'Shared API reference') : '');
+  const [spec, setSpec] = useState<OpenAPIDocument | string>(
+    () => location.source || (location.sourceUrl ? '' : SAMPLE_SPEC),
+  );
+  const [source, setSource] = useState(
+    () => location.source || JSON.stringify(SAMPLE_SPEC, null, 2),
+  );
+  const [fileName, setFileName] = useState(() =>
+    location.source ? (location.name ?? 'Shared API reference') : '',
+  );
   const [sourceUrl, setSourceUrl] = useState(() => location.sourceUrl ?? '');
   const [activeId, setActiveId] = useState('');
-  const [recents, setRecents] = useState<RecentReference[]>(readRecentReferences);
+  const [recents, setRecents] =
+    useState<RecentReference[]>(readRecentReferences);
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const [urlOpen, setUrlOpen] = useState(false);
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
   const [loading, setLoading] = useState(Boolean(location.sourceUrl));
   const [message, setMessage] = useState('');
   const [shareMessage, setShareMessage] = useState('');
-  const [route, setRoute] = useState<StudioRoute>(() => parseStudioRoute(window.location));
-  const [spectralDiagnostics, setSpectralDiagnostics] = useState<SpectralDiagnosticInput[]>([]);
+  const [route, setRoute] = useState<StudioRoute>(() =>
+    parseStudioRoute(window.location),
+  );
+  const [spectralDiagnostics, setSpectralDiagnostics] = useState<
+    SpectralDiagnosticInput[]
+  >([]);
   const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
   const restoredInitialRoute = useRef(false);
@@ -89,10 +134,21 @@ export function App() {
     let active = true;
     if (location.preview || !fileName) {
       setSpectralDiagnostics([]);
-      return () => { active = false; };
+      return () => {
+        active = false;
+      };
     }
-    void import('speccy-spectral').then(({ runSpectral }) => runSpectral(parseSpec(spec))).then((findings) => { if (active) setSpectralDiagnostics(findings); }).catch(() => { if (active) setSpectralDiagnostics([]); });
-    return () => { active = false; };
+    void import('speccy-spectral')
+      .then(({ runSpectral }) => runSpectral(parseSpec(spec)))
+      .then((findings) => {
+        if (active) setSpectralDiagnostics(findings);
+      })
+      .catch(() => {
+        if (active) setSpectralDiagnostics([]);
+      });
+    return () => {
+      active = false;
+    };
   }, [spec, fileName, location.preview]);
 
   useEffect(() => {
@@ -117,14 +173,23 @@ export function App() {
         return;
       }
 
-      const reference = recentsRef.current.find((item) => item.id === nextRoute.referenceId);
+      const reference = recentsRef.current.find(
+        (item) => item.id === nextRoute.referenceId,
+      );
       if (reference) {
         displayReference(reference);
       } else if (nextRoute.sourceUrl) {
-        void loadUrl(nextRoute.sourceUrl, nextRoute.referenceId, nextRoute.referenceRoute, 'replace');
+        void loadUrl(
+          nextRoute.sourceUrl,
+          nextRoute.referenceId,
+          nextRoute.referenceRoute,
+          'replace',
+        );
       } else {
         showHome();
-        setMessage('That reference is only available on the device where it was opened.');
+        setMessage(
+          'That reference is only available on the device where it was opened.',
+        );
       }
     };
 
@@ -141,23 +206,43 @@ export function App() {
   }, [theme]);
 
   useEffect(() => {
-    window.speccyLoadSpec = (nextSource, name) => applySource(nextSource, name ?? 'Opened spec');
-    return () => { delete window.speccyLoadSpec; };
+    window.speccyLoadSpec = (nextSource, name) =>
+      applySource(nextSource, name ?? 'Opened spec');
+    return () => {
+      delete window.speccyLoadSpec;
+    };
   }, []);
 
   useEffect(() => {
     window.speccyLoadSpecBundle = (sources, entrypoint) => {
       const bundled = bundleFragmentedSpec(sources, entrypoint);
-      applySource(JSON.stringify(bundled, null, 2), entrypoint.split('/').pop() ?? entrypoint);
+      applySource(
+        JSON.stringify(bundled, null, 2),
+        entrypoint.split('/').pop() ?? entrypoint,
+      );
     };
-    return () => { delete window.speccyLoadSpecBundle; };
+    return () => {
+      delete window.speccyLoadSpecBundle;
+    };
   }, []);
 
-  function setBrowserRoute(nextRoute: StudioRoute, mode: 'push' | 'replace' = 'push') {
-    const href = nextRoute.page === 'reference'
-      ? referenceHref(nextRoute.referenceId, nextRoute.referenceRoute, nextRoute.sourceUrl)
-      : '/';
-    window.history[mode === 'push' ? 'pushState' : 'replaceState']({}, '', href);
+  function setBrowserRoute(
+    nextRoute: StudioRoute,
+    mode: 'push' | 'replace' = 'push',
+  ) {
+    const href =
+      nextRoute.page === 'reference'
+        ? referenceHref(
+            nextRoute.referenceId,
+            nextRoute.referenceRoute,
+            nextRoute.sourceUrl,
+          )
+        : '/';
+    window.history[mode === 'push' ? 'pushState' : 'replaceState'](
+      {},
+      '',
+      href,
+    );
     setRoute(nextRoute);
   }
 
@@ -184,24 +269,46 @@ export function App() {
     referenceRoute: SpeccyRoute = { page: 'overview' },
     historyMode: 'push' | 'replace' | false = 'push',
   ) {
-    const current = existingId ? recentsRef.current.find((item) => item.id === existingId) : undefined;
-    const added = addRecentReference(recentsRef.current, {
-      name,
-      source: next,
-      sourceUrl: nextSourceUrl === null ? undefined : nextSourceUrl ?? current?.sourceUrl,
-    }, existingId);
+    const current = existingId
+      ? recentsRef.current.find((item) => item.id === existingId)
+      : undefined;
+    const added = addRecentReference(
+      recentsRef.current,
+      {
+        name,
+        source: next,
+        sourceUrl:
+          nextSourceUrl === null
+            ? undefined
+            : (nextSourceUrl ?? current?.sourceUrl),
+      },
+      existingId,
+    );
     const { reference, references: updated } = added;
     displayReference(reference);
     recentsRef.current = updated;
     writeRecentReferences(updated);
     setRecents(updated);
     if (historyMode) {
-      setBrowserRoute({ page: 'reference', referenceId: reference.id, referenceRoute, sourceUrl: reference.sourceUrl }, historyMode);
+      setBrowserRoute(
+        {
+          page: 'reference',
+          referenceId: reference.id,
+          referenceRoute,
+          sourceUrl: reference.sourceUrl,
+        },
+        historyMode,
+      );
     }
   }
 
   function openRecent(reference: RecentReference) {
-    applySource(reference.source, reference.name, reference.id, reference.sourceUrl);
+    applySource(
+      reference.source,
+      reference.name,
+      reference.id,
+      reference.sourceUrl,
+    );
   }
 
   function openSample() {
@@ -229,7 +336,8 @@ export function App() {
     setMessage('');
     try {
       const response = await fetch(nextUrl);
-      if (!response.ok) throw new Error(`The server returned ${response.status}.`);
+      if (!response.ok)
+        throw new Error(`The server returned ${response.status}.`);
       applySource(
         await response.text(),
         new URL(nextUrl).pathname.split('/').pop() || nextUrl,
@@ -242,32 +350,55 @@ export function App() {
       storeItem(URL_STORAGE_KEY, nextUrl);
       setUrlOpen(false);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Couldn’t load that URL.');
+      setMessage(
+        error instanceof Error ? error.message : 'Couldn’t load that URL.',
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  const referenceRoute = route.page === 'reference' && (route.referenceId === activeId || location.preview)
-    ? route.referenceRoute
-    : { page: 'overview' } satisfies SpeccyRoute;
+  const referenceRoute =
+    route.page === 'reference' &&
+    (route.referenceId === activeId || location.preview)
+      ? route.referenceRoute
+      : ({ page: 'overview' } satisfies SpeccyRoute);
 
   function rendererHref(nextRoute: SpeccyRoute) {
-    if (!location.preview) return referenceHref(activeId, nextRoute, sourceUrl || undefined);
-    return previewHref(nextRoute, { source, sourceUrl: sourceUrl || undefined, name: fileName }, window.location.origin);
+    if (!location.preview)
+      return referenceHref(activeId, nextRoute, sourceUrl || undefined);
+    return previewHref(
+      nextRoute,
+      { source, sourceUrl: sourceUrl || undefined, name: fileName },
+      window.location.origin,
+    );
   }
 
   function navigateRenderer(nextRoute: SpeccyRoute) {
     if (location.preview) {
       window.history.pushState({}, '', rendererHref(nextRoute));
-      setRoute({ page: 'reference', referenceId: 'preview', referenceRoute: nextRoute });
+      setRoute({
+        page: 'reference',
+        referenceId: 'preview',
+        referenceRoute: nextRoute,
+      });
       return;
     }
-    setBrowserRoute({ page: 'reference', referenceId: activeId, referenceRoute: nextRoute, sourceUrl: sourceUrl || undefined });
+    setBrowserRoute({
+      page: 'reference',
+      referenceId: activeId,
+      referenceRoute: nextRoute,
+      sourceUrl: sourceUrl || undefined,
+    });
   }
 
   function previewUrl() {
-    return previewHref({ page: 'overview' }, { source, sourceUrl: sourceUrl || undefined, name: fileName }, window.location.origin, true);
+    return previewHref(
+      { page: 'overview' },
+      { source, sourceUrl: sourceUrl || undefined, name: fileName },
+      window.location.origin,
+      true,
+    );
   }
 
   async function sharePreview() {
@@ -283,81 +414,233 @@ export function App() {
   if (location.preview) {
     return (
       <main className={`studio studio-preview-only studio-${theme}`}>
-        <ThemeToggle className="studio-preview-theme" theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />
-        {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype />}
+        <ThemeToggle
+          className="studio-preview-theme"
+          theme={theme}
+          onChange={setTheme}
+          themes={['system', 'dark', 'light']}
+          label="current"
+        />
+        {loading ? (
+          <div className="studio-preview-loading">Loading API reference…</div>
+        ) : (
+          <Speccy
+            spec={spec}
+            theme={theme}
+            showThemeToggle={false}
+            route={referenceRoute}
+            onNavigate={navigateRenderer}
+            hrefForRoute={rendererHref}
+            parameterPrototype
+          />
+        )}
       </main>
     );
   }
 
   return (
-    <div className={`studio studio-${theme}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void loadFile(event.dataTransfer.files[0]); }}>
+    <div
+      className={`studio studio-${theme}`}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        void loadFile(event.dataTransfer.files[0]);
+      }}
+    >
       <header className="studio-bar">
-        <button className="studio-logo" type="button" onClick={goHome} aria-label="Speccy home"><Mark /><span>Speccy</span></button>
+        <button
+          className="studio-logo"
+          type="button"
+          onClick={goHome}
+          aria-label="Speccy home"
+        >
+          <Mark />
+          <span>Speccy</span>
+        </button>
         {fileName ? (
           <label className="studio-switcher">
             <span className="studio-dot" />
-            <select aria-label="Switch API reference" value={activeId} onChange={(event) => {
-              const reference = recents.find((item) => item.id === event.target.value);
-              if (reference) openRecent(reference);
-            }}>
-              {recents.map((reference) => <option key={reference.id} value={reference.id}>{recentReferenceLabel(reference, recents)}</option>)}
+            <select
+              aria-label="Switch API reference"
+              value={activeId}
+              onChange={(event) => {
+                const reference = recents.find(
+                  (item) => item.id === event.target.value,
+                );
+                if (reference) openRecent(reference);
+              }}
+            >
+              {recents.map((reference) => (
+                <option key={reference.id} value={reference.id}>
+                  {recentReferenceLabel(reference, recents)}
+                </option>
+              ))}
             </select>
-            <span className="studio-chevron" aria-hidden="true">⌄</span>
+            <span className="studio-chevron" aria-hidden="true">
+              ⌄
+            </span>
           </label>
-        ) : <div className="studio-document">Your API references</div>}
+        ) : (
+          <div className="studio-document">Your API references</div>
+        )}
         <div className="studio-actions">
-          {fileName && <button className="studio-action-share" type="button" onClick={() => void sharePreview()} aria-label="Copy preview link" title={shareMessage || 'Copy preview link'}><ShareIcon /><span className="studio-share-label">Share</span></button>}
-          {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
-          {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
-          <ThemeToggle className="studio-theme" theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />
-          <input ref={fileInput} type="file" accept=".yaml,.yml,.json,application/json,text/yaml" hidden onChange={(event) => void loadFile(event.target.files?.[0])} />
+          {fileName && (
+            <button
+              className="studio-action-share"
+              type="button"
+              onClick={() => void sharePreview()}
+              aria-label="Copy preview link"
+              title={shareMessage || 'Copy preview link'}
+            >
+              <ShareIcon />
+              <span className="studio-share-label">Share</span>
+            </button>
+          )}
+          {fileName && (
+            <button
+              className="studio-action-url"
+              type="button"
+              onClick={() => setUrlOpen(!urlOpen)}
+            >
+              <span>Load URL</span>
+            </button>
+          )}
+          {fileName && (
+            <button
+              className="studio-action-file"
+              type="button"
+              onClick={() => fileInput.current?.click()}
+            >
+              <span>Open file</span>
+            </button>
+          )}
+          <ThemeToggle
+            className="studio-theme"
+            theme={theme}
+            onChange={setTheme}
+            themes={['system', 'dark', 'light']}
+            label="current"
+          />
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".yaml,.yml,.json,application/json,text/yaml"
+            hidden
+            onChange={(event) => void loadFile(event.target.files?.[0])}
+          />
         </div>
       </header>
 
       {urlOpen && (
-        <form className="studio-url" onSubmit={(event) => { event.preventDefault(); void loadUrl(url); }}>
+        <form
+          className="studio-url"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void loadUrl(url);
+          }}
+        >
           <label htmlFor="spec-url">OpenAPI document URL</label>
-          <input id="spec-url" type="url" placeholder="https://example.com/openapi.yaml" value={url} onChange={(event) => setUrl(event.target.value)} autoFocus />
-          <button type="submit" disabled={loading}>{loading ? 'Loading…' : 'Load'}</button>
-          <button type="button" onClick={() => setUrlOpen(false)}>Cancel</button>
+          <input
+            id="spec-url"
+            type="url"
+            placeholder="https://example.com/openapi.yaml"
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+            autoFocus
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? 'Loading…' : 'Load'}
+          </button>
+          <button type="button" onClick={() => setUrlOpen(false)}>
+            Cancel
+          </button>
           {message && <span className="studio-message">{message}</span>}
         </form>
       )}
 
       {fileName ? (
         <div className="studio-workspace">
-          <div className="studio-preview"><Speccy spec={spec} theme={theme} showThemeToggle={false} showDeveloperHints spectralDiagnostics={spectralDiagnostics} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype /></div>
+          <div className="studio-preview">
+            <Speccy
+              spec={spec}
+              theme={theme}
+              showThemeToggle={false}
+              showDeveloperHints
+              spectralDiagnostics={spectralDiagnostics}
+              route={referenceRoute}
+              onNavigate={navigateRenderer}
+              hrefForRoute={rendererHref}
+              parameterPrototype
+            />
+          </div>
         </div>
       ) : (
         <main className="studio-home">
           <section className="studio-home-intro">
             <span className="studio-eyebrow">API reference studio</span>
             <h1>Pick up where you left off.</h1>
-            <p>Open a recent API reference, or bring in an OpenAPI document to start exploring.</p>
+            <p>
+              Open a recent API reference, or bring in an OpenAPI document to
+              start exploring.
+            </p>
             <div className="studio-home-actions">
-              <button className="is-primary" type="button" onClick={() => fileInput.current?.click()}>Open a file</button>
-              <button type="button" onClick={() => setUrlOpen(true)}>Load from URL</button>
-              <button type="button" onClick={openSample}>Explore the sample</button>
+              <button
+                className="is-primary"
+                type="button"
+                onClick={() => fileInput.current?.click()}
+              >
+                Open a file
+              </button>
+              <button type="button" onClick={() => setUrlOpen(true)}>
+                Load from URL
+              </button>
+              <button type="button" onClick={openSample}>
+                Explore the sample
+              </button>
             </div>
           </section>
           <section className="studio-recents" aria-labelledby="recent-heading">
             <div className="studio-section-heading">
-              <div><span className="studio-eyebrow">Your workspace</span><h2 id="recent-heading">Recent references</h2></div>
-              <span>{recents.length} {recents.length === 1 ? 'reference' : 'references'}</span>
+              <div>
+                <span className="studio-eyebrow">Your workspace</span>
+                <h2 id="recent-heading">Recent references</h2>
+              </div>
+              <span>
+                {recents.length}{' '}
+                {recents.length === 1 ? 'reference' : 'references'}
+              </span>
             </div>
             {recents.length ? (
               <div className="studio-recent-grid">
                 {recents.map((reference) => (
-                  <button className="studio-recent-card" type="button" key={reference.id} onClick={() => openRecent(reference)}>
-                    <span className="studio-recent-icon"><Mark /></span>
+                  <button
+                    className="studio-recent-card"
+                    type="button"
+                    key={reference.id}
+                    onClick={() => openRecent(reference)}
+                  >
+                    <span className="studio-recent-icon">
+                      <Mark />
+                    </span>
                     <span className="studio-recent-name">{reference.name}</span>
-                    <span className="studio-recent-meta">Opened {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(reference.openedAt)}</span>
-                    <span className="studio-recent-arrow" aria-hidden="true">↗</span>
+                    <span className="studio-recent-meta">
+                      Opened{' '}
+                      {new Intl.DateTimeFormat(undefined, {
+                        dateStyle: 'medium',
+                      }).format(reference.openedAt)}
+                    </span>
+                    <span className="studio-recent-arrow" aria-hidden="true">
+                      ↗
+                    </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="studio-empty"><Mark /><h3>No recent references yet</h3><p>References you open will stay handy here on this device.</p></div>
+              <div className="studio-empty">
+                <Mark />
+                <h3>No recent references yet</h3>
+                <p>References you open will stay handy here on this device.</p>
+              </div>
             )}
           </section>
         </main>

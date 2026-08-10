@@ -25,10 +25,7 @@ export default defineConfig(
   },
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [
-      eslint.configs.recommended,
-      tseslint.configs.recommended,
-    ],
+    extends: [eslint.configs.recommended, tseslint.configs.recommended],
     plugins: {
       'react-hooks': reactHooks,
     },
@@ -39,11 +36,14 @@ export default defineConfig(
       },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       'react-hooks/rules-of-hooks': 'error',
     },
   },
@@ -58,7 +58,13 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx', '**/vite.config.ts', '**/vitest.config.ts', '**/playwright.config.ts'],
+    files: [
+      '**/*.test.{ts,tsx}',
+      '**/*.stories.tsx',
+      '**/vite.config.ts',
+      '**/vitest.config.ts',
+      '**/playwright.config.ts',
+    ],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
     },

@@ -7,17 +7,17 @@ description: Configure Speccy's appearance, navigation, and error handling.
 
 Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI` component. Generated Docusaurus routes accept them beneath `renderer`.
 
-| Option | Type | Default | Purpose |
-| --- | --- | --- | --- |
-| `spec` | object or string | required | Parsed OpenAPI data, YAML, or JSON |
-| `basePath` | string | `/` | URL prefix for operation, tag, and reference pages |
-| `theme` | `light`, `dark`, or `system` | `system` | Renderer color theme |
-| `accentColor` | string | `#6d5dfc` | Accent color used for focus and active states |
-| `showSidebar` | boolean | `true` | Show the navigation and filter sidebar |
-| `defaultExpanded` | boolean | `false` | Open operation groups on first render |
-| `logo` | React node | Speccy mark | Brand mark beside the API title |
-| `className` | string | empty | Extra class on the renderer root |
-| `onError` | function | none | Receive parsing and model errors |
+| Option            | Type                         | Default     | Purpose                                            |
+| ----------------- | ---------------------------- | ----------- | -------------------------------------------------- |
+| `spec`            | object or string             | required    | Parsed OpenAPI data, YAML, or JSON                 |
+| `basePath`        | string                       | `/`         | URL prefix for operation, tag, and reference pages |
+| `theme`           | `light`, `dark`, or `system` | `system`    | Renderer color theme                               |
+| `accentColor`     | string                       | `#6d5dfc`   | Accent color used for focus and active states      |
+| `showSidebar`     | boolean                      | `true`      | Show the navigation and filter sidebar             |
+| `defaultExpanded` | boolean                      | `false`     | Open operation groups on first render              |
+| `logo`            | React node                   | Speccy mark | Brand mark beside the API title                    |
+| `className`       | string                       | empty       | Extra class on the renderer root                   |
+| `onError`         | function                     | none        | Receive parsing and model errors                   |
 
 ## Theme
 

@@ -1,21 +1,53 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 const { previewRender } = vi.hoisted(() => ({ previewRender: vi.fn() }));
 
 vi.mock('speccy-renderer', async (importOriginal) => ({
-  ...await importOriginal<typeof import('speccy-renderer')>(),
-  Speccy: ({ onNavigate, hrefForRoute, theme }: {
+  ...(await importOriginal<typeof import('speccy-renderer')>()),
+  Speccy: ({
+    onNavigate,
+    hrefForRoute,
+    theme,
+  }: {
     onNavigate?: (route: { page: 'operation'; operationId: string }) => void;
-    hrefForRoute?: (route: { page: 'operation'; operationId: string }) => string;
+    hrefForRoute?: (route: {
+      page: 'operation';
+      operationId: string;
+    }) => string;
     theme?: 'light' | 'dark' | 'system';
   }) => {
     previewRender();
-    const operation = { page: 'operation' as const, operationId: 'list-companies' };
-    return <div className={`speccy sp-theme-${theme}`}>Preview{onNavigate && <a href={hrefForRoute?.(operation)} onClick={(event) => { event.preventDefault(); onNavigate(operation); }}>Open test operation</a>}</div>;
+    const operation = {
+      page: 'operation' as const,
+      operationId: 'list-companies',
+    };
+    return (
+      <div className={`speccy sp-theme-${theme}`}>
+        Preview
+        {onNavigate && (
+          <a
+            href={hrefForRoute?.(operation)}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate(operation);
+            }}
+          >
+            Open test operation
+          </a>
+        )}
+      </div>
+    );
   },
 }));
 
@@ -45,8 +77,12 @@ describe('web app', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
     fireEvent.click(screen.getByRole('button', { name: 'Speccy home' }));
 
-    expect(screen.getByRole('heading', { name: 'Pick up where you left off.' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Luma Library API/ })).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Pick up where you left off.' }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: /Luma Library API/ }),
+    ).toBeTruthy();
     expect(window.location.pathname).toBe('/');
   });
 
@@ -58,38 +94,73 @@ describe('web app', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Open test operation' }));
 
     expect(referencePath).toMatch(/^\/references\/Luma%20Library%20API-/);
-    expect(window.location.pathname).toBe(`${referencePath}/operations/list-companies`);
+    expect(window.location.pathname).toBe(
+      `${referencePath}/operations/list-companies`,
+    );
   });
 
   it('normalizes a remote import and preserves its source across nested routes', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve('{"openapi":"3.1.0"}'),
-    }));
-    window.history.replaceState({}, '', '/open?url=https%3A%2F%2Fexample.com%2Fopenapi.yaml');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('{"openapi":"3.1.0"}'),
+      }),
+    );
+    window.history.replaceState(
+      {},
+      '',
+      '/open?url=https%3A%2F%2Fexample.com%2Fopenapi.yaml',
+    );
 
     render(<App />);
     await screen.findByText('Preview');
 
     expect(window.location.pathname).toMatch(/^\/references\/openapi.yaml-/);
-    expect(new URLSearchParams(window.location.search).get('source')).toBe('https://example.com/openapi.yaml');
+    expect(new URLSearchParams(window.location.search).get('source')).toBe(
+      'https://example.com/openapi.yaml',
+    );
 
     fireEvent.click(screen.getByRole('link', { name: 'Open test operation' }));
     expect(window.location.pathname).toMatch(/\/operations\/list-companies$/);
-    expect(new URLSearchParams(window.location.search).get('source')).toBe('https://example.com/openapi.yaml');
+    expect(new URLSearchParams(window.location.search).get('source')).toBe(
+      'https://example.com/openapi.yaml',
+    );
   });
 
   it('opens and switches between recent API references', () => {
-    window.localStorage.setItem('speccy-recent-references', JSON.stringify([
-      { id: 'one', name: 'Catalog API', source: '{"openapi":"3.1.0"}', openedAt: 1 },
-      { id: 'two', name: 'Billing API', source: '{"openapi":"3.1.0"}', openedAt: 2 },
-    ]));
+    window.localStorage.setItem(
+      'speccy-recent-references',
+      JSON.stringify([
+        {
+          id: 'one',
+          name: 'Catalog API',
+          source: '{"openapi":"3.1.0"}',
+          openedAt: 1,
+        },
+        {
+          id: 'two',
+          name: 'Billing API',
+          source: '{"openapi":"3.1.0"}',
+          openedAt: 2,
+        },
+      ]),
+    );
     render(<App />);
 
     fireEvent.click(screen.getByRole('button', { name: /Catalog API/ }));
-    fireEvent.change(screen.getByRole('combobox', { name: 'Switch API reference' }), { target: { value: 'two' } });
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'Switch API reference' }),
+      { target: { value: 'two' } },
+    );
 
-    expect((screen.getByRole('combobox', { name: 'Switch API reference' }) as HTMLSelectElement).value).toBe('two');
+    expect(
+      (
+        screen.getByRole('combobox', {
+          name: 'Switch API reference',
+        }) as HTMLSelectElement
+      ).value,
+    ).toBe('two');
     expect(screen.getByRole('option', { name: 'Billing API' })).toBeTruthy();
   });
 
@@ -102,7 +173,9 @@ describe('web app', () => {
       window.speccyLoadSpec?.('{"openapi":"3.1.0"}', 'Catalog API');
     });
 
-    const stored = JSON.parse(window.localStorage.getItem('speccy-recent-references') ?? '[]');
+    const stored = JSON.parse(
+      window.localStorage.getItem('speccy-recent-references') ?? '[]',
+    );
     expect(stored).toHaveLength(1);
   });
 
@@ -129,20 +202,32 @@ describe('web app', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
     setItem.mockImplementation((key) => {
       if (key === 'speccy-recent-references') {
-        throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+        throw new DOMException(
+          'The quota has been exceeded.',
+          'QuotaExceededError',
+        );
       }
     });
     render(<App />);
 
-    expect(() => fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }))).not.toThrow();
+    expect(() =>
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Explore the sample' }),
+      ),
+    ).not.toThrow();
 
     expect(screen.getByText('Preview')).toBeTruthy();
-    expect(screen.getByRole('combobox', { name: 'Switch API reference' })).toBeTruthy();
+    expect(
+      screen.getByRole('combobox', { name: 'Switch API reference' }),
+    ).toBeTruthy();
   });
 
   it('copies a self-contained preview link for a local reference', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
 
@@ -151,21 +236,30 @@ describe('web app', () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
     const shared = new URL(writeText.mock.calls[0]![0]);
     expect(shared.searchParams.get('preview')).toBe('1');
-    expect(new URLSearchParams(shared.hash.slice(1)).get('source')).toContain('"openapi"');
+    expect(new URLSearchParams(shared.hash.slice(1)).get('source')).toContain(
+      '"openapi"',
+    );
   });
 
   it('renders a preview URL without viewer navigation', () => {
-    const fragment = new URLSearchParams({ source: '{"openapi":"3.1.0"}', name: 'Catalog API' });
+    const fragment = new URLSearchParams({
+      source: '{"openapi":"3.1.0"}',
+      name: 'Catalog API',
+    });
     window.history.replaceState({}, '', `/?preview=1#${fragment}`);
 
     render(<App />);
 
     expect(screen.getByText('Preview')).toBeTruthy();
     const themePicker = screen.getByRole('button', { name: 'Theme: system' });
-    expect(document.querySelector('.speccy')?.classList.contains('sp-theme-system')).toBe(true);
+    expect(
+      document.querySelector('.speccy')?.classList.contains('sp-theme-system'),
+    ).toBe(true);
     fireEvent.click(themePicker);
     expect(screen.getByRole('button', { name: 'Theme: dark' })).toBeTruthy();
-    expect(document.querySelector('.speccy')?.classList.contains('sp-theme-dark')).toBe(true);
+    expect(
+      document.querySelector('.speccy')?.classList.contains('sp-theme-dark'),
+    ).toBe(true);
     expect(screen.queryByRole('button', { name: 'Speccy home' })).toBeNull();
   });
 });

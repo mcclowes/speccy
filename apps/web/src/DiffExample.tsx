@@ -20,7 +20,9 @@ export function DiffExample() {
       className="diff-example"
       headingLevel={1}
       report={report}
-      hrefForChange={(change) => change.operationId ? `/#${change.operationId}` : undefined}
+      hrefForChange={(change) =>
+        change.operationId ? `/#${change.operationId}` : undefined
+      }
     />
   );
 }

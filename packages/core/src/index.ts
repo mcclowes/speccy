@@ -12,8 +12,19 @@ export {
   resolveRefs,
   slugify,
 } from './model';
-export type { OperationModel, ReferenceModel, TagGroupModel, TagModel } from './model';
-export type { ApiDiagnostic, DiagnosticCategory, DiagnosticSeverity, DiagnosticSource, SpectralDiagnosticInput } from './diagnostics';
+export type {
+  OperationModel,
+  ReferenceModel,
+  TagGroupModel,
+  TagModel,
+} from './model';
+export type {
+  ApiDiagnostic,
+  DiagnosticCategory,
+  DiagnosticSeverity,
+  DiagnosticSource,
+  SpectralDiagnosticInput,
+} from './diagnostics';
 export type {
   ApiChange,
   DiffArea,
@@ -24,7 +35,11 @@ export type {
   DiffSourceLocation,
   DiffSpecVersion,
 } from './diff';
-export type { OasdiffAdapterOptions, OasdiffChange, OasdiffSource } from './oasdiff';
+export type {
+  OasdiffAdapterOptions,
+  OasdiffChange,
+  OasdiffSource,
+} from './oasdiff';
 export type {
   CallbackObject,
   ExampleObject,

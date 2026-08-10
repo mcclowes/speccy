@@ -9,9 +9,17 @@
 
 import type { HttpMethod } from './types';
 
-export type DiffSeverity = 'breaking' | 'warning' | 'compatible' | 'documentation';
+export type DiffSeverity =
+  'breaking' | 'warning' | 'compatible' | 'documentation';
 export type DiffKind = 'added' | 'removed' | 'changed' | 'deprecated';
-export type DiffArea = 'operation' | 'parameters' | 'request-body' | 'response-body' | 'headers' | 'security' | 'documentation';
+export type DiffArea =
+  | 'operation'
+  | 'parameters'
+  | 'request-body'
+  | 'response-body'
+  | 'headers'
+  | 'security'
+  | 'documentation';
 
 export interface DiffSpecVersion {
   title?: string;

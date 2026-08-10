@@ -8,14 +8,7 @@
  */
 
 export type HttpMethod =
-  | 'get'
-  | 'post'
-  | 'put'
-  | 'patch'
-  | 'delete'
-  | 'options'
-  | 'head'
-  | 'trace';
+  'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'trace';
 
 export interface SpecificationExtensions {
   'x-internal'?: boolean;
@@ -192,7 +185,8 @@ export interface SchemaObject extends SpecificationExtensions {
   readOnly?: boolean;
   writeOnly?: boolean;
   deprecated?: boolean;
-  discriminator?: string | { propertyName?: string; mapping?: Record<string, string> };
+  discriminator?:
+    string | { propertyName?: string; mapping?: Record<string, string> };
   additionalProperties?: boolean | SchemaObject;
   minimum?: number;
   maximum?: number;

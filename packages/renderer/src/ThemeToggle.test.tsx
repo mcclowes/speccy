@@ -9,7 +9,9 @@ describe('ThemeToggle', () => {
     const onChange = vi.fn();
     render(<ThemeToggle theme="dark" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Switch to light theme' }),
+    );
 
     expect(onChange).toHaveBeenCalledWith('light');
   });
@@ -18,14 +20,23 @@ describe('ThemeToggle', () => {
     const onChange = vi.fn();
     render(<ThemeToggle theme="light" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Switch to dark theme' }),
+    );
 
     expect(onChange).toHaveBeenCalledWith('dark');
   });
 
   it('cycles through an explicit set of themes', () => {
     const onChange = vi.fn();
-    render(<ThemeToggle theme="system" onChange={onChange} themes={['system', 'dark', 'light']} label="current" />);
+    render(
+      <ThemeToggle
+        theme="system"
+        onChange={onChange}
+        themes={['system', 'dark', 'light']}
+        label="current"
+      />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Theme: system' }));
 

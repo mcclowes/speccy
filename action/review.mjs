@@ -14,9 +14,14 @@ export function parseSpecs(value) {
         throw new Error(`Invalid spec "${line}". Use name=path.`);
       }
       const name = line.slice(0, separator).trim();
-      const paths = line.slice(separator + 1).split('=>').map((path) => path.trim());
+      const paths = line
+        .slice(separator + 1)
+        .split('=>')
+        .map((path) => path.trim());
       if (paths.length > 2 || paths.some((path) => !path)) {
-        throw new Error(`Invalid spec "${line}". Use name=path or name=base-path=>revision-path.`);
+        throw new Error(
+          `Invalid spec "${line}". Use name=path or name=base-path=>revision-path.`,
+        );
       }
       return paths.length === 1
         ? { name, revisionPath: paths[0] }
@@ -29,7 +34,14 @@ export function parseSpecs(value) {
 export function composeReport(results) {
   const lines = [reportMarker, '', '## Speccy API review', ''];
   for (const result of results) {
-    lines.push(`### ${result.name}`, '', result.diff.trim(), '', result.health.trim(), '');
+    lines.push(
+      `### ${result.name}`,
+      '',
+      result.diff.trim(),
+      '',
+      result.health.trim(),
+      '',
+    );
   }
   return `${lines.join('\n').trim()}\n`;
 }
@@ -40,7 +52,8 @@ function runCli(args, version) {
     env: { ...process.env, NO_COLOR: '1' },
   });
   if (result.error) throw result.error;
-  if (result.status === 2) throw new Error(result.stderr.trim() || 'Speccy could not run.');
+  if (result.status === 2)
+    throw new Error(result.stderr.trim() || 'Speccy could not run.');
   return { output: result.stdout, status: result.status ?? 2 };
 }
 
@@ -55,14 +68,20 @@ async function github(path, options = {}) {
     },
   });
   if (!response.ok) {
-    throw new Error(`GitHub ${options.method ?? 'GET'} ${path} failed: ${response.status} ${await response.text()}`);
+    throw new Error(
+      `GitHub ${options.method ?? 'GET'} ${path} failed: ${response.status} ${await response.text()}`,
+    );
   }
   return response.status === 204 ? undefined : response.json();
 }
 
 async function publishComment(repository, pullNumber, body) {
-  const comments = await github(`/repos/${repository}/issues/${pullNumber}/comments?per_page=100`);
-  const existing = comments.find((comment) => comment.body?.startsWith(reportMarker));
+  const comments = await github(
+    `/repos/${repository}/issues/${pullNumber}/comments?per_page=100`,
+  );
+  const existing = comments.find((comment) =>
+    comment.body?.startsWith(reportMarker),
+  );
   if (existing) {
     if (existing.body !== body) {
       await github(`/repos/${repository}/issues/comments/${existing.id}`, {
@@ -78,16 +97,37 @@ async function publishComment(repository, pullNumber, body) {
   });
 }
 
-export async function review({ specs, version, baseRef, failOn, healthFailOn }) {
+export async function review({
+  specs,
+  version,
+  baseRef,
+  failOn,
+  healthFailOn,
+}) {
   const results = [];
   let exitCode = 0;
   for (const spec of specs) {
     const diff = runCli(
-      ['diff', spec.basePath ?? `${baseRef}:${spec.revisionPath}`, spec.revisionPath, '--format', 'markdown', '--fail-on', failOn],
+      [
+        'diff',
+        spec.basePath ?? `${baseRef}:${spec.revisionPath}`,
+        spec.revisionPath,
+        '--format',
+        'markdown',
+        '--fail-on',
+        failOn,
+      ],
       version,
     );
     const health = runCli(
-      ['lint', spec.revisionPath, '--format', 'markdown', '--fail-on', healthFailOn],
+      [
+        'lint',
+        spec.revisionPath,
+        '--format',
+        'markdown',
+        '--fail-on',
+        healthFailOn,
+      ],
       version,
     );
     exitCode = Math.max(exitCode, diff.status, health.status);
@@ -97,8 +137,11 @@ export async function review({ specs, version, baseRef, failOn, healthFailOn }) 
 }
 
 async function main() {
-  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
-  if (!event.pull_request) throw new Error('Speccy API review must run on a pull_request event.');
+  const event = JSON.parse(
+    fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'),
+  );
+  if (!event.pull_request)
+    throw new Error('Speccy API review must run on a pull_request event.');
   const specs = parseSpecs(process.env.SPECCY_SPECS ?? '');
   const result = await review({
     specs,
@@ -109,8 +152,13 @@ async function main() {
   });
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, result.report);
   if (process.env.SPECCY_COMMENT !== 'false') {
-    if (!process.env.GH_TOKEN) throw new Error('github-token is required when comment is true.');
-    await publishComment(process.env.GITHUB_REPOSITORY, event.pull_request.number, result.report);
+    if (!process.env.GH_TOKEN)
+      throw new Error('github-token is required when comment is true.');
+    await publishComment(
+      process.env.GITHUB_REPOSITORY,
+      event.pull_request.number,
+      result.report,
+    );
   }
   process.exitCode = result.exitCode;
 }

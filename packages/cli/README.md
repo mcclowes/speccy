@@ -29,20 +29,20 @@ If the ref exists but does not contain the file, the spec is new on this branch 
 
 ## Options
 
-| Option | Meaning |
-| --- | --- |
-| `--format <pretty\|json\|markdown>` | Output shape. `pretty` for a terminal, `json` for anything downstream, `markdown` for a pull request comment. Defaults to `pretty`. |
-| `--fail-on <severity>` | Exit 1 at or above this severity. Lint takes `issue`, `warning`, `suggestion`, or `never`, defaulting to `issue`. Diff takes `breaking`, `warning`, `compatible`, `documentation`, or `never`, defaulting to `breaking`. |
-| `--against <spec>` | Adds change-safety findings to a lint by comparing against a previous document. |
-| `--no-color` | Never colorize terminal output. `NO_COLOR` is respected too. |
+| Option                              | Meaning                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--format <pretty\|json\|markdown>` | Output shape. `pretty` for a terminal, `json` for anything downstream, `markdown` for a pull request comment. Defaults to `pretty`.                                                                                      |
+| `--fail-on <severity>`              | Exit 1 at or above this severity. Lint takes `issue`, `warning`, `suggestion`, or `never`, defaulting to `issue`. Diff takes `breaking`, `warning`, `compatible`, `documentation`, or `never`, defaulting to `breaking`. |
+| `--against <spec>`                  | Adds change-safety findings to a lint by comparing against a previous document.                                                                                                                                          |
+| `--no-color`                        | Never colorize terminal output. `NO_COLOR` is respected too.                                                                                                                                                             |
 
 ## Exit codes
 
-| Code | Meaning |
-| --- | --- |
-| 0 | Nothing at or above the threshold |
-| 1 | Findings at or above the threshold |
-| 2 | The tool could not run |
+| Code | Meaning                            |
+| ---- | ---------------------------------- |
+| 0    | Nothing at or above the threshold  |
+| 1    | Findings at or above the threshold |
+| 2    | The tool could not run             |
 
 Code 2 is deliberately separate: a spec that will not parse is a different problem from a spec with breaking changes, and CI should be able to tell them apart.
 

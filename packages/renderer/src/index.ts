@@ -3,8 +3,19 @@ export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
 export { ThemeToggle } from './ThemeToggle';
 export type { Theme } from './ThemeToggle';
-export { ApiPath, DisclosureChevron, httpMethodLabel, MethodBadge, RequiredMark, VisuallyHidden } from './DesignSystem';
-export { ParameterDetails, RequestBodyDetails, ResponseDetails } from './ResourceDetails';
+export {
+  ApiPath,
+  DisclosureChevron,
+  httpMethodLabel,
+  MethodBadge,
+  RequiredMark,
+  VisuallyHidden,
+} from './DesignSystem';
+export {
+  ParameterDetails,
+  RequestBodyDetails,
+  ResponseDetails,
+} from './ResourceDetails';
 export type { ResourceDensity } from './ResourceDetails';
 export { parseRoutePath, routePath } from './routing';
 export type { RoutePathOptions } from './routing';

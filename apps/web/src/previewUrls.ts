@@ -16,7 +16,9 @@ export interface PreviewSource {
   name?: string;
 }
 
-export function parseInitialLocation(location: Pick<Location, 'search' | 'hash'>): PreviewSource & { preview: boolean } {
+export function parseInitialLocation(
+  location: Pick<Location, 'search' | 'hash'>,
+): PreviewSource & { preview: boolean } {
   const search = new URLSearchParams(location.search);
   const fragment = new URLSearchParams(location.hash.replace(/^#/, ''));
   return {
@@ -27,10 +29,21 @@ export function parseInitialLocation(location: Pick<Location, 'search' | 'hash'>
   };
 }
 
-export function previewHref(route: SpeccyRoute, preview: PreviewSource, origin: string, absolute = false): string {
+export function previewHref(
+  route: SpeccyRoute,
+  preview: PreviewSource,
+  origin: string,
+  absolute = false,
+): string {
   const target = new URL(referenceHref('preview', route), origin);
   target.searchParams.set('preview', '1');
   if (preview.sourceUrl) target.searchParams.set('url', preview.sourceUrl);
-  else target.hash = new URLSearchParams({ source: preview.source, name: preview.name || 'API reference' }).toString();
-  return absolute ? target.toString() : `${target.pathname}${target.search}${target.hash}`;
+  else
+    target.hash = new URLSearchParams({
+      source: preview.source,
+      name: preview.name || 'API reference',
+    }).toString();
+  return absolute
+    ? target.toString()
+    : `${target.pathname}${target.search}${target.hash}`;
 }
