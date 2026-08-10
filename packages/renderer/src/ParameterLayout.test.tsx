@@ -1,8 +1,15 @@
+import { readFileSync } from 'node:fs';
 import { fireEvent, render, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
 describe('endpoint parameter layout', () => {
+  it('allows parameter tooltips to escape the parameter card', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(/\.sp-endpoint-parameters \{[^}]*overflow: visible;/);
+  });
+
   it('progressively reveals long parameter groups', () => {
     window.history.replaceState({}, '', '/api/list-companies');
     const parameters = Array.from({ length: 8 }, (_, index) => ({
