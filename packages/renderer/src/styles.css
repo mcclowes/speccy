@@ -180,7 +180,7 @@ related:
 .sp-download-format { font-family: 'DM Mono', monospace; font-size: 7px; font-weight: 700; text-transform: uppercase; }
 .sp-download-format-json { letter-spacing: -0.08em; }
 .sp-download-format-yaml { color: var(--sp-muted); }
-.sp-server { width: fit-content; max-width: 100%; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
+.sp-server { width: 100%; max-width: 100%; padding: 8px 9px 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--sp-line); border-radius: 10px; background: var(--sp-surface); }
 .sp-server > span { color: var(--sp-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .sp-server code { overflow: hidden; color: var(--sp-text); font-size: 11px; text-overflow: ellipsis; }
 .sp-copy { border: 0; border-radius: 6px; padding: 5px 8px; color: var(--sp-muted); background: var(--sp-surface-soft); cursor: pointer; font-size: 10px; transition: color 120ms ease, background-color 120ms ease, transform 80ms ease; }
