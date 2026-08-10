@@ -15,8 +15,9 @@ import { Markdown } from './Markdown';
 import { SchemaExplorer, structuralObjectSchema } from './SchemaExplorer';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
 
-function schemaLabel(schema?: SchemaObject): string {
-  if (!schema) return 'any';
+function schemaLabel(schema?: Schema): string {
+  if (schema === undefined || schema === true) return 'any';
+  if (schema === false) return 'never';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
   const declaredType = Array.isArray(schema.type)
     ? schema.type.join(' | ')
@@ -30,7 +31,8 @@ function schemaLabel(schema?: SchemaObject): string {
   return [schema.title, type].filter(Boolean).join(' · ');
 }
 
-function alternativeName(schema: SchemaObject, index: number): string {
+function alternativeName(schema: Schema, index: number): string {
+  if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';
   if (!schema.title) return `Option ${index + 1}`;
   return schema.title
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
@@ -171,7 +173,10 @@ export function SchemaView({
   const isObject =
     schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues =
-    schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
+    schema.enum ??
+    (schema.type === 'array' && typeof schema.items === 'object'
+      ? schema.items.enum
+      : undefined);
   const constraints: Array<{ label: string; value: unknown }> = [];
   if (schema.minimum !== undefined)
     constraints.push({ label: 'min', value: schema.minimum });

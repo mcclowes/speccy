@@ -14,6 +14,7 @@ import {
   type Parameter,
   type RequestBody,
   type ResponseObject,
+  type Schema,
   type SchemaObject,
   type SecurityRequirement,
   type SecurityScheme,
@@ -113,6 +114,15 @@ function firstMedia(
   content?: Record<string, MediaType>,
 ): [string, MediaType] | undefined {
   return content ? Object.entries(content)[0] : undefined;
+}
+
+function objectSchema(schema: Schema | undefined): SchemaObject | undefined {
+  return typeof schema === 'object' ? schema : undefined;
+}
+
+function schemaTypeText(schema: Schema | undefined): string {
+  const type = objectSchema(schema)?.type;
+  return Array.isArray(type) ? type.join(' | ') : (type ?? 'value');
 }
 
 function securitySchemeLabel(scheme?: SecurityScheme): string | undefined {
@@ -271,13 +281,14 @@ function ParameterCard({
   parameter: Parameter;
   index: number;
 }) {
+  const parameterSchema = objectSchema(parameter.schema);
   const example =
     parameter.example !== undefined
       ? parameter.example
-      : parameter.schema?.example;
+      : parameterSchema?.example;
   const schema = {
-    ...parameter.schema,
-    description: parameter.description ?? parameter.schema?.description,
+    ...parameterSchema,
+    description: parameter.description ?? parameterSchema?.description,
   };
 
   return (
@@ -312,17 +323,21 @@ function ParameterExplorer({
 }) {
   const title = PARAMETER_GROUP_LABELS[location] ?? 'Parameters';
   const properties = Object.fromEntries(
-    items.map((parameter) => [
-      parameter.name ?? 'unnamed',
-      {
-        ...parameter.schema,
-        description: parameter.description ?? parameter.schema?.description,
-      },
-    ]),
+    items.map((parameter) => {
+      const schema = objectSchema(parameter.schema);
+      return [
+        parameter.name ?? 'unnamed',
+        {
+          ...schema,
+          description: parameter.description ?? schema?.description,
+        },
+      ];
+    }),
   );
   const examples = Object.fromEntries(
     items.flatMap((parameter) => {
-      const example = parameter.example ?? parameter.schema?.example;
+      const example =
+        parameter.example ?? objectSchema(parameter.schema)?.example;
       return parameter.name && example !== undefined
         ? [[parameter.name, example]]
         : [];
@@ -488,9 +503,10 @@ function responseExamples(
     if (value !== undefined)
       examples.push({ label: example.summary ?? name, value });
   }
-  if (media.schema?.example !== undefined)
-    examples.push({ label: 'Generic example', value: media.schema.example });
-  if (examples.length === 0 && media.schema)
+  const schema = objectSchema(media.schema);
+  if (schema?.example !== undefined)
+    examples.push({ label: 'Generic example', value: schema.example });
+  if (examples.length === 0 && media.schema !== undefined)
     examples.push({
       label: 'Generated example',
       value: schemaExample(media.schema),
@@ -499,10 +515,11 @@ function responseExamples(
 }
 
 function schemaExample(
-  schema: SchemaObject,
+  schema: Schema,
   mode: 'request' | 'response' = 'response',
   requiredOnly = false,
 ): unknown {
+  if (typeof schema === 'boolean') return schema ? {} : undefined;
   const isObject = schema.type === 'object' || Boolean(schema.properties);
   if (schema.example !== undefined && (!requiredOnly || !isObject))
     return schema.example;
@@ -533,9 +550,10 @@ function schemaExample(
     const requiredProperties = new Set(schema.required ?? []);
     return Object.fromEntries(
       Object.entries(schema.properties ?? {})
-        .filter(([, property]) =>
-          mode === 'request' ? !property.readOnly : !property.writeOnly,
-        )
+        .filter(([, property]) => {
+          const object = objectSchema(property);
+          return mode === 'request' ? !object?.readOnly : !object?.writeOnly;
+        })
         .filter(([name]) => !requiredOnly || requiredProperties.has(name))
         .map(([name, property]) => [
           name,
@@ -661,11 +679,14 @@ function ResponseExamplePanel({
 }
 
 function parameterExample(parameter: Parameter): unknown {
+  const schema = objectSchema(parameter.schema);
   return (
     parameter.example ??
-    parameter.schema?.example ??
-    parameter.schema?.default ??
-    (parameter.schema ? schemaExample(parameter.schema, 'request') : 'string')
+    schema?.example ??
+    schema?.default ??
+    (parameter.schema !== undefined
+      ? schemaExample(parameter.schema, 'request')
+      : 'string')
   );
 }
 
@@ -994,7 +1015,7 @@ export function RequestRail({
   const parameterDefaults = Object.fromEntries(
     parameters.map((parameter) => [
       `${parameter.in}-${parameter.name}`,
-      String(parameter.schema?.default ?? ''),
+      String(objectSchema(parameter.schema)?.default ?? ''),
     ]),
   );
   const [storedValues, setStoredValues] = useLocalState<Record<string, string>>(
@@ -1134,9 +1155,10 @@ export function RequestRail({
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
     if (!parameter.name || !value) continue;
     let parsedValue: unknown = value;
+    const schema = objectSchema(parameter.schema);
     if (
-      parameter.schema?.type === 'array' ||
-      parameter.schema?.type === 'object' ||
+      schema?.type === 'array' ||
+      schema?.type === 'object' ||
       parameter.content
     ) {
       try {
@@ -1475,11 +1497,7 @@ export function RequestRail({
                           [key]: event.target.value,
                         })
                       }
-                      placeholder={
-                        Array.isArray(parameter.schema?.type)
-                          ? parameter.schema.type.join(' | ')
-                          : (parameter.schema?.type ?? 'value')
-                      }
+                      placeholder={schemaTypeText(parameter.schema)}
                     />
                   </label>
                   {parameterPrototype && !parameter.required && (

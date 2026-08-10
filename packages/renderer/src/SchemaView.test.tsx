@@ -610,4 +610,25 @@ describe('SchemaView composition', () => {
     ).toBeVisible();
     expect(screen.getByRole('button', { name: 'error string' })).toBeVisible();
   });
+
+  it('renders boolean schemas in nested properties and array items', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            forbidden: false,
+            values: { type: 'array', items: true },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'forbidden never' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'values array<any>' }),
+    ).toBeVisible();
+  });
 });

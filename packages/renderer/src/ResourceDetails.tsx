@@ -7,7 +7,12 @@
  * ---
  */
 
-import type { Parameter, RequestBody, ResponseObject } from 'speccy-core';
+import type {
+  Parameter,
+  RequestBody,
+  ResponseObject,
+  SchemaObject,
+} from 'speccy-core';
 import { RequiredMark } from './DesignSystem';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
@@ -29,7 +34,9 @@ export function ParameterDetails({
   const example =
     parameter.example !== undefined
       ? parameter.example
-      : parameter.schema?.example;
+      : typeof parameter.schema === 'object'
+        ? parameter.schema.example
+        : undefined;
   return (
     <div className={`sp-resource-details sp-parameter-details is-${density}`}>
       <div className="sp-resource-heading">
@@ -111,7 +118,10 @@ export function ResponseDetails({
               properties: Object.fromEntries(
                 Object.entries(response.headers).map(([name, header]) => [
                   name,
-                  { ...header.schema, description: header.description },
+                  {
+                    ...(typeof header.schema === 'object' ? header.schema : {}),
+                    description: header.description,
+                  } satisfies SchemaObject,
                 ]),
               ),
               required: Object.entries(response.headers)

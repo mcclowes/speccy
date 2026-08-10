@@ -99,7 +99,11 @@ export function serializeRequestBody(
       for (const [headerName, header] of Object.entries(
         encoding?.headers ?? {},
       )) {
-        const headerValue = header.example ?? header.schema?.default;
+        const headerValue =
+          header.example ??
+          (typeof header.schema === 'object'
+            ? header.schema.default
+            : undefined);
         if (headerValue !== undefined)
           lines.push(`${headerName}: ${scalar(headerValue)}`);
       }

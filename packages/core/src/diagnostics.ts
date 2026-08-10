@@ -15,6 +15,7 @@ import type {
   Operation,
   Parameter,
   ResponseObject,
+  Schema,
   SchemaObject,
 } from './types';
 
@@ -85,7 +86,7 @@ function operationKey(method: HttpMethod, path: string, operation: Operation) {
   );
 }
 
-function responseSchema(response: ResponseObject): SchemaObject | undefined {
+function responseSchema(response: ResponseObject): Schema | undefined {
   return (
     response.content?.['application/json']?.schema ??
     Object.values(response.content ?? {})[0]?.schema ??
@@ -93,8 +94,9 @@ function responseSchema(response: ResponseObject): SchemaObject | undefined {
   );
 }
 
-function schemaSignature(schema?: SchemaObject): string {
-  if (!schema) return '';
+function schemaSignature(schema?: Schema): string {
+  if (schema === undefined) return '';
+  if (typeof schema === 'boolean') return String(schema);
   return JSON.stringify({
     type: schema.type,
     format: schema.format,
@@ -105,13 +107,14 @@ function schemaSignature(schema?: SchemaObject): string {
 }
 
 function visitSchema(
-  schema: SchemaObject | undefined,
+  schema: Schema | undefined,
   path: Array<string | number>,
   add: AddDiagnostic,
   context: { operationId?: string; tag?: string },
   seen = new Set<SchemaObject>(),
 ) {
-  if (!schema || seen.has(schema)) return;
+  if (schema === undefined || typeof schema === 'boolean' || seen.has(schema))
+    return;
   seen.add(schema);
   const label = String(path.at(-1) ?? schema.title ?? 'schema');
   if (
@@ -208,6 +211,10 @@ function visitSchema(
   }
   for (const [name, property] of Object.entries(schema.properties ?? {})) {
     const propertyPath = [...path, 'properties', name];
+    if (typeof property === 'boolean') {
+      visitSchema(property, propertyPath, add, context, seen);
+      continue;
+    }
     if (!text(property.description))
       add({
         ruleId: 'property-description',
@@ -309,7 +316,7 @@ function inspectErrors(
   }
   for (const [code, response] of errors) {
     const schema = responseSchema(response);
-    if (!schema)
+    if (!schema || typeof schema === 'boolean')
       add({
         ruleId: 'structured-error-response',
         severity: 'warning',
@@ -678,7 +685,8 @@ export function analyzeOpenApi(
           if (
             media.example === undefined &&
             !Object.keys(media.examples ?? {}).length &&
-            media.schema?.example === undefined
+            (typeof media.schema !== 'object' ||
+              media.schema.example === undefined)
           )
             add({
               ruleId: 'request-example',
@@ -755,7 +763,8 @@ export function analyzeOpenApi(
             successCodes.test(code) &&
             media.example === undefined &&
             !Object.keys(media.examples ?? {}).length &&
-            media.schema?.example === undefined
+            (typeof media.schema !== 'object' ||
+              media.schema.example === undefined)
           )
             add({
               ruleId: 'response-example',
@@ -814,15 +823,17 @@ export function analyzeOpenApi(
           path: [...operationPath, 'security'],
           ...context,
         });
+      const successSchema = responseSchema(
+        Object.values(responses).find((_, index) =>
+          Object.keys(responses)[index]?.startsWith('2'),
+        ) ?? {},
+      );
       const looksCollection =
         method === 'get' &&
         !/\{[^}]+\}\/?$/.test(path) &&
         (collectionWords.test(operation.summary ?? '') ||
-          responseSchema(
-            Object.values(responses).find((_, index) =>
-              Object.keys(responses)[index]?.startsWith('2'),
-            ) ?? {},
-          )?.type === 'array');
+          (typeof successSchema === 'object' &&
+            successSchema.type === 'array'));
       if (looksCollection) {
         const names = new Set(
           parameters.map((parameter) => parameter.name?.toLowerCase()),
@@ -1025,7 +1036,8 @@ export function analyzeOpenApi(
       };
       const bodySchema = Object.values(operation.requestBody?.content ?? {})[0]
         ?.schema;
-      const properties = bodySchema?.properties ?? {};
+      const properties =
+        typeof bodySchema === 'object' ? (bodySchema.properties ?? {}) : {};
       for (const [ruleId, candidates, label] of [
         ['webhook-event-id', ['id', 'eventId'], 'a unique event ID'],
         [

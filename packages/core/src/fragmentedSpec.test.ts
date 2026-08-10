@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createReferenceModel } from './model';
 import { bundleFragmentedSpec } from './fragmentedSpec';
+import type { SchemaObject } from './types';
 
 describe('bundleFragmentedSpec', () => {
   it('resolves refs relative to the document that declares them', () => {
@@ -43,7 +44,9 @@ components:
     const model = createReferenceModel(document);
     const response = model.operations[0]?.operation.responses?.['200'];
     expect(response?.description).toBe('Found them');
-    expect(response?.content?.['application/json']?.schema?.type).toBe('array');
+    expect(
+      (response?.content?.['application/json']?.schema as SchemaObject)?.type,
+    ).toBe('array');
   });
 
   it('leaves remote and missing refs unchanged', () => {

@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import type { SchemaObject } from 'speccy-core';
+import type { Schema, SchemaObject } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
 import { DisclosureContent } from './DesignSystem';
 import { Markdown } from './Markdown';
@@ -22,8 +22,9 @@ function scoped(className: string) {
     .join(' ');
 }
 
-function schemaTypeLabel(schema?: SchemaObject): string {
-  if (!schema) return 'any';
+function schemaTypeLabel(schema?: Schema): string {
+  if (schema === undefined || schema === true) return 'any';
+  if (schema === false) return 'never';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
   return schema.type === 'array'
     ? `array<${schemaTypeLabel(schema.items)}>`
@@ -32,8 +33,13 @@ function schemaTypeLabel(schema?: SchemaObject): string {
       : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
 }
 
-function schemaLabel(schema?: SchemaObject): string {
-  return [schema?.title, schemaTypeLabel(schema)].filter(Boolean).join(' · ');
+function schemaLabel(schema?: Schema): string {
+  return [
+    typeof schema === 'object' ? schema.title : undefined,
+    schemaTypeLabel(schema),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 function ExplorerExample({ value }: { value: unknown }) {
@@ -44,14 +50,19 @@ function ExplorerExample({ value }: { value: unknown }) {
 
 type ExplorerField = {
   name: string;
-  schema: SchemaObject;
+  schema: Schema;
   required: boolean;
   path: string[];
   exampleValue?: unknown;
 };
 
-export function structuralObjectSchema(schema: SchemaObject): SchemaObject {
+export function structuralObjectSchema(schema: Schema): SchemaObject {
+  if (typeof schema === 'boolean')
+    return {
+      description: schema ? 'Any value is allowed.' : 'No value is allowed.',
+    };
   const base = schema.type === 'array' && schema.items ? schema.items : schema;
+  if (typeof base === 'boolean') return structuralObjectSchema(base);
   const members = (base.allOf ?? []).map(structuralObjectSchema);
   if (members.length === 0) return base;
 
@@ -75,7 +86,7 @@ export function structuralObjectSchema(schema: SchemaObject): SchemaObject {
   };
 }
 
-function childProperties(schema: SchemaObject): Record<string, SchemaObject> {
+function childProperties(schema: SchemaObject): Record<string, Schema> {
   return structuralObjectSchema(schema).properties ?? {};
 }
 
@@ -136,6 +147,7 @@ function ExplorerTree({
   depth?: number;
 }) {
   return fields.map((field) => {
+    const fieldObject = structuralObjectSchema(field.schema);
     const path = field.path.join('.');
     const children = fieldChildren(field);
     const open = expandedPaths.has(path);
@@ -150,7 +162,7 @@ function ExplorerTree({
       >
         <div
           className={scoped(
-            `sp-schema-explorer-row${selected ? ' is-selected' : ''}${field.schema.deprecated ? ' is-deprecated' : ''}`,
+            `sp-schema-explorer-row${selected ? ' is-selected' : ''}${fieldObject.deprecated ? ' is-deprecated' : ''}`,
           )}
         >
           {children.length > 0 ? (
@@ -177,7 +189,7 @@ function ExplorerTree({
           >
             <span className={scoped('sp-schema-explorer-name')}>
               <code>{field.name}</code>
-              {field.schema.deprecated && (
+              {fieldObject.deprecated && (
                 <span className={scoped('sp-schema-explorer-deprecated')}>
                   Deprecated
                 </span>
@@ -189,19 +201,19 @@ function ExplorerTree({
               )}
             </span>
             <span className={scoped('sp-schema-explorer-type')}>
-              {field.schema.title && (
+              {fieldObject.title && (
                 <>
                   <span
                     className={scoped('sp-schema-explorer-model')}
-                    title={field.schema.title}
+                    title={fieldObject.title}
                   >
-                    {field.schema.title} ·&nbsp;
+                    {fieldObject.title} ·&nbsp;
                   </span>
                 </>
               )}
               <span className={scoped('sp-schema-explorer-primitive')}>
                 {schemaTypeLabel(field.schema)}
-                {field.schema.nullable && <span>?</span>}
+                {fieldObject.nullable && <span>?</span>}
               </span>
             </span>
           </button>
@@ -233,33 +245,40 @@ function ExplorerFieldDetails({
   showExample: boolean;
 }) {
   const schema = field.schema;
+  const objectSchema = structuralObjectSchema(schema);
   const enumValues =
-    schema.enum ?? (schema.type === 'array' ? schema.items?.enum : undefined);
+    objectSchema.enum ??
+    (objectSchema.type === 'array' && typeof objectSchema.items === 'object'
+      ? objectSchema.items.enum
+      : undefined);
   const constraints: Array<{ label: string; value: string | number }> = [];
-  if (schema.minimum !== undefined)
-    constraints.push({ label: 'Minimum', value: schema.minimum });
-  if (schema.maximum !== undefined)
-    constraints.push({ label: 'Maximum', value: schema.maximum });
-  if (schema.minLength !== undefined && schema.minLength === schema.maxLength) {
+  if (objectSchema.minimum !== undefined)
+    constraints.push({ label: 'Minimum', value: objectSchema.minimum });
+  if (objectSchema.maximum !== undefined)
+    constraints.push({ label: 'Maximum', value: objectSchema.maximum });
+  if (
+    objectSchema.minLength !== undefined &&
+    objectSchema.minLength === objectSchema.maxLength
+  ) {
     constraints.push({
       label: 'Length',
-      value: `Exactly ${schema.minLength} characters`,
+      value: `Exactly ${objectSchema.minLength} characters`,
     });
   } else {
-    if (schema.minLength !== undefined)
+    if (objectSchema.minLength !== undefined)
       constraints.push({
         label: 'Length',
-        value: `At least ${schema.minLength} characters`,
+        value: `At least ${objectSchema.minLength} characters`,
       });
-    if (schema.maxLength !== undefined)
+    if (objectSchema.maxLength !== undefined)
       constraints.push({
         label: 'Length',
-        value: `At most ${schema.maxLength} characters`,
+        value: `At most ${objectSchema.maxLength} characters`,
       });
   }
-  if (schema.pattern)
-    constraints.push({ label: 'Pattern', value: schema.pattern });
-  const example = field.exampleValue ?? schema.example;
+  if (objectSchema.pattern)
+    constraints.push({ label: 'Pattern', value: objectSchema.pattern });
+  const example = field.exampleValue ?? objectSchema.example;
 
   return (
     <article
@@ -276,17 +295,19 @@ function ExplorerFieldDetails({
             Required
           </span>
         )}
-        {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
+        {objectSchema.deprecated && (
+          <span className="sp-deprecated">deprecated</span>
+        )}
       </div>
       <div className={scoped('sp-schema-explorer-detail-meta')}>
-        {schema.title && <span>Schema {schema.title}</span>}
+        {objectSchema.title && <span>Schema {objectSchema.title}</span>}
         <code>{schemaTypeLabel(schema)}</code>
-        {schema.nullable && <span>Nullable</span>}
-        {schema.readOnly && <span>Read only</span>}
-        {schema.writeOnly && <span>Write only</span>}
+        {objectSchema.nullable && <span>Nullable</span>}
+        {objectSchema.readOnly && <span>Read only</span>}
+        {objectSchema.writeOnly && <span>Write only</span>}
       </div>
       <Markdown className={scoped('sp-schema-explorer-description')}>
-        {schema.description}
+        {objectSchema.description}
       </Markdown>
       {enumValues && (
         <section className={scoped('sp-schema-explorer-detail-section')}>
@@ -315,11 +336,11 @@ function ExplorerFieldDetails({
           </dl>
         </section>
       )}
-      {schema.default !== undefined && (
+      {objectSchema.default !== undefined && (
         <section className={scoped('sp-schema-explorer-detail-section')}>
           <h4>Default</h4>
           <code className={scoped('sp-schema-explorer-value')}>
-            {JSON.stringify(schema.default)}
+            {JSON.stringify(objectSchema.default)}
           </code>
         </section>
       )}

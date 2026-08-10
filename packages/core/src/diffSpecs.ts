@@ -29,7 +29,7 @@ import type {
   Parameter,
   PathItem,
   ResponseObject,
-  SchemaObject,
+  Schema,
   SecurityRequirement,
 } from './types';
 
@@ -72,22 +72,17 @@ function schemaName(ref: string | undefined) {
   return ref?.startsWith(REF_PREFIX) ? ref.slice(REF_PREFIX.length) : undefined;
 }
 
-function componentSchemas(
-  document: OpenAPIDocument,
-): Record<string, SchemaObject> {
-  return (document.components?.schemas ?? document.definitions ?? {}) as Record<
-    string,
-    SchemaObject
-  >;
+function componentSchemas(document: OpenAPIDocument): Record<string, Schema> {
+  return document.components?.schemas ?? document.definitions ?? {};
 }
 
 /** Follows `$ref` chains within one document so inline and referenced schemas compare alike. */
 function dereference(
-  schema: SchemaObject | undefined,
+  schema: Schema | undefined,
   document: OpenAPIDocument,
   seen = new Set<string>(),
-): SchemaObject | undefined {
-  if (!schema?.$ref) return schema;
+): Schema | undefined {
+  if (typeof schema !== 'object' || !schema.$ref) return schema;
   const name = schemaName(schema.$ref);
   if (!name || seen.has(name)) return undefined;
   seen.add(name);
@@ -97,11 +92,11 @@ function dereference(
 function bodySchema(
   container:
     | {
-        content?: Record<string, { schema?: SchemaObject }>;
-        schema?: SchemaObject;
+        content?: Record<string, { schema?: Schema }>;
+        schema?: Schema;
       }
     | undefined,
-): SchemaObject | undefined {
+): Schema | undefined {
   if (!container) return undefined;
   return (
     container.content?.['application/json']?.schema ??
@@ -244,8 +239,8 @@ function componentUsage(
 }
 
 function compareSchemas(
-  before: SchemaObject | undefined,
-  after: SchemaObject | undefined,
+  before: Schema | undefined,
+  after: Schema | undefined,
   baseDocument: OpenAPIDocument,
   revisionDocument: OpenAPIDocument,
   direction: Direction,
@@ -256,15 +251,37 @@ function compareSchemas(
   seen: Set<string>,
 ) {
   // A shared component sitting on both sides is compared once, by the component pass.
-  if (before?.$ref && before.$ref === after?.$ref) return;
+  if (
+    typeof before === 'object' &&
+    typeof after === 'object' &&
+    before.$ref &&
+    before.$ref === after.$ref
+  )
+    return;
 
   const left = dereference(before, baseDocument);
   const right = dereference(after, revisionDocument);
-  if (!left || !right) return;
+  if (left === undefined || right === undefined) return;
 
   const key = location.join('/');
   if (seen.has(key)) return;
   seen.add(key);
+
+  if (typeof left === 'boolean' || typeof right === 'boolean') {
+    if (left !== right)
+      emit({
+        ruleId: 'boolean-schema-changed',
+        severity: 'breaking',
+        kind: 'changed',
+        context,
+        location,
+        label,
+        message: `${label} changed its boolean schema constraint.`,
+        before: left,
+        after: right,
+      });
+    return;
+  }
 
   if (left.type && right.type && left.type !== right.type) {
     emit({

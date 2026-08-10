@@ -206,7 +206,9 @@ paths:
     const responseSchema =
       operation?.responses?.['200']?.content?.['application/json']?.schema;
     expect(operation?.parameters?.map(({ name }) => name)).toEqual(['page']);
-    expect(responseSchema?.properties).toEqual({ name: { type: 'string' } });
+    expect((responseSchema as SchemaObject)?.properties).toEqual({
+      name: { type: 'string' },
+    });
     expect(model.document.components?.schemas?.AdminPet).toBeUndefined();
   });
 
@@ -294,7 +296,7 @@ paths:
         },
       },
     });
-    expect(schema?.properties?.debugNotes).toBeUndefined();
+    expect((schema as SchemaObject)?.properties?.debugNotes).toBeUndefined();
     expect(
       model.document.components?.schemas?.DataIntegritySummaries,
     ).toBeUndefined();
@@ -416,10 +418,15 @@ paths:
       operation?.requestBody?.content?.['application/json']?.schema;
     const responseSchema =
       operation?.responses?.['200']?.content?.['application/json']?.schema;
-    expect(requestSchema?.properties?.name?.type).toBe('string');
-    expect(responseSchema?.properties?.name?.type).toBe('string');
-    expect(requestSchema?.title).toBe('Pet');
-    expect(responseSchema?.title).toBe('Pet');
+    expect(
+      ((requestSchema as SchemaObject)?.properties?.name as SchemaObject)?.type,
+    ).toBe('string');
+    expect(
+      ((responseSchema as SchemaObject)?.properties?.name as SchemaObject)
+        ?.type,
+    ).toBe('string');
+    expect((requestSchema as SchemaObject)?.title).toBe('Pet');
+    expect((responseSchema as SchemaObject)?.title).toBe('Pet');
   });
 
   it('keeps an explicit schema title when resolving a $ref', () => {
@@ -450,7 +457,7 @@ paths:
       model.operations[0]?.operation.responses?.['200']?.content?.[
         'application/json'
       ]?.schema;
-    expect(schema?.title).toBe('Animal');
+    expect((schema as SchemaObject)?.title).toBe('Animal');
   });
 
   it('does not hang on circular $ref schemas', () => {
@@ -492,9 +499,12 @@ paths:
       model.operations[0]?.operation.responses?.['200']?.content?.[
         'application/json'
       ]?.schema;
-    expect(schema?.properties?.children?.items?.$ref).toBe(
-      '#/components/schemas/Node',
-    );
+    expect(
+      (
+        ((schema as SchemaObject)?.properties?.children as SchemaObject)
+          ?.items as SchemaObject
+      )?.$ref,
+    ).toBe('#/components/schemas/Node');
   });
 
   it('expands discriminator mappings into their allOf subtype choices', () => {
@@ -554,12 +564,15 @@ paths:
     const schema =
       model.operations[0]?.operation.requestBody?.content?.['application/json']
         ?.schema;
-    expect(schema?.oneOf?.map((choice) => choice.title)).toEqual([
+    const choices = (schema as SchemaObject)?.oneOf as SchemaObject[];
+    expect(choices.map((choice) => choice.title)).toEqual([
       'PrepaidModeCardRequest',
       'DebitModeCardRequest',
     ]);
-    expect(schema?.oneOf?.[0]?.allOf?.[1]?.required).toEqual(['currency']);
-    expect(schema?.oneOf?.[1]?.allOf?.[1]?.required).toEqual([
+    expect((choices[0]?.allOf?.[1] as SchemaObject)?.required).toEqual([
+      'currency',
+    ]);
+    expect((choices[1]?.allOf?.[1] as SchemaObject)?.required).toEqual([
       'parentManagedAccountId',
     ]);
   });
@@ -599,19 +612,23 @@ paths:
 
     expect(model.document.servers?.[0]?.url).toBe('https://api.example.com/v2');
     expect(
-      (model.document.components?.schemas?.Pet as SchemaObject)?.properties
-        ?.name?.type,
+      (
+        (model.document.components?.schemas?.Pet as SchemaObject)?.properties
+          ?.name as SchemaObject
+      )?.type,
     ).toBe('string');
     expect(model.operations[0]?.operation.parameters).toEqual([]);
-    expect(
-      model.operations[0]?.operation.requestBody?.content?.['application/json']
-        ?.schema?.properties?.name?.type,
-    ).toBe('string');
-    expect(
-      model.operations[0]?.operation.responses?.['201']?.content?.[
-        'application/json'
-      ]?.schema?.properties?.name?.type,
-    ).toBe('string');
+    const requestSchema = model.operations[0]?.operation.requestBody?.content?.[
+      'application/json'
+    ]?.schema as SchemaObject;
+    const responseSchema = model.operations[0]?.operation.responses?.['201']
+      ?.content?.['application/json']?.schema as SchemaObject;
+    expect((requestSchema.properties?.name as SchemaObject)?.type).toBe(
+      'string',
+    );
+    expect((responseSchema.properties?.name as SchemaObject)?.type).toBe(
+      'string',
+    );
   });
 
   it('collects top-level webhook operations separately from API paths', () => {

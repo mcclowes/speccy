@@ -121,11 +121,11 @@ export interface Parameter extends SpecificationExtensions {
   style?: string;
   explode?: boolean;
   allowReserved?: boolean;
-  schema?: SchemaObject;
+  schema?: Schema;
   content?: Record<string, MediaType>;
   type?: string;
   format?: string;
-  items?: SchemaObject;
+  items?: Schema;
   enum?: unknown[];
   collectionFormat?: string;
   example?: unknown;
@@ -144,14 +144,14 @@ export interface ResponseObject extends SpecificationExtensions {
   description?: string;
   headers?: Record<string, HeaderObject>;
   content?: Record<string, MediaType>;
-  schema?: SchemaObject;
+  schema?: Schema;
   examples?: Record<string, unknown>;
   links?: Record<string, LinkObject>;
   $ref?: string;
 }
 
 export interface MediaType extends SpecificationExtensions {
-  schema?: SchemaObject;
+  schema?: Schema;
   example?: unknown;
   examples?: Record<string, ExampleObject>;
   encoding?: Record<string, EncodingObject>;
@@ -225,12 +225,12 @@ export interface SchemaObject extends SpecificationExtensions {
   description?: string;
   required?: string[];
   $defs?: Record<string, Schema>;
-  properties?: Record<string, SchemaObject>;
+  properties?: Record<string, Schema>;
   patternProperties?: Record<string, Schema>;
   dependentSchemas?: Record<string, Schema>;
   dependentRequired?: Record<string, string[]>;
   propertyNames?: Schema;
-  items?: SchemaObject;
+  items?: Schema;
   prefixItems?: Schema[];
   contains?: Schema;
   minContains?: number;
@@ -254,7 +254,7 @@ export interface SchemaObject extends SpecificationExtensions {
     wrapped?: boolean;
   };
   externalDocs?: ExternalDocumentationObject;
-  additionalProperties?: boolean | SchemaObject;
+  additionalProperties?: Schema;
   unevaluatedProperties?: Schema;
   unevaluatedItems?: Schema;
   minimum?: number;
@@ -272,9 +272,9 @@ export interface SchemaObject extends SpecificationExtensions {
   maxProperties?: number;
   contentEncoding?: string;
   contentMediaType?: string;
-  allOf?: SchemaObject[];
-  oneOf?: SchemaObject[];
-  anyOf?: SchemaObject[];
+  allOf?: Schema[];
+  oneOf?: Schema[];
+  anyOf?: Schema[];
   not?: Schema;
   if?: Schema;
   then?: Schema;

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { diffSpecs } from './diffSpecs';
 import { parseSpec } from './model';
 import type { ApiChange, DiffReport } from './diff';
-import type { OpenAPIDocument, SchemaObject } from './types';
+import type { OpenAPIDocument, Schema, SchemaObject } from './types';
 
 function document(
   paths: OpenAPIDocument['paths'],
@@ -27,7 +27,7 @@ function operation(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function jsonBody(schema: SchemaObject) {
+function jsonBody(schema: Schema) {
   return { content: { 'application/json': { schema } } };
 }
 
@@ -42,6 +42,19 @@ function ruleIds(report: DiffReport): string[] {
 }
 
 describe('diffSpecs', () => {
+  it('compares boolean schemas without treating false as missing', () => {
+    const base = document({
+      '/loans': { get: operation({ responses: { '200': jsonBody(false) } }) },
+    });
+    const revision = document({
+      '/loans': { get: operation({ responses: { '200': jsonBody(true) } }) },
+    });
+
+    expect(
+      find(diffSpecs(base, revision), 'boolean-schema-changed'),
+    ).toHaveLength(1);
+  });
+
   it('reports nothing for identical documents', () => {
     const spec = document({ '/loans': { get: operation() } });
     expect(diffSpecs(spec, spec).changes).toEqual([]);
@@ -817,7 +830,11 @@ describe('diffSpecs', () => {
       const revision = clone(managedCards);
       (
         revision.components!.schemas!.ManagedCard as SchemaObject
-      ).properties!.mode!.type = 'integer';
+      ).properties!.mode = {
+        ...((revision.components!.schemas!.ManagedCard as SchemaObject)
+          .properties!.mode as SchemaObject),
+        type: 'integer',
+      };
       const changes = find(
         diffSpecs(managedCards, revision),
         'field-type-changed',
