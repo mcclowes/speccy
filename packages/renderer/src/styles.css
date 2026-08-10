@@ -137,12 +137,15 @@ related:
 .sp-theme-inherit {
   --sp-bg: var(--ifm-background-color, var(--sp-palette-light-bg));
   --sp-text: var(--ifm-font-color-base, var(--sp-palette-light-text));
-  --sp-surface: color-mix(in srgb, var(--sp-bg) 98%, var(--sp-text));
-  --sp-surface-soft: color-mix(in srgb, var(--sp-bg) 94%, var(--sp-text));
-  --sp-field-head: color-mix(in srgb, var(--sp-bg) 92%, var(--sp-text));
-  --sp-muted: color-mix(in srgb, var(--sp-text) 58%, var(--sp-bg));
-  --sp-line: color-mix(in srgb, var(--sp-text) 16%, var(--sp-bg));
-  --sp-code: color-mix(in srgb, var(--sp-bg) 95%, var(--sp-text));
+  --sp-surface: var(
+    --ifm-background-surface-color,
+    var(--sp-palette-light-surface)
+  );
+  --sp-surface-soft: color-mix(in srgb, var(--sp-surface) 94%, var(--sp-text));
+  --sp-field-head: color-mix(in srgb, var(--sp-surface) 92%, var(--sp-text));
+  --sp-muted: color-mix(in srgb, var(--sp-text) 58%, var(--sp-surface));
+  --sp-line: color-mix(in srgb, var(--sp-text) 16%, var(--sp-surface));
+  --sp-code: color-mix(in srgb, var(--sp-surface) 95%, var(--sp-text));
   --sp-code-text: var(--sp-text);
   --sp-code-border: var(--sp-line);
   --sp-code-control: var(--sp-surface-soft);

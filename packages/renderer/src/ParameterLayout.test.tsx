@@ -4,6 +4,14 @@ import { describe, expect, it } from 'vitest';
 import { Speccy } from './Speccy';
 
 describe('endpoint parameter layout', () => {
+  it('uses an opaque host surface for inherited cards and menus', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-theme-inherit \{[^}]*--sp-surface: var\(\s*--ifm-background-surface-color,/,
+    );
+  });
+
   it('allows parameter tooltips to escape the parameter card', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 
