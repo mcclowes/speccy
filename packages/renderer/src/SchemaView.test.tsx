@@ -477,4 +477,25 @@ describe('SchemaView composition', () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
+
+  it('uses object examples to populate otherwise empty response schemas', () => {
+    render(
+      <SchemaView
+        schema={{ title: 'ErrorMessage', type: 'object' }}
+        exampleValue={{
+          statusCode: 401,
+          service: 'PublicApi',
+          error: 'Unauthorized',
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'statusCode number' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'service string' }),
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'error string' })).toBeVisible();
+  });
 });

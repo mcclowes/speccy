@@ -33,6 +33,28 @@ function alternativeName(schema: SchemaObject, index: number): string {
     .replace(/[_-]+/g, ' ');
 }
 
+function schemaFromExample(value: unknown): SchemaObject {
+  if (Array.isArray(value)) {
+    return {
+      type: 'array',
+      items: value.length > 0 ? schemaFromExample(value[0]) : {},
+    };
+  }
+  if (value !== null && typeof value === 'object') {
+    return {
+      type: 'object',
+      properties: Object.fromEntries(
+        Object.entries(value).map(([name, fieldValue]) => [
+          name,
+          schemaFromExample(fieldValue),
+        ]),
+      ),
+    };
+  }
+  if (value === null) return { nullable: true };
+  return { type: typeof value };
+}
+
 export function JsonValue({ value }: { value: unknown }) {
   if (value === undefined) return null;
   const serialized =
@@ -105,15 +127,26 @@ export function SchemaView({
   const [structureOpen, setStructureOpen] = useState(!name);
   if (!schema) return null;
   const explorerSchema = structuralObjectSchema(schema);
+  const exampleSchema =
+    exampleValue !== null &&
+    typeof exampleValue === 'object' &&
+    !Array.isArray(exampleValue)
+      ? schemaFromExample(exampleValue)
+      : undefined;
+  const schemaWithExampleFields =
+    Object.keys(explorerSchema.properties ?? {}).length === 0 && exampleSchema
+      ? { ...schema, properties: exampleSchema.properties }
+      : schema;
+  const displayExplorerSchema = structuralObjectSchema(schemaWithExampleFields);
   if (
     depth === 0 &&
     !name &&
     !summaryOnly &&
-    Object.keys(explorerSchema.properties ?? {}).length > 0
+    Object.keys(displayExplorerSchema.properties ?? {}).length > 0
   ) {
     return (
       <SchemaExplorer
-        schema={schema}
+        schema={schemaWithExampleFields}
         showExample={showExample}
         showRootDescription={showRootDescription}
         exampleValue={exampleValue}
