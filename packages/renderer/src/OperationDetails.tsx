@@ -35,6 +35,7 @@ import {
 } from './DesignSystem';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
+import { serializeParameter } from './parameterSerialization';
 import { RequestSample } from './RequestSample';
 import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 import { SchemaExplorer } from './SchemaExplorer';
@@ -1024,9 +1025,9 @@ export function RequestRail({
   }>();
   const [executing, setExecuting] = useState(false);
   let requestPath = item.path;
-  const query = new URLSearchParams();
+  const query: Array<[string, string, boolean]> = [];
   const headers: string[] = [];
-  const maskedQuery = new URLSearchParams();
+  const maskedQuery: Array<[string, string, boolean]> = [];
   const maskedHeaders: string[] = [];
   const requiredParameters = parameters.filter(
     (parameter) => parameter.required,
@@ -1113,18 +1114,46 @@ export function RequestRail({
   for (const parameter of requestParameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
     if (!parameter.name || !value) continue;
-    if (parameter.in === 'path')
-      requestPath = requestPath.replace(
-        `{${parameter.name}}`,
-        encodeURIComponent(value),
-      );
-    if (parameter.in === 'query') {
-      query.set(parameter.name, value);
-      maskedQuery.set(parameter.name, value);
+    let parsedValue: unknown = value;
+    if (
+      parameter.schema?.type === 'array' ||
+      parameter.schema?.type === 'object' ||
+      parameter.content
+    ) {
+      try {
+        parsedValue = JSON.parse(value);
+      } catch {
+        parsedValue = value;
+      }
     }
-    if (parameter.in === 'header') {
-      headers.push(`${parameter.name}: ${value}`);
-      maskedHeaders.push(`${parameter.name}: ${value}`);
+    const pathValue =
+      parameter.in === 'path'
+        ? Array.isArray(parsedValue)
+          ? parsedValue.map((item) => encodeURIComponent(String(item)))
+          : parsedValue && typeof parsedValue === 'object'
+            ? Object.fromEntries(
+                Object.entries(parsedValue).map(([name, item]) => [
+                  encodeURIComponent(name),
+                  encodeURIComponent(String(item)),
+                ]),
+              )
+            : encodeURIComponent(String(parsedValue))
+        : parsedValue;
+    const serialized = serializeParameter(parameter, pathValue);
+    if (parameter.in === 'path' && typeof serialized === 'string')
+      requestPath = requestPath.replace(`{${parameter.name}}`, serialized);
+    if (parameter.in === 'query' && Array.isArray(serialized))
+      for (const [name, item] of serialized) {
+        query.push([name, item, parameter.allowReserved === true]);
+        maskedQuery.push([name, item, parameter.allowReserved === true]);
+      }
+    if (parameter.in === 'header' && typeof serialized === 'string') {
+      headers.push(`${parameter.name}: ${serialized}`);
+      maskedHeaders.push(`${parameter.name}: ${serialized}`);
+    }
+    if (parameter.in === 'cookie' && typeof serialized === 'string') {
+      headers.push(`Cookie: ${serialized}`);
+      maskedHeaders.push(`Cookie: ${serialized}`);
     }
   }
   for (const { name: schemeName, scheme } of activeSchemes) {
@@ -1136,8 +1165,8 @@ export function RequestRail({
       maskedHeaders.push(`${scheme.name ?? schemeName}: ${mask}`);
     }
     if (scheme.type === 'apiKey' && scheme.in === 'query') {
-      query.set(scheme.name ?? schemeName ?? 'api_key', credential);
-      maskedQuery.set(scheme.name ?? schemeName ?? 'api_key', mask);
+      query.push([scheme.name ?? schemeName ?? 'api_key', credential, false]);
+      maskedQuery.push([scheme.name ?? schemeName ?? 'api_key', mask, false]);
     }
     if (scheme.type === 'apiKey' && scheme.in === 'cookie') {
       headers.push(`Cookie: ${scheme.name ?? schemeName}=${credential}`);
@@ -1154,8 +1183,35 @@ export function RequestRail({
     headers.push(`Content-Type: ${contentType}`);
     maskedHeaders.push(`Content-Type: ${contentType}`);
   }
-  const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${query.size ? `?${query}` : ''}`;
-  const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${maskedQuery.size ? `?${maskedQuery}` : ''}`;
+  const queryString = (items: Array<[string, string, boolean]>) =>
+    items
+      .map(([name, value, allowReserved]) => {
+        const encoded = encodeURIComponent(value);
+        const encodedValue = allowReserved
+          ? encoded.replace(
+              /%3A|%2F|%3F|%23|%5B|%5D|%40|%21|%24|%26|%27|%28|%29|%2A|%2B|%2C|%3B|%3D/gi,
+              (part) => decodeURIComponent(part),
+            )
+          : encoded;
+        return `${encodeURIComponent(name)}=${encodedValue}`;
+      })
+      .join('&');
+  const serializedQuery = queryString(query);
+  const serializedMaskedQuery = queryString(maskedQuery);
+  const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${serializedQuery ? `?${serializedQuery}` : ''}`;
+  const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${serializedMaskedQuery ? `?${serializedMaskedQuery}` : ''}`;
+  const requestHeaders = headers.reduce<Record<string, string>>(
+    (result, header) => {
+      const separator = header.indexOf(':');
+      const name = header.slice(0, separator);
+      const value = header.slice(separator + 1).trim();
+      result[name] = result[name]
+        ? `${result[name]}${name === 'Cookie' ? '; ' : ', '}${value}`
+        : value;
+      return result;
+    },
+    {},
+  );
   async function executeRequest() {
     if (!authorizationComplete) {
       setAuthorizationExpanded(true);
@@ -1180,15 +1236,7 @@ export function RequestRail({
     try {
       const response = await fetch(requestUrl, {
         method: HTTP_METHOD_LABELS[item.method],
-        headers: Object.fromEntries(
-          headers.map((header) => {
-            const separator = header.indexOf(':');
-            return [
-              header.slice(0, separator),
-              header.slice(separator + 1).trim(),
-            ];
-          }),
-        ),
+        headers: requestHeaders,
         body:
           item.method === 'get' || item.method === 'head' || !body
             ? undefined

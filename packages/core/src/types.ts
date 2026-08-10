@@ -111,13 +111,19 @@ export interface Parameter extends SpecificationExtensions {
   description?: string;
   required?: boolean;
   deprecated?: boolean;
+  allowEmptyValue?: boolean;
+  style?: string;
+  explode?: boolean;
+  allowReserved?: boolean;
   schema?: SchemaObject;
+  content?: Record<string, MediaType>;
   type?: string;
   format?: string;
   items?: SchemaObject;
   enum?: unknown[];
   collectionFormat?: string;
   example?: unknown;
+  examples?: Record<string, ExampleObject>;
   $ref?: string;
 }
 

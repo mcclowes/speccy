@@ -931,7 +931,7 @@ describe('Speccy navigation', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
     expect(writeText).toHaveBeenCalledWith(
-      expect.stringContaining('api_key=secret+token'),
+      expect.stringContaining('api_key=secret%20token'),
     );
 
     expect(authorization).toHaveAttribute('type', 'password');

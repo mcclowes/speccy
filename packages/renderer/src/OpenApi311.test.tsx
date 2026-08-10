@@ -1,8 +1,18 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Speccy } from './Speccy';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+  vi.unstubAllGlobals();
+});
 
 describe('OpenAPI 3.1.1 conformance', () => {
   it('renders 3.1 metadata and expands server variables', () => {
@@ -154,5 +164,72 @@ describe('OpenAPI 3.1.1 conformance', () => {
     ]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
+  });
+
+  it('serializes styled parameters in executable requests', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 204,
+      statusText: 'No Content',
+      text: vi.fn().mockResolvedValue(''),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'inspect' }}
+        parameterPrototype={false}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Serialization API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/items/{coordinates}': {
+              get: {
+                operationId: 'inspect',
+                parameters: [
+                  {
+                    name: 'coordinates',
+                    in: 'path',
+                    required: true,
+                    style: 'label',
+                    schema: { type: 'array' },
+                  },
+                  {
+                    name: 'filter',
+                    in: 'query',
+                    style: 'deepObject',
+                    schema: { type: 'object' },
+                  },
+                  {
+                    name: 'session',
+                    in: 'cookie',
+                    schema: { type: 'string' },
+                  },
+                ],
+                responses: { '204': { description: 'No content' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    fireEvent.change(screen.getAllByLabelText(/coordinates/)[0]!, {
+      target: { value: '["10","20"]' },
+    });
+    fireEvent.change(screen.getAllByLabelText(/filter/)[0]!, {
+      target: { value: '{"role":"admin"}' },
+    });
+    fireEvent.change(screen.getAllByLabelText(/session/)[0]!, {
+      target: { value: 'abc' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send request' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.example.com/items/.10,20?filter%5Brole%5D=admin',
+      expect.objectContaining({
+        headers: expect.objectContaining({ Cookie: 'session=abc' }),
+      }),
+    );
   });
 });
