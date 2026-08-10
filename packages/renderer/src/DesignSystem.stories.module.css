@@ -1,0 +1,23 @@
+.stack {
+  display: grid;
+  gap: 32px;
+  min-width: min(680px, 90vw);
+  padding: 32px;
+}
+
+.stack section {
+  display: grid;
+  gap: 12px;
+}
+
+.stack h2 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}

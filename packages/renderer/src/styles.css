@@ -967,27 +967,6 @@ related:
   color: var(--sp-accent);
   background: color-mix(in srgb, var(--sp-accent) 12%, var(--sp-surface-soft));
 }
-.sp-story-stack {
-  display: grid;
-  gap: 32px;
-  min-width: min(680px, 90vw);
-  padding: 32px;
-}
-.sp-story-stack section {
-  display: grid;
-  gap: 12px;
-}
-.sp-story-stack h2 {
-  margin: 0;
-  font-size: 13px;
-}
-.sp-story-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-}
-
 .sp-diff {
   --sp-diff-breaking: #d24859;
   --sp-diff-warning: #c98722;

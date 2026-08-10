@@ -5,15 +5,16 @@ import {
   MethodBadge,
   RequiredMark,
 } from './DesignSystem';
+import styles from './DesignSystem.stories.module.css';
 
 const meta = {
   title: 'Design system/Primitives',
   parameters: { layout: 'centered' },
   render: () => (
-    <div className="sp-story-stack">
+    <div className={styles.stack}>
       <section>
         <h2>Method badges</h2>
-        <div className="sp-story-row">
+        <div className={styles.row}>
           {['get', 'post', 'put', 'patch', 'delete'].map((method) => (
             <MethodBadge method={method} key={method} />
           ))}
@@ -22,7 +23,7 @@ const meta = {
       </section>
       <section>
         <h2>Compact method badges</h2>
-        <div className="sp-story-row">
+        <div className={styles.row}>
           {['get', 'post', 'put', 'patch', 'delete'].map((method) => (
             <MethodBadge method={method} compact key={method} />
           ))}
@@ -35,7 +36,7 @@ const meta = {
       </section>
       <section>
         <h2>Indicators</h2>
-        <div className="sp-story-row">
+        <div className={styles.row}>
           <RequiredMark />
           <span aria-expanded="true">
             <DisclosureChevron />
