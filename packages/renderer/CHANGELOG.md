@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.4.3
+
+### Patch Changes
+
+- [`3c7381d`](https://github.com/mcclowes/speccy/commit/3c7381d22bb52091afc48240af23380f375eed82) Thanks [@mcclowes](https://github.com/mcclowes)! - Keep inherited themes controlled by the host, hide Speccy's duplicate theme control, improve inherited color contrast, and enlarge desktop sidebar labels.
+
+- Updated dependencies []:
+  - speccy-core@0.4.3
+
 ## 0.4.2
 
 ### Patch Changes
