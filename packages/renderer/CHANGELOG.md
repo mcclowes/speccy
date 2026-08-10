@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.4.4
+
+### Patch Changes
+
+- [`77b0921`](https://github.com/mcclowes/speccy/commit/77b09210ccdfd4fbb4146f93558970228ed2ef60) Thanks [@mcclowes](https://github.com/mcclowes)! - Improve style isolation, responsive layouts, code samples, diagnostics, schema exploration, and disclosure animations across rendered API references.
+
+- Updated dependencies []:
+  - speccy-core@0.4.4
+
 ## 0.4.3
 
 ### Patch Changes
