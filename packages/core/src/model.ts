@@ -195,14 +195,19 @@ function expandDiscriminatorMappings(node: unknown): unknown {
 }
 
 /** Removes objects marked as internal before they can contribute to the public reference model. */
-function removeInternalNodes(node: unknown): unknown {
+function removeInternalNodes(
+  node: unknown,
+  preserveSchemaRoot = false,
+): unknown {
   if (Array.isArray(node)) {
-    return node.map(removeInternalNodes).filter((item) => item !== undefined);
+    return node
+      .map((item) => removeInternalNodes(item))
+      .filter((item) => item !== undefined);
   }
   if (!node || typeof node !== 'object') return node;
 
   const source = node as Record<string, unknown>;
-  if (source['x-internal'] === true) return undefined;
+  if (source['x-internal'] === true && !preserveSchemaRoot) return undefined;
 
   const literalValueKeys = new Set([
     'const',
@@ -218,10 +223,12 @@ function removeInternalNodes(node: unknown): unknown {
         ([key, value]) =>
           [
             key,
-            literalValueKeys.has(key) ||
-            (key.startsWith('x-') && key !== 'x-internal')
-              ? value
-              : removeInternalNodes(value),
+            preserveSchemaRoot && key === 'x-internal'
+              ? undefined
+              : literalValueKeys.has(key) ||
+                  (key.startsWith('x-') && key !== 'x-internal')
+                ? value
+                : removeInternalNodes(value, key === 'schema'),
           ] as const,
       )
       .filter(

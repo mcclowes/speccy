@@ -195,6 +195,24 @@ paths:
                   },
                 },
               },
+              '201': {
+                description: 'Created',
+                content: {
+                  'application/json': {
+                    schema: {
+                      'x-internal': true,
+                      type: 'object',
+                      properties: {
+                        result: { type: 'string' },
+                        debugNotes: {
+                          type: 'string',
+                          'x-internal': true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -248,6 +266,14 @@ paths:
     expect(
       model.document.components?.schemas?.DataIntegritySummaries,
     ).toBeUndefined();
+    expect(
+      model.operations[0]?.operation.responses?.['201']?.content?.[
+        'application/json'
+      ]?.schema,
+    ).toEqual({
+      type: 'object',
+      properties: { result: { type: 'string' } },
+    });
   });
 
   it('preserves x-internal fields inside literal example data', () => {
