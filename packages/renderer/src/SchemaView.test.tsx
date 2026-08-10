@@ -89,6 +89,20 @@ describe('SchemaView composition', () => {
     );
   });
 
+  it('shows the active response value for a root primitive schema', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{ title: 'DataIntegrityDetails', type: 'string' }}
+        exampleValue="The records do not reconcile."
+      />,
+    );
+
+    expect(container.querySelector('.sp-schema-primitive')).toBeInTheDocument();
+    expect(
+      screen.getByText('Example').closest('.sp-schema-example'),
+    ).toHaveTextContent('ExampleThe records do not reconcile.');
+  });
+
   it('does not present allOf members as alternatives', () => {
     render(
       <SchemaView

@@ -289,7 +289,7 @@ export function SchemaView({
           Default: <code>{JSON.stringify(schema.default)}</code>
         </p>
       )}
-      {name &&
+      {(name || depth === 0) &&
         exampleValue !== undefined &&
         (exampleValue === null || typeof exampleValue !== 'object') && (
           <p className="sp-schema-meta sp-schema-example">
@@ -400,6 +400,8 @@ export function SchemaView({
     enumValues ||
     constraints.length > 0 ||
     schema.default !== undefined ||
+    (exampleValue !== undefined &&
+      (exampleValue === null || typeof exampleValue !== 'object')) ||
     (showExample && schema.example !== undefined),
   );
 
