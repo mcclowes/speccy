@@ -15,6 +15,22 @@ const request = {
 };
 
 describe('RequestSample', () => {
+  it('starts collapsed and expands from its summary', () => {
+    const { container } = render(
+      <RequestSample request={request} storageKey="test-language" />,
+    );
+    const sample =
+      container.querySelector<HTMLDetailsElement>('.sp-request-sample')!;
+
+    expect(sample.open).toBe(false);
+    expect(screen.queryByText(/curl --request POST/)).not.toBeVisible();
+
+    fireEvent.click(sample.querySelector(':scope > summary')!);
+
+    expect(sample.open).toBe(true);
+    expect(screen.getByText(/curl --request POST/)).toBeVisible();
+  });
+
   it('generates samples for every offered language', () => {
     expect(generateRequestSample('curl', request)).toContain(
       'curl --request POST',

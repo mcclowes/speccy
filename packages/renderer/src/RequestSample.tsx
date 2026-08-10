@@ -241,11 +241,16 @@ export function RequestSample({
     </details>
   );
   return (
-    <CodeBlock
-      className={className}
-      title={title}
-      value={generateRequestSample(selected.value, request)}
-      copyValue={generateRequestSample(selected.value, copyRequest)}
-    />
+    <details className={`sp-request-sample ${className}`.trim()}>
+      <summary>
+        <span>{selected.label}</span>
+        <DisclosureChevron />
+      </summary>
+      <CodeBlock
+        title={title}
+        value={generateRequestSample(selected.value, request)}
+        copyValue={generateRequestSample(selected.value, copyRequest)}
+      />
+    </details>
   );
 }
