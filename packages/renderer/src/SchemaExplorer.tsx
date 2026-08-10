@@ -12,16 +12,18 @@ import type { SchemaObject } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
 import { Markdown } from './Markdown';
 
-function schemaLabel(schema?: SchemaObject): string {
+function schemaTypeLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  const type =
-    schema.type === 'array'
-      ? `array<${schemaLabel(schema.items)}>`
-      : schema.enum
-        ? 'enum'
-        : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
-  return [schema.title, type].filter(Boolean).join(' · ');
+  return schema.type === 'array'
+    ? `array<${schemaTypeLabel(schema.items)}>`
+    : schema.enum
+      ? 'enum'
+      : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+}
+
+function schemaLabel(schema?: SchemaObject): string {
+  return [schema?.title, schemaTypeLabel(schema)].filter(Boolean).join(' · ');
 }
 
 function ExplorerExample({ value }: { value: unknown }) {
@@ -208,9 +210,15 @@ function ExplorerFieldDetails({
         {schema.description}
       </Markdown>
       <dl className="sp-schema-explorer-facts">
+        {schema.title && (
+          <div>
+            <dt>Schema</dt>
+            <dd className="sp-schema-explorer-schema-name">{schema.title}</dd>
+          </div>
+        )}
         <div>
           <dt>Type</dt>
-          <dd>{schemaLabel(schema)}</dd>
+          <dd>{schemaTypeLabel(schema)}</dd>
         </div>
         <div>
           <dt>Required</dt>

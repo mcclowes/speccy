@@ -2897,6 +2897,10 @@ related:
   font-family: 'DM Mono', monospace;
   font-size: 9px;
 }
+.sp-schema-explorer-facts .sp-schema-explorer-schema-name {
+  color: var(--sp-accent);
+  font-weight: 600;
+}
 .sp-schema-explorer-detail-section {
   margin-top: 18px;
 }

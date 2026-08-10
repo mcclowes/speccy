@@ -244,6 +244,28 @@ describe('SchemaView composition', () => {
     expect(screen.getByRole('button', { name: 'id string' })).toBeVisible();
   });
 
+  it('identifies a named field schema separately from its type', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            location: {
+              title: 'Location',
+              type: 'object',
+              properties: { city: { type: 'string' } },
+            },
+          },
+        }}
+      />,
+    );
+
+    const facts = container.querySelector('.sp-schema-explorer-facts');
+    expect(facts).toHaveTextContent('SchemaLocation');
+    expect(facts).toHaveTextContent('Typeobject');
+    expect(facts).not.toHaveTextContent('TypeLocation · object');
+  });
+
   it('labels deprecated fields in the explorer row', () => {
     render(
       <SchemaView
