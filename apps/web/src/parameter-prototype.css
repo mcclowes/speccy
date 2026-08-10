@@ -50,7 +50,7 @@
 .sp-optional-parameter-summary[aria-expanded='true'] .sp-chevron {
   transform: rotate(225deg);
 }
-.sp-optional-parameter-docs > .sp-endpoint-parameters {
+.sp-optional-parameter-docs > .sp-schema-explorer .sp-schema-explorer-shell {
   border: 0;
   border-top: 1px solid var(--sp-line);
   border-radius: 0;
