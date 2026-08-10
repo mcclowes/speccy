@@ -22,6 +22,16 @@ const stories = [
     viewport: { width: 768, height: 1024 },
     openNavigation: true,
   },
+  {
+    name: 'long-endpoint-path',
+    id: 'renderer-speccy--long-endpoint-path',
+    viewport: { width: 1440, height: 900 },
+  },
+  {
+    name: 'long-endpoint-path-mobile',
+    id: 'renderer-speccy--long-endpoint-path',
+    viewport: { width: 390, height: 844 },
+  },
 ] as const;
 
 for (const story of stories) {
@@ -30,6 +40,11 @@ for (const story of stories) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
     await expect(page.locator('.speccy.sp-with-sidebar')).toBeVisible();
+    if (story.name.startsWith('long-endpoint-path')) {
+      await expect(page.locator('.sp-endpoint-address')).toContainText(
+        'transactionCategoryId',
+      );
+    }
     if ('openNavigation' in story && story.openNavigation) {
       await page.getByRole('button', { name: 'Open navigation' }).click();
       await expect(

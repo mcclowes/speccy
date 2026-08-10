@@ -1403,6 +1403,45 @@ describe('Speccy navigation', () => {
     expect(screen.getByText('{companyId}')).toHaveClass('sp-path-parameter');
   });
 
+  it('shows the complete endpoint path and lets users copy it', async () => {
+    const writeText = vi.fn();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+    const path =
+      '/companies/{companyId}/connections/{connectionId}/data/banking-transactionCategories/{transactionCategoryId}';
+    window.history.replaceState({}, '', '/api/get-transaction-category');
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            [path]: {
+              get: {
+                summary: 'Get transaction category',
+                operationId: 'get-transaction-category',
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const address = container.querySelector('.sp-endpoint-address');
+    expect(address).toHaveTextContent(path);
+    expect(address?.querySelectorAll('wbr')).toHaveLength(7);
+
+    fireEvent.click(
+      within(address as HTMLElement).getByRole('button', {
+        name: 'Copy endpoint path',
+      }),
+    );
+    expect(writeText).toHaveBeenCalledWith(path);
+  });
+
   it('uses an asterisk for required parameters and response fields', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const { container } = render(

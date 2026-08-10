@@ -7,7 +7,7 @@
  * ---
  */
 
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { WebhookIcon } from './WebhookIcon';
 
 export const HTTP_METHOD_LABELS: Record<string, string> = {
@@ -73,20 +73,38 @@ export function MethodBadge({
 export function ApiPath({
   value,
   className = '',
+  wrap = false,
 }: {
   value: string;
   className?: string;
+  wrap?: boolean;
 }) {
   const parts = value.split(/(\{[^{}]+\})/g);
   return (
-    <code className={`sp-api-path ${className}`.trim()}>
+    <code
+      className={`sp-api-path ${className}`.trim()}
+      title={wrap ? value : undefined}
+    >
       {parts.map((part, index) =>
         part.startsWith('{') && part.endsWith('}') ? (
           <span className="sp-path-parameter" key={`${part}-${index}`}>
             {part}
           </span>
         ) : (
-          part
+          <Fragment key={`${part}-${index}`}>
+            {wrap
+              ? part.split('/').map((segment, segmentIndex) => (
+                  <Fragment key={`${segment}-${segmentIndex}`}>
+                    {segmentIndex > 0 && (
+                      <>
+                        /<wbr />
+                      </>
+                    )}
+                    {segment}
+                  </Fragment>
+                ))
+              : part}
+          </Fragment>
         ),
       )}
     </code>

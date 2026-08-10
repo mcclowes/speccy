@@ -213,7 +213,8 @@ function EndpointPage({
           <h1>{operationTitle(item)}</h1>
           <div className="sp-endpoint-address">
             <OperationBadge item={item} />
-            <ApiPath value={item.path} />
+            <ApiPath value={item.path} wrap />
+            <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
           <Markdown>{item.operation.description}</Markdown>
           {showInlineHints && (

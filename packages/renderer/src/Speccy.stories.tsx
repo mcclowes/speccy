@@ -178,3 +178,32 @@ export const EndpointDark: Story = {
     route: { page: 'operation', operationId: 'create-payment-link' },
   },
 };
+
+export const LongEndpointPath: Story = {
+  args: {
+    spec: {
+      ...exampleSpec,
+      tags: [{ name: 'Bank statements' }],
+      paths: {
+        '/companies/{companyId}/connections/{connectionId}/data/banking-transactionCategories/{transactionCategoryId}':
+          {
+            get: {
+              tags: ['Bank statements'],
+              summary: 'Get transaction category',
+              operationId: 'get-transaction-category',
+              description:
+                'Returns a single transaction category for the supplied identifier.',
+              responses: {
+                '200': { description: 'The transaction category.' },
+              },
+            },
+          },
+      },
+    },
+    theme: 'light',
+    route: {
+      page: 'operation',
+      operationId: 'get-transaction-category',
+    },
+  },
+};

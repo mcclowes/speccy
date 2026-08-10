@@ -1632,14 +1632,19 @@ related:
   background: var(--sp-surface);
 }
 .sp-endpoint-address code {
-  overflow: hidden;
+  min-width: 0;
+  overflow: visible;
   font-size: 12px;
   font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+  white-space: normal;
+}
+.sp-endpoint-address > :is(.sp-method-badge, .sp-copy) {
+  flex: none;
 }
 .sp-path-parameter {
   color: var(--sp-accent);
+  white-space: nowrap;
 }
 .sp-endpoint-layout {
   display: grid;

@@ -20,6 +20,19 @@ describe('design system primitives', () => {
     expect(screen.getByText('{userId}')).toHaveClass('sp-path-parameter');
   });
 
+  it('adds wrap opportunities after path separators without splitting parameters', () => {
+    const { container } = render(
+      <ApiPath
+        value="/companies/{companyId}/connections/{connectionId}"
+        wrap
+      />,
+    );
+
+    expect(container.querySelectorAll('wbr')).toHaveLength(4);
+    expect(screen.getByText('{companyId}')).toHaveClass('sp-path-parameter');
+    expect(screen.getByText('{connectionId}')).toHaveClass('sp-path-parameter');
+  });
+
   it('gives structural marks accessible semantics', () => {
     const { container } = render(
       <>
