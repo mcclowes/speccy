@@ -1805,6 +1805,9 @@ related:
   font: inherit;
   cursor: pointer;
 }
+.sp-response-example .sp-example-select {
+  background: var(--sp-bg);
+}
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section {
   margin-top: 0;
   padding: 14px 22px;
