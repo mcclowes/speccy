@@ -223,6 +223,11 @@ function EndpointPage({
   ];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
+  const scopedServer =
+    item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
+  const effectiveServer = scopedServer?.url
+    ? expandServerUrl(scopedServer.url, scopedServer.variables)
+    : server;
   return (
     <article
       id={item.id}
@@ -258,7 +263,7 @@ function EndpointPage({
         {!isWebhook && !compactLayout && (
           <RequestRail
             item={item}
-            server={server}
+            server={effectiveServer}
             security={document.security}
             securitySchemes={
               document.components?.securitySchemes ??
@@ -304,12 +309,15 @@ function EndpointPage({
         <EndpointResponses responses={item.operation.responses} />
       )}
       {item.operation.callbacks && (
-        <CallbackList callbacks={item.operation.callbacks} server={server} />
+        <CallbackList
+          callbacks={item.operation.callbacks}
+          server={effectiveServer}
+        />
       )}
       {!isWebhook && compactLayout && (
         <RequestRail
           item={item}
-          server={server}
+          server={effectiveServer}
           security={document.security}
           securitySchemes={
             document.components?.securitySchemes ?? document.securityDefinitions
@@ -336,6 +344,11 @@ function OperationCard({
     ...(item.pathItem.parameters ?? []),
     ...(item.operation.parameters ?? []),
   ];
+  const scopedServer =
+    item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
+  const effectiveServer = scopedServer?.url
+    ? expandServerUrl(scopedServer.url, scopedServer.variables)
+    : server;
   return (
     <article id={item.id} className={`sp-operation sp-method-${item.method}`}>
       <button
@@ -378,11 +391,11 @@ function OperationCard({
             {item.operation.callbacks && (
               <CallbackList
                 callbacks={item.operation.callbacks}
-                server={server}
+                server={effectiveServer}
               />
             )}
           </div>
-          <CodeSample item={item} server={server} />
+          <CodeSample item={item} server={effectiveServer} />
         </div>
       )}
     </article>
@@ -877,7 +890,10 @@ export function Speccy({
     );
 
   const model = result.model;
-  const server = model.document.servers?.[0]?.url ?? '';
+  const rootServer = model.document.servers?.[0];
+  const server = rootServer?.url
+    ? expandServerUrl(rootServer.url, rootServer.variables)
+    : '';
   const groupedTagNames = new Set(
     model.tagGroups.flatMap((group) => group.tags.map((tag) => tag.name)),
   );

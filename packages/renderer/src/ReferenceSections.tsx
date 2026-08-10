@@ -28,6 +28,7 @@ export const REFERENCE_GROUPS = [
   ['examples', 'Examples'],
   ['links', 'Links'],
   ['callbacks', 'Callbacks'],
+  ['pathItems', 'Path items'],
   ['securitySchemes', 'Security schemes'],
 ] as const;
 
@@ -409,6 +410,31 @@ export function DocumentReference({
                   </div>
                 ),
               )}
+          </>
+        ))}
+      {activeKey === 'pathItems' &&
+        renderCards('pathItems', components.pathItems, (_name, pathItem) => (
+          <>
+            <Markdown>{pathItem.description}</Markdown>
+            {pathItem.summary && <p>{pathItem.summary}</p>}
+            {entries(pathItem)
+              .filter(([method]) =>
+                [
+                  'get',
+                  'put',
+                  'post',
+                  'delete',
+                  'options',
+                  'head',
+                  'patch',
+                  'trace',
+                ].includes(method),
+              )
+              .map(([method, operation]) => (
+                <div className="sp-callback-method" key={method}>
+                  {method.toUpperCase()} {operationLabel(operation)}
+                </div>
+              ))}
           </>
         ))}
       {activeKey === 'securitySchemes' &&

@@ -185,6 +185,12 @@ describe('OpenAPI 3.1.1 conformance', () => {
             '/items/{coordinates}': {
               get: {
                 operationId: 'inspect',
+                servers: [
+                  {
+                    url: 'https://{env}.example.com',
+                    variables: { env: { default: 'operations' } },
+                  },
+                ],
                 parameters: [
                   {
                     name: 'coordinates',
@@ -226,10 +232,34 @@ describe('OpenAPI 3.1.1 conformance', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://api.example.com/items/.10,20?filter%5Brole%5D=admin',
+      'https://operations.example.com/items/.10,20?filter%5Brole%5D=admin',
       expect.objectContaining({
         headers: expect.objectContaining({ Cookie: 'session=abc' }),
       }),
     );
+  });
+
+  it('renders reusable path items', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'pathItems' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Path item API', version: '1.0.0' },
+          components: {
+            pathItems: {
+              Pets: {
+                summary: 'Shared pet operations',
+                get: { summary: 'List pets', operationId: 'listPets' },
+              },
+            },
+          },
+          paths: { '/pets': { $ref: '#/components/pathItems/Pets' } },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Shared pet operations')).toBeInTheDocument();
+    expect(screen.getByText('GET List pets')).toBeInTheDocument();
   });
 });

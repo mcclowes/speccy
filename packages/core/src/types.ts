@@ -58,6 +58,7 @@ export interface OpenAPIDocument {
     examples?: Record<string, ExampleObject>;
     links?: Record<string, LinkObject>;
     callbacks?: Record<string, CallbackObject>;
+    pathItems?: Record<string, PathItem>;
     securitySchemes?: Record<string, SecurityScheme>;
   };
   [key: string]: unknown;
@@ -81,9 +82,11 @@ export interface ServerObject extends SpecificationExtensions {
 }
 
 export interface PathItem extends Partial<Record<HttpMethod, Operation>> {
+  $ref?: string;
   parameters?: Parameter[];
   summary?: string;
   description?: string;
+  servers?: ServerObject[];
   [key: string]: unknown;
 }
 
@@ -94,6 +97,8 @@ export interface Operation extends SpecificationExtensions {
   description?: string;
   operationId?: string;
   deprecated?: boolean;
+  externalDocs?: ExternalDocumentationObject;
+  servers?: ServerObject[];
   parameters?: Parameter[];
   requestBody?: RequestBody;
   responses?: Record<string, ResponseObject>;

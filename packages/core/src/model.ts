@@ -131,32 +131,48 @@ export function resolveRefs(
 
     const ref = (node as { $ref?: unknown }).$ref;
     if (typeof ref === 'string') {
-      if (activeRefs.has(ref)) return { $ref: ref };
-      if (resolved.has(ref)) return resolved.get(ref);
-      const target = lookup(ref);
-      if (target === undefined) return node;
-      let resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
-      const resolvedObject = resolvedTarget as Record<string, unknown> | null;
-      if (
-        options.preserveReferencedInternalNodes &&
-        resolvedObject &&
-        typeof resolvedTarget === 'object' &&
-        !Array.isArray(resolvedTarget) &&
-        resolvedObject['x-internal'] === true
-      ) {
-        const { ['x-internal']: _internal, ...publicTarget } = resolvedObject;
-        resolvedTarget = publicTarget;
+      const siblings = Object.fromEntries(
+        Object.entries(node).filter(([key]) => key !== '$ref'),
+      );
+      if (activeRefs.has(ref)) return { $ref: ref, ...siblings };
+      let cachedTarget = resolved.get(ref);
+      if (cachedTarget === undefined) {
+        const target = lookup(ref);
+        if (target === undefined) return node;
+        let resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
+        const resolvedObject = resolvedTarget as Record<string, unknown> | null;
+        if (
+          options.preserveReferencedInternalNodes &&
+          resolvedObject &&
+          typeof resolvedTarget === 'object' &&
+          !Array.isArray(resolvedTarget) &&
+          resolvedObject['x-internal'] === true
+        ) {
+          const { ['x-internal']: _internal, ...publicTarget } = resolvedObject;
+          resolvedTarget = publicTarget;
+        }
+        const inferredTitle = schemaTitle(ref);
+        const value =
+          inferredTitle &&
+          resolvedTarget &&
+          typeof resolvedTarget === 'object' &&
+          !Array.isArray(resolvedTarget)
+            ? { title: inferredTitle, ...resolvedTarget }
+            : resolvedTarget;
+        resolved.set(ref, value);
+        cachedTarget = value;
       }
-      const inferredTitle = schemaTitle(ref);
-      const value =
-        inferredTitle &&
-        resolvedTarget &&
-        typeof resolvedTarget === 'object' &&
-        !Array.isArray(resolvedTarget)
-          ? { title: inferredTitle, ...resolvedTarget }
-          : resolvedTarget;
-      resolved.set(ref, value);
-      return value;
+      if (
+        cachedTarget &&
+        typeof cachedTarget === 'object' &&
+        !Array.isArray(cachedTarget)
+      ) {
+        return {
+          ...cachedTarget,
+          ...(resolve(siblings, activeRefs) as Record<string, unknown>),
+        };
+      }
+      return cachedTarget;
     }
 
     const result: Record<string, unknown> = {};

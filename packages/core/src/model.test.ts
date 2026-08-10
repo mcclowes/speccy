@@ -15,6 +15,37 @@ describe('parseSpec', () => {
   });
 });
 
+describe('OpenAPI 3.1 references', () => {
+  it('resolves reusable path items and preserves reference siblings', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.1',
+      info: { title: 'Referenced paths', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          $ref: '#/components/pathItems/Pets',
+          summary: 'Public pets',
+        },
+      },
+      components: {
+        pathItems: {
+          Pets: {
+            summary: 'Shared pets',
+            get: {
+              operationId: 'listPets',
+              responses: { '200': { description: 'Pets' } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(model.operations.map((operation) => operation.id)).toEqual([
+      'listpets',
+    ]);
+    expect(model.operations[0]?.pathItem.summary).toBe('Public pets');
+  });
+});
+
 describe('createReferenceModel', () => {
   it('keeps operations in their YAML declaration order', () => {
     const document = parseSpec(`
