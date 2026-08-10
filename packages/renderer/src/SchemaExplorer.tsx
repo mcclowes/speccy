@@ -109,10 +109,13 @@ function ExplorerTree({
     const open = expandedPaths.has(path);
     const selected = path === selectedPath;
     return (
-      <div className="sp-schema-explorer-branch" key={path}>
+      <div
+        className={`sp-schema-explorer-branch${depth > 0 ? ' is-nested' : ''}`}
+        key={path}
+        style={{ '--sp-schema-depth': depth } as React.CSSProperties}
+      >
         <div
           className={`sp-schema-explorer-row${selected ? ' is-selected' : ''}${field.schema.deprecated ? ' is-deprecated' : ''}`}
-          style={{ '--sp-schema-depth': depth } as React.CSSProperties}
         >
           {children.length > 0 ? (
             <button
@@ -135,7 +138,11 @@ function ExplorerTree({
           >
             <span className="sp-schema-explorer-name">
               <code>{field.name}</code>
-              {field.required && <span className="sp-required">required</span>}
+              {field.required && (
+                <span className="sp-required" title="Required">
+                  *
+                </span>
+              )}
             </span>
             <span className="sp-schema-explorer-type">
               {schemaLabel(field.schema)}

@@ -1503,7 +1503,7 @@ describe('Speccy navigation', () => {
       [...container.querySelectorAll('.sp-required')].map(
         (indicator) => indicator.textContent,
       ),
-    ).toEqual(['*', 'required']);
+    ).toEqual(['*', '*']);
   });
 
   it('switches between responses in the full-width response section', () => {
