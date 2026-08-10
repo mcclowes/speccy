@@ -211,6 +211,12 @@ describe('OpenAPI 3.1.1 conformance', () => {
                     in: 'cookie',
                     schema: { type: 'string' },
                   },
+                  {
+                    name: 'empty',
+                    in: 'query',
+                    allowEmptyValue: true,
+                    schema: { type: 'string' },
+                  },
                 ],
                 responses: { '204': { description: 'No content' } },
               },
@@ -233,7 +239,7 @@ describe('OpenAPI 3.1.1 conformance', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://operations.example.com/items/.10,20?filter%5Brole%5D=admin',
+      'https://operations.example.com/items/.10,20?filter%5Brole%5D=admin&empty=',
       expect.objectContaining({
         headers: expect.objectContaining({ Cookie: 'session=abc' }),
       }),

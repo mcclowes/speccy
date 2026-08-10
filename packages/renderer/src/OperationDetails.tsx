@@ -1153,7 +1153,11 @@ export function RequestRail({
 
   for (const parameter of requestParameters) {
     const value = values[`${parameter.in}-${parameter.name}`] ?? '';
-    if (!parameter.name || !value) continue;
+    if (
+      !parameter.name ||
+      (!value && !(parameter.in === 'query' && parameter.allowEmptyValue))
+    )
+      continue;
     let parsedValue: unknown = value;
     const schema = objectSchema(parameter.schema);
     if (

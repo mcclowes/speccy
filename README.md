@@ -22,7 +22,9 @@ See the [public package decision](docs/decisions/001-public-package-surface.md) 
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
-The renderer accepts OpenAPI 3.x and Swagger 2 documents in YAML or JSON. It covers info, all servers and media types, tags, operations, parameters, request and response bodies, webhooks, callbacks, security requirements and schemes, headers, links, examples, reusable component catalogues, nested schemas, composition, enums, references, deprecation, search, cURL samples, dark mode, responsive layouts, and print styles. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
+The renderer supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
+
+Speccy also accepts other OpenAPI 3.x descriptions and Swagger 2 documents. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
 
 ## Run the web studio
 

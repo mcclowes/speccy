@@ -209,9 +209,10 @@ export const LIBRARY_V1 = library('1.4.0', () => undefined);
 export const LIBRARY_V2 = library('2.0.0', (document) => {
   // Breaking: the delete operation is gone, the loan library becomes mandatory, and reads now need a key.
   delete document.paths!['/books/{bookId}']!.delete;
-  document.paths!['/loans']!.post!.requestBody!.content![
+  const loanRequest = document.paths!['/loans']!.post!.requestBody!.content![
     'application/json'
-  ]!.schema!.required = ['bookId', 'memberId', 'libraryId'];
+  ]!.schema as SchemaObject;
+  loanRequest.required = ['bookId', 'memberId', 'libraryId'];
   document.paths!['/loans']!.get!.security = [{ apiKey: [] }];
 
   // Warning: a newly deprecated operation, and a loan status clients have never handled.
