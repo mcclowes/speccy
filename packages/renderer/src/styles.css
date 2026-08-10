@@ -3318,7 +3318,7 @@ related:
 .sp-code-numbered .sp-code-line {
   position: relative;
   display: block;
-  padding-left: 3.1em;
+  padding-left: 4em;
 }
 .sp-code-numbered .sp-code-line::before {
   content: counter(sp-line);
