@@ -1576,9 +1576,18 @@ related:
 .sp-endpoint {
   margin-top: 38px;
 }
-.sp-endpoint-header {
-  max-width: 820px;
+.sp-endpoint-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr);
+  gap: clamp(36px, 5vw, 76px);
+  align-items: start;
   margin-bottom: 54px;
+}
+.sp-endpoint-hero.is-webhook {
+  grid-template-columns: minmax(0, 820px);
+}
+.sp-endpoint-header {
+  min-width: 0;
 }
 .sp-endpoint-header .sp-tag-kicker {
   margin-bottom: 10px;
@@ -3366,6 +3375,9 @@ related:
   .sp-endpoint-layout {
     grid-template-columns: 1fr;
   }
+  .sp-endpoint-hero {
+    grid-template-columns: 1fr;
+  }
   .sp-endpoint-response-grid {
     grid-template-columns: 1fr;
   }
@@ -3444,6 +3456,9 @@ related:
     grid-template-columns: 1fr;
   }
   .sp-endpoint-layout {
+    grid-template-columns: 1fr;
+  }
+  .sp-endpoint-hero {
     grid-template-columns: 1fr;
   }
   .sp-endpoint-response-grid {

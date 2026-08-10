@@ -198,32 +198,47 @@ function EndpointPage({
   const isWebhook = item.source === 'webhook';
   return (
     <article id={item.id} className={`sp-endpoint sp-method-${item.method}`}>
-      <header className="sp-endpoint-header">
-        <a
-          className="sp-tag-kicker sp-tag-link"
-          href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
-          onClick={(event) => {
-            event.preventDefault();
-            onNavigateTag(tag);
-          }}
-        >
-          {item.tag}
-        </a>
-        <h1>{operationTitle(item)}</h1>
-        <div className="sp-endpoint-address">
-          <OperationBadge item={item} />
-          <ApiPath value={item.path} />
-        </div>
-        <Markdown>{item.operation.description}</Markdown>
-        {showInlineHints && (
-          <InlineDiagnostics
-            diagnostics={diagnostics.filter(
-              (diagnostic) => diagnostic.operationId === item.id,
-            )}
-            onHide={onHideInlineHints}
+      <div className={`sp-endpoint-hero ${isWebhook ? 'is-webhook' : ''}`}>
+        <header className="sp-endpoint-header">
+          <a
+            className="sp-tag-kicker sp-tag-link"
+            href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigateTag(tag);
+            }}
+          >
+            {item.tag}
+          </a>
+          <h1>{operationTitle(item)}</h1>
+          <div className="sp-endpoint-address">
+            <OperationBadge item={item} />
+            <ApiPath value={item.path} />
+          </div>
+          <Markdown>{item.operation.description}</Markdown>
+          {showInlineHints && (
+            <InlineDiagnostics
+              diagnostics={diagnostics.filter(
+                (diagnostic) => diagnostic.operationId === item.id,
+              )}
+              onHide={onHideInlineHints}
+            />
+          )}
+        </header>
+        {!isWebhook && (
+          <RequestRail
+            item={item}
+            server={server}
+            security={document.security}
+            securitySchemes={
+              document.components?.securitySchemes ??
+              document.securityDefinitions
+            }
+            storageScope={storageScope}
+            parameterPrototype={parameterPrototype}
           />
         )}
-      </header>
+      </div>
       {!isWebhook && (
         <div className="sp-request-heading">
           <h2>Request</h2>
@@ -272,19 +287,6 @@ function EndpointPage({
             </section>
           )}
         </div>
-        {!isWebhook && (
-          <RequestRail
-            item={item}
-            server={server}
-            security={document.security}
-            securitySchemes={
-              document.components?.securitySchemes ??
-              document.securityDefinitions
-            }
-            storageScope={storageScope}
-            parameterPrototype={parameterPrototype}
-          />
-        )}
       </div>
       {item.operation.responses && (
         <EndpointResponses responses={item.operation.responses} />

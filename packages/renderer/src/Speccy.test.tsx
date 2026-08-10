@@ -829,6 +829,14 @@ describe('Speccy navigation', () => {
     );
 
     const authorization = screen.getByLabelText('api_key');
+    const requestBuilder = screen.getByRole('complementary', {
+      name: 'Request builder',
+    });
+    expect(requestBuilder.parentElement).toHaveClass('sp-endpoint-hero');
+    expect(requestBuilder.parentElement).toContainElement(
+      screen.getByRole('heading', { level: 1, name: 'Get companies' }),
+    );
+    expect(requestBuilder.closest('.sp-endpoint-layout')).toBeNull();
     expect(
       screen.getByRole('heading', { level: 3, name: 'Authorization API key' }),
     ).toBeInTheDocument();
