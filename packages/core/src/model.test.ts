@@ -178,6 +178,78 @@ paths:
     expect(model.document.components?.schemas?.AdminPet).toBeUndefined();
   });
 
+  it('resolves internal schemas referenced by public responses without listing them', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/integrity': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/DataIntegritySummaries',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          DataIntegritySummaries: {
+            title: 'Data integrity summaries',
+            'x-internal': true,
+            type: 'object',
+            properties: {
+              debugNotes: { type: 'string', 'x-internal': true },
+              summaries: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/DataIntegritySummary',
+                },
+              },
+            },
+          },
+          DataIntegritySummary: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', description: 'Matched data type.' },
+            },
+          },
+        },
+      },
+    });
+
+    const schema =
+      model.operations[0]?.operation.responses?.['200']?.content?.[
+        'application/json'
+      ]?.schema;
+    expect(schema).toMatchObject({
+      title: 'Data integrity summaries',
+      type: 'object',
+      properties: {
+        summaries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', description: 'Matched data type.' },
+            },
+          },
+        },
+      },
+    });
+    expect(schema?.properties?.debugNotes).toBeUndefined();
+    expect(
+      model.document.components?.schemas?.DataIntegritySummaries,
+    ).toBeUndefined();
+  });
+
   it('preserves x-internal fields inside literal example data', () => {
     const model = createReferenceModel({
       openapi: '3.1.0',

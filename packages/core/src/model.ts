@@ -86,7 +86,10 @@ export function parseSpec(input: OpenAPIDocument | string): OpenAPIDocument {
  * bare `{ $ref }` object. Refs that form a cycle are left unresolved at the point of
  * recursion to avoid infinite loops; everything else is inlined.
  */
-export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
+export function resolveRefs(
+  document: OpenAPIDocument,
+  options: { preserveReferencedInternalNodes?: boolean } = {},
+): OpenAPIDocument {
   const resolved = new Map<string, unknown>();
 
   function schemaTitle(ref: string): string | undefined {
@@ -121,7 +124,18 @@ export function resolveRefs(document: OpenAPIDocument): OpenAPIDocument {
       if (resolved.has(ref)) return resolved.get(ref);
       const target = lookup(ref);
       if (target === undefined) return node;
-      const resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
+      let resolvedTarget = resolve(target, new Set(activeRefs).add(ref));
+      const resolvedObject = resolvedTarget as Record<string, unknown> | null;
+      if (
+        options.preserveReferencedInternalNodes &&
+        resolvedObject &&
+        typeof resolvedTarget === 'object' &&
+        !Array.isArray(resolvedTarget) &&
+        resolvedObject['x-internal'] === true
+      ) {
+        const { ['x-internal']: _internal, ...publicTarget } = resolvedObject;
+        resolvedTarget = publicTarget;
+      }
       const inferredTitle = schemaTitle(ref);
       const value =
         inferredTitle &&
@@ -362,10 +376,16 @@ export function createReferenceModel(
     );
   }
 
-  const publicDocument = removeInternalNodes(rawDocument) as OpenAPIDocument;
-  const document = normalizeDocument(
-    resolveRefs(expandDiscriminatorMappings(publicDocument) as OpenAPIDocument),
-  );
+  const expandedDocument = expandDiscriminatorMappings(
+    rawDocument,
+  ) as OpenAPIDocument;
+  const resolvedDocument = resolveRefs(expandedDocument, {
+    preserveReferencedInternalNodes: true,
+  });
+  const publicDocument = removeInternalNodes(
+    resolvedDocument,
+  ) as OpenAPIDocument;
+  const document = normalizeDocument(publicDocument);
 
   const declaredTags = new Map(
     (document.tags ?? [])
