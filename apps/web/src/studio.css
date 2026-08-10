@@ -303,7 +303,6 @@ body {
 .studio-workspace {
   min-height: 0;
   flex: 1;
-  margin-top: 58px;
 }
 .studio-preview {
   min-width: 0;
