@@ -1675,7 +1675,8 @@ related:
   line-height: 1.2;
   letter-spacing: -0.025em;
 }
-.sp-endpoint-section > h2 {
+.sp-endpoint-section > h2,
+.sp-endpoint-section > .sp-response-tabs-row > h2 {
   font-size: 23px;
 }
 .sp-endpoint-section > h3 {
@@ -1695,7 +1696,6 @@ related:
   flex: 0 0 auto;
   margin: 0;
   padding: 13px 0;
-  font-size: 18px;
   letter-spacing: -0.025em;
 }
 .sp-response-tabs {
