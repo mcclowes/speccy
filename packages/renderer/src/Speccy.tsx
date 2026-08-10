@@ -32,6 +32,7 @@ import { CopyButton } from './CodeBlock';
 import {
   ApiPath,
   DisclosureChevron,
+  DisclosureContent,
   httpMethodLabel,
   MethodBadge,
   RequiredMark,
@@ -568,7 +569,7 @@ function NavigationGroup({
         <DisclosureChevron />
       </button>
       {expanded && (
-        <div className="sp-nav-operations" id={operationListId}>
+        <DisclosureContent className="sp-nav-operations" id={operationListId}>
           <a
             className={`sp-nav-operation sp-nav-overview ${activeTag === tag ? 'is-active' : ''}`}
             href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
@@ -596,7 +597,7 @@ function NavigationGroup({
               operationLink(item)
             ),
           )}
-        </div>
+        </DisclosureContent>
       )}
     </div>
   );

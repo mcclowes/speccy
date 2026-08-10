@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import type { SchemaObject } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
+import { DisclosureContent } from './DesignSystem';
 import { Markdown } from './Markdown';
 import styles from './SchemaExplorer.module.css';
 
@@ -206,14 +207,16 @@ function ExplorerTree({
           </button>
         </div>
         {children.length > 0 && open && (
-          <ExplorerTree
-            fields={children}
-            selectedPath={selectedPath}
-            expandedPaths={expandedPaths}
-            onSelect={onSelect}
-            onToggle={onToggle}
-            depth={depth + 1}
-          />
+          <DisclosureContent className={scoped('sp-schema-explorer-children')}>
+            <ExplorerTree
+              fields={children}
+              selectedPath={selectedPath}
+              expandedPaths={expandedPaths}
+              onSelect={onSelect}
+              onToggle={onToggle}
+              depth={depth + 1}
+            />
+          </DisclosureContent>
         )}
       </div>
     );

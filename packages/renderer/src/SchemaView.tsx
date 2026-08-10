@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
+import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer, structuralObjectSchema } from './SchemaExplorer';
@@ -436,7 +437,12 @@ export function SchemaView({
             {namedHeader(true)}
             {detailsOpen && fieldDetails}
           </div>
-          <div hidden={!structureOpen}>{structuralBody}</div>
+          <DisclosureContent
+            hidden={!structureOpen}
+            key={structureOpen ? 'open' : 'closed'}
+          >
+            {structuralBody}
+          </DisclosureContent>
         </div>
       );
     }

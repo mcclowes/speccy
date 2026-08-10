@@ -41,12 +41,20 @@ export function DisclosureChevron({ className = '' }: { className?: string }) {
 export function DisclosureContent({
   children,
   className = '',
+  hidden,
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  hidden?: boolean;
+  id?: string;
 }) {
   return (
-    <div className={`sp-disclosure-content ${className}`.trim()}>
+    <div
+      id={id}
+      className={`sp-disclosure-content ${className}`.trim()}
+      hidden={hidden}
+    >
       {children}
     </div>
   );
