@@ -3147,10 +3147,8 @@ related:
   content: ':';
 }
 .sp-media-type {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   width: fit-content;
+  margin: 0 0 8px auto;
   padding: 3px 7px;
   color: var(--sp-muted);
   border: 1px solid var(--sp-line);
@@ -3163,7 +3161,6 @@ related:
   gap: 12px;
 }
 .sp-media {
-  position: relative;
   min-width: 0;
   padding: 12px;
   border: 1px solid var(--sp-line);
