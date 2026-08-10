@@ -11,6 +11,15 @@ import { useState } from 'react';
 import type { SchemaObject } from 'speccy-core';
 import { CodeBlock } from './CodeBlock';
 import { Markdown } from './Markdown';
+import styles from './SchemaExplorer.module.css';
+
+function scoped(className: string) {
+  return className
+    .split(' ')
+    .flatMap((name) => (name ? [name, styles[name]] : []))
+    .filter(Boolean)
+    .join(' ');
+}
 
 function schemaTypeLabel(schema?: SchemaObject): string {
   if (!schema) return 'any';
@@ -105,7 +114,7 @@ function ExplorerChevron({ open }: { open: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`sp-schema-explorer-chevron${open ? ' is-open' : ''}`}
+      className={scoped(`sp-schema-explorer-chevron${open ? ' is-open' : ''}`)}
     />
   );
 }
@@ -132,17 +141,21 @@ function ExplorerTree({
     const selected = path === selectedPath;
     return (
       <div
-        className={`sp-schema-explorer-branch${depth > 0 ? ' is-nested' : ''}`}
+        className={scoped(
+          `sp-schema-explorer-branch${depth > 0 ? ' is-nested' : ''}`,
+        )}
         key={path}
         style={{ '--sp-schema-depth': depth } as React.CSSProperties}
       >
         <div
-          className={`sp-schema-explorer-row${selected ? ' is-selected' : ''}${field.schema.deprecated ? ' is-deprecated' : ''}`}
+          className={scoped(
+            `sp-schema-explorer-row${selected ? ' is-selected' : ''}${field.schema.deprecated ? ' is-deprecated' : ''}`,
+          )}
         >
           {children.length > 0 ? (
             <button
               type="button"
-              className="sp-schema-explorer-toggle"
+              className={scoped('sp-schema-explorer-toggle')}
               aria-expanded={open}
               aria-label={`${open ? 'Collapse' : 'Expand'} ${field.name}`}
               onClick={() => onToggle(path)}
@@ -150,21 +163,21 @@ function ExplorerTree({
               <ExplorerChevron open={open} />
             </button>
           ) : (
-            <span className="sp-schema-explorer-toggle-spacer" />
+            <span className={scoped('sp-schema-explorer-toggle-spacer')} />
           )}
           <button
             type="button"
-            className="sp-schema-explorer-select"
+            className={scoped('sp-schema-explorer-select')}
             aria-pressed={selected}
             onClick={() => {
               onSelect(field.path);
               if (children.length > 0 && !open) onToggle(path);
             }}
           >
-            <span className="sp-schema-explorer-name">
+            <span className={scoped('sp-schema-explorer-name')}>
               <code>{field.name}</code>
               {field.schema.deprecated && (
-                <span className="sp-schema-explorer-deprecated">
+                <span className={scoped('sp-schema-explorer-deprecated')}>
                   Deprecated
                 </span>
               )}
@@ -174,18 +187,18 @@ function ExplorerTree({
                 </span>
               )}
             </span>
-            <span className="sp-schema-explorer-type">
+            <span className={scoped('sp-schema-explorer-type')}>
               {field.schema.title && (
                 <>
                   <span
-                    className="sp-schema-explorer-model"
+                    className={scoped('sp-schema-explorer-model')}
                     title={field.schema.title}
                   >
                     {field.schema.title} ·&nbsp;
                   </span>
                 </>
               )}
-              <span className="sp-schema-explorer-primitive">
+              <span className={scoped('sp-schema-explorer-primitive')}>
                 {schemaTypeLabel(field.schema)}
                 {field.schema.nullable && <span>?</span>}
               </span>
@@ -246,31 +259,36 @@ function ExplorerFieldDetails({
   const example = field.exampleValue ?? schema.example;
 
   return (
-    <article className="sp-schema-explorer-details" aria-live="polite">
-      <div className="sp-schema-explorer-path">
+    <article
+      className={scoped('sp-schema-explorer-details')}
+      aria-live="polite"
+    >
+      <div className={scoped('sp-schema-explorer-path')}>
         {[rootName, ...field.path].join(' / ')}
       </div>
-      <div className="sp-schema-explorer-detail-heading">
+      <div className={scoped('sp-schema-explorer-detail-heading')}>
         <code>{field.name}</code>
         {field.required && (
-          <span className="sp-schema-explorer-required">Required</span>
+          <span className={scoped('sp-schema-explorer-required')}>
+            Required
+          </span>
         )}
         {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
       </div>
-      <div className="sp-schema-explorer-detail-meta">
+      <div className={scoped('sp-schema-explorer-detail-meta')}>
         {schema.title && <span>Schema {schema.title}</span>}
         <code>{schemaTypeLabel(schema)}</code>
         {schema.nullable && <span>Nullable</span>}
         {schema.readOnly && <span>Read only</span>}
         {schema.writeOnly && <span>Write only</span>}
       </div>
-      <Markdown className="sp-schema-explorer-description">
+      <Markdown className={scoped('sp-schema-explorer-description')}>
         {schema.description}
       </Markdown>
       {enumValues && (
-        <section className="sp-schema-explorer-detail-section">
+        <section className={scoped('sp-schema-explorer-detail-section')}>
           <h4>Allowed values</h4>
-          <div className="sp-schema-explorer-values">
+          <div className={scoped('sp-schema-explorer-values')}>
             {enumValues.map((value, index) => (
               <code key={index}>
                 {typeof value === 'string' ? value : JSON.stringify(value)}
@@ -280,9 +298,9 @@ function ExplorerFieldDetails({
         </section>
       )}
       {constraints.length > 0 && (
-        <section className="sp-schema-explorer-detail-section">
+        <section className={scoped('sp-schema-explorer-detail-section')}>
           <h4>Constraints</h4>
-          <dl className="sp-schema-explorer-constraints">
+          <dl className={scoped('sp-schema-explorer-constraints')}>
             {constraints.map((constraint) => (
               <div key={constraint.label}>
                 <dt>{constraint.label}</dt>
@@ -295,15 +313,15 @@ function ExplorerFieldDetails({
         </section>
       )}
       {schema.default !== undefined && (
-        <section className="sp-schema-explorer-detail-section">
+        <section className={scoped('sp-schema-explorer-detail-section')}>
           <h4>Default</h4>
-          <code className="sp-schema-explorer-value">
+          <code className={scoped('sp-schema-explorer-value')}>
             {JSON.stringify(schema.default)}
           </code>
         </section>
       )}
       {showExample && example !== undefined && (
-        <section className="sp-schema-explorer-detail-section">
+        <section className={scoped('sp-schema-explorer-detail-section')}>
           <h4>Example</h4>
           <ExplorerExample value={example} />
         </section>
@@ -360,23 +378,27 @@ export function SchemaExplorer({
   };
 
   return (
-    <div className="sp-schema-explorer">
+    <div className={scoped('sp-schema-explorer')}>
       {showRootDescription &&
         (schema.description ?? structuralSchema.description) && (
-          <Markdown className="sp-schema-explorer-root-description">
+          <Markdown className={scoped('sp-schema-explorer-root-description')}>
             {schema.description ?? structuralSchema.description}
           </Markdown>
         )}
       <div
-        className={`sp-schema-explorer-shell${selected ? ' has-selection' : ''}`}
+        className={scoped(
+          `sp-schema-explorer-shell${selected ? ' has-selection' : ''}`,
+        )}
       >
         <section
-          className="sp-schema-explorer-tree"
+          className={scoped('sp-schema-explorer-tree')}
           aria-label={`${rootName} schema`}
         >
           {showHeader && (
-            <header className="sp-schema-explorer-header">
-              <span className="sp-schema-explorer-object-icon">{'{}'}</span>
+            <header className={scoped('sp-schema-explorer-header')}>
+              <span className={scoped('sp-schema-explorer-object-icon')}>
+                {'{}'}
+              </span>
               <div>
                 <strong>{rootName}</strong>
                 <span>
@@ -386,7 +408,7 @@ export function SchemaExplorer({
               </div>
             </header>
           )}
-          <div className="sp-schema-explorer-rows">
+          <div className={scoped('sp-schema-explorer-rows')}>
             <ExplorerTree
               fields={fields}
               selectedPath={selected?.path.join('.') ?? ''}
@@ -397,7 +419,7 @@ export function SchemaExplorer({
           </div>
         </section>
         {selected && (
-          <aside className="sp-schema-explorer-inspector">
+          <aside className={scoped('sp-schema-explorer-inspector')}>
             <ExplorerFieldDetails
               field={selected}
               rootName={rootName}

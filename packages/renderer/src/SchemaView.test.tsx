@@ -15,11 +15,11 @@ describe('SchemaView composition', () => {
   });
 
   it('keeps the field inspector sticky within long schemas', () => {
-    const css = readFileSync('src/styles.css', 'utf8');
+    const css = readFileSync('src/SchemaExplorer.module.css', 'utf8');
 
     expect(css).toMatch(/\.sp-schema-explorer-shell \{[^}]*overflow: clip;/);
     expect(css).toMatch(
-      /\.sp-schema-explorer-description\.sp-markdown \{[^}]*font-size: 0\.6875rem;/,
+      /\.sp-schema-explorer-description:global\(\.sp-markdown\) \{[^}]*font-size: 0\.6875rem;/,
     );
     expect(css).toMatch(
       /\.sp-schema-explorer-details \{[^}]*position: sticky;[^}]*top: 24px;/,
