@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { generateRequestSample, RequestSample } from './RequestSample';
 
@@ -15,20 +21,21 @@ const request = {
 };
 
 describe('RequestSample', () => {
-  it('starts collapsed and expands from its summary', () => {
+  it('starts collapsed and expands from its header', () => {
     const { container } = render(
       <RequestSample request={request} storageKey="test-language" />,
     );
-    const sample =
-      container.querySelector<HTMLDetailsElement>('.sp-request-sample')!;
+    const sample = container.querySelector<HTMLElement>('.sp-request-sample')!;
+    const toggle = screen.getByRole('button', { name: 'Code snippet' });
 
-    expect(sample.open).toBe(false);
-    expect(screen.queryByText(/curl --request POST/)).not.toBeVisible();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText(/curl --request POST/)).not.toBeInTheDocument();
 
-    fireEvent.click(sample.querySelector(':scope > summary')!);
+    fireEvent.click(toggle);
 
-    expect(sample.open).toBe(true);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText(/curl --request POST/)).toBeVisible();
+    expect(within(sample).getByRole('button', { name: 'Copy' })).toBeVisible();
   });
 
   it('generates samples for every offered language', () => {
@@ -55,6 +62,7 @@ describe('RequestSample', () => {
       <RequestSample request={request} storageKey="test-language" />,
     );
     fireEvent.click(screen.getByRole('option', { name: 'Python' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
     expect(screen.getByText(/requests\.post/)).toBeInTheDocument();
     expect(window.localStorage.getItem('test-language')).toBe('"python"');
 

@@ -2120,32 +2120,51 @@ related:
   overflow: visible;
 }
 
-.sp-request-sample > summary {
+.sp-request-sample-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   min-height: 46px;
   padding: 0 14px;
-  cursor: pointer;
-  list-style: none;
   font-size: 12px;
   font-weight: 600;
 }
 
-.sp-request-sample > summary::-webkit-details-marker {
-  display: none;
+.sp-request-sample-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
-.sp-request-sample > summary .sp-disclosure-chevron {
+.sp-request-sample-toggle .sp-disclosure-chevron {
   transition: transform 120ms ease;
 }
 
-.sp-request-sample[open] > summary .sp-disclosure-chevron {
+.sp-request-sample-toggle[aria-expanded='true'] .sp-disclosure-chevron {
   transform: rotate(180deg);
 }
 
-.sp-request-sample[open] > summary {
-  display: none;
+.sp-request-sample-code {
+  position: relative;
+  border-top: 1px solid var(--sp-code-border);
+}
+
+.sp-request-sample-code > .sp-copy {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  right: 14px;
+}
+
+.sp-request-sample .sp-request-sample-code pre {
+  padding-top: 50px;
 }
 .sp-rail-card {
   overflow: hidden;

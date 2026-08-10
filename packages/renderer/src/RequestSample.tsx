@@ -7,8 +7,8 @@
  * ---
  */
 
-import { useEffect, useRef, type ReactNode } from 'react';
-import { CodeBlock } from './CodeBlock';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { CodeBlock, CopyButton } from './CodeBlock';
 import { useLocalState } from './useLocalState';
 import { DisclosureChevron } from './DesignSystem';
 
@@ -188,6 +188,7 @@ export function RequestSample({
     storageKey,
     'curl',
   );
+  const [expanded, setExpanded] = useState(false);
   const languageMenuRef = useRef<HTMLDetailsElement>(null);
   const selected =
     LANGUAGES.find((item) => item.value === language) ?? LANGUAGES[0]!;
@@ -206,7 +207,7 @@ export function RequestSample({
     setLanguage(nextLanguage);
     target.closest('details')?.removeAttribute('open');
   };
-  const title = (
+  const languagePicker = (
     <details className="sp-sample-language" ref={languageMenuRef}>
       <summary
         role="button"
@@ -240,17 +241,29 @@ export function RequestSample({
       </div>
     </details>
   );
+  const sample = generateRequestSample(selected.value, request);
+  const copySample = generateRequestSample(selected.value, copyRequest);
+
   return (
-    <details className={`sp-request-sample ${className}`.trim()}>
-      <summary>
-        <span>{selected.label}</span>
-        <DisclosureChevron />
-      </summary>
-      <CodeBlock
-        title={title}
-        value={generateRequestSample(selected.value, request)}
-        copyValue={generateRequestSample(selected.value, copyRequest)}
-      />
-    </details>
+    <section className={`sp-request-sample ${className}`.trim()}>
+      <header className="sp-request-sample-header">
+        <button
+          type="button"
+          className="sp-request-sample-toggle"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          <DisclosureChevron />
+          <span>Code snippet</span>
+        </button>
+        {languagePicker}
+      </header>
+      {expanded && (
+        <div className="sp-request-sample-code">
+          <CopyButton value={copySample} />
+          <CodeBlock value={sample} copyable={false} />
+        </div>
+      )}
+    </section>
   );
 }
