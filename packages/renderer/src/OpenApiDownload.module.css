@@ -10,7 +10,7 @@
   margin: 0;
   padding: 17px 20px;
   border-bottom: 1px solid var(--sp-line);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.4;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .options strong {
-  font-size: 13px;
+  font-size: 0.8125rem;
   transition: color 120ms ease;
 }
 
@@ -54,7 +54,7 @@
 
 .format {
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 7px;
+  font-size: 0.4375rem;
   font-weight: 700;
   text-transform: uppercase;
 }

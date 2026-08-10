@@ -60,7 +60,7 @@ related:
     system-ui,
     sans-serif
   );
-  font-size: var(--sp-font-size, 14px);
+  font-size: var(--sp-font-size, 0.875rem);
   line-height: 1.6;
   min-height: 100%;
 }
@@ -221,7 +221,7 @@ related:
   align-items: center;
   gap: 11px;
   border-bottom: 1px solid var(--sp-line);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -251,7 +251,7 @@ related:
   background: var(--sp-surface);
   border: 1px solid var(--sp-line);
   border-radius: 9px;
-  font-size: 12px;
+  font-size: 0.75rem;
   transition: border-color 140ms ease;
 }
 .sp-sidebar-search:focus-within {
@@ -288,7 +288,7 @@ related:
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1;
   transition:
     color 120ms ease,
@@ -307,7 +307,7 @@ related:
   border-radius: 5px;
   box-shadow: 0 1px 0 var(--sp-line);
   font-family: inherit;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-search-backdrop {
   position: fixed;
@@ -347,7 +347,7 @@ related:
   background: transparent;
   border: 0;
   outline: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .sp-search-results {
   max-height: min(56vh, 480px);
@@ -359,7 +359,7 @@ related:
   margin: 0;
   padding: 9px 9px 5px;
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -391,7 +391,7 @@ related:
 .sp-search-group button small {
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-search-group button small svg {
   width: 11px;
@@ -410,7 +410,7 @@ related:
   color: var(--sp-muted);
   background: var(--sp-surface-soft);
   border-top: 1px solid var(--sp-line);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-search-help span {
   display: flex;
@@ -505,10 +505,10 @@ related:
 }
 .sp-nav-empty strong {
   color: var(--sp-text);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-nav-empty span {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-nav-group {
   margin: 6px 0;
@@ -519,7 +519,7 @@ related:
 .sp-nav-tag-group > .sp-nav-heading {
   padding: 5px 8px 2px;
   color: color-mix(in srgb, var(--sp-text) 78%, var(--sp-muted));
-  font-size: 14px;
+  font-size: 0.875rem;
   text-transform: none;
 }
 .sp-nav-tag-group .sp-nav-group {
@@ -540,7 +540,7 @@ related:
   backdrop-filter: blur(14px);
   border: 0;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.45;
   text-align: left;
@@ -608,7 +608,7 @@ related:
   gap: 12px;
   padding: 7px 8px;
   border-radius: 7px;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--sp-text);
   transition:
     color 120ms ease,
@@ -634,7 +634,7 @@ related:
   margin: 0;
   padding: 4px 8px 3px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -657,11 +657,11 @@ related:
   padding: 5px 6px;
   border-radius: 5px;
   background: #eeecff;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-method-badge-compact {
   color: #5f57cb;
-  font-size: 9px;
+  font-size: 0.5625rem;
   opacity: 0.78;
 }
 .sp-method-badge.sp-method-post {
@@ -703,7 +703,7 @@ related:
 .sp-nav-heading {
   padding: 5px 8px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -729,7 +729,7 @@ related:
 .sp-eyebrow,
 .sp-tag-kicker {
   color: var(--sp-accent);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -746,12 +746,12 @@ related:
 .sp-hero h1 {
   max-width: 800px;
   margin: 18px 0 18px;
-  font-size: clamp(38px, 6vw, 67px);
+  font-size: clamp(2.375rem, 6vw, 4.188rem);
   line-height: 1.03;
   letter-spacing: -0.055em;
 }
 .sp-hero-intro > .sp-markdown {
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.75;
 }
 .sp-hero-aside {
@@ -774,7 +774,7 @@ related:
 .sp-server > span {
   min-width: 0;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -783,7 +783,7 @@ related:
   min-width: 0;
   overflow: hidden;
   color: var(--sp-text);
-  font-size: 11px;
+  font-size: 0.6875rem;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -802,7 +802,7 @@ related:
   color: var(--sp-muted);
   background: var(--sp-surface-soft);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 0.625rem;
   transition:
     color 120ms ease,
     background-color 120ms ease,
@@ -834,7 +834,7 @@ related:
 }
 .sp-diff-hero :is(h1, h2, h3, h4, h5) {
   margin: 12px 0 8px;
-  font-size: clamp(30px, 5vw, 48px);
+  font-size: clamp(1.875rem, 5vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.04em;
 }
@@ -862,13 +862,13 @@ related:
   display: block;
 }
 .sp-diff-summary strong {
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.1;
 }
 .sp-diff-summary span {
   margin-top: 5px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -906,7 +906,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 999px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.6875rem;
   transition:
     color 120ms ease,
     background-color 120ms ease,
@@ -929,7 +929,7 @@ related:
 }
 .sp-diff-group h2 {
   margin: 0 0 12px;
-  font-size: 18px;
+  font-size: 1.125rem;
   letter-spacing: -0.02em;
 }
 .sp-diff-operation-list {
@@ -973,7 +973,7 @@ related:
 .sp-diff-operation-heading > span {
   flex: none;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diff-impact {
   display: grid;
@@ -998,13 +998,13 @@ related:
 }
 .sp-diff-impact span {
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   text-transform: uppercase;
 }
 .sp-diff-impact strong {
   margin-top: 3px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
 }
 .sp-diff-impact .is-affected strong {
@@ -1018,7 +1018,7 @@ related:
   color: var(--sp-muted);
   border-bottom: 1px solid var(--sp-line);
   background: var(--sp-surface-soft);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-diff-change-list {
   display: grid;
@@ -1096,7 +1096,7 @@ related:
   color: var(--sp-muted);
   background: var(--sp-surface-soft);
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1113,21 +1113,21 @@ related:
 }
 .sp-diff-area {
   color: var(--sp-text);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 .sp-diff-scope-detail {
   overflow: hidden;
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 11px;
+  font-size: 0.6875rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .sp-diff-path {
   overflow: hidden;
   color: var(--sp-text);
-  font-size: 11px;
+  font-size: 0.6875rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1135,7 +1135,7 @@ related:
   display: block;
   margin-top: 7px;
   color: var(--sp-muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-diff-change-body {
   padding: 0 18px 18px;
@@ -1150,14 +1150,14 @@ related:
 .sp-diff-change-link {
   flex: none;
   color: var(--sp-accent);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-diff-location {
   display: block;
   overflow-x: auto;
   padding: 12px 0;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   white-space: nowrap;
 }
 .sp-diff-sources {
@@ -1166,12 +1166,12 @@ related:
   gap: 8px 18px;
   margin: -4px 0 12px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diff-affected-operations {
   margin: 0 0 14px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diff-affected-operations ul {
   display: flex;
@@ -1200,7 +1200,7 @@ related:
 }
 .sp-diff-value-heading {
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1212,7 +1212,7 @@ related:
   background: var(--sp-code);
   border: 1px solid var(--sp-code-border);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diff-tools {
   display: flex;
@@ -1227,7 +1227,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 7px;
   font: inherit;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diff-tools button {
   cursor: pointer;
@@ -1388,7 +1388,7 @@ related:
 }
 .sp-tag h2 {
   margin: 5px 0 0;
-  font-size: 30px;
+  font-size: 1.875rem;
   line-height: 1.2;
   letter-spacing: -0.035em;
 }
@@ -1429,7 +1429,7 @@ related:
 }
 .sp-operation-link-summary {
   color: var(--sp-muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .sp-operation-link-address {
   min-width: 0;
@@ -1457,12 +1457,12 @@ related:
 }
 .sp-tag-overview-intro h1 {
   margin: 0 0 18px;
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.045em;
 }
 .sp-tag-overview-intro > .sp-markdown {
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.75;
 }
 .sp-tag-overview-intro > .sp-tag-long-description {
@@ -1470,7 +1470,7 @@ related:
 }
 .sp-tag-overview-operations h2 {
   margin: 8px 0 18px;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.2;
 }
 .sp-endpoint-page {
@@ -1485,7 +1485,7 @@ related:
   border: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   transition: color 120ms ease;
 }
 .sp-back:hover {
@@ -1523,14 +1523,14 @@ related:
 }
 .sp-endpoint-header h1 {
   margin: 0 0 18px;
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.045em;
 }
 .sp-endpoint-header > .sp-markdown {
   max-width: 760px;
   margin-top: 20px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.75;
 }
 .sp-endpoint-address {
@@ -1547,7 +1547,7 @@ related:
 .sp-endpoint-address code {
   min-width: 0;
   overflow: visible;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   text-overflow: clip;
   white-space: normal;
@@ -1577,7 +1577,7 @@ related:
 .sp-request-heading h2 {
   margin: 0;
   padding-bottom: 13px;
-  font-size: 23px;
+  font-size: 1.438rem;
   line-height: 1.2;
   letter-spacing: -0.03em;
 }
@@ -1594,13 +1594,13 @@ related:
 }
 .sp-endpoint-section > h2,
 .sp-endpoint-section > .sp-response-tabs-row > h2 {
-  font-size: 23px;
+  font-size: 1.438rem;
 }
 .sp-endpoint-section > h3 {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 .sp-endpoint-request-details .sp-endpoint-section > h3 {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0;
 }
@@ -1637,7 +1637,7 @@ related:
   background: transparent;
   cursor: pointer;
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 10px;
+  font-size: 0.625rem;
   white-space: nowrap;
   transition:
     color 120ms ease,
@@ -1699,7 +1699,7 @@ related:
   justify-content: space-between;
   padding: 9px 14px 0;
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1729,7 +1729,7 @@ related:
   align-items: baseline;
   gap: 8px;
   color: var(--sp-text);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-response-label > strong {
   font-weight: 600;
@@ -1737,7 +1737,7 @@ related:
 .sp-response-code {
   color: var(--sp-response-error);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
 }
 .sp-response-summary.is-success .sp-response-code {
@@ -1746,7 +1746,7 @@ related:
 .sp-response-summary > .sp-markdown {
   margin-top: 9px;
   color: var(--sp-text);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 .sp-endpoint-response-detail {
@@ -1787,7 +1787,7 @@ related:
 }
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section h4 {
   margin-bottom: 9px;
-  font-size: 12px;
+  font-size: 0.75rem;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -1796,7 +1796,7 @@ related:
   gap: 3px;
   margin-top: 14px;
   color: var(--sp-muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 .sp-request-empty strong {
@@ -1840,7 +1840,7 @@ related:
   border: 1px solid currentColor;
   border-radius: 50%;
   font:
-    700 10px/1 Manrope,
+    700 0.625rem/1 Manrope,
     sans-serif;
   place-items: center;
   transition: color 120ms ease;
@@ -1858,7 +1858,7 @@ related:
   background: var(--sp-muted);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font:
-    600 12px/1.3 Manrope,
+    600 0.75rem/1.3 Manrope,
     sans-serif;
   opacity: 0;
   pointer-events: none;
@@ -1897,7 +1897,7 @@ related:
 .sp-section-count {
   margin-left: 4px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
 }
 .sp-parameter-toggle {
@@ -1909,7 +1909,7 @@ related:
   border-top: 1px solid var(--sp-line);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: left;
   transition: filter 120ms ease;
@@ -1925,7 +1925,7 @@ related:
   border: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 .sp-rail-parameter-toggle:hover {
@@ -1962,7 +1962,7 @@ related:
 }
 .sp-rail-card h3 {
   margin: 0 0 14px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .sp-authorization-card {
   padding: 0;
@@ -2012,7 +2012,7 @@ related:
   border: 1px solid color-mix(in srgb, var(--sp-success-text) 45%, transparent);
   border-radius: 50%;
   background: color-mix(in srgb, var(--sp-success) 10%, var(--sp-surface));
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   place-items: center;
 }
@@ -2029,7 +2029,7 @@ related:
   color: var(--sp-danger-text);
   border-radius: 6px;
   background: color-mix(in srgb, var(--sp-danger) 9%, var(--sp-surface));
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   line-height: 1.45;
 }
@@ -2048,18 +2048,18 @@ related:
   color: var(--sp-text);
   background: var(--sp-bg);
   border-color: var(--sp-line);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-rail-card-description {
   margin: -6px 0 14px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.5;
 }
 .sp-rail-empty {
   margin: 0;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.5;
 }
 .sp-rail-fields {
@@ -2070,7 +2070,7 @@ related:
   display: grid;
   gap: 6px;
   color: var(--sp-text);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
 }
 .sp-field span {
@@ -2083,7 +2083,7 @@ related:
 }
 .sp-field small {
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 400;
 }
 .sp-field input {
@@ -2096,7 +2096,7 @@ related:
   border-radius: 7px;
   outline: none;
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 10px;
+  font-size: 0.625rem;
   transition:
     border-color 140ms ease,
     box-shadow 140ms ease;
@@ -2146,7 +2146,7 @@ related:
   border-radius: 7px;
   outline: none;
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.55;
   transition:
     border-color 140ms ease,
@@ -2161,7 +2161,7 @@ related:
   margin-left: 5px;
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 400;
 }
 .sp-auth-method {
@@ -2176,7 +2176,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 7px;
   outline: none;
-  font-size: 10px;
+  font-size: 0.625rem;
   cursor: pointer;
   transition:
     border-color 140ms ease,
@@ -2203,7 +2203,7 @@ related:
   background: var(--sp-accent);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 650;
   transition: filter 160ms ease;
 }
@@ -2236,7 +2236,7 @@ related:
   gap: 12px;
   padding: 11px 14px;
   border-bottom: 1px solid var(--sp-code-border);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-live-response-head span {
   color: var(--sp-code-success);
@@ -2250,7 +2250,7 @@ related:
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.75;
 }
 .sp-live-response.is-error {
@@ -2264,7 +2264,7 @@ related:
 .sp-live-response.is-error p {
   margin: 0;
   padding: 14px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.55;
 }
 .sp-rail-code {
@@ -2336,20 +2336,20 @@ related:
 .sp-api-path {
   overflow: hidden;
   color: var(--sp-text);
-  font-size: 11px;
+  font-size: 0.6875rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .sp-operation-name {
   color: var(--sp-muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-operation-summary > .sp-disclosure-chevron {
   justify-self: end;
 }
 .sp-deprecated {
   color: #a8525e;
-  font-size: 9px;
+  font-size: 0.5625rem;
   text-transform: uppercase;
 }
 .sp-operation-body {
@@ -2366,18 +2366,18 @@ related:
 }
 .sp-section h4 {
   margin: 0 0 12px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .sp-required {
   color: var(--sp-danger);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
 }
 .sp-qualifier {
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-parameter-list,
 .sp-responses {
@@ -2447,19 +2447,19 @@ related:
 .sp-resource-heading code,
 .sp-property {
   color: var(--sp-text);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
 }
 .sp-resource-meta {
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-resource-details > .sp-markdown,
 .sp-schema-description,
 .sp-schema-meta {
   margin: 6px 0;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-resource-title {
   display: flex;
@@ -2474,7 +2474,7 @@ related:
 .sp-schema-explorer-root-description {
   margin: 0 0 12px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-markdown:is(
     .sp-schema-description,
@@ -2547,7 +2547,7 @@ related:
   border-radius: 5px;
   background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-primitive-details:not(:empty) {
   padding: 8px 12px 10px 46px;
@@ -2584,14 +2584,14 @@ related:
 }
 .sp-schema-explorer-header strong {
   overflow: hidden;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .sp-schema-explorer-header > div > span {
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-explorer-object-icon {
   display: grid;
@@ -2603,7 +2603,7 @@ related:
   border-radius: 5px;
   background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-explorer-rows {
   padding: 6px 0;
@@ -2711,12 +2711,12 @@ related:
 }
 .sp-schema-explorer-name code {
   color: var(--sp-text);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 500;
   white-space: nowrap;
 }
 .sp-schema-explorer-name .sp-required {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-schema-explorer-deprecated {
   padding: 2px 5px;
@@ -2725,7 +2725,7 @@ related:
   border-radius: 999px;
   background: color-mix(in srgb, var(--sp-muted) 7%, var(--sp-surface));
   font-family: inherit;
-  font-size: 7px;
+  font-size: 0.4375rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -2737,7 +2737,7 @@ related:
   flex: 0 1 auto;
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
   white-space: nowrap;
 }
 .sp-schema-explorer-model {
@@ -2763,7 +2763,7 @@ related:
 .sp-schema-explorer-detail-section h4,
 .sp-schema-explorer-constraints dt {
   color: var(--sp-muted);
-  font-size: 8px;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -2781,12 +2781,12 @@ related:
 }
 .sp-schema-explorer-detail-heading > code {
   color: var(--sp-text);
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 .sp-schema-explorer-required {
   color: #a33d4c;
-  font-size: 8px;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2798,10 +2798,10 @@ related:
   gap: 7px;
   margin-bottom: 13px;
   color: var(--sp-muted);
-  font-size: 8px;
+  font-size: 0.5rem;
 }
 .sp-schema-explorer-detail-meta code {
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-explorer-detail-meta > * + *::before {
   content: '·';
@@ -2811,7 +2811,7 @@ related:
 .sp-schema-explorer-description.sp-markdown {
   margin: 0 0 16px;
   color: color-mix(in srgb, var(--sp-text) 76%, var(--sp-muted));
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-schema-explorer-description:empty::after {
   content: 'No description provided.';
@@ -2836,7 +2836,7 @@ related:
   border: 1px solid var(--sp-code-border);
   border-radius: 4px;
   background: var(--sp-code);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-explorer-constraints {
   display: grid;
@@ -2854,7 +2854,7 @@ related:
 }
 .sp-schema-explorer-constraints code {
   color: var(--sp-text);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-explorer-detail-section .sp-example {
   margin-top: 0;
@@ -2956,7 +2956,7 @@ related:
 .sp-schema-details-toggle > span::before {
   content: '?';
   font:
-    700 10px/1 Manrope,
+    700 0.625rem/1 Manrope,
     sans-serif;
 }
 .sp-schema-details-toggle::after {
@@ -2972,7 +2972,7 @@ related:
   background: var(--sp-muted);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font:
-    600 9px/1.2 Manrope,
+    600 0.5625rem/1.2 Manrope,
     sans-serif;
   opacity: 0;
   pointer-events: none;
@@ -3002,7 +3002,7 @@ related:
 .sp-schema-alternatives-label {
   margin: 10px 0 -3px 4px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3010,7 +3010,7 @@ related:
 .sp-type {
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-schema-meta code {
   color: var(--sp-text);
@@ -3025,7 +3025,7 @@ related:
   padding: 1px 4px;
   border-radius: 4px;
   background: var(--sp-surface-soft);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-schema-constraints {
   display: flex;
@@ -3049,7 +3049,7 @@ related:
   border: 1px solid color-mix(in srgb, var(--sp-line) 75%, transparent);
   border-radius: 4px;
   background: color-mix(in srgb, var(--sp-field-head) 75%, transparent);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-schema-example {
   display: flex;
@@ -3066,7 +3066,7 @@ related:
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-media-heading > strong {
   font-weight: 600;
@@ -3079,7 +3079,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 5px;
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-media-list {
   display: grid;
@@ -3132,7 +3132,7 @@ related:
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--sp-line);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-detail-list > strong {
   font-weight: 600;
@@ -3149,7 +3149,7 @@ related:
   display: grid;
   gap: 6px;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-security-option > div {
   display: grid;
@@ -3157,7 +3157,7 @@ related:
 }
 .sp-security-operator {
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -3168,7 +3168,7 @@ related:
 }
 .sp-security-scheme .sp-markdown {
   color: var(--sp-text);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .sp-callback {
   margin-top: 12px;
@@ -3184,7 +3184,7 @@ related:
   overflow-wrap: anywhere;
   margin-bottom: 8px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-callback .sp-operation {
   margin-top: 8px;
@@ -3212,7 +3212,7 @@ related:
 .sp-reference-toc strong {
   display: block;
   margin-bottom: 8px;
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-reference-toc a {
   display: block;
@@ -3220,7 +3220,7 @@ related:
   padding: 5px 8px;
   color: var(--sp-muted);
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 0.625rem;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition:
@@ -3248,14 +3248,14 @@ related:
 }
 .sp-component-card h3 {
   margin: 0 0 14px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .sp-auth-flow {
   margin-top: 14px;
   padding: 12px;
   background: var(--sp-surface-soft);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-callback-method {
   display: inline-block;
@@ -3264,7 +3264,7 @@ related:
   color: var(--sp-muted);
   background: var(--sp-surface-soft);
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-response {
   border-bottom: 1px solid var(--sp-line);
@@ -3281,7 +3281,7 @@ related:
   background: transparent;
   text-align: left;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-status {
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
@@ -3308,13 +3308,13 @@ related:
   justify-content: space-between;
   margin-bottom: 15px;
   color: #8e8f9c;
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-code-block {
   min-width: 0;
   color: var(--sp-code-text);
   background: var(--sp-code);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-code-block pre {
   overflow: auto;
@@ -3431,7 +3431,7 @@ related:
 .sp-example {
   color: var(--sp-code-text);
   background: var(--sp-code);
-  font-size: 10px;
+  font-size: 0.625rem;
   white-space: pre-wrap;
 }
 .sp-example code {
@@ -3492,7 +3492,7 @@ related:
   border-radius: 9px;
   background: var(--sp-surface);
   box-shadow: 0 4px 14px rgba(12, 13, 18, 0.1);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-inline-controls > span {
   padding: 0 5px;
@@ -3519,7 +3519,7 @@ related:
 .sp-inline-more {
   padding: 3px 4px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   text-align: right;
   text-shadow: 0 1px 2px var(--sp-bg);
 }
@@ -3539,7 +3539,7 @@ related:
   background: var(--sp-surface);
   box-shadow: 0 7px 24px rgba(12, 13, 18, 0.16);
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diagnostics-trigger > span {
   display: grid;
@@ -3549,7 +3549,7 @@ related:
   color: #fff;
   border-radius: 50%;
   background: var(--sp-warning);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 800;
 }
 .sp-diagnostics-trigger.has-issues > span {
@@ -3600,12 +3600,12 @@ related:
 }
 .sp-diagnostics-drawer h2 {
   margin: 3px 0 5px;
-  font-size: 22px;
+  font-size: 1.375rem;
 }
 .sp-diagnostics-drawer header p {
   margin: 0;
   color: var(--sp-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diagnostics-header-actions {
   position: relative;
@@ -3623,12 +3623,12 @@ related:
   border-radius: 8px;
   background: var(--sp-surface);
   cursor: pointer;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-diagnostics-close {
   width: 31px;
   padding: 0;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 .sp-diagnostics-menu summary {
   width: 31px;
@@ -3672,7 +3672,7 @@ related:
   background: transparent;
   cursor: pointer;
   text-align: left;
-  font-size: 9px;
+  font-size: 0.5625rem;
   white-space: nowrap;
 }
 .sp-diagnostics-menu button:hover {
@@ -3699,7 +3699,7 @@ related:
   border: 0;
   background: transparent;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diagnostics-tabs button::after {
   position: absolute;
@@ -3722,7 +3722,7 @@ related:
   border-radius: 8px;
   background: var(--sp-surface-soft);
   text-align: center;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .sp-diagnostics-summary {
   min-width: 0;
@@ -3744,7 +3744,7 @@ related:
   background: var(--sp-surface);
   cursor: pointer;
   text-align: left;
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .sp-diagnostics-summary button.is-active {
   color: var(--sp-text);
@@ -3753,7 +3753,7 @@ related:
 }
 .sp-diagnostics-summary strong {
   color: var(--sp-text);
-  font-size: 16px;
+  font-size: 1rem;
 }
 .sp-diagnostics-tools {
   min-width: 0;
@@ -3769,7 +3769,7 @@ related:
   border-radius: 8px;
   outline: none;
   background: var(--sp-surface);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .sp-diagnostics-list {
   min-width: 0;
@@ -3789,7 +3789,7 @@ related:
   border-left: 3px solid var(--sp-warning);
   border-radius: 8px;
   background: var(--sp-surface);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.5;
 }
 .sp-diagnostic-card.is-issue {
@@ -3808,7 +3808,7 @@ related:
 }
 .sp-diagnostic-card-head span {
   color: var(--sp-muted);
-  font-size: 8px;
+  font-size: 0.5rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3817,7 +3817,7 @@ related:
   min-width: 0;
   overflow: hidden;
   color: var(--sp-muted);
-  font-size: 8px;
+  font-size: 0.5rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3842,7 +3842,7 @@ related:
   padding-top: 8px;
   color: var(--sp-muted);
   border-top: 1px solid var(--sp-line);
-  font-size: 8px;
+  font-size: 0.5rem;
 }
 .sp-diagnostic-card footer > span {
   min-width: 0;
@@ -3872,7 +3872,7 @@ related:
   padding: 30px;
   color: var(--sp-muted);
   text-align: center;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 @container sp-content (max-width: 900px) {
@@ -3932,7 +3932,7 @@ related:
     gap: 6px;
     margin-bottom: 16px;
     color: var(--sp-muted);
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 700;
   }
   .sp-reference-jump select {
@@ -3963,7 +3963,7 @@ related:
     border-bottom: 1px solid var(--sp-line);
     background: color-mix(in srgb, var(--sp-bg) 94%, transparent);
     backdrop-filter: blur(14px);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
   }
   .sp-mobile-nav-toggle {
@@ -4035,12 +4035,12 @@ related:
     margin: 10px 16px 16px;
     padding-inline: 14px 8px;
     border-radius: 11px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
   .sp-sidebar .sp-nav-tag {
     padding: 9px 12px;
     border-radius: 9px;
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.4;
   }
   .sp-sidebar .sp-nav-tag.has-icon {
@@ -4050,7 +4050,7 @@ related:
     min-height: 42px;
     padding: 10px 12px;
     border-radius: 9px;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
   .sp-sidebar .sp-nav-operations {
     margin-left: 12px;
@@ -4061,7 +4061,7 @@ related:
   }
   .sp-sidebar .sp-nav-heading,
   .sp-sidebar .sp-nav-subgroup > h3 {
-    font-size: 11px;
+    font-size: 0.6875rem;
   }
   .sp-content {
     padding-inline: 20px;
@@ -4145,7 +4145,7 @@ related:
     margin-top: 26px;
   }
   .sp-endpoint-header h1 {
-    font-size: 32px;
+    font-size: 2rem;
   }
   .sp-endpoint-section {
     margin-bottom: 36px;

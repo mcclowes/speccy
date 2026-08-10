@@ -19,7 +19,7 @@ describe('SchemaView composition', () => {
 
     expect(css).toMatch(/\.sp-schema-explorer-shell \{[^}]*overflow: clip;/);
     expect(css).toMatch(
-      /\.sp-schema-explorer-description\.sp-markdown \{[^}]*font-size: 11px;/,
+      /\.sp-schema-explorer-description\.sp-markdown \{[^}]*font-size: 0\.6875rem;/,
     );
     expect(css).toMatch(
       /\.sp-schema-explorer-details \{[^}]*position: sticky;[^}]*top: 24px;/,

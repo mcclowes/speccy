@@ -1,7 +1,7 @@
 .markdown {
   max-width: 680px;
   color: var(--sp-muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .markdown > :first-child {
   margin-top: 0;
@@ -74,7 +74,7 @@
 .admonitionTitle {
   margin-bottom: 5px;
   color: var(--sp-admonition-color);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 .admonition > :last-child {

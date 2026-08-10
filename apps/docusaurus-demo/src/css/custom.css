@@ -57,25 +57,25 @@ body {
   color: white;
   border-radius: 8px;
   background: var(--ifm-color-primary);
-  font-size: 13px;
+  font-size: 0.8125rem;
   place-items: center;
   vertical-align: middle;
 }
 .navbar__item {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 .footer {
   border-top: 1px solid #302f36;
 }
 .footer__title {
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 .footer__link-item {
   color: #aaa8b2;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .theme-doc-markdown h1,
 .theme-doc-markdown h2,
@@ -112,7 +112,7 @@ body {
   align-items: center;
   gap: 9px;
   color: var(--ifm-color-primary);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -156,7 +156,7 @@ body {
   gap: 26px;
   border: 1px solid var(--site-line);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   text-decoration: none !important;
   transition:
@@ -187,7 +187,7 @@ body {
   border: 1px solid var(--site-line);
   border-radius: 7px;
   background: color-mix(in srgb, var(--site-paper) 75%, transparent);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .home-install span {
   color: var(--ifm-color-primary);
@@ -225,7 +225,7 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 .preview-brand > span {
@@ -249,7 +249,7 @@ body {
   display: block;
   margin: 0 7px 12px;
   color: var(--site-muted);
-  font-size: 8px;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -259,7 +259,7 @@ body {
   display: flex;
   align-items: center;
   border-radius: 6px;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .preview-tag {
   gap: 8px;
@@ -282,7 +282,7 @@ body {
 .preview-link b {
   margin-left: auto;
   color: var(--site-success);
-  font-size: 7px;
+  font-size: 0.4375rem;
 }
 .preview-link.is-active {
   background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
@@ -292,13 +292,13 @@ body {
 }
 .preview-eyebrow {
   color: var(--ifm-color-primary);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 .preview-content h2 {
   margin: 12px 0 24px;
-  font-size: 39px;
+  font-size: 2.438rem;
   letter-spacing: -0.05em;
 }
 .preview-path {
@@ -309,14 +309,14 @@ body {
   padding: 8px 13px 8px 8px;
   border: 1px solid var(--site-line);
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .preview-path b {
   padding: 5px 7px;
   color: white;
   border-radius: 4px;
   background: var(--site-success);
-  font-size: 7px;
+  font-size: 0.4375rem;
 }
 .preview-path code {
   padding: 0;
@@ -327,11 +327,11 @@ body {
   max-width: 430px;
   margin: 28px 0 48px;
   color: var(--site-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.7;
 }
 .preview-content h3 {
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .preview-parameter {
   margin-top: 15px;
@@ -341,7 +341,7 @@ body {
   gap: 6px;
   border: 1px solid var(--site-line);
   border-radius: 8px;
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .preview-parameter code {
   padding: 0;
@@ -364,7 +364,7 @@ body {
   gap: 18px;
   align-items: center;
   border-bottom: 1px solid var(--site-line);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
 }
 .preview-response b {
@@ -372,7 +372,7 @@ body {
   color: var(--site-success);
   border-radius: 5px;
   background: color-mix(in srgb, var(--site-success) 10%, transparent);
-  font-size: 8px;
+  font-size: 0.5rem;
 }
 .preview-response i {
   width: 5px;
@@ -398,7 +398,7 @@ body {
 .home-feature > span {
   color: var(--ifm-color-primary);
   font-family: var(--ifm-font-family-monospace);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .home-intro h2,
 .home-ways h2,
@@ -481,7 +481,7 @@ body {
 }
 .home-way > span {
   color: var(--ifm-color-primary);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -498,7 +498,7 @@ body {
 }
 .home-way b {
   margin-top: auto;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .home-way b i {
   margin-left: 8px;

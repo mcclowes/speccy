@@ -95,7 +95,7 @@ body {
   cursor: pointer;
   text-decoration: none;
   font:
-    700 13px Manrope,
+    700 0.8125rem Manrope,
     sans-serif;
 }
 .studio-mark {
@@ -123,7 +123,7 @@ body {
   align-items: center;
   gap: 8px;
   color: var(--studio-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .studio-dot {
   width: 5px;
@@ -157,7 +157,7 @@ body {
   background: transparent;
   cursor: pointer;
   font:
-    600 11px Manrope,
+    600 0.6875rem Manrope,
     sans-serif;
 }
 .studio-chevron {
@@ -166,7 +166,7 @@ body {
   top: 5px;
   color: var(--studio-muted);
   pointer-events: none;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .studio-actions {
   justify-self: end;
@@ -182,7 +182,7 @@ body {
   background: transparent;
   cursor: pointer;
   font:
-    600 10px Manrope,
+    600 0.625rem Manrope,
     sans-serif;
   transition:
     color 120ms ease,
@@ -209,7 +209,7 @@ body {
 .studio-actions .studio-theme {
   width: 31px;
   padding-inline: 0;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .studio-action-share {
   display: inline-flex;
@@ -248,7 +248,7 @@ body {
   backdrop-filter: blur(14px);
   cursor: pointer;
   font:
-    16px Manrope,
+    1rem Manrope,
     sans-serif;
   transition:
     color 120ms ease,
@@ -273,7 +273,7 @@ body {
   display: grid;
   place-items: center;
   color: var(--studio-muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 @media (prefers-color-scheme: dark) {
   .studio-preview-only.studio-system {
@@ -295,7 +295,7 @@ body {
 }
 .studio-url label {
   color: var(--studio-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
 }
 .studio-url input {
@@ -308,12 +308,12 @@ body {
   outline: none;
   background: color-mix(in srgb, var(--studio-bg) 70%, transparent);
   font:
-    11px 'DM Mono',
+    0.6875rem 'DM Mono',
     monospace;
 }
 .studio-message {
   color: var(--studio-danger);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .studio-workspace {
   min-height: 0;
@@ -386,14 +386,14 @@ body {
 }
 .studio-eyebrow {
   color: var(--studio-accent);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .studio-home h1 {
   margin: 15px 0 14px;
-  font-size: clamp(38px, 6vw, 64px);
+  font-size: clamp(2.375rem, 6vw, 4rem);
   line-height: 1.02;
   letter-spacing: -0.055em;
 }
@@ -401,7 +401,7 @@ body {
   max-width: 550px;
   margin: 0 auto;
   color: var(--studio-muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.65;
 }
 .studio-home-actions {
@@ -419,7 +419,7 @@ body {
   background: var(--studio-bar);
   cursor: pointer;
   font:
-    700 11px Manrope,
+    700 0.6875rem Manrope,
     sans-serif;
   box-shadow: 0 5px 16px rgba(30, 30, 42, 0.04);
   transition:
@@ -454,12 +454,12 @@ body {
 }
 .studio-section-heading h2 {
   margin: 7px 0 0;
-  font-size: 19px;
+  font-size: 1.188rem;
   letter-spacing: -0.025em;
 }
 .studio-section-heading > span {
   color: var(--studio-muted);
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 .studio-recent-grid {
   display: grid;
@@ -504,7 +504,7 @@ body {
   max-width: calc(100% - 28px);
   margin-top: 22px;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -512,14 +512,14 @@ body {
 .studio-recent-meta {
   margin-top: 6px;
   color: var(--studio-muted);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }
 .studio-recent-arrow {
   position: absolute;
   top: 20px;
   right: 20px;
   color: var(--studio-muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .studio-empty {
   display: flex;
@@ -541,11 +541,11 @@ body {
 .studio-empty h3 {
   margin: 14px 0 5px;
   color: var(--studio-text);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .studio-empty p {
   margin: 0;
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 
 @media (max-width: 800px) {
@@ -608,7 +608,7 @@ body {
     white-space: nowrap;
   }
   .studio-actions button:not(.studio-theme)::before {
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1;
   }
   .studio-action-url::before {
