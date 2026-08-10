@@ -785,7 +785,7 @@ export function Speccy({
   showDeveloperHints = false,
   previousSpec,
   spectralDiagnostics,
-  parameterPrototype,
+  parameterPrototype = true,
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {

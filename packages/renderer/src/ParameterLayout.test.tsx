@@ -45,6 +45,7 @@ describe('endpoint parameter layout', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 
@@ -111,6 +112,7 @@ describe('endpoint parameter layout', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 
@@ -309,6 +311,7 @@ describe('endpoint parameter layout', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 
@@ -365,6 +368,7 @@ describe('endpoint parameter layout', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 

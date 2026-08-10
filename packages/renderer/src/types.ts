@@ -42,6 +42,6 @@ export interface SpeccyProps {
   previousSpec?: OpenAPIDocument | string;
   /** Spectral results to present alongside Speccy's built-in guidance. */
   spectralDiagnostics?: SpectralDiagnosticInput[];
-  /** PROTOTYPE: separates required parameters from optional parameters added on demand. */
+  /** Separates required parameters from optional parameters added on demand. Defaults to true. */
   parameterPrototype?: boolean;
 }

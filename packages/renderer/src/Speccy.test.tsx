@@ -373,7 +373,6 @@ describe('Speccy navigation', () => {
           },
         }}
         basePath="/api"
-        parameterPrototype
       />,
     );
 
@@ -793,6 +792,7 @@ describe('Speccy navigation', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 
@@ -837,6 +837,7 @@ describe('Speccy navigation', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 
@@ -1083,6 +1084,7 @@ describe('Speccy navigation', () => {
           },
         }}
         basePath="/api"
+        parameterPrototype={false}
       />,
     );
 

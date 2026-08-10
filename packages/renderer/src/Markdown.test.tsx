@@ -93,6 +93,7 @@ Keep the [nested Markdown](https://example.com) intact.
     render(
       <Speccy
         defaultExpanded
+        parameterPrototype={false}
         spec={{
           openapi: '3.1.0',
           info: {
