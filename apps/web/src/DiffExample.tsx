@@ -11,13 +11,14 @@ import { useMemo } from 'react';
 import { diffSpecs } from 'speccy-core';
 import { SpecDiff } from 'speccy-renderer';
 import { LIBRARY_V1, LIBRARY_V2 } from './diffExampleSpecs';
+import styles from './DiffExample.module.css';
 
 export function DiffExample() {
   const report = useMemo(() => diffSpecs(LIBRARY_V1, LIBRARY_V2), []);
 
   return (
     <SpecDiff
-      className="diff-example"
+      className={`diff-example ${styles.example}`}
       headingLevel={1}
       report={report}
       hrefForChange={(change) =>

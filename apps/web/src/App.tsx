@@ -5,7 +5,8 @@
  *   - ./sample.ts - Default document used for the first-run preview.
  *   - ./recentReferences.ts - Owns recent-reference identity and persistence.
  *   - ./previewUrls.ts - Creates and parses shareable preview links.
- *   - ./studio.css - Viewer chrome and reference workspace styling.
+ *   - ./App.module.css - Viewer chrome and reference workspace styling.
+ *   - ./studio.css - Document-level studio styles.
  *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
  */
@@ -30,6 +31,15 @@ import {
   writeRecentReferences,
 } from './recentReferences';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
+import styles from './App.module.css';
+
+function scoped(className: string) {
+  return className
+    .split(' ')
+    .flatMap((name) => (name ? [name, styles[name]] : []))
+    .filter(Boolean)
+    .join(' ');
+}
 
 declare global {
   interface DiscoveredRepository {
@@ -84,7 +94,7 @@ function storedTheme(): Theme {
 
 function Mark() {
   return (
-    <span className="studio-mark" aria-hidden="true">
+    <span className={scoped('studio-mark')} aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none">
         <path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" />
         <circle cx="6.5" cy="13" r="3.5" />
@@ -97,7 +107,7 @@ function Mark() {
 function ShareIcon() {
   return (
     <svg
-      className="studio-share-icon"
+      className={scoped('studio-share-icon')}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -441,16 +451,18 @@ export function App() {
 
   if (location.preview) {
     return (
-      <main className={`studio studio-preview-only studio-${theme}`}>
+      <main className={scoped(`studio studio-preview-only studio-${theme}`)}>
         <ThemeToggle
-          className="studio-preview-theme"
+          className={scoped('studio-preview-theme')}
           theme={theme}
           onChange={setTheme}
           themes={['system', 'dark', 'light']}
           label="current"
         />
         {loading ? (
-          <div className="studio-preview-loading">Loading API reference…</div>
+          <div className={scoped('studio-preview-loading')}>
+            Loading API reference…
+          </div>
         ) : (
           <Speccy
             spec={spec}
@@ -468,16 +480,16 @@ export function App() {
 
   return (
     <div
-      className={`studio studio-${theme}`}
+      className={scoped(`studio studio-${theme}`)}
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => {
         event.preventDefault();
         void loadFile(event.dataTransfer.files[0]);
       }}
     >
-      <header className="studio-bar">
+      <header className={scoped('studio-bar')}>
         <button
-          className="studio-logo"
+          className={scoped('studio-logo')}
           type="button"
           onClick={goHome}
           aria-label="Speccy home"
@@ -486,8 +498,8 @@ export function App() {
           <span>Speccy</span>
         </button>
         {fileName ? (
-          <label className="studio-switcher">
-            <span className="studio-dot" />
+          <label className={scoped('studio-switcher')}>
+            <span className={scoped('studio-dot')} />
             <select
               aria-label="Switch API reference"
               value={activeId}
@@ -504,29 +516,29 @@ export function App() {
                 </option>
               ))}
             </select>
-            <span className="studio-chevron" aria-hidden="true">
+            <span className={scoped('studio-chevron')} aria-hidden="true">
               ⌄
             </span>
           </label>
         ) : (
-          <div className="studio-document">Your API references</div>
+          <div className={scoped('studio-document')}>Your API references</div>
         )}
-        <div className="studio-actions">
+        <div className={scoped('studio-actions')}>
           {fileName && (
             <button
-              className="studio-action-share"
+              className={scoped('studio-action-share')}
               type="button"
               onClick={() => void sharePreview()}
               aria-label="Copy preview link"
               title={shareMessage || 'Copy preview link'}
             >
               <ShareIcon />
-              <span className="studio-share-label">Share</span>
+              <span className={scoped('studio-share-label')}>Share</span>
             </button>
           )}
           {fileName && (
             <button
-              className="studio-action-url"
+              className={scoped('studio-action-url')}
               type="button"
               onClick={() => setUrlOpen(!urlOpen)}
             >
@@ -535,7 +547,7 @@ export function App() {
           )}
           {fileName && (
             <button
-              className="studio-action-file"
+              className={scoped('studio-action-file')}
               type="button"
               onClick={() => fileInput.current?.click()}
             >
@@ -543,7 +555,7 @@ export function App() {
             </button>
           )}
           <ThemeToggle
-            className="studio-theme"
+            className={scoped('studio-theme')}
             theme={theme}
             onChange={setTheme}
             themes={['system', 'dark', 'light']}
@@ -561,7 +573,7 @@ export function App() {
 
       {urlOpen && (
         <form
-          className="studio-url"
+          className={scoped('studio-url')}
           onSubmit={(event) => {
             event.preventDefault();
             void loadUrl(url);
@@ -582,13 +594,15 @@ export function App() {
           <button type="button" onClick={() => setUrlOpen(false)}>
             Cancel
           </button>
-          {message && <span className="studio-message">{message}</span>}
+          {message && (
+            <span className={scoped('studio-message')}>{message}</span>
+          )}
         </form>
       )}
 
       {fileName ? (
-        <div className="studio-workspace">
-          <div className="studio-preview">
+        <div className={scoped('studio-workspace')}>
+          <div className={scoped('studio-preview')}>
             <Speccy
               spec={spec}
               theme={theme}
@@ -603,17 +617,19 @@ export function App() {
           </div>
         </div>
       ) : (
-        <main className="studio-home">
-          <section className="studio-home-intro">
-            <span className="studio-eyebrow">API reference studio</span>
+        <main className={scoped('studio-home')}>
+          <section className={scoped('studio-home-intro')}>
+            <span className={scoped('studio-eyebrow')}>
+              API reference studio
+            </span>
             <h1>Pick up where you left off.</h1>
             <p>
               Open a recent API reference, or bring in an OpenAPI document to
               start exploring.
             </p>
-            <div className="studio-home-actions">
+            <div className={scoped('studio-home-actions')}>
               <button
-                className="is-primary"
+                className={scoped('is-primary')}
                 type="button"
                 onClick={() => fileInput.current?.click()}
               >
@@ -629,12 +645,14 @@ export function App() {
           </section>
           {discoveredRepositories.length > 0 && (
             <section
-              className="studio-recents"
+              className={scoped('studio-recents')}
               aria-labelledby="discovered-heading"
             >
-              <div className="studio-section-heading">
+              <div className={scoped('studio-section-heading')}>
                 <div>
-                  <span className="studio-eyebrow">Found on this Mac</span>
+                  <span className={scoped('studio-eyebrow')}>
+                    Found on this Mac
+                  </span>
                   <h2 id="discovered-heading">OpenAPI repositories</h2>
                 </div>
                 <span>
@@ -644,10 +662,10 @@ export function App() {
                     : 'repositories'}
                 </span>
               </div>
-              <div className="studio-recent-grid">
+              <div className={scoped('studio-recent-grid')}>
                 {discoveredRepositories.map((repository) => (
                   <button
-                    className="studio-recent-card"
+                    className={scoped('studio-recent-card')}
                     type="button"
                     key={repository.path}
                     onClick={() =>
@@ -656,19 +674,22 @@ export function App() {
                       )
                     }
                   >
-                    <span className="studio-recent-icon">
+                    <span className={scoped('studio-recent-icon')}>
                       <Mark />
                     </span>
-                    <span className="studio-recent-name">
+                    <span className={scoped('studio-recent-name')}>
                       {repository.name}
                     </span>
-                    <span className="studio-recent-meta">
+                    <span className={scoped('studio-recent-meta')}>
                       {repository.documentCount}{' '}
                       {repository.documentCount === 1
                         ? 'OpenAPI document'
                         : 'OpenAPI documents'}
                     </span>
-                    <span className="studio-recent-arrow" aria-hidden="true">
+                    <span
+                      className={scoped('studio-recent-arrow')}
+                      aria-hidden="true"
+                    >
                       ↗
                     </span>
                   </button>
@@ -676,10 +697,13 @@ export function App() {
               </div>
             </section>
           )}
-          <section className="studio-recents" aria-labelledby="recent-heading">
-            <div className="studio-section-heading">
+          <section
+            className={scoped('studio-recents')}
+            aria-labelledby="recent-heading"
+          >
+            <div className={scoped('studio-section-heading')}>
               <div>
-                <span className="studio-eyebrow">Your workspace</span>
+                <span className={scoped('studio-eyebrow')}>Your workspace</span>
                 <h2 id="recent-heading">Recent references</h2>
               </div>
               <span>
@@ -688,32 +712,37 @@ export function App() {
               </span>
             </div>
             {recents.length ? (
-              <div className="studio-recent-grid">
+              <div className={scoped('studio-recent-grid')}>
                 {recents.map((reference) => (
                   <button
-                    className="studio-recent-card"
+                    className={scoped('studio-recent-card')}
                     type="button"
                     key={reference.id}
                     onClick={() => openRecent(reference)}
                   >
-                    <span className="studio-recent-icon">
+                    <span className={scoped('studio-recent-icon')}>
                       <Mark />
                     </span>
-                    <span className="studio-recent-name">{reference.name}</span>
-                    <span className="studio-recent-meta">
+                    <span className={scoped('studio-recent-name')}>
+                      {reference.name}
+                    </span>
+                    <span className={scoped('studio-recent-meta')}>
                       Opened{' '}
                       {new Intl.DateTimeFormat(undefined, {
                         dateStyle: 'medium',
                       }).format(reference.openedAt)}
                     </span>
-                    <span className="studio-recent-arrow" aria-hidden="true">
+                    <span
+                      className={scoped('studio-recent-arrow')}
+                      aria-hidden="true"
+                    >
                       ↗
                     </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="studio-empty">
+              <div className={scoped('studio-empty')}>
                 <Mark />
                 <h3>No recent references yet</h3>
                 <p>References you open will stay handy here on this device.</p>
