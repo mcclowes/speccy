@@ -72,6 +72,27 @@ describe('web app', () => {
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 
+  it('opens a repository discovered by the macOS app', async () => {
+    const postMessage = vi.fn();
+    window.webkit = {
+      messageHandlers: { speccyOpenRepository: { postMessage } },
+    };
+    render(<App />);
+    await waitFor(() =>
+      expect(window.speccySetDiscoveredRepositories).toBeTypeOf('function'),
+    );
+
+    act(() => {
+      window.speccySetDiscoveredRepositories?.([
+        { name: 'catalog', path: '/code/catalog', documentCount: 2 },
+      ]);
+    });
+    fireEvent.click(screen.getByRole('button', { name: /catalog/ }));
+
+    expect(postMessage).toHaveBeenCalledWith('/code/catalog');
+    delete window.webkit;
+  });
+
   it('returns to the homepage from the studio logo', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Explore the sample' }));
