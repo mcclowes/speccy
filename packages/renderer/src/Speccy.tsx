@@ -594,10 +594,12 @@ export function Speccy({
             <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
             <Markdown>{model.document.info?.description}</Markdown>
             {showInlineHints && <InlineDiagnostics diagnostics={overviewDiagnostics} onHide={() => setShowInlineHints(false)} />}
+          </div>
+          <aside className="sp-hero-aside">
+            <OpenApiDownload document={result.document ?? model.document} />
             {model.document.servers?.map((item, index) => item.url && <div className="sp-server" key={`${item.url}-${index}`}><span>{item.description ?? 'Base URL'}</span><code>{item.url}</code><CopyButton value={item.url} /></div>)}
             <SecurityRequirements requirements={model.document.security} schemes={model.document.components?.securitySchemes} />
-          </div>
-          <OpenApiDownload document={result.document ?? model.document} />
+          </aside>
         </header>}
         {!activeOperation && !activeReference && !activeTag && model.tags.map((tag) => {
           const visible = tag.operations;

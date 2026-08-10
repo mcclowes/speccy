@@ -447,6 +447,21 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('button', { name: 'Hide authorization' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('places overview connection details beneath the API download', () => {
+    window.history.replaceState({}, '', '/api');
+    render(<Speccy spec={{
+      openapi: '3.1.0', info: { title: 'Secured API' }, servers: [{ url: 'https://api.example.com', description: 'Production' }],
+      security: [{ apiKey: [] }],
+      paths: {},
+      components: { securitySchemes: { apiKey: { type: 'apiKey', in: 'header', name: 'Authorization' } } },
+    }} basePath="/api" />);
+
+    const aside = screen.getByRole('complementary');
+    expect(aside).toContainElement(screen.getByRole('heading', { name: 'Download OpenAPI description' }));
+    expect(aside).toContainElement(screen.getByText('https://api.example.com'));
+    expect(aside).toContainElement(screen.getByRole('button', { name: 'Authorization: API key' }));
+  });
+
   it('selects alternative authorization methods and includes combined credentials', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={{
