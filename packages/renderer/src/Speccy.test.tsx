@@ -842,7 +842,7 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Use the credential described under Request → Authorization: API key.',
+        'Add the credential below to send an authenticated request. See Request → Authorization for the required format.',
       ),
     ).toBeInTheDocument();
     fireEvent.change(authorization, { target: { value: 'secret token' } });

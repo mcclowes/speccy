@@ -904,9 +904,9 @@ export function RequestRail({
         <section className="sp-rail-card">
           <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
           <p className="sp-rail-card-description">
-            Use the {activeSchemes.length === 1 ? 'credential' : 'credentials'}{' '}
-            described under Request → Authorization
-            {schemeLabel && `: ${schemeLabel}`}.
+            Add the {activeSchemes.length === 1 ? 'credential' : 'credentials'}{' '}
+            below to send an authenticated request. See Request → Authorization
+            for the required format.
           </p>
           {requirements && requirements.length > 1 && (
             <label className="sp-field sp-auth-method">
