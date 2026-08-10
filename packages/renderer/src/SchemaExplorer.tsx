@@ -138,6 +138,11 @@ function ExplorerTree({
           >
             <span className="sp-schema-explorer-name">
               <code>{field.name}</code>
+              {field.schema.deprecated && (
+                <span className="sp-schema-explorer-deprecated">
+                  Deprecated
+                </span>
+              )}
               {field.required && (
                 <span className="sp-required" title="Required">
                   *

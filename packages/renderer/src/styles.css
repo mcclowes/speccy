@@ -2657,8 +2657,15 @@ related:
 .sp-schema-explorer-row.is-selected {
   background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface));
 }
-.sp-schema-explorer-row.is-deprecated:not(:hover) {
-  opacity: 0.55;
+.sp-schema-explorer-row.is-deprecated {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #a8525e 8%, transparent),
+    transparent 55%
+  );
+}
+.sp-schema-explorer-row.is-deprecated:hover {
+  background: color-mix(in srgb, #a8525e 10%, var(--sp-surface));
 }
 .sp-schema-explorer-toggle,
 .sp-schema-explorer-toggle-spacer {
@@ -2719,6 +2726,19 @@ related:
 }
 .sp-schema-explorer-name .sp-required {
   font-size: 11px;
+}
+.sp-schema-explorer-deprecated {
+  padding: 2px 5px;
+  color: #8f3442;
+  border: 1px solid color-mix(in srgb, #a8525e 32%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #a8525e 9%, var(--sp-surface));
+  font-family: inherit;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 .sp-schema-explorer-type {
   flex: 0 1 auto;

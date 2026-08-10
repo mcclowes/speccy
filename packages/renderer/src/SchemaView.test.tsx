@@ -244,6 +244,30 @@ describe('SchemaView composition', () => {
     expect(screen.getByRole('button', { name: 'id string' })).toBeVisible();
   });
 
+  it('labels deprecated fields in the explorer row', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            legacyCode: {
+              type: 'string',
+              deprecated: true,
+            },
+          },
+        }}
+      />,
+    );
+
+    const field = screen.getByRole('button', {
+      name: 'legacyCode Deprecated string',
+    });
+    expect(field).toBeVisible();
+    expect(field.closest('.sp-schema-explorer-row')).toHaveClass(
+      'is-deprecated',
+    );
+  });
+
   it('toggles structure and details from an object row while keeping its icon actions separate', () => {
     render(
       <SchemaView
