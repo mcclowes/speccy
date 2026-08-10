@@ -156,7 +156,10 @@ function ExplorerTree({
             type="button"
             className="sp-schema-explorer-select"
             aria-pressed={selected}
-            onClick={() => onSelect(field.path)}
+            onClick={() => {
+              onSelect(field.path);
+              if (children.length > 0 && !open) onToggle(path);
+            }}
           >
             <span className="sp-schema-explorer-name">
               <code>{field.name}</code>

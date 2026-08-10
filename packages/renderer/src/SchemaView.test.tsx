@@ -448,11 +448,42 @@ describe('SchemaView composition', () => {
     fireEvent.click(connection);
     expect(connection).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('The company data connection.')).toBeVisible();
-    expect(screen.queryByRole('button', { name: 'status string' })).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Expand connection' }));
     expect(screen.getByRole('button', { name: 'status string' })).toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Collapse connection' }),
+    );
+    expect(screen.queryByRole('button', { name: 'status string' })).toBeNull();
     expect(screen.getByText('The company data connection.')).toBeVisible();
+  });
+
+  it('expands a collapsed object row and shows its details on click', () => {
+    render(
+      <SchemaView
+        collapseObjects
+        schema={{
+          type: 'object',
+          properties: {
+            _links: {
+              type: 'object',
+              description: 'Hypermedia links.',
+              properties: { self: { type: 'string' } },
+            },
+          },
+        }}
+      />,
+    );
+
+    const row = screen.getByRole('button', { name: '_links object' });
+    expect(screen.queryByRole('button', { name: 'self string' })).toBeNull();
+
+    fireEvent.click(row);
+    expect(row).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Hypermedia links.')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'self string' })).toBeVisible();
+
+    fireEvent.click(row);
+    expect(screen.getByRole('button', { name: 'self string' })).toBeVisible();
   });
 
   it('shows an array item description before its field tree', () => {
