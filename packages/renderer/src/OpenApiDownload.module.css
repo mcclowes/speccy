@@ -1,0 +1,68 @@
+.card {
+  overflow: hidden;
+  margin-top: 4px;
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: var(--sp-surface);
+}
+
+.card h2 {
+  margin: 0;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--sp-line);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.options {
+  padding: 0 20px;
+}
+
+.options button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  gap: 10px;
+  align-items: center;
+  padding: 18px 0;
+  color: var(--sp-text);
+  border: 0;
+  border-bottom: 1px solid var(--sp-line);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.options button:last-child {
+  border-bottom: 0;
+}
+
+.options button:hover strong {
+  color: var(--sp-accent);
+}
+
+.options strong {
+  font-size: 13px;
+  transition: color 120ms ease;
+}
+
+.options svg {
+  width: 17px;
+  height: 17px;
+  color: var(--sp-muted);
+}
+
+.format {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.jsonFormat {
+  letter-spacing: -0.08em;
+}
+
+.yamlFormat {
+  color: var(--sp-muted);
+}

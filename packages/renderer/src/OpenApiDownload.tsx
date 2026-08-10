@@ -9,6 +9,7 @@
 
 import { stringify as stringifyYaml } from 'yaml';
 import type { OpenAPIDocument } from 'speccy-core';
+import styles from './OpenApiDownload.module.css';
 
 type DownloadFormat = 'json' | 'yaml';
 
@@ -49,16 +50,21 @@ function DownloadIcon() {
 
 export function OpenApiDownload({ document }: { document: OpenAPIDocument }) {
   return (
-    <section className="sp-download-card" aria-labelledby="sp-download-heading">
+    <section
+      className={`sp-download-card ${styles.card}`}
+      aria-labelledby="sp-download-heading"
+    >
       <h2 id="sp-download-heading">Download OpenAPI description</h2>
-      <div className="sp-download-options">
+      <div className={`sp-download-options ${styles.options}`}>
         {(['json', 'yaml'] as const).map((format) => (
           <button
             type="button"
             onClick={() => downloadDocument(document, format)}
             key={format}
           >
-            <span className={`sp-download-format sp-download-format-${format}`}>
+            <span
+              className={`sp-download-format sp-download-format-${format} ${styles.format} ${format === 'json' ? styles.jsonFormat : styles.yamlFormat}`}
+            >
               {format}
             </span>
             <strong>openapi.{format}</strong>
