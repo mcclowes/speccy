@@ -2697,10 +2697,10 @@ related:
 }
 .sp-schema-primitive-header {
   display: flex;
-  min-height: 64px;
+  min-height: 48px;
   align-items: center;
   gap: 10px;
-  padding: 13px 16px;
+  padding: 9px 12px;
 }
 .sp-schema-primitive-icon {
   display: grid;
@@ -2715,11 +2715,14 @@ related:
   font-size: 9px;
 }
 .sp-schema-primitive-details:not(:empty) {
-  padding: 0 16px 14px 50px;
+  padding: 8px 12px 10px 46px;
   border-top: 1px solid var(--sp-line);
 }
 .sp-schema-primitive-details .sp-schema-field-details {
-  padding-top: 12px;
+  padding: 0;
+}
+.sp-schema-primitive-details .sp-schema-meta {
+  margin: 0;
 }
 .sp-schema-explorer-shell.has-selection {
   grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
