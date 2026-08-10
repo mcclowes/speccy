@@ -395,6 +395,36 @@ export function SchemaView({
     </>
   );
   const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
+  const hasRootDetails = Boolean(
+    schema.description ||
+    enumValues ||
+    constraints.length > 0 ||
+    schema.default !== undefined ||
+    (showExample && schema.example !== undefined),
+  );
+
+  if (
+    depth === 0 &&
+    !name &&
+    !isObject &&
+    !alternatives?.length &&
+    !schema.allOf?.length &&
+    !summaryOnly
+  ) {
+    return (
+      <section className={`${className} sp-schema-primitive`}>
+        <header className="sp-schema-primitive-header">
+          <span className="sp-schema-primitive-icon" aria-hidden="true">
+            Aa
+          </span>
+          <div>{header}</div>
+        </header>
+        {hasRootDetails && (
+          <div className="sp-schema-primitive-details">{fieldDetails}</div>
+        )}
+      </section>
+    );
+  }
 
   if (collapseObjects && isObject) {
     if (name) {

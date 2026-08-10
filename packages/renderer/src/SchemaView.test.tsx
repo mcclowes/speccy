@@ -64,6 +64,31 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('Connection · object')).toBeInTheDocument();
   });
 
+  it('presents root primitive schemas with their descriptive details', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{
+          title: 'DataIntegrityDetails',
+          type: 'string',
+          description: 'Explains the integrity issue found in the data.',
+          minLength: 1,
+          enum: ['complete', 'partial'],
+        }}
+      />,
+    );
+
+    expect(container.querySelector('.sp-schema-primitive')).toBeInTheDocument();
+    expect(screen.getByText('DataIntegrityDetails · enum')).toBeVisible();
+    expect(
+      screen.getByText('Explains the integrity issue found in the data.'),
+    ).toBeVisible();
+    expect(screen.getByText('complete')).toBeVisible();
+    expect(screen.getByText('partial')).toBeVisible();
+    expect(container.querySelector('.sp-schema-constraints')).toHaveTextContent(
+      'min length 1',
+    );
+  });
+
   it('does not present allOf members as alternatives', () => {
     render(
       <SchemaView

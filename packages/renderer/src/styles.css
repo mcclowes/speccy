@@ -2689,6 +2689,38 @@ related:
   border-radius: 8px;
   background: var(--sp-surface);
 }
+.sp-schema-primitive {
+  overflow: clip;
+  border: 1px solid var(--sp-line);
+  border-radius: 8px;
+  background: var(--sp-surface);
+}
+.sp-schema-primitive-header {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+}
+.sp-schema-primitive-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  color: var(--sp-accent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+.sp-schema-primitive-details:not(:empty) {
+  padding: 0 16px 14px 50px;
+  border-top: 1px solid var(--sp-line);
+}
+.sp-schema-primitive-details .sp-schema-field-details {
+  padding-top: 12px;
+}
 .sp-schema-explorer-shell.has-selection {
   grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
   min-height: 420px;
