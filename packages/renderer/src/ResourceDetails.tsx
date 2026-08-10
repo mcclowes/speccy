@@ -104,13 +104,20 @@ export function ResponseDetails({
       {response.headers && (
         <div className="sp-detail-list">
           <strong>Headers</strong>
-          {Object.entries(response.headers).map(([name, header]) => (
-            <SchemaView
-              key={name}
-              name={name}
-              schema={{ ...header.schema, description: header.description }}
-            />
-          ))}
+          <SchemaView
+            schema={{
+              type: 'object',
+              properties: Object.fromEntries(
+                Object.entries(response.headers).map(([name, header]) => [
+                  name,
+                  { ...header.schema, description: header.description },
+                ]),
+              ),
+              required: Object.entries(response.headers)
+                .filter(([, header]) => header.required)
+                .map(([name]) => name),
+            }}
+          />
         </div>
       )}
       <MediaContent

@@ -3302,12 +3302,6 @@ related:
 .sp-detail-list > strong {
   font-weight: 600;
 }
-.sp-detail-list > .sp-schema {
-  overflow: clip;
-  border: 1px solid var(--sp-line);
-  border-radius: 8px;
-  background: var(--sp-surface);
-}
 .sp-response-content .sp-detail-list + .sp-media-list,
 .sp-response-body .sp-detail-list + .sp-media-list {
   margin-top: 32px;
