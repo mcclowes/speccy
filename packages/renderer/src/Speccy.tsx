@@ -247,13 +247,14 @@ function EndpointPage({
       )}
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
-          {!isWebhook && (
-            <div className="sp-endpoint-section sp-request-intro">
-              <SecurityRequirements
-                requirements={requirements}
-                schemes={document.components?.securitySchemes}
-              />
-              {parameters.length === 0 && !item.operation.requestBody && (
+          {!isWebhook &&
+            parameters.length === 0 &&
+            !item.operation.requestBody && (
+              <div className="sp-endpoint-section sp-request-intro">
+                <SecurityRequirements
+                  requirements={requirements}
+                  schemes={document.components?.securitySchemes}
+                />
                 <div className="sp-request-empty">
                   <strong>No request parameters</strong>
                   <span>
@@ -261,15 +262,16 @@ function EndpointPage({
                     body.
                   </span>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
           {!isWebhook &&
             (parameters.length > 0 || item.operation.requestBody) && (
               <EndpointRequestDetails
                 path={item.path}
                 parameters={parameters}
                 body={item.operation.requestBody}
+                security={requirements}
+                securitySchemes={document.components?.securitySchemes}
                 parameterPrototype={parameterPrototype}
               />
             )}

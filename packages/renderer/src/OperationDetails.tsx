@@ -646,11 +646,15 @@ export function EndpointRequestDetails({
   path,
   parameters,
   body,
+  security,
+  securitySchemes,
   parameterPrototype,
 }: {
   path: string;
   parameters: Parameter[];
   body?: RequestBody;
+  security?: SecurityRequirement[];
+  securitySchemes?: Record<string, SecurityScheme>;
   parameterPrototype?: boolean;
 }) {
   const pathParameters = parameters.filter(
@@ -709,6 +713,12 @@ export function EndpointRequestDetails({
   return (
     <div className="sp-endpoint-request-grid">
       <div className="sp-endpoint-request-details">
+        <div className="sp-endpoint-section sp-request-intro">
+          <SecurityRequirements
+            requirements={security}
+            schemes={securitySchemes}
+          />
+        </div>
         <GroupedParameterList
           parameters={parameters}
           parameterPrototype={parameterPrototype}

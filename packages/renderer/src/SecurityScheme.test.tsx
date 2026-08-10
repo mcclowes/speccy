@@ -37,13 +37,27 @@ describe('operation security schemes', () => {
               },
             },
           },
-          paths: { '/secured': { get: { operationId: 'secured-operation' } } },
+          paths: {
+            '/secured': {
+              get: {
+                operationId: 'secured-operation',
+                parameters: [
+                  {
+                    in: 'query',
+                    name: 'page',
+                    schema: { type: 'integer' },
+                  },
+                ],
+              },
+            },
+          },
         }}
         showThemeToggle={false}
       />,
     );
 
     const toggle = screen.getByRole('button', { name: 'Authorization' });
+    expect(toggle.closest('.sp-endpoint-request-details')).not.toBeNull();
     fireEvent.click(toggle);
     const authorization = within(toggle.closest('section')!);
 
