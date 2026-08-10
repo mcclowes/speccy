@@ -292,7 +292,7 @@ related:
 .sp-endpoint-address { width: fit-content; max-width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border: 1px solid var(--sp-line); border-radius: 8px; background: var(--sp-surface); }
 .sp-endpoint-address code { overflow: hidden; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .sp-path-parameter { color: var(--sp-accent); }
-.sp-endpoint-layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); gap: clamp(36px, 5vw, 76px); align-items: start; }
+.sp-endpoint-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); gap: clamp(36px, 5vw, 76px); align-items: start; }
 .sp-endpoint-layout.is-webhook { grid-template-columns: minmax(0, 1fr); }
 .sp-endpoint-main { min-width: 0; }
 .sp-endpoint-section { margin: 0 0 46px; }
@@ -306,7 +306,7 @@ related:
 .sp-response-tab.is-success > span { background: #25a878; }
 .sp-response-tab:hover { color: var(--sp-text); background: var(--sp-surface-soft); }
 .sp-response-tab[aria-selected='true'] { color: var(--sp-text); background: var(--sp-surface-soft); }
-.sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.8fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
+.sp-endpoint-response-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr); column-gap: clamp(36px, 5vw, 76px); row-gap: 12px; align-items: start; padding-top: 16px; }
 .sp-response-content { display: grid; min-width: 0; gap: 12px; }
 .sp-response-summary { padding: 11px 14px; border-left: 2px solid #d24872; border-radius: 6px; background: var(--sp-surface-soft); }
 .sp-response-summary.is-success { border-left-color: #25a878; }
