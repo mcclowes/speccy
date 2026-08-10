@@ -109,4 +109,56 @@ describe('OpenAPI diagnostics', () => {
       range: { start: { line: 4 } },
     });
   });
+
+  it('reports a literal UUID in a path', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Companies', version: '1' },
+      paths: {
+        '/companies/8a210b68-6988-11ed-a1eb-0242ac120002/connections': {},
+      },
+    };
+
+    expect(analyzeOpenApi(document)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleId: 'literal-path-identifier',
+          severity: 'warning',
+          path: [
+            'paths',
+            '/companies/8a210b68-6988-11ed-a1eb-0242ac120002/connections',
+          ],
+        }),
+      ]),
+    );
+  });
+
+  it('does not report UUID examples supplied through path parameters', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Companies', version: '1' },
+      paths: {
+        '/companies/{companyId}/connections': {
+          parameters: [
+            {
+              name: 'companyId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'string',
+                format: 'uuid',
+                example: '8a210b68-6988-11ed-a1eb-0242ac120002',
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    expect(
+      analyzeOpenApi(document).some(
+        (diagnostic) => diagnostic.ruleId === 'literal-path-identifier',
+      ),
+    ).toBe(false);
+  });
 });

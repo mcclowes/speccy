@@ -493,6 +493,22 @@ export function analyzeOpenApi(
       (match) => match[1],
     );
     if (
+      /\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?=\/|$)/i.test(
+        path,
+      )
+    )
+      add({
+        ruleId: 'literal-path-identifier',
+        severity: 'warning',
+        category: 'resource-design',
+        message: `${path} contains a literal UUID.`,
+        rationale:
+          'Resource identifiers should be path parameters, not fixed parts of the API contract.',
+        suggestion:
+          'Replace the UUID with a parameter such as `{companyId}` and provide the UUID as its example.',
+        path: ['paths', path],
+      });
+    if (
       /\/(?:create|add|update|delete|remove|get|list|search)(?:\/|$)/i.test(
         path,
       )
