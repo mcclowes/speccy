@@ -1,5 +1,11 @@
 # speccy-renderer
 
+## 0.4.1
+
+### Patch Changes
+
+- [`efdc6c3`](https://github.com/mcclowes/speccy/commit/efdc6c309775b2d8ba7947291a0ee341114fe66b) Thanks [@mcclowes](https://github.com/mcclowes)! - Ship optional parameter controls with their component styles.
+
 ## 0.4.0
 
 ### Minor Changes
