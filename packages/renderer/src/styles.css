@@ -515,9 +515,9 @@ related:
 .sp-code-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; color: #8e8f9c; font-size: 10px; }
 .sp-code-block { min-width: 0; color: var(--sp-code-text); background: var(--sp-code); font-size: 10px; }
 .sp-code-block pre { overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
-.sp-code-block pre.sp-code-numbered { counter-reset: sp-line; white-space: pre; }
-.sp-code-numbered .sp-code-line { position: relative; display: block; padding-left: 2.6em; }
-.sp-code-numbered .sp-code-line::before { content: counter(sp-line); counter-increment: sp-line; position: absolute; top: 0; left: 0; width: 2.1em; color: var(--sp-muted); text-align: right; user-select: none; }
+.sp-code-block pre.sp-code-numbered { counter-reset: sp-line; padding-left: 10px; white-space: pre; }
+.sp-code-numbered .sp-code-line { position: relative; display: block; padding-left: 2.1em; }
+.sp-code-numbered .sp-code-line::before { content: counter(sp-line); counter-increment: sp-line; position: absolute; top: 0; left: 0; width: 1.7em; color: var(--sp-muted); text-align: right; user-select: none; }
 .sp-json-key { color: var(--sp-json-key); }
 .sp-json-string { color: var(--sp-json-string); }
 .sp-json-number { color: var(--sp-json-number); }
