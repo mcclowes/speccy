@@ -1,6 +1,6 @@
 # Release checklist
 
-Changesets owns package versions and changelogs. The release workflow opens or updates a `Version packages` pull request whenever changesets land on `main`. Merging that pull request publishes to npm through trusted publishing with OIDC, creates GitHub releases, and moves the `v1` Action tag to the published commit.
+Changesets owns package versions and changelogs. All public Speccy packages are in one fixed group, so every release gives them the same version. The release workflow opens or updates a `Version packages` pull request whenever changesets land on `main`. Merging that pull request publishes to npm through trusted publishing with OIDC, creates GitHub releases, and moves the `v1` Action tag to the published commit.
 
 ## One-time setup
 
@@ -16,14 +16,14 @@ Changesets owns package versions and changelogs. The release workflow opens or u
 ## Before merging a change
 
 - [ ] Run `npm run check`.
-- [ ] Run `npm run changeset` for each consumer-facing package change.
+- [ ] Run `npm run changeset` for each consumer-facing package change. Select the packages whose behavior changed; Changesets includes the rest of the fixed group when it prepares the release.
 - [ ] Select the smallest correct SemVer bump and write a concise, consumer-facing summary.
-- [ ] Check that changes to shared packages include affected dependents when their declared version ranges need to move.
+- [ ] Check that internal package dependency ranges move to the shared release version in the `Version packages` pull request.
 - [ ] Don't add changesets for private apps, tests, documentation-only changes, or internal refactors with no package behavior change.
 
 ## Release pull request
 
-- [ ] Review every version in the `Version packages` pull request.
+- [ ] Confirm every public package has the same version in the `Version packages` pull request.
 - [ ] Review each generated `CHANGELOG.md`, including dependency-only release notes.
 - [ ] Confirm `package-lock.json` contains the new workspace versions and internal dependency ranges.
 - [ ] Let the full CI suite pass, including the external-style Action fixture.

@@ -7,7 +7,16 @@
     }
   ],
   "commit": false,
-  "fixed": [],
+  "fixed": [
+    [
+      "speccy-core",
+      "speccy-spectral",
+      "speccy-cli",
+      "speccy-renderer",
+      "docusaurus-plugin-speccy",
+      "create-speccy-reference"
+    ]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
