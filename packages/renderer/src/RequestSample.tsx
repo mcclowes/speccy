@@ -11,6 +11,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CodeBlock, CopyButton } from './CodeBlock';
 import { useLocalState } from './useLocalState';
 import { DisclosureChevron } from './DesignSystem';
+import styles from './RequestSample.module.css';
 
 export type RequestSampleLanguage =
   'curl' | 'javascript' | 'node' | 'python' | 'java' | 'csharp' | 'php' | 'go';
@@ -208,7 +209,10 @@ export function RequestSample({
     target.closest('details')?.removeAttribute('open');
   };
   const languagePicker = (
-    <details className="sp-sample-language" ref={languageMenuRef}>
+    <details
+      className={`sp-sample-language ${styles.language}`}
+      ref={languageMenuRef}
+    >
       <summary
         role="button"
         aria-label="Code sample language"
@@ -219,7 +223,7 @@ export function RequestSample({
         <DisclosureChevron />
       </summary>
       <div
-        className="sp-sample-language-menu"
+        className={`sp-sample-language-menu ${styles.languageMenu}`}
         role="listbox"
         aria-label="Code sample language"
       >
@@ -234,7 +238,7 @@ export function RequestSample({
             <LanguageIcon language={item.value} />
             <span>{item.label}</span>
             {item.value === selected.value && (
-              <span className="sp-sample-check">✓</span>
+              <span className={`sp-sample-check ${styles.check}`}>✓</span>
             )}
           </button>
         ))}
@@ -245,11 +249,13 @@ export function RequestSample({
   const copySample = generateRequestSample(selected.value, copyRequest);
 
   return (
-    <section className={`sp-request-sample ${className}`.trim()}>
-      <header className="sp-request-sample-header">
+    <section
+      className={`sp-request-sample ${styles.sample} ${className}`.trim()}
+    >
+      <header className={`sp-request-sample-header ${styles.header}`}>
         <button
           type="button"
-          className="sp-request-sample-toggle"
+          className={`sp-request-sample-toggle ${styles.toggle}`}
           aria-expanded={expanded}
           onClick={() => setExpanded((value) => !value)}
         >
@@ -259,7 +265,7 @@ export function RequestSample({
         {languagePicker}
       </header>
       {expanded && (
-        <div className="sp-request-sample-code">
+        <div className={`sp-request-sample-code ${styles.code}`}>
           <CopyButton value={copySample} compact />
           <CodeBlock value={sample} copyable={false} />
         </div>

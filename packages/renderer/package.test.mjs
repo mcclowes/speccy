@@ -13,6 +13,7 @@ test('packs global and component styles in the public stylesheet', () => {
   assert.match(css, /\.speccy \{/);
   assert.match(css, /\.OperationDetails_optionalParameterDocs \{/);
   assert.match(css, /\.OpenApiDownload_card \{/);
+  assert.match(css, /\.RequestSample_sample \{/);
   assert.match(
     javascript,
     /optionalParameterDocs: "OperationDetails_optionalParameterDocs"/,

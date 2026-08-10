@@ -1,0 +1,148 @@
+.sample {
+  overflow: visible;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.toggle :global(.sp-disclosure-chevron) {
+  transition: transform 120ms ease;
+}
+
+.code {
+  position: relative;
+  border-top: 1px solid var(--sp-code-border);
+}
+
+.code > :global(.sp-copy) {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  right: 14px;
+}
+
+.sample .code pre {
+  padding: 18px 46px 18px 18px;
+}
+
+.language {
+  position: relative;
+  color: var(--sp-code-text);
+  font: inherit;
+}
+
+.language summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  padding: 4px 8px;
+  background: var(--sp-code-control);
+  border: 1px solid var(--sp-code-border);
+  border-radius: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.language summary::-webkit-details-marker {
+  display: none;
+}
+
+.language svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.language summary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.language svg path,
+.language svg circle {
+  vector-effect: non-scaling-stroke;
+}
+
+.language svg path:not([fill]) {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.language svg text {
+  font: 700 9px/1 sans-serif;
+}
+
+.language summary :global(.sp-disclosure-chevron) {
+  margin: -4px 3px 0 auto;
+}
+
+.language[open] summary :global(.sp-disclosure-chevron) {
+  margin-top: 4px;
+  transform: rotate(225deg);
+}
+
+.languageMenu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 220px;
+  padding: 6px;
+  background: var(--sp-code);
+  border: 1px solid var(--sp-code-border);
+  border-radius: 10px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
+}
+
+.languageMenu button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 9px;
+  color: var(--sp-code-text);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.languageMenu button:hover,
+.languageMenu button:focus-visible {
+  background: color-mix(in srgb, var(--sp-accent) 9%, var(--sp-code));
+  outline: none;
+}
+
+.check {
+  font-size: 13px;
+  text-align: center;
+}
