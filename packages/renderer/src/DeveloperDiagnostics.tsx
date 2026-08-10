@@ -11,6 +11,15 @@ import { useMemo, useState } from 'react';
 import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
+import styles from './DeveloperDiagnostics.module.css';
+
+function scoped(className: string) {
+  return className
+    .split(' ')
+    .flatMap((name) => (name ? [name, styles[name]] : []))
+    .filter(Boolean)
+    .join(' ');
+}
 import { DisclosureContent } from './DesignSystem';
 
 const SEVERITY_LABELS: Record<DiagnosticSeverity, string> = {
@@ -113,8 +122,8 @@ function DiagnosticCard({
   onIgnore?: (ruleId: string) => void;
 }) {
   return (
-    <article className={`sp-diagnostic-card is-${diagnostic.severity}`}>
-      <div className="sp-diagnostic-card-head">
+    <article className={scoped(`sp-diagnostic-card is-${diagnostic.severity}`)}>
+      <div className={scoped('sp-diagnostic-card-head')}>
         <span>{diagnostic.severity}</span>
         <code>
           {diagnostic.source}: {diagnostic.ruleId}
@@ -123,13 +132,15 @@ function DiagnosticCard({
       <strong>{diagnostic.message}</strong>
       {diagnostic.rationale && <p>{diagnostic.rationale}</p>}
       {diagnostic.suggestion && (
-        <p className="sp-diagnostic-fix">Try this: {diagnostic.suggestion}</p>
+        <p className={scoped('sp-diagnostic-fix')}>
+          Try this: {diagnostic.suggestion}
+        </p>
       )}
       <footer>
         <span title={diagnostic.path.join('.')}>
           {diagnosticLocation(diagnostic)}
         </span>
-        <span className="sp-diagnostic-actions">
+        <span className={scoped('sp-diagnostic-actions')}>
           {route && href && (
             <a
               href={href}
@@ -171,8 +182,12 @@ export function InlineDiagnostics({
   const [expanded, setExpanded] = useState(true);
   if (!diagnostics.length) return null;
   return (
-    <div className={`sp-inline-diagnostics ${expanded ? '' : 'is-collapsed'}`}>
-      <div className="sp-inline-controls">
+    <div
+      className={scoped(
+        `sp-inline-diagnostics ${expanded ? '' : 'is-collapsed'}`,
+      )}
+    >
+      <div className={scoped('sp-inline-controls')}>
         <span>
           {diagnostics.length} hint{diagnostics.length === 1 ? '' : 's'}
         </span>
@@ -202,7 +217,7 @@ export function InlineDiagnostics({
             );
           })}
           {diagnostics.length > 3 && (
-            <span className="sp-inline-more">
+            <span className={scoped('sp-inline-more')}>
               And {diagnostics.length - 3} more
             </span>
           )}
@@ -281,7 +296,9 @@ export function DeveloperDiagnostics({
     <>
       <button
         type="button"
-        className={`sp-diagnostics-trigger ${allVisible.some((diagnostic) => diagnostic.severity === 'issue') ? 'has-issues' : ''}`}
+        className={scoped(
+          `sp-diagnostics-trigger ${allVisible.some((diagnostic) => diagnostic.severity === 'issue') ? 'has-issues' : ''}`,
+        )}
         onClick={() => {
           onScopeChange(currentPageDiagnostics ? 'page' : 'all');
           onOpenChange(true);
@@ -294,13 +311,15 @@ export function DeveloperDiagnostics({
       </button>
       {open && (
         <div
-          className="sp-diagnostics-backdrop"
+          className={scoped('sp-diagnostics-backdrop')}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) onOpenChange(false);
           }}
         >
           <aside
-            className={`sp-diagnostics-drawer ${pageVisible ? 'has-tabs' : ''}`}
+            className={scoped(
+              `sp-diagnostics-drawer ${pageVisible ? 'has-tabs' : ''}`,
+            )}
             aria-label="API health"
             aria-modal="true"
             role="dialog"
@@ -311,8 +330,8 @@ export function DeveloperDiagnostics({
                 <h2>API health</h2>
                 <p>Contract checks and design guidance. No opaque score.</p>
               </div>
-              <div className="sp-diagnostics-header-actions">
-                <details className="sp-diagnostics-menu">
+              <div className={scoped('sp-diagnostics-header-actions')}>
+                <details className={scoped('sp-diagnostics-menu')}>
                   <summary aria-label="API health actions">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <circle cx="5" cy="12" r="1.75" />
@@ -345,7 +364,7 @@ export function DeveloperDiagnostics({
                 </details>
                 <button
                   type="button"
-                  className="sp-diagnostics-close"
+                  className={scoped('sp-diagnostics-close')}
                   onClick={() => onOpenChange(false)}
                   aria-label="Close API health"
                 >
@@ -354,12 +373,12 @@ export function DeveloperDiagnostics({
               </div>
             </header>
             {pageVisible && (
-              <div className="sp-diagnostics-tabs" role="tablist">
+              <div className={scoped('sp-diagnostics-tabs')} role="tablist">
                 <button
                   type="button"
                   role="tab"
                   aria-selected={scope === 'page'}
-                  className={scope === 'page' ? 'is-active' : ''}
+                  className={scoped(scope === 'page' ? 'is-active' : '')}
                   onClick={() => onScopeChange('page')}
                 >
                   This endpoint <span>{pageVisible.length}</span>
@@ -368,18 +387,18 @@ export function DeveloperDiagnostics({
                   type="button"
                   role="tab"
                   aria-selected={scope === 'all'}
-                  className={scope === 'all' ? 'is-active' : ''}
+                  className={scoped(scope === 'all' ? 'is-active' : '')}
                   onClick={() => onScopeChange('all')}
                 >
                   All API <span>{allVisible.length}</span>
                 </button>
               </div>
             )}
-            <div className="sp-diagnostics-summary">
+            <div className={scoped('sp-diagnostics-summary')}>
               {(['issue', 'warning', 'suggestion'] as const).map((severity) => (
                 <button
                   type="button"
-                  className={filter === severity ? 'is-active' : ''}
+                  className={scoped(filter === severity ? 'is-active' : '')}
                   onClick={() =>
                     setFilter(filter === severity ? 'all' : severity)
                   }
@@ -390,7 +409,7 @@ export function DeveloperDiagnostics({
                 </button>
               ))}
             </div>
-            <div className="sp-diagnostics-tools">
+            <div className={scoped('sp-diagnostics-tools')}>
               <input
                 type="search"
                 value={query}
@@ -399,7 +418,7 @@ export function DeveloperDiagnostics({
                 aria-label="Filter API health findings"
               />
             </div>
-            <div className="sp-diagnostics-list">
+            <div className={scoped('sp-diagnostics-list')}>
               {filtered.map((diagnostic) => {
                 const diagnosticRoute = routeForDiagnostic?.(diagnostic);
                 return (
@@ -417,7 +436,7 @@ export function DeveloperDiagnostics({
                 );
               })}
               {filtered.length === 0 && (
-                <div className="sp-diagnostics-empty">
+                <div className={scoped('sp-diagnostics-empty')}>
                   <strong>No matching findings</strong>
                   <span>Change the filter or restore ignored rules.</span>
                 </div>

@@ -38,7 +38,7 @@ afterEach(() => {
 
 describe('developer diagnostics layout', () => {
   it('allows drawer rows and cards to shrink within the viewport', () => {
-    const css = readFileSync('src/styles.css', 'utf8');
+    const css = readFileSync('src/DeveloperDiagnostics.module.css', 'utf8');
 
     for (const selector of [
       '.sp-diagnostics-drawer',
@@ -57,7 +57,7 @@ describe('developer diagnostics layout', () => {
   });
 
   it('keeps finding cards tall enough to show their content', () => {
-    const css = readFileSync('src/styles.css', 'utf8');
+    const css = readFileSync('src/DeveloperDiagnostics.module.css', 'utf8');
 
     expect(css).toMatch(
       /\.sp-diagnostics-list \{[^}]*grid-auto-rows: max-content;/,
@@ -65,7 +65,7 @@ describe('developer diagnostics layout', () => {
   });
 
   it('floats contextual findings above the API health trigger', () => {
-    const css = readFileSync('src/styles.css', 'utf8');
+    const css = readFileSync('src/DeveloperDiagnostics.module.css', 'utf8');
 
     expect(css).toMatch(
       /\.sp-inline-diagnostics \{[^}]*position: fixed;[^}]*right: 20px;[^}]*bottom: 72px;/,

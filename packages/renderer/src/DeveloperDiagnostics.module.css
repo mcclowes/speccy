@@ -1,0 +1,405 @@
+.sp-inline-diagnostics {
+  position: fixed;
+  right: 20px;
+  bottom: 72px;
+  z-index: 18;
+  width: min(380px, calc(100vw - 40px));
+  max-height: calc(100vh - 112px);
+  overflow: hidden auto;
+  display: grid;
+  gap: 8px;
+  padding: 1px;
+}
+.sp-inline-controls {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  color: var(--sp-muted);
+  border: 1px solid var(--sp-line);
+  border-radius: 9px;
+  background: var(--sp-surface);
+  box-shadow: 0 4px 14px rgba(12, 13, 18, 0.1);
+  font-size: 0.5625rem;
+}
+.sp-inline-controls > span {
+  padding: 0 5px;
+}
+.sp-inline-controls button {
+  padding: 3px 6px;
+  color: inherit;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.sp-inline-controls button:hover {
+  color: var(--sp-text);
+  background: var(--sp-surface-soft);
+}
+.sp-inline-diagnostics.is-collapsed {
+  width: auto;
+}
+.sp-inline-diagnostics .sp-diagnostic-card {
+  box-shadow: 0 7px 24px rgba(12, 13, 18, 0.12);
+}
+.sp-inline-more {
+  padding: 3px 4px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+  text-align: right;
+  text-shadow: 0 1px 2px var(--sp-bg);
+}
+.sp-diagnostics-trigger {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 19;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  color: var(--sp-text);
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: var(--sp-surface);
+  box-shadow: 0 7px 24px rgba(12, 13, 18, 0.16);
+  cursor: pointer;
+  font-size: 0.6875rem;
+}
+.sp-diagnostics-trigger > span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: var(--sp-warning);
+  font-size: 0.625rem;
+  font-weight: 800;
+}
+.sp-diagnostics-trigger.has-issues > span {
+  background: var(--sp-diagnostic-error);
+}
+.sp-diagnostics-trigger small {
+  min-width: 20px;
+  padding: 2px 5px;
+  color: var(--sp-muted);
+  border-radius: 8px;
+  background: var(--sp-surface-soft);
+  text-align: center;
+}
+.sp-diagnostics-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(8, 9, 13, 0.28);
+  backdrop-filter: blur(2px);
+}
+.sp-diagnostics-drawer {
+  width: min(520px, 100%);
+  min-width: 0;
+  height: 100%;
+  overflow-x: hidden;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  color: var(--sp-text);
+  border-left: 1px solid var(--sp-line);
+  background: var(--sp-bg);
+  box-shadow: -20px 0 60px rgba(8, 9, 13, 0.2);
+}
+.sp-diagnostics-drawer.has-tabs {
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+}
+.sp-diagnostics-drawer > header {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 24px 19px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-diagnostics-drawer > header > div:first-child {
+  min-width: 0;
+}
+.sp-diagnostics-drawer h2 {
+  margin: 3px 0 5px;
+  font-size: 1.375rem;
+}
+.sp-diagnostics-drawer header p {
+  margin: 0;
+  color: var(--sp-muted);
+  font-size: 0.6875rem;
+}
+.sp-diagnostics-header-actions {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+.sp-diagnostics-close,
+.sp-diagnostics-menu summary {
+  height: 31px;
+  padding: 0 10px;
+  color: var(--sp-muted);
+  border: 1px solid var(--sp-line);
+  border-radius: 8px;
+  background: var(--sp-surface);
+  cursor: pointer;
+  font-size: 0.5625rem;
+}
+.sp-diagnostics-close {
+  width: 31px;
+  padding: 0;
+  font-size: 1.25rem;
+}
+.sp-diagnostics-menu summary {
+  width: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  list-style: none;
+}
+.sp-diagnostics-menu summary svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.sp-diagnostics-menu summary::-webkit-details-marker {
+  display: none;
+}
+.sp-diagnostics-menu[open] summary {
+  color: var(--sp-text);
+  border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line));
+}
+.sp-diagnostics-menu > div {
+  position: absolute;
+  top: 38px;
+  right: 38px;
+  z-index: 1;
+  min-width: 132px;
+  overflow: hidden;
+  display: grid;
+  padding: 4px;
+  border: 1px solid var(--sp-line);
+  border-radius: 9px;
+  background: var(--sp-surface);
+  box-shadow: 0 10px 30px rgba(12, 13, 18, 0.16);
+}
+.sp-diagnostics-menu button {
+  padding: 8px 9px;
+  color: var(--sp-text);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.5625rem;
+  white-space: nowrap;
+}
+.sp-diagnostics-menu button:hover {
+  background: var(--sp-surface-soft);
+}
+.sp-diagnostics-menu button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.sp-diagnostics-tabs {
+  min-width: 0;
+  display: flex;
+  gap: 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-diagnostics-tabs button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 0 10px;
+  color: var(--sp-muted);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.6875rem;
+}
+.sp-diagnostics-tabs button::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: transparent;
+  content: '';
+}
+.sp-diagnostics-tabs button.is-active {
+  color: var(--sp-text);
+}
+.sp-diagnostics-tabs button.is-active::after {
+  background: var(--sp-accent);
+}
+.sp-diagnostics-tabs span {
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--sp-surface-soft);
+  text-align: center;
+  font-size: 0.5625rem;
+}
+.sp-diagnostics-summary {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-diagnostics-summary button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 7px;
+  padding: 9px 10px;
+  color: var(--sp-muted);
+  border: 1px solid var(--sp-line);
+  border-radius: 8px;
+  background: var(--sp-surface);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.625rem;
+}
+.sp-diagnostics-summary button.is-active {
+  color: var(--sp-text);
+  border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line));
+  background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface));
+}
+.sp-diagnostics-summary strong {
+  color: var(--sp-text);
+  font-size: 1rem;
+}
+.sp-diagnostics-tools {
+  min-width: 0;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-diagnostics-tools input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  color: var(--sp-text);
+  border: 1px solid var(--sp-line);
+  border-radius: 8px;
+  outline: none;
+  background: var(--sp-surface);
+  font-size: 0.6875rem;
+}
+.sp-diagnostics-list {
+  min-width: 0;
+  overflow: hidden auto;
+  display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 10px;
+  padding: 18px 24px 32px;
+}
+.sp-diagnostic-card {
+  min-width: 0;
+  overflow: hidden;
+  padding: 12px 13px;
+  color: var(--sp-text);
+  border: 1px solid var(--sp-line);
+  border-left: 3px solid var(--sp-warning);
+  border-radius: 8px;
+  background: var(--sp-surface);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+.sp-diagnostic-card.is-issue {
+  border-left-color: var(--sp-diagnostic-error);
+}
+.sp-diagnostic-card.is-suggestion {
+  border-left-color: var(--sp-accent);
+}
+.sp-diagnostic-card-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.sp-diagnostic-card-head span {
+  color: var(--sp-muted);
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sp-diagnostic-card-head code {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--sp-muted);
+  font-size: 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-diagnostic-card > strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.sp-diagnostic-card p {
+  margin: 5px 0 0;
+  color: var(--sp-muted);
+  overflow-wrap: anywhere;
+}
+.sp-diagnostic-card .sp-diagnostic-fix {
+  color: var(--sp-text);
+}
+.sp-diagnostic-card footer {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  padding-top: 8px;
+  color: var(--sp-muted);
+  border-top: 1px solid var(--sp-line);
+  font-size: 0.5rem;
+}
+.sp-diagnostic-card footer > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-diagnostic-actions {
+  flex: none;
+  display: flex;
+  gap: 10px;
+}
+.sp-diagnostic-card footer a,
+.sp-diagnostic-card footer button {
+  flex: none;
+  padding: 0;
+  color: var(--sp-muted);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: inherit;
+  text-decoration: underline;
+}
+.sp-diagnostics-empty {
+  display: grid;
+  gap: 4px;
+  padding: 30px;
+  color: var(--sp-muted);
+  text-align: center;
+  font-size: 0.6875rem;
+}
