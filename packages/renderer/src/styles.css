@@ -1794,6 +1794,7 @@ related:
   border-radius: 5px;
   background: var(--sp-code-control);
   font: inherit;
+  cursor: pointer;
 }
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section {
   margin-top: 0;
@@ -2107,6 +2108,7 @@ related:
   border-radius: 7px;
   outline: none;
   font-size: 10px;
+  cursor: pointer;
   transition:
     border-color 140ms ease,
     box-shadow 140ms ease;
