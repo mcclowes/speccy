@@ -286,6 +286,9 @@ describe('SchemaView composition', () => {
       />,
     );
 
+    fireEvent.click(
+      screen.getByRole('button', { name: 'location Location · object' }),
+    );
     const meta = container.querySelector('.sp-schema-explorer-detail-meta');
     expect(meta).toHaveTextContent('Schema Location');
     expect(meta).toHaveTextContent('object');
@@ -333,6 +336,9 @@ describe('SchemaView composition', () => {
       />,
     );
 
+    fireEvent.click(
+      screen.getByRole('button', { name: 'countryCode * string' }),
+    );
     expect(
       container.querySelector('.sp-schema-explorer-detail-heading'),
     ).toHaveTextContent('countryCodeRequired');
@@ -421,6 +427,15 @@ describe('SchemaView composition', () => {
       />,
     );
 
+    expect(
+      screen.queryByText('Unique identifier for the company.'),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('.sp-schema-explorer-inspector'),
+    ).not.toBeInTheDocument();
+    const id = screen.getByRole('button', { name: 'id string · uuid' });
+    fireEvent.click(id);
+    expect(id).toHaveAttribute('aria-pressed', 'true');
     expect(
       screen.getByText('Unique identifier for the company.'),
     ).toBeVisible();

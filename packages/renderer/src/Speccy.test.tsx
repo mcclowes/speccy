@@ -1590,6 +1590,14 @@ describe('Speccy navigation', () => {
       responseBody?.querySelector('.sp-schema-explorer'),
     ).toBeInTheDocument();
     expect(responseBody?.querySelector('.sp-schema-object')).toBeNull();
+    expect(
+      screen.queryByText('The current company state.'),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      within(responseBody as HTMLElement).getByRole('button', {
+        name: 'state string',
+      }),
+    );
     expect(screen.getByText('The current company state.')).toBeInTheDocument();
     expect(screen.getByText(/"found"/)).toBeInTheDocument();
     fireEvent.change(

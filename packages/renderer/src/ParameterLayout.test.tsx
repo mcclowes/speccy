@@ -251,13 +251,30 @@ describe('endpoint parameter layout', () => {
       }),
     ).toBeVisible();
     expect(
-      within(documentation).getByText('Unique identifier for a company.'),
-    ).toBeVisible();
-    expect(
       within(documentation).getByRole('region', {
         name: 'Query parameters schema',
       }),
     ).toBeVisible();
+    expect(
+      within(documentation).queryByText('Unique identifier for a company.'),
+    ).not.toBeInTheDocument();
+    expect(
+      documentation.querySelector('.sp-schema-explorer-inspector'),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      within(documentation).getByRole('button', {
+        name: 'companyId * string · uuid',
+      }),
+    );
+
+    expect(
+      within(documentation).getByText('Unique identifier for a company.'),
+    ).toBeVisible();
+
+    fireEvent.click(
+      within(documentation).getByRole('button', { name: 'include enum' }),
+    );
     expect(
       within(documentation).getByText('Related records to include.'),
     ).toBeVisible();

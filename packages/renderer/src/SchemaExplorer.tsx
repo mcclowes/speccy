@@ -327,14 +327,11 @@ export function SchemaExplorer({
           ? (exampleValue[0] as Record<string, unknown>)[name]
           : undefined,
   }));
-  const [selectedPath, setSelectedPath] = useState<string[]>(
-    fields[0]?.path ?? [],
-  );
+  const [selectedPath, setSelectedPath] = useState<string[]>([]);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
-  const selected =
-    findExplorerField(fields, selectedPath) ?? fields[0] ?? undefined;
+  const selected = findExplorerField(fields, selectedPath);
 
-  if (!selected) return null;
+  if (fields.length === 0) return null;
 
   const toggle = (path: string) => {
     setExpandedPaths((current) => {
@@ -352,7 +349,9 @@ export function SchemaExplorer({
           {schema.description ?? structuralSchema.description}
         </Markdown>
       )}
-      <div className="sp-schema-explorer-shell">
+      <div
+        className={`sp-schema-explorer-shell${selected ? ' has-selection' : ''}`}
+      >
         <section
           className="sp-schema-explorer-tree"
           aria-label={`${rootName} schema`}
@@ -372,20 +371,22 @@ export function SchemaExplorer({
           <div className="sp-schema-explorer-rows">
             <ExplorerTree
               fields={fields}
-              selectedPath={selected.path.join('.')}
+              selectedPath={selected?.path.join('.') ?? ''}
               expandedPaths={expandedPaths}
               onSelect={setSelectedPath}
               onToggle={toggle}
             />
           </div>
         </section>
-        <aside className="sp-schema-explorer-inspector">
-          <ExplorerFieldDetails
-            field={selected}
-            rootName={rootName}
-            showExample={showExample}
-          />
-        </aside>
+        {selected && (
+          <aside className="sp-schema-explorer-inspector">
+            <ExplorerFieldDetails
+              field={selected}
+              rootName={rootName}
+              showExample={showExample}
+            />
+          </aside>
+        )}
       </div>
     </div>
   );

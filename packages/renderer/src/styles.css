@@ -2610,15 +2610,20 @@ related:
 }
 .sp-schema-explorer-shell {
   display: grid;
-  grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
-  min-height: 420px;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid var(--sp-line);
   border-radius: 8px;
   background: var(--sp-surface);
 }
+.sp-schema-explorer-shell.has-selection {
+  grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
+  min-height: 420px;
+}
 .sp-schema-explorer-tree {
   min-width: 0;
+}
+.sp-schema-explorer-shell.has-selection .sp-schema-explorer-tree {
   border-right: 1px solid var(--sp-line);
 }
 .sp-schema-explorer-header {
@@ -2909,7 +2914,7 @@ related:
   .sp-schema-explorer-shell {
     grid-template-columns: 1fr;
   }
-  .sp-schema-explorer-tree {
+  .sp-schema-explorer-shell.has-selection .sp-schema-explorer-tree {
     border-right: 0;
     border-bottom: 1px solid var(--sp-line);
   }
