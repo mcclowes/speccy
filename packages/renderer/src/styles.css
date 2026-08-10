@@ -1772,6 +1772,11 @@ related:
 .sp-endpoint-section > h3 {
   font-size: 18px;
 }
+.sp-endpoint-request-details .sp-endpoint-section > h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
 .sp-endpoint-responses {
   margin-top: 32px;
 }
