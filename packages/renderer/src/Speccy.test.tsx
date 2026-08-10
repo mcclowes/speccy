@@ -1586,6 +1586,10 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByRole('combobox', { name: 'Response example' }),
     ).toHaveValue('0');
+    expect(
+      responseBody?.querySelector('.sp-schema-explorer'),
+    ).toBeInTheDocument();
+    expect(responseBody?.querySelector('.sp-schema-object')).toBeNull();
     expect(screen.getByText('The current company state.')).toBeInTheDocument();
     expect(screen.getByText(/"found"/)).toBeInTheDocument();
     fireEvent.change(
