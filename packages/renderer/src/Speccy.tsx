@@ -439,25 +439,27 @@ function NavigationGroup({
   tag,
   operations,
   searching,
+  open,
+  onOpenChange,
   activeTag,
   activeOperationId,
   onNavigate,
   onNavigateTag,
   hrefForRoute,
-  storageKey,
 }: {
   tag: TagModel;
   operations: OperationModel[];
   searching: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   activeTag?: TagModel;
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
-  storageKey: string;
 }) {
-  const [open, setOpen] = useLocalState(storageKey, false);
   const groupRef = useRef<HTMLDivElement>(null);
+  const wasActiveRouteWithinGroup = useRef(false);
   const activeRouteIsWithinGroup =
     activeTag === tag ||
     operations.some((item) => item.id === activeOperationId);
@@ -500,8 +502,10 @@ function NavigationGroup({
   );
 
   useEffect(() => {
-    if (activeRouteIsWithinGroup) setOpen(true);
-  }, [activeRouteIsWithinGroup, setOpen]);
+    if (activeRouteIsWithinGroup && !wasActiveRouteWithinGroup.current)
+      onOpenChange(true);
+    wasActiveRouteWithinGroup.current = activeRouteIsWithinGroup;
+  }, [activeRouteIsWithinGroup, onOpenChange]);
 
   useEffect(() => {
     if (!activeRouteIsWithinGroup || !expanded) return;
@@ -515,7 +519,7 @@ function NavigationGroup({
       <button
         type="button"
         className={`sp-nav-tag ${tag.icon ? 'has-icon ' : ''}${activeRouteIsWithinGroup ? 'is-active' : ''}`}
-        onClick={() => setOpen(!expanded)}
+        onClick={() => onOpenChange(!expanded)}
         aria-expanded={expanded}
         aria-controls={operationListId}
       >
@@ -526,7 +530,7 @@ function NavigationGroup({
         <DisclosureChevron />
       </button>
       {expanded && (
-        <div id={operationListId}>
+        <div className="sp-nav-operations" id={operationListId}>
           <a
             className={`sp-nav-operation sp-nav-overview ${activeTag === tag ? 'is-active' : ''}`}
             href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
@@ -564,22 +568,24 @@ function NavigationTags({
   tags,
   matches,
   searching,
+  openTag,
+  onOpenTagChange,
   activeTag,
   activeOperationId,
   onNavigate,
   onNavigateTag,
   hrefForRoute,
-  storageScope,
 }: {
   tags: TagModel[];
   matches: (item: OperationModel) => boolean;
   searching: boolean;
+  openTag: string | null;
+  onOpenTagChange: (tag: string | null) => void;
   activeTag?: TagModel;
   activeOperationId?: string;
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
-  storageScope: string;
 }) {
   return (
     <>
@@ -591,12 +597,13 @@ function NavigationTags({
             tag={tag}
             operations={operations}
             searching={searching}
+            open={openTag === tag.name}
+            onOpenChange={(open) => onOpenTagChange(open ? tag.name : null)}
             activeTag={activeTag}
             activeOperationId={activeOperationId}
             onNavigate={onNavigate}
             onNavigateTag={onNavigateTag}
             hrefForRoute={hrefForRoute}
-            storageKey={`${storageScope}:navigation:${tag.name}`}
             key={tag.name}
           />
         ))}
@@ -750,6 +757,9 @@ export function Speccy({
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const [openNavigationTag, setOpenNavigationTag] = useState<string | null>(
+    null,
+  );
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>(
     'speccy:theme',
     theme,
@@ -1075,12 +1085,13 @@ export function Speccy({
                           tags={visibleTags}
                           matches={matchesFilter}
                           searching={Boolean(normalizedFilter)}
+                          openTag={openNavigationTag}
+                          onOpenTagChange={setOpenNavigationTag}
                           activeTag={activeTag}
                           activeOperationId={activeOperation?.id}
                           onNavigate={navigate}
                           onNavigateTag={navigateTag}
                           hrefForRoute={hrefForRoute}
-                          storageScope={storageScope}
                         />
                       </section>
                     );
@@ -1089,12 +1100,13 @@ export function Speccy({
                     tags={ungroupedTags}
                     matches={matchesFilter}
                     searching={Boolean(normalizedFilter)}
+                    openTag={openNavigationTag}
+                    onOpenTagChange={setOpenNavigationTag}
                     activeTag={activeTag}
                     activeOperationId={activeOperation?.id}
                     onNavigate={navigate}
                     onNavigateTag={navigateTag}
                     hrefForRoute={hrefForRoute}
-                    storageScope={storageScope}
                   />
                 </>
               ) : (
@@ -1102,12 +1114,13 @@ export function Speccy({
                   tags={model.tags}
                   matches={matchesFilter}
                   searching={Boolean(normalizedFilter)}
+                  openTag={openNavigationTag}
+                  onOpenTagChange={setOpenNavigationTag}
                   activeTag={activeTag}
                   activeOperationId={activeOperation?.id}
                   onNavigate={navigate}
                   onNavigateTag={navigateTag}
                   hrefForRoute={hrefForRoute}
-                  storageScope={storageScope}
                 />
               )}
               {normalizedFilter && filteredOperationCount === 0 && (

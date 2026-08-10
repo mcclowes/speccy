@@ -536,6 +536,12 @@ related:
   border-radius: 7px;
   font-weight: 700;
 }
+.sp-nav-operations {
+  margin: 3px 4px 10px 8px;
+  padding: 3px 0 3px 7px;
+  border-left: 1px solid
+    color-mix(in srgb, var(--sp-accent) 24%, var(--sp-line));
+}
 .sp-disclosure-chevron {
   display: inline-block;
   flex: none;
@@ -4093,6 +4099,10 @@ related:
     padding: 10px 12px;
     border-radius: 9px;
     font-size: 13px;
+  }
+  .sp-sidebar .sp-nav-operations {
+    margin-left: 12px;
+    padding-left: 8px;
   }
   .sp-sidebar .sp-nav-subgroup > .sp-nav-operation {
     padding-left: 20px;
