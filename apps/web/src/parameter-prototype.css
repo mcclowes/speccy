@@ -96,7 +96,7 @@
 .sp-optional-parameter-picker {
   position: relative;
 }
-.sp-add-optional-parameter {
+.speccy .sp-add-optional-parameter {
   padding: 0;
   color: var(--sp-muted);
   border: 0;
@@ -107,8 +107,8 @@
     sans-serif;
   transition: color 120ms ease;
 }
-.sp-add-optional-parameter:hover,
-.sp-add-optional-parameter:focus-visible {
+.speccy .sp-add-optional-parameter:hover,
+.speccy .sp-add-optional-parameter:focus-visible {
   color: var(--sp-accent);
 }
 .sp-optional-parameter-menu {
