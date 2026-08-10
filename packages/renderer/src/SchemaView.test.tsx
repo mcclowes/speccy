@@ -71,10 +71,36 @@ describe('SchemaView composition', () => {
       />,
     );
 
-    expect(screen.getByText('array<object>')).toBeInTheDocument();
-    expect(screen.getByText('id')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'object schema' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'id string' })).toBeVisible();
     expect(screen.queryByText(/option/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/one of/i)).not.toBeInTheDocument();
+  });
+
+  it('uses the schema explorer for fields composed with allOf', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{
+          title: 'Banking: Transaction category',
+          description: 'A transaction category.',
+          allOf: [
+            {
+              type: 'object',
+              required: ['id'],
+              properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+              },
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(container.querySelector('.sp-schema-explorer')).toBeInTheDocument();
+    expect(container.querySelector('.sp-schema-object')).toBeNull();
+    expect(screen.getByRole('button', { name: 'id * string' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'name string' })).toBeVisible();
   });
 
   it('does not repeat primitive array items beneath the array type', () => {

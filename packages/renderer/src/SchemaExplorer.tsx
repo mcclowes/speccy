@@ -40,19 +40,39 @@ type ExplorerField = {
   exampleValue?: unknown;
 };
 
+export function structuralObjectSchema(schema: SchemaObject): SchemaObject {
+  const base = schema.type === 'array' && schema.items ? schema.items : schema;
+  const members = (base.allOf ?? []).map(structuralObjectSchema);
+  if (members.length === 0) return base;
+
+  const properties = Object.assign(
+    {},
+    ...members.map((member) => member.properties ?? {}),
+    base.properties ?? {},
+  );
+  const required = [
+    ...new Set([
+      ...members.flatMap((member) => member.required ?? []),
+      ...(base.required ?? []),
+    ]),
+  ];
+
+  return {
+    ...base,
+    type: base.type ?? members.find((member) => member.type)?.type,
+    properties,
+    required,
+  };
+}
+
 function childProperties(schema: SchemaObject): Record<string, SchemaObject> {
-  if (schema.type === 'array' && schema.items) {
-    return schema.items.properties ?? {};
-  }
-  return schema.properties ?? {};
+  return structuralObjectSchema(schema).properties ?? {};
 }
 
 function fieldChildren(field: ExplorerField): ExplorerField[] {
-  const properties = childProperties(field.schema);
-  const required =
-    field.schema.type === 'array'
-      ? field.schema.items?.required
-      : field.schema.required;
+  const structuralSchema = structuralObjectSchema(field.schema);
+  const properties = childProperties(structuralSchema);
+  const required = structuralSchema.required;
   return Object.entries(properties).map(([name, schema]) => ({
     name,
     schema,
@@ -286,8 +306,7 @@ export function SchemaExplorer({
   showExample: boolean;
   exampleValue?: unknown;
 }) {
-  const structuralSchema =
-    schema.type === 'array' && schema.items ? schema.items : schema;
+  const structuralSchema = structuralObjectSchema(schema);
   const properties = structuralSchema.properties ?? {};
   const rootName = structuralSchema.title ?? schema.title ?? 'object';
   const fields = Object.entries(properties).map(([name, fieldSchema]) => ({
