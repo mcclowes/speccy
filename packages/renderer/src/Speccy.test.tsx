@@ -887,7 +887,6 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    const authorization = screen.getByLabelText('api_key');
     const requestBuilder = screen.getByRole('complementary', {
       name: 'Request builder',
     });
@@ -900,9 +899,18 @@ describe('Speccy navigation', () => {
       screen.getByRole('heading', { level: 3, name: 'Authorization API key' }),
     ).toBeInTheDocument();
     expect(
-      within(requestBuilder).getByLabelText('Required'),
-    ).toBeInTheDocument();
+      within(requestBuilder).queryByLabelText('Required'),
+    ).not.toBeInTheDocument();
+    const authorizationToggle = within(requestBuilder).getByRole('button', {
+      name: 'Authorization API key',
+    });
+    expect(authorizationToggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(authorizationToggle);
+    const authorization = screen.getByLabelText('api_key');
     fireEvent.change(authorization, { target: { value: 'secret token' } });
+    expect(
+      within(requestBuilder).getByLabelText('Authorization configured'),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
 
     expect(
@@ -1037,6 +1045,9 @@ describe('Speccy navigation', () => {
       />,
     );
 
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Authorization Bearer' }),
+    );
     expect(screen.getByLabelText('auth_token')).toBeInTheDocument();
     expect(screen.queryByLabelText('X-API-Key')).not.toBeInTheDocument();
 
@@ -1115,6 +1126,45 @@ describe('Speccy navigation', () => {
         },
       }),
     );
+  });
+
+  it('opens authorization and warns instead of sending without credentials', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    const fetchMock = vi.spyOn(globalThis, 'fetch');
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Secured API' },
+          servers: [{ url: 'https://api.example.com' }],
+          security: [{ apiKey: [] }],
+          paths: {
+            '/companies': {
+              get: { summary: 'Get companies', operationId: 'get-companies' },
+            },
+          },
+          components: {
+            securitySchemes: {
+              apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const authorizationToggle = screen.getByRole('button', {
+      name: 'Authorization API key',
+    });
+    expect(authorizationToggle).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send request' }));
+
+    expect(authorizationToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Enter all required credentials before sending this request.',
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('prepopulates the request body from its schema', () => {
@@ -2061,11 +2111,20 @@ describe('Speccy navigation', () => {
     fireEvent.change(screen.getByRole('textbox', { name: /companyId/ }), {
       target: { value: 'company-42' },
     });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Authorization Bearer' }),
+    );
     fireEvent.change(screen.getByLabelText('bearerAuth'), {
       target: { value: 'secret-token' },
     });
     unmount();
     render(<Speccy spec={securedSpec} basePath="/api" />);
+    expect(
+      screen.getByLabelText('Authorization configured'),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Authorization Bearer' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
 
     expect(screen.getByRole('textbox', { name: /companyId/ })).toHaveValue(
@@ -2130,6 +2189,9 @@ describe('Speccy navigation', () => {
     fireEvent.change(screen.getByRole('textbox', { name: /companyId/ }), {
       target: { value: 'company-42' },
     });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Authorization Bearer' }),
+    );
     fireEvent.change(screen.getByLabelText('bearerAuth'), {
       target: { value: 'secret-token' },
     });
@@ -2137,6 +2199,9 @@ describe('Speccy navigation', () => {
       within(
         screen.getByRole('navigation', { name: 'API reference' }),
       ).getByRole('link', { name: /List company people/ }),
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Authorization Bearer' }),
     );
 
     expect(screen.getByRole('textbox', { name: /companyId/ })).toHaveValue(

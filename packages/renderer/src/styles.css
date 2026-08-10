@@ -2183,6 +2183,75 @@ related:
   margin: 0 0 14px;
   font-size: 13px;
 }
+.sp-authorization-card {
+  padding: 0;
+  transition: border-color 140ms ease;
+}
+.sp-authorization-card.is-warning {
+  border-color: color-mix(in srgb, #d24859 62%, var(--sp-line));
+}
+.sp-authorization-header {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px;
+}
+.sp-authorization-header h3 {
+  min-width: 0;
+  margin: 0;
+}
+.sp-authorization-toggle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 0;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.sp-authorization-toggle .sp-disclosure-chevron {
+  transition: transform 120ms ease;
+}
+.sp-authorization-toggle:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid color-mix(in srgb, var(--sp-accent) 55%, transparent);
+  outline-offset: 3px;
+}
+.sp-authorization-complete {
+  display: grid;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  color: #167c5a;
+  border: 1px solid color-mix(in srgb, #167c5a 45%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, #25a878 10%, var(--sp-surface));
+  font-size: 11px;
+  font-weight: 700;
+  place-items: center;
+}
+.sp-authorization-content {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--sp-line);
+}
+.sp-authorization-content > :first-child {
+  margin-top: 14px;
+}
+.sp-authorization-warning {
+  margin: 0 0 14px;
+  padding: 9px 10px;
+  color: #9c3344;
+  border-radius: 6px;
+  background: color-mix(in srgb, #d24859 9%, var(--sp-surface));
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.45;
+}
 .sp-rail-card-heading {
   display: flex;
   align-items: center;

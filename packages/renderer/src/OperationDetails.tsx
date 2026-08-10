@@ -988,6 +988,8 @@ export function RequestRail({
     `${storageScope}:authorization`,
     {},
   );
+  const [authorizationExpanded, setAuthorizationExpanded] = useState(false);
+  const [authorizationWarning, setAuthorizationWarning] = useState(false);
   const [credentialVisible, setCredentialVisible] = useState(false);
   const [parametersExpanded, setParametersExpanded] = useState(false);
   const [selectedOptionalParameters, setSelectedOptionalParameters] = useState<
@@ -1061,6 +1063,13 @@ export function RequestRail({
           .includes(optionalPickerQuery.trim().toLowerCase()))
     );
   });
+  const authorizationComplete = activeSchemes.every(({ name }) =>
+    credentials[name]?.trim(),
+  );
+
+  useEffect(() => {
+    if (authorizationComplete) setAuthorizationWarning(false);
+  }, [authorizationComplete]);
 
   useEffect(() => {
     const input = bodyInputRef.current;
@@ -1140,6 +1149,12 @@ export function RequestRail({
   const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${query.size ? `?${query}` : ''}`;
   const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${maskedQuery.size ? `?${maskedQuery}` : ''}`;
   async function executeRequest() {
+    if (!authorizationComplete) {
+      setAuthorizationExpanded(true);
+      setAuthorizationWarning(true);
+      return;
+    }
+
     const missing = parameters.filter(
       (parameter) =>
         parameter.required &&
@@ -1199,62 +1214,96 @@ export function RequestRail({
   return (
     <aside className="sp-request-rail" aria-label="Request builder">
       {activeSchemes.length > 0 && (
-        <section className="sp-rail-card">
-          <h3>Authorization{schemeLabel && <small>{schemeLabel}</small>}</h3>
-          {requirements && requirements.length > 1 && (
-            <label className="sp-field sp-auth-method">
-              <span>Authorization method</span>
-              <select
-                aria-label="Authorization method"
-                value={selectedSecurityOption}
-                onChange={(event) =>
-                  setSelectedSecurityOption(Number(event.target.value))
-                }
+        <section
+          className={`sp-rail-card sp-authorization-card${authorizationWarning ? ' is-warning' : ''}`}
+        >
+          <div className="sp-authorization-header">
+            <h3>
+              <button
+                type="button"
+                className="sp-authorization-toggle"
+                aria-expanded={authorizationExpanded}
+                onClick={() => setAuthorizationExpanded(!authorizationExpanded)}
               >
-                {requirements.map((requirement, index) => (
-                  <option value={index} key={index}>
-                    {securityRequirementLabel(requirement, securitySchemes)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="sp-auth-fields">
-            {activeSchemes.map(({ name: schemeName, scheme }) => (
-              <label className="sp-field" key={schemeName}>
-                <span>
-                  {scheme?.name ?? schemeName} <RequiredMark />
-                </span>
-                <div className="sp-secret-field">
-                  <input
-                    type={credentialVisible ? 'text' : 'password'}
-                    aria-label={scheme?.name ?? schemeName}
-                    required
-                    autoComplete="off"
-                    data-1p-ignore
-                    value={credentials[schemeName] ?? ''}
-                    onChange={(event) =>
-                      setCredentials({
-                        ...credentials,
-                        [schemeName]: event.target.value,
-                      })
-                    }
-                    placeholder={
-                      scheme?.type === 'http' ? 'Bearer token' : 'API key'
-                    }
-                  />
-                  <button
-                    type="button"
-                    aria-label={`${credentialVisible ? 'Hide' : 'Show'} ${activeSchemes.length === 1 ? 'authorization' : (scheme?.name ?? schemeName)}`}
-                    aria-pressed={credentialVisible}
-                    onClick={() => setCredentialVisible((visible) => !visible)}
-                  >
-                    <EyeIcon crossed={credentialVisible} />
-                  </button>
-                </div>
-              </label>
-            ))}
+                <DisclosureChevron />
+                Authorization{schemeLabel && <small>{schemeLabel}</small>}
+              </button>
+            </h3>
+            {authorizationComplete && (
+              <span
+                className="sp-authorization-complete"
+                aria-label="Authorization configured"
+              >
+                ✓
+              </span>
+            )}
           </div>
+          {authorizationExpanded && (
+            <div className="sp-authorization-content">
+              {authorizationWarning && (
+                <p className="sp-authorization-warning" role="alert">
+                  Enter all required credentials before sending this request.
+                </p>
+              )}
+              {requirements && requirements.length > 1 && (
+                <label className="sp-field sp-auth-method">
+                  <span>Authorization method</span>
+                  <select
+                    aria-label="Authorization method"
+                    value={selectedSecurityOption}
+                    onChange={(event) => {
+                      setSelectedSecurityOption(Number(event.target.value));
+                      setAuthorizationWarning(false);
+                    }}
+                  >
+                    {requirements.map((requirement, index) => (
+                      <option value={index} key={index}>
+                        {securityRequirementLabel(requirement, securitySchemes)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className="sp-auth-fields">
+                {activeSchemes.map(({ name: schemeName, scheme }) => (
+                  <label className="sp-field" key={schemeName}>
+                    <span>
+                      {scheme?.name ?? schemeName} <RequiredMark />
+                    </span>
+                    <div className="sp-secret-field">
+                      <input
+                        type={credentialVisible ? 'text' : 'password'}
+                        aria-label={scheme?.name ?? schemeName}
+                        required
+                        autoComplete="off"
+                        data-1p-ignore
+                        value={credentials[schemeName] ?? ''}
+                        onChange={(event) =>
+                          setCredentials({
+                            ...credentials,
+                            [schemeName]: event.target.value,
+                          })
+                        }
+                        placeholder={
+                          scheme?.type === 'http' ? 'Bearer token' : 'API key'
+                        }
+                      />
+                      <button
+                        type="button"
+                        aria-label={`${credentialVisible ? 'Hide' : 'Show'} ${activeSchemes.length === 1 ? 'authorization' : (scheme?.name ?? schemeName)}`}
+                        aria-pressed={credentialVisible}
+                        onClick={() =>
+                          setCredentialVisible((visible) => !visible)
+                        }
+                      >
+                        <EyeIcon crossed={credentialVisible} />
+                      </button>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       )}
       {parameters.length > 0 && (
