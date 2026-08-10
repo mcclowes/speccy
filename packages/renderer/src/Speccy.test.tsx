@@ -122,6 +122,46 @@ describe('Speccy navigation', () => {
     expect(container.querySelector('.sp-brand')).toHaveClass('has-logo');
   });
 
+  it('opens and closes the mobile navigation', () => {
+    render(<Speccy spec={spec} />);
+    const navigation = screen.getByRole('navigation', {
+      name: 'API reference',
+    });
+    const toggle = screen.getByRole('button', { name: 'Open navigation' });
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(navigation).not.toHaveClass('is-open');
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(navigation).toHaveClass('is-open');
+
+    fireEvent.click(
+      within(navigation).getByRole('button', { name: 'Companies' }),
+    );
+    fireEvent.click(
+      within(navigation).getByRole('link', { name: /List companies/ }),
+    );
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(navigation).not.toHaveClass('is-open');
+  });
+
+  it('dismisses the mobile navigation from its backdrop and Escape', () => {
+    render(<Speccy spec={spec} />);
+    const toggle = screen.getByRole('button', { name: 'Open navigation' });
+    const backdrop = screen.getByRole('button', {
+      name: 'Close navigation',
+    });
+
+    fireEvent.click(toggle);
+    fireEvent.click(backdrop);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(toggle);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('delegates routing to a controlling host without changing browser history', () => {
     const onNavigate = vi.fn();
     const hrefForRoute = vi.fn((route: SpeccyRoute) =>

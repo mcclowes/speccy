@@ -745,6 +745,7 @@ export function Speccy({
   }, [showDeveloperHints, result.document, previousSpec, spectralDiagnostics]);
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>(
     'speccy:theme',
     theme,
@@ -798,6 +799,7 @@ export function Speccy({
         setSearchOpen(true);
       } else if (event.key === 'Escape') {
         setSearchOpen(false);
+        setMobileNavigationOpen(false);
       }
     };
     window.addEventListener('keydown', handleShortcut);
@@ -891,6 +893,7 @@ export function Speccy({
       setInternalRoute(routeKey(nextRoute));
     }
     rootRef.current?.scrollIntoView({ block: 'start' });
+    setMobileNavigationOpen(false);
   }
 
   function navigateTag(tag: TagModel) {
@@ -901,6 +904,7 @@ export function Speccy({
       setInternalRoute(routeKey(nextRoute));
     }
     rootRef.current?.scrollIntoView({ block: 'start' });
+    setMobileNavigationOpen(false);
   }
 
   function navigateReference(key: ReferenceKey, component?: string) {
@@ -922,6 +926,7 @@ export function Speccy({
           ?.scrollIntoView({ block: 'start' }),
       );
     else rootRef.current?.scrollIntoView({ block: 'start' });
+    setMobileNavigationOpen(false);
   }
 
   function navigateDiagnostic(nextRoute: SpeccyRoute) {
@@ -993,65 +998,104 @@ export function Speccy({
         <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />
       )}
       {showSidebar && (
-        <nav className="sp-sidebar" aria-label="API reference">
-          <a
-            className={logo ? 'sp-brand has-logo' : 'sp-brand'}
-            href={hrefForRoute({ page: 'overview' })}
-            onClick={(event) => {
-              event.preventDefault();
-              navigate();
-            }}
-          >
-            {logo}
+        <>
+          <header className="sp-mobile-header">
             <span>{model.document.info?.title ?? 'API reference'}</span>
-          </a>
-          <div className="sp-nav-scroll">
+            <button
+              type="button"
+              className="sp-mobile-nav-toggle"
+              aria-expanded={mobileNavigationOpen}
+              aria-controls="sp-sidebar-navigation"
+              aria-label="Open navigation"
+              onClick={() => setMobileNavigationOpen(true)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            </button>
+          </header>
+          <button
+            type="button"
+            className={`sp-mobile-nav-backdrop ${mobileNavigationOpen ? 'is-open' : ''}`}
+            aria-label="Close navigation"
+            onClick={() => setMobileNavigationOpen(false)}
+          />
+          <nav
+            id="sp-sidebar-navigation"
+            className={`sp-sidebar ${mobileNavigationOpen ? 'is-open' : ''}`}
+            aria-label="API reference"
+          >
             <a
-              className={`sp-nav-operation sp-nav-overview ${!activeRoute ? 'is-active' : ''}`}
+              className={logo ? 'sp-brand has-logo' : 'sp-brand'}
               href={hrefForRoute({ page: 'overview' })}
-              aria-current={!activeRoute ? 'page' : undefined}
               onClick={(event) => {
                 event.preventDefault();
                 navigate();
               }}
             >
-              All endpoints
+              {logo}
+              <span>{model.document.info?.title ?? 'API reference'}</span>
             </a>
-            {model.tagGroups.length > 0 ? (
-              <>
-                {model.tagGroups.map((group) => {
-                  const visibleTags = group.tags.filter((tag) =>
-                    tag.operations.some(matchesFilter),
-                  );
-                  if (visibleTags.length === 0) return null;
-                  return (
-                    <section
-                      className="sp-nav-tag-group"
-                      aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`}
-                      key={group.name}
-                    >
-                      <h2
-                        className="sp-nav-heading"
-                        id={`sp-nav-tag-group-${slugify(group.name)}`}
+            <div className="sp-nav-scroll">
+              <a
+                className={`sp-nav-operation sp-nav-overview ${!activeRoute ? 'is-active' : ''}`}
+                href={hrefForRoute({ page: 'overview' })}
+                aria-current={!activeRoute ? 'page' : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigate();
+                }}
+              >
+                All endpoints
+              </a>
+              {model.tagGroups.length > 0 ? (
+                <>
+                  {model.tagGroups.map((group) => {
+                    const visibleTags = group.tags.filter((tag) =>
+                      tag.operations.some(matchesFilter),
+                    );
+                    if (visibleTags.length === 0) return null;
+                    return (
+                      <section
+                        className="sp-nav-tag-group"
+                        aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`}
+                        key={group.name}
                       >
-                        {group.name}
-                      </h2>
-                      <NavigationTags
-                        tags={visibleTags}
-                        matches={matchesFilter}
-                        searching={Boolean(normalizedFilter)}
-                        activeTag={activeTag}
-                        activeOperationId={activeOperation?.id}
-                        onNavigate={navigate}
-                        onNavigateTag={navigateTag}
-                        hrefForRoute={hrefForRoute}
-                        storageScope={storageScope}
-                      />
-                    </section>
-                  );
-                })}
+                        <h2
+                          className="sp-nav-heading"
+                          id={`sp-nav-tag-group-${slugify(group.name)}`}
+                        >
+                          {group.name}
+                        </h2>
+                        <NavigationTags
+                          tags={visibleTags}
+                          matches={matchesFilter}
+                          searching={Boolean(normalizedFilter)}
+                          activeTag={activeTag}
+                          activeOperationId={activeOperation?.id}
+                          onNavigate={navigate}
+                          onNavigateTag={navigateTag}
+                          hrefForRoute={hrefForRoute}
+                          storageScope={storageScope}
+                        />
+                      </section>
+                    );
+                  })}
+                  <NavigationTags
+                    tags={ungroupedTags}
+                    matches={matchesFilter}
+                    searching={Boolean(normalizedFilter)}
+                    activeTag={activeTag}
+                    activeOperationId={activeOperation?.id}
+                    onNavigate={navigate}
+                    onNavigateTag={navigateTag}
+                    hrefForRoute={hrefForRoute}
+                    storageScope={storageScope}
+                  />
+                </>
+              ) : (
                 <NavigationTags
-                  tags={ungroupedTags}
+                  tags={model.tags}
                   matches={matchesFilter}
                   searching={Boolean(normalizedFilter)}
                   activeTag={activeTag}
@@ -1061,66 +1105,54 @@ export function Speccy({
                   hrefForRoute={hrefForRoute}
                   storageScope={storageScope}
                 />
-              </>
-            ) : (
-              <NavigationTags
-                tags={model.tags}
-                matches={matchesFilter}
-                searching={Boolean(normalizedFilter)}
-                activeTag={activeTag}
-                activeOperationId={activeOperation?.id}
-                onNavigate={navigate}
-                onNavigateTag={navigateTag}
-                hrefForRoute={hrefForRoute}
-                storageScope={storageScope}
-              />
-            )}
-            {normalizedFilter && filteredOperationCount === 0 && (
-              <div className="sp-nav-empty">
-                <strong>No matching endpoints</strong>
-                <span>Try a path, method, or operation name.</span>
-              </div>
-            )}
-            {!normalizedFilter && (
-              <ReferenceNavigation
-                document={model.document}
-                activeKey={activeReference}
-                storageKey={`${storageScope}:navigation:reference`}
-                hrefFor={(key) =>
-                  hrefForRoute({ page: 'reference', section: key })
-                }
-                onNavigate={navigateReference}
-              />
-            )}
-          </div>
-          <div className="sp-sidebar-search">
-            <svg
-              className="sp-filter-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="m16 16 4 4" />
-            </svg>
-            <input
-              value={filterQuery}
-              onChange={(event) => setFilterQuery(event.target.value)}
-              placeholder="Filter endpoints"
-              aria-label="Filter endpoints"
-            />
-            {filterQuery && (
-              <button
-                type="button"
-                className="sp-search-clear"
-                onClick={() => setFilterQuery('')}
-                aria-label="Clear filter"
+              )}
+              {normalizedFilter && filteredOperationCount === 0 && (
+                <div className="sp-nav-empty">
+                  <strong>No matching endpoints</strong>
+                  <span>Try a path, method, or operation name.</span>
+                </div>
+              )}
+              {!normalizedFilter && (
+                <ReferenceNavigation
+                  document={model.document}
+                  activeKey={activeReference}
+                  storageKey={`${storageScope}:navigation:reference`}
+                  hrefFor={(key) =>
+                    hrefForRoute({ page: 'reference', section: key })
+                  }
+                  onNavigate={navigateReference}
+                />
+              )}
+            </div>
+            <div className="sp-sidebar-search">
+              <svg
+                className="sp-filter-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
               >
-                ×
-              </button>
-            )}
-          </div>
-        </nav>
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="m16 16 4 4" />
+              </svg>
+              <input
+                value={filterQuery}
+                onChange={(event) => setFilterQuery(event.target.value)}
+                placeholder="Filter endpoints"
+                aria-label="Filter endpoints"
+              />
+              {filterQuery && (
+                <button
+                  type="button"
+                  className="sp-search-clear"
+                  onClick={() => setFilterQuery('')}
+                  aria-label="Clear filter"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </nav>
+        </>
       )}
       <main className="sp-content">
         {!activeOperation && !activeReference && !activeTag && (

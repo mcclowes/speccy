@@ -166,6 +166,10 @@ related:
   flex-direction: column;
   z-index: 10;
 }
+.sp-mobile-header,
+.sp-mobile-nav-backdrop {
+  display: none;
+}
 .sp-brand {
   min-height: 56px;
   padding: 11px 20px;
@@ -3466,17 +3470,84 @@ related:
   .sp-with-sidebar {
     grid-template-columns: 1fr;
   }
-  .sp-sidebar {
-    position: relative;
-    height: auto;
-    border-right: 0;
+  .sp-mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    min-height: 56px;
+    padding: 8px 16px 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     border-bottom: 1px solid var(--sp-line);
+    background: color-mix(in srgb, var(--sp-bg) 94%, transparent);
+    backdrop-filter: blur(14px);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .sp-mobile-nav-toggle {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    padding: 0;
+    color: var(--sp-text);
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-line);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  .sp-mobile-nav-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .sp-mobile-nav-toggle:focus-visible {
+    outline: 2px solid var(--sp-accent);
+    outline-offset: 2px;
+  }
+  .sp-mobile-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 19;
+    display: block;
+    padding: 0;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(12, 13, 18, 0.38);
+    border: 0;
+    transition:
+      opacity 180ms ease,
+      visibility 180ms ease;
+  }
+  .sp-mobile-nav-backdrop.is-open {
+    visibility: visible;
+    opacity: 1;
+  }
+  .sp-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    width: min(320px, calc(100vw - 48px));
+    height: 100dvh;
+    visibility: hidden;
+    border-right: 1px solid var(--sp-line);
+    transform: translateX(-100%);
+    transition:
+      transform 180ms ease,
+      visibility 180ms ease;
+  }
+  .sp-sidebar.is-open {
+    visibility: visible;
+    transform: translateX(0);
   }
   .sp-nav-scroll {
-    display: none;
-  }
-  .sp-sidebar-search {
-    margin-bottom: 16px;
+    display: block;
   }
   .sp-content {
     padding-inline: 20px;
