@@ -2805,7 +2805,7 @@ related:
   margin-right: 7px;
   color: var(--sp-muted);
 }
-.sp-schema-explorer-description {
+.sp-schema-explorer-description.sp-markdown {
   margin: 0 0 16px;
   color: color-mix(in srgb, var(--sp-text) 76%, var(--sp-muted));
   font-size: 11px;
