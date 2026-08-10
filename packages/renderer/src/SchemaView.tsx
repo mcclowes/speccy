@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
+import { SchemaExplorer } from './SchemaExplorer';
 import type { MediaType, SchemaObject } from 'speccy-core';
 
 function schemaLabel(schema?: SchemaObject): string {
@@ -101,6 +102,22 @@ export function SchemaView({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [structureOpen, setStructureOpen] = useState(!name);
   if (!schema) return null;
+  const explorerSchema =
+    schema.type === 'array' && schema.items ? schema.items : schema;
+  if (
+    depth === 0 &&
+    !name &&
+    !summaryOnly &&
+    Object.keys(explorerSchema.properties ?? {}).length > 0
+  ) {
+    return (
+      <SchemaExplorer
+        schema={schema}
+        showExample={showExample}
+        exampleValue={exampleValue}
+      />
+    );
+  }
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
   const isObject =

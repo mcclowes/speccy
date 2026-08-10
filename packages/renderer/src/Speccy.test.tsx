@@ -691,9 +691,13 @@ describe('Speccy navigation', () => {
       name: 'Expand payload',
     });
     expect(payloadToggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText('quotaRemaining')).not.toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: 'quotaRemaining integer' }),
+    ).toBeNull();
     fireEvent.click(payloadToggle);
-    expect(screen.getByText('quotaRemaining')).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'quotaRemaining integer' }),
+    ).toBeVisible();
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
     expect(
       screen.queryByRole('complementary', { name: 'Request builder' }),
@@ -1499,7 +1503,7 @@ describe('Speccy navigation', () => {
       [...container.querySelectorAll('.sp-required')].map(
         (indicator) => indicator.textContent,
       ),
-    ).toEqual(['*', '*']);
+    ).toEqual(['*', 'required']);
   });
 
   it('switches between responses in the full-width response section', () => {
@@ -1582,23 +1586,11 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByRole('combobox', { name: 'Response example' }),
     ).toHaveValue('0');
-    expect(
-      screen.queryByText('The current company state.'),
-    ).not.toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Show details for state' }),
-    );
     expect(screen.getByText('The current company state.')).toBeInTheDocument();
-    expect(container.querySelector('.sp-schema-example')).toHaveTextContent(
-      'Examplefound',
-    );
     expect(screen.getByText(/"found"/)).toBeInTheDocument();
     fireEvent.change(
       screen.getByRole('combobox', { name: 'Response example' }),
       { target: { value: '1' } },
-    );
-    expect(container.querySelector('.sp-schema-example')).toHaveTextContent(
-      'Examplecached',
     );
     expect(screen.getByText(/"cached"/)).toBeInTheDocument();
     fireEvent.change(

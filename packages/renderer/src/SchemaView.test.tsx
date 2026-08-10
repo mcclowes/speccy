@@ -218,8 +218,8 @@ describe('SchemaView composition', () => {
     expect(screen.queryByText(/option/i)).not.toBeInTheDocument();
   });
 
-  it('opens structural response objects while nested named objects start collapsed', () => {
-    const { container } = render(
+  it('keeps nested fields collapsed until their tree branch opens', () => {
+    render(
       <SchemaView
         collapseObjects
         schema={{
@@ -234,19 +234,14 @@ describe('SchemaView composition', () => {
       />,
     );
 
-    const root = container.querySelector('details');
     const nestedToggle = screen.getByRole('button', { name: 'Expand result' });
-    expect(root).toHaveAttribute('open');
-    expect(screen.getByText('result')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'result object' })).toBeVisible();
     expect(nestedToggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('id')).not.toBeVisible();
-
-    fireEvent.click(root!.querySelector('summary')!);
-    expect(root).not.toHaveAttribute('open');
-    fireEvent.click(root!.querySelector('summary')!);
+    expect(screen.queryByRole('button', { name: 'id string' })).toBeNull();
 
     fireEvent.click(nestedToggle);
-    expect(screen.getByText('id')).toBeVisible();
+    expect(nestedToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'id string' })).toBeVisible();
   });
 
   it('toggles structure and details from an object row while keeping its icon actions separate', () => {
@@ -302,7 +297,7 @@ describe('SchemaView composition', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('hides named field details without hiding the field structure', () => {
+  it('keeps selected field details visible while tree branches expand independently', () => {
     render(
       <SchemaView
         collapseObjects
@@ -325,65 +320,26 @@ describe('SchemaView composition', () => {
       />,
     );
 
-    expect(screen.getByText('id')).toBeVisible();
-    expect(screen.getByText('connection')).toBeVisible();
-    expect(screen.getByText('id').closest('.sp-schema-head')).toHaveClass(
-      'sp-schema-head-named',
-    );
-    expect(screen.getByText('id').closest('.sp-schema-head')).toContainElement(
-      screen.getByRole('button', { name: 'Show details for id' }),
-    );
     expect(
-      screen.queryByText('Unique identifier for the company.'),
-    ).not.toBeInTheDocument();
-
-    const idDetailsButton = screen.getByRole('button', {
-      name: 'Show details for id',
-    });
-    expect(idDetailsButton).toHaveClass('sp-schema-details-toggle');
-    expect(idDetailsButton).toHaveAttribute(
-      'data-tooltip',
-      'Show field details',
-    );
-
-    fireEvent.click(idDetailsButton);
-    const idDescription = screen.getByText(
-      'Unique identifier for the company.',
-    );
-    expect(idDescription.closest('.sp-schema-field-details')).toHaveClass(
-      'sp-schema-field-details-named',
-    );
-    expect(idDescription.closest('.sp-schema-field-card')).toContainElement(
-      idDetailsButton,
-    );
+      screen.getByText('Unique identifier for the company.'),
+    ).toBeVisible();
     expect(
       screen.getByText('ee2eb431-c0fa-4dc9-93fa-d29781c12bcd'),
     ).toBeVisible();
-    const openIdDetailsButton = screen.getByRole('button', {
-      name: 'Hide details for id',
+    const connection = screen.getByRole('button', {
+      name: 'connection object',
     });
-    expect(openIdDetailsButton).toHaveAttribute('aria-expanded', 'true');
-    expect(openIdDetailsButton).toHaveAttribute(
-      'data-tooltip',
-      'Hide field details',
-    );
+    fireEvent.click(connection);
+    expect(connection).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('The company data connection.')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'status string' })).toBeNull();
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Show details for connection' }),
-    );
-    const connectionDescription = screen.getByText(
-      'The company data connection.',
-    );
-    expect(connectionDescription).toBeVisible();
-    expect(
-      connectionDescription.closest('.sp-schema-field-card'),
-    ).toContainElement(
-      screen.getByRole('button', { name: 'Hide details for connection' }),
-    );
-    expect(screen.queryByText('status')).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Expand connection' }));
+    expect(screen.getByRole('button', { name: 'status string' })).toBeVisible();
+    expect(screen.getByText('The company data connection.')).toBeVisible();
   });
 
-  it('shows an object field description before its subfields', () => {
+  it('shows an array item description before its field tree', () => {
     render(
       <SchemaView
         collapseObjects
@@ -398,13 +354,8 @@ describe('SchemaView composition', () => {
       />,
     );
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Show details for items' }),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Expand items' }));
-
     const description = screen.getByText('A company returned by the API.');
-    const subfield = screen.getByText('id');
+    const subfield = screen.getByRole('button', { name: 'id string' });
     expect(
       description.compareDocumentPosition(subfield) &
         Node.DOCUMENT_POSITION_FOLLOWING,
