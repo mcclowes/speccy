@@ -10,6 +10,17 @@ describe('endpoint parameter layout', () => {
     expect(css).toMatch(/\.sp-endpoint-parameters \{[^}]*overflow: visible;/);
   });
 
+  it('gives the request details split the full endpoint width', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-endpoint-layout \{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
+    );
+    expect(css).toMatch(
+      /\.sp-endpoint-request-grid \{[^}]*grid-template-columns: minmax\(0, 7fr\) minmax\(340px, 5fr\);/,
+    );
+  });
+
   it('progressively reveals long parameter groups', () => {
     window.history.replaceState({}, '', '/api/list-companies');
     const parameters = Array.from({ length: 8 }, (_, index) => ({

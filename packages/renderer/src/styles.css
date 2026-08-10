@@ -1643,8 +1643,7 @@ related:
 }
 .sp-endpoint-layout {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr);
-  gap: clamp(36px, 5vw, 76px);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 .sp-endpoint-layout.is-webhook {
