@@ -324,6 +324,17 @@ describe('Speccy navigation', () => {
     expect(container.querySelector('.speccy')).toHaveClass('sp-theme-dark');
   });
 
+  it('uses the host theme without rendering its own theme control', () => {
+    window.localStorage.setItem('speccy:theme', JSON.stringify('light'));
+
+    const { container } = render(<Speccy spec={spec} theme="inherit" />);
+
+    expect(container.querySelector('.speccy')).toHaveClass('sp-theme-inherit');
+    expect(
+      screen.queryByRole('button', { name: /theme/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it('omits the empty request state when the endpoint accepts input', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(

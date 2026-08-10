@@ -805,6 +805,8 @@ export function Speccy({
     'speccy:theme',
     theme,
   );
+  const themeControlVisible = showThemeToggle && theme !== 'inherit';
+  const activeTheme = themeControlVisible ? selectedTheme : theme;
   const basePath = basePathProp;
   const storageScope = `speccy:${basePath || '/'}:${result.model?.document.info?.title ?? 'api'}`;
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -1050,10 +1052,10 @@ export function Speccy({
   return (
     <div
       ref={rootRef}
-      className={`speccy sp-theme-${selectedTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`}
+      className={`speccy sp-theme-${activeTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`}
       style={style}
     >
-      {showThemeToggle && (
+      {themeControlVisible && (
         <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />
       )}
       {showSidebar && (

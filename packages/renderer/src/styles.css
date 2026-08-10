@@ -101,36 +101,27 @@ related:
 }
 .sp-theme-inherit {
   --sp-bg: var(--ifm-background-color, var(--sp-palette-light-bg));
-  --sp-surface: var(--ifm-background-surface-color, var(--sp-bg));
-  --sp-surface-soft: var(--ifm-color-emphasis-100, #f5f5f8);
-  --sp-field-head: var(--ifm-color-emphasis-100, #f5f5f8);
   --sp-text: var(--ifm-font-color-base, var(--sp-palette-light-text));
-  --sp-muted: var(--ifm-color-emphasis-700, var(--sp-palette-light-muted));
-  --sp-line: var(--ifm-color-emphasis-300, var(--sp-palette-light-line));
-  --sp-code: var(--ifm-code-background, #f5f5f8);
-  --sp-code-text: var(--ifm-font-color-base, #34343d);
-  --sp-code-border: var(--ifm-color-emphasis-300, #dddde5);
-  --sp-code-control: var(--ifm-color-emphasis-100, #f5f5f8);
+  --sp-surface: color-mix(in srgb, var(--sp-bg) 98%, var(--sp-text));
+  --sp-surface-soft: color-mix(in srgb, var(--sp-bg) 94%, var(--sp-text));
+  --sp-field-head: color-mix(in srgb, var(--sp-bg) 92%, var(--sp-text));
+  --sp-muted: color-mix(in srgb, var(--sp-text) 58%, var(--sp-bg));
+  --sp-line: color-mix(in srgb, var(--sp-text) 16%, var(--sp-bg));
+  --sp-code: color-mix(in srgb, var(--sp-bg) 95%, var(--sp-text));
+  --sp-code-text: var(--sp-text);
+  --sp-code-border: var(--sp-line);
+  --sp-code-control: var(--sp-surface-soft);
   --sp-font-family: var(--ifm-font-family-base);
   --sp-mono-font-family: var(--ifm-font-family-monospace);
   --sp-font-size: var(--ifm-font-size-base, 100%);
   color-scheme: inherit;
 }
 :root[data-theme='dark'] .sp-theme-inherit {
-  --sp-bg: var(--ifm-background-color, var(--sp-palette-dark-bg));
-  --sp-surface: var(
-    --ifm-background-surface-color,
-    var(--sp-palette-dark-surface)
-  );
-  --sp-surface-soft: var(--ifm-color-emphasis-200, #202127);
-  --sp-field-head: var(--ifm-color-emphasis-200, #24252c);
-  --sp-text: var(--ifm-font-color-base, var(--sp-palette-dark-text));
-  --sp-muted: var(--ifm-color-emphasis-700, var(--sp-palette-dark-muted));
-  --sp-line: var(--ifm-color-emphasis-300, var(--sp-palette-dark-line));
-  --sp-code: var(--ifm-code-background, #0c0d11);
-  --sp-code-text: var(--ifm-font-color-base, #ededf4);
-  --sp-code-border: var(--ifm-color-emphasis-300, #292a33);
-  --sp-code-control: var(--ifm-color-emphasis-200, #252630);
+  --sp-json-key: #b8a8f0;
+  --sp-json-string: #82c9aa;
+  --sp-json-number: #e2ae72;
+  --sp-json-literal: #e196b1;
+  color-scheme: dark;
 }
 .sp-theme-inherit :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ifm-heading-font-family, inherit);
@@ -480,7 +471,7 @@ related:
 .sp-nav-tag-group > .sp-nav-heading {
   padding: 5px 8px 2px;
   color: color-mix(in srgb, var(--sp-text) 78%, var(--sp-muted));
-  font-size: 11px;
+  font-size: 14px;
   text-transform: none;
 }
 .sp-nav-tag-group .sp-nav-group {
@@ -501,7 +492,7 @@ related:
   backdrop-filter: blur(14px);
   border: 0;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
   text-align: left;
@@ -569,7 +560,7 @@ related:
   gap: 12px;
   padding: 7px 8px;
   border-radius: 7px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--sp-text);
   transition:
     color 120ms ease,
@@ -595,7 +586,7 @@ related:
   margin: 0;
   padding: 4px 8px 3px;
   color: var(--sp-muted);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -622,7 +613,7 @@ related:
 }
 .sp-method-badge-compact {
   color: #5f57cb;
-  font-size: 8px;
+  font-size: 9px;
   opacity: 0.78;
 }
 .sp-method-badge.sp-method-post {
@@ -664,7 +655,7 @@ related:
 .sp-nav-heading {
   padding: 5px 8px;
   color: var(--sp-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
