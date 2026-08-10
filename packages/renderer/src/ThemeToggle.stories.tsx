@@ -7,6 +7,11 @@ function InteractiveThemeToggle({ initialTheme }: { initialTheme: Theme }) {
   return <ThemeToggle theme={theme} onChange={setTheme} />;
 }
 
+function SystemThemeToggle() {
+  const [theme, setTheme] = useState<Theme>('system');
+  return <ThemeToggle theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />;
+}
+
 const meta = {
   title: 'Renderer/Actions/Theme toggle',
   component: ThemeToggle,
@@ -23,4 +28,8 @@ export const Light: Story = {
 
 export const Dark: Story = {
   render: () => <InteractiveThemeToggle initialTheme="dark" />,
+};
+
+export const SystemCycle: Story = {
+  render: () => <SystemThemeToggle />,
 };

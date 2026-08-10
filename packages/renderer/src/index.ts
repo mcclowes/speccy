@@ -1,6 +1,8 @@
 export { Speccy } from './Speccy';
 export { SpecDiff } from './SpecDiff';
 export { WebhookIcon } from './WebhookIcon';
+export { ThemeToggle } from './ThemeToggle';
+export type { Theme } from './ThemeToggle';
 export { ApiPath, DisclosureChevron, httpMethodLabel, MethodBadge, RequiredMark, VisuallyHidden } from './DesignSystem';
 export { ParameterDetails, RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 export type { ResourceDensity } from './ResourceDetails';

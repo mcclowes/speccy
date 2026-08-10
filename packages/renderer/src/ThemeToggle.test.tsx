@@ -22,4 +22,13 @@ describe('ThemeToggle', () => {
 
     expect(onChange).toHaveBeenCalledWith('dark');
   });
+
+  it('cycles through an explicit set of themes', () => {
+    const onChange = vi.fn();
+    render(<ThemeToggle theme="system" onChange={onChange} themes={['system', 'dark', 'light']} label="current" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Theme: system' }));
+
+    expect(onChange).toHaveBeenCalledWith('dark');
+  });
 });

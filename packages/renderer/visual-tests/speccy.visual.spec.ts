@@ -11,7 +11,7 @@ for (const story of stories) {
     await page.setViewportSize(story.viewport);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
-    await expect(page.locator('.speccy')).toBeVisible();
+    await expect(page.locator('.speccy.sp-with-sidebar')).toBeVisible();
     await expect(page).toHaveScreenshot(`${story.name}.png`, { fullPage: true });
   });
 }

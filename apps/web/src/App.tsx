@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Speccy, type OpenAPIDocument, type SpeccyRoute, type SpectralDiagnosticInput } from 'speccy-renderer';
+import { Speccy, ThemeToggle, type OpenAPIDocument, type SpeccyRoute, type SpectralDiagnosticInput, type Theme } from 'speccy-renderer';
 import { bundleFragmentedSpec, parseSpec } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
 import { parseInitialLocation, previewHref } from './previewUrls';
@@ -24,8 +24,6 @@ declare global {
     speccyLoadSpecBundle?: (sources: Record<string, string>, entrypoint: string) => void;
   }
 }
-
-type Theme = 'light' | 'dark' | 'system';
 
 const THEME_STORAGE_KEY = 'speccy-theme';
 const URL_STORAGE_KEY = 'speccy-oas-url';
@@ -282,14 +280,10 @@ export function App() {
     }
   }
 
-  function cycleTheme() {
-    setTheme(theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system');
-  }
-
   if (location.preview) {
     return (
       <main className={`studio studio-preview-only studio-${theme}`}>
-        <button className="studio-preview-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`} title={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
+        <ThemeToggle className="studio-preview-theme" theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />
         {loading ? <div className="studio-preview-loading">Loading API reference…</div> : <Speccy spec={spec} theme={theme} showThemeToggle={false} route={referenceRoute} onNavigate={navigateRenderer} hrefForRoute={rendererHref} parameterPrototype />}
       </main>
     );
@@ -315,7 +309,7 @@ export function App() {
           {fileName && <button className="studio-action-share" type="button" onClick={() => void sharePreview()} aria-label="Copy preview link" title={shareMessage || 'Copy preview link'}><ShareIcon /><span className="studio-share-label">Share</span></button>}
           {fileName && <button className="studio-action-url" type="button" onClick={() => setUrlOpen(!urlOpen)}><span>Load URL</span></button>}
           {fileName && <button className="studio-action-file" type="button" onClick={() => fileInput.current?.click()}><span>Open file</span></button>}
-          <button className="studio-theme" type="button" onClick={cycleTheme} aria-label={`Theme: ${theme}`}>{theme === 'dark' ? '◐' : theme === 'light' ? '○' : '◒'}</button>
+          <ThemeToggle className="studio-theme" theme={theme} onChange={setTheme} themes={['system', 'dark', 'light']} label="current" />
           <input ref={fileInput} type="file" accept=".yaml,.yml,.json,application/json,text/yaml" hidden onChange={(event) => void loadFile(event.target.files?.[0])} />
         </div>
       </header>
