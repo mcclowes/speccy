@@ -239,8 +239,19 @@ struct SpeccyWebView: NSViewRepresentable {
 
         static func loadFragments(from selectedURL: URL) throws -> FragmentBundle {
             let selectedDirectory = try selectedURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true
-            let root = (selectedDirectory ? selectedURL : selectedURL.deletingLastPathComponent())
-                .resolvingSymlinksInPath()
+            if !selectedDirectory {
+                return FragmentBundle(
+                    sources: [
+                        selectedURL.lastPathComponent: try String(
+                            contentsOf: selectedURL.resolvingSymlinksInPath(),
+                            encoding: .utf8
+                        ),
+                    ],
+                    entrypoint: selectedURL.lastPathComponent,
+                    selectedDirectory: false
+                )
+            }
+            let root = selectedURL.resolvingSymlinksInPath()
             let keys: [URLResourceKey] = [.isRegularFileKey, .isDirectoryKey, .isHiddenKey]
             guard let enumerator = FileManager.default.enumerator(
                 at: root,
@@ -257,10 +268,11 @@ struct SpeccyWebView: NSViewRepresentable {
                 sources[relativePath] = try String(contentsOf: resolvedFileURL, encoding: .utf8)
             }
             guard !sources.isEmpty else { throw FragmentError.noDocuments }
-            let entrypoint = selectedDirectory
-                ? sources.keys.sorted().first!
-                : selectedURL.lastPathComponent
-            return FragmentBundle(sources: sources, entrypoint: entrypoint, selectedDirectory: selectedDirectory)
+            return FragmentBundle(
+                sources: sources,
+                entrypoint: sources.keys.sorted().first!,
+                selectedDirectory: true
+            )
         }
 
         private static let supportedExtensions = Set(["yaml", "yml", "json"])

@@ -65,10 +65,16 @@ struct CoordinatorTests {
         defer { try? FileManager.default.removeItem(at: directory) }
         let entrypoint = directory.appendingPathComponent("api.json")
         try "{}".write(to: entrypoint, atomically: true, encoding: .utf8)
+        try "openapi: 3.1.0".write(
+            to: directory.appendingPathComponent("unrelated.yaml"),
+            atomically: true,
+            encoding: .utf8
+        )
 
         let bundle = try SpeccyWebView.Coordinator.loadFragments(from: entrypoint)
 
         #expect(bundle.entrypoint == "api.json")
+        #expect(bundle.sources == ["api.json": "{}"])
     }
 
     @Test("resolves bundled web resources without allowing traversal")
