@@ -12,6 +12,7 @@ import {
   type MediaType,
   type OperationModel,
   type Parameter,
+  type RequestBody,
   type ResponseObject,
   type SchemaObject,
   type SecurityRequirement,
@@ -21,12 +22,13 @@ import { CodeBlock } from './CodeBlock';
 import {
   DisclosureChevron,
   HTTP_METHOD_LABELS,
+  RequiredMark,
   httpMethodLabel,
 } from './DesignSystem';
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { RequestSample } from './RequestSample';
-import { ResponseDetails } from './ResourceDetails';
+import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 import { SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
@@ -487,15 +489,22 @@ function requestBodyValue(
   contentType: string | undefined,
   media: MediaType | undefined,
 ): string {
+  return formatRequestBodyValue(requestBodyExampleValue(contentType, media));
+}
+
+function requestBodyExampleValue(
+  contentType: string | undefined,
+  media: MediaType | undefined,
+): unknown {
   const namedExample = Object.values(media?.examples ?? {}).find(
     (example) => example.value !== undefined,
   )?.value;
-  const example =
+  return (
     media?.example ??
     namedExample ??
     (media?.schema ? schemaExample(media.schema, 'request') : undefined) ??
-    (contentType === 'application/json' ? {} : undefined);
-  return formatRequestBodyValue(example);
+    (contentType === 'application/json' ? {} : undefined)
+  );
 }
 
 function formatRequestBodyValue(example: unknown): string {
@@ -554,6 +563,63 @@ function ResponseExamplePanel({
       lineNumbers
       collapsibleValue={activeExample.value}
     />
+  );
+}
+
+export function EndpointRequestBody({ body }: { body: RequestBody }) {
+  const bodyMedia = firstMedia(body.content);
+  const namedExamples = requestBodyExamples(bodyMedia?.[1]);
+  const examples = namedExamples.length
+    ? namedExamples
+    : [
+        {
+          label: 'Example',
+          value: requestBodyExampleValue(bodyMedia?.[0], bodyMedia?.[1]),
+        },
+      ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeExample = examples[activeIndex];
+  const title =
+    examples.length > 1 ? (
+      <>
+        <span>Request body example</span>
+        <select
+          className="sp-example-select"
+          aria-label="Request body example"
+          value={activeIndex}
+          onChange={(event) => setActiveIndex(Number(event.target.value))}
+        >
+          {examples.map((example, index) => (
+            <option value={index} key={`${example.label}-${index}`}>
+              {example.label}
+            </option>
+          ))}
+        </select>
+      </>
+    ) : (
+      'Request body example'
+    );
+
+  return (
+    <section className="sp-endpoint-section sp-request-body">
+      <h3>Request body {body.required && <RequiredMark />}</h3>
+      <div className="sp-endpoint-request-body-grid">
+        <RequestBodyDetails
+          body={body}
+          showExamples={false}
+          exampleValue={activeExample?.value}
+        />
+        {activeExample && (
+          <CodeBlock
+            className="sp-rail-code sp-request-body-example"
+            title={title}
+            value={formatRequestBodyValue(activeExample.value)}
+            lineNumbers
+            collapsibleValue={activeExample.value}
+          />
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -1091,7 +1157,7 @@ export function RequestRail({
             {bodyExamples.length > 1 && (
               <select
                 className="sp-example-select"
-                aria-label="Request body example"
+                aria-label="Request builder body example"
                 value={activeBodyExample}
                 onChange={(event) => {
                   const index = Number(event.target.value);

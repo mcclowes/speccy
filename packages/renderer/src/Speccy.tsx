@@ -45,6 +45,7 @@ import { OpenApiDownload } from './OpenApiDownload';
 import {
   CodeSample,
   EndpointResponses,
+  EndpointRequestBody,
   GroupedParameterList,
   RequestRail,
   SecurityRequirements,
@@ -267,27 +268,23 @@ function EndpointPage({
             parameters={parameters}
             parameterPrototype={parameterPrototype}
           />
-          {item.operation.requestBody && (
+          {isWebhook && item.operation.requestBody && (
             <section className="sp-endpoint-section sp-request-body">
-              {isWebhook ? (
-                <h2>
-                  Payload{' '}
-                  {item.operation.requestBody.required && <RequiredMark />}
-                </h2>
-              ) : (
-                <h3>
-                  Request body{' '}
-                  {item.operation.requestBody.required && <RequiredMark />}
-                </h3>
-              )}
+              <h2>
+                Payload{' '}
+                {item.operation.requestBody.required && <RequiredMark />}
+              </h2>
               <RequestBodyDetails
                 body={item.operation.requestBody}
-                collapseObjects={isWebhook}
+                collapseObjects
               />
             </section>
           )}
         </div>
       </div>
+      {!isWebhook && item.operation.requestBody && (
+        <EndpointRequestBody body={item.operation.requestBody} />
+      )}
       {item.operation.responses && (
         <EndpointResponses responses={item.operation.responses} />
       )}

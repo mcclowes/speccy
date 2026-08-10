@@ -1053,6 +1053,49 @@ describe('Speccy navigation', () => {
     expect(screen.getAllByText(/"name": "Acme"/)).toHaveLength(2);
   });
 
+  it('shows the request body example beside its schema', () => {
+    window.history.replaceState({}, '', '/api/create-company');
+    const { container } = render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          paths: {
+            '/companies': {
+              post: {
+                summary: 'Create company',
+                operationId: 'create-company',
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      example: { name: 'Technicallium' },
+                      schema: {
+                        type: 'object',
+                        properties: { name: { type: 'string' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const grid = container.querySelector('.sp-endpoint-request-body-grid');
+    const example = screen
+      .getByText('Request body example')
+      .closest<HTMLElement>('.sp-code-block');
+    expect(grid).toContainElement(example);
+    expect(example).toHaveClass('sp-request-body-example');
+    expect(example).toHaveTextContent('"name": "Technicallium"');
+    expect(
+      container.querySelector('.sp-request-body-details .sp-schema-example'),
+    ).not.toBeInTheDocument();
+  });
+
   it('prefills the request body from a selected named example', () => {
     window.history.replaceState({}, '', '/api/create-company');
     render(
@@ -1087,9 +1130,9 @@ describe('Speccy navigation', () => {
     );
 
     const input = screen.getByRole('textbox', { name: 'Request body' });
-    const exampleSelect = screen.getByRole('combobox', {
-      name: 'Request body example',
-    });
+    const exampleSelect = within(
+      screen.getByRole('complementary', { name: 'Request builder' }),
+    ).getByRole('combobox', { name: 'Request builder body example' });
     expect(input).toHaveValue('{\n  "name": "Acme"\n}');
 
     fireEvent.change(exampleSelect, { target: { value: '1' } });

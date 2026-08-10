@@ -1741,6 +1741,15 @@ related:
   align-items: start;
   padding-top: 16px;
 }
+.sp-endpoint-request-body-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr);
+  column-gap: clamp(36px, 5vw, 76px);
+  align-items: start;
+}
+.sp-request-body-example {
+  min-width: 0;
+}
 .sp-response-content {
   display: grid;
   min-width: 0;
@@ -3400,6 +3409,10 @@ related:
   .sp-endpoint-response-grid {
     grid-template-columns: 1fr;
   }
+  .sp-endpoint-request-body-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
   .sp-response-summary,
   .sp-endpoint-response-detail,
   .sp-response-example {
@@ -3482,6 +3495,10 @@ related:
   }
   .sp-endpoint-response-grid {
     grid-template-columns: 1fr;
+  }
+  .sp-endpoint-request-body-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
   .sp-request-rail {
     position: static;

@@ -51,11 +51,15 @@ export function RequestBodyDetails({
   body,
   density = 'comfortable',
   collapseObjects = false,
+  showExamples = true,
+  exampleValue,
   title,
 }: {
   body: RequestBody;
   density?: ResourceDensity;
   collapseObjects?: boolean;
+  showExamples?: boolean;
+  exampleValue?: unknown;
   title?: string;
 }) {
   return (
@@ -69,7 +73,12 @@ export function RequestBodyDetails({
         </div>
       )}
       <Markdown>{body.description}</Markdown>
-      <MediaContent content={body.content} collapseObjects={collapseObjects} />
+      <MediaContent
+        content={body.content}
+        collapseObjects={collapseObjects}
+        showExamples={showExamples}
+        exampleValue={exampleValue}
+      />
     </div>
   );
 }
