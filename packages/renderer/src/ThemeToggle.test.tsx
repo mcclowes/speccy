@@ -5,6 +5,25 @@ import { ThemeToggle } from './ThemeToggle';
 afterEach(cleanup);
 
 describe('ThemeToggle', () => {
+  it('keeps custom positioning separate from the default appearance', () => {
+    const { rerender } = render(
+      <ThemeToggle theme="light" onChange={() => undefined} />,
+    );
+
+    expect(screen.getByRole('button')).toHaveClass('sp-theme-toggle');
+
+    rerender(
+      <ThemeToggle
+        className="host-theme-toggle"
+        theme="light"
+        onChange={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole('button')).toHaveClass('host-theme-toggle');
+    expect(screen.getByRole('button')).not.toHaveClass('sp-theme-toggle');
+  });
+
   it('offers light mode when the current theme is dark', () => {
     const onChange = vi.fn();
     render(<ThemeToggle theme="dark" onChange={onChange} />);

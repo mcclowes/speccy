@@ -1,3 +1,5 @@
+import styles from './ThemeToggle.module.css';
+
 export type Theme = 'light' | 'dark' | 'system';
 
 function MoonIcon() {
@@ -21,7 +23,7 @@ export function ThemeToggle({
   theme,
   onChange,
   themes = ['light', 'dark'],
-  className = 'sp-theme-toggle',
+  className,
   label = 'action',
 }: {
   theme: Theme;
@@ -45,9 +47,10 @@ export function ThemeToggle({
       : (themes[(currentIndex + 1) % themes.length] ?? 'light');
   const accessibleLabel =
     label === 'current' ? `Theme: ${theme}` : `Switch to ${nextTheme} theme`;
+  const appearanceClassName = className ?? `sp-theme-toggle ${styles.toggle}`;
   return (
     <button
-      className={`sp-theme-control ${className}`.trim()}
+      className={`sp-theme-control ${styles.control} ${appearanceClassName}`}
       type="button"
       onClick={() => onChange(nextTheme)}
       aria-label={accessibleLabel}
