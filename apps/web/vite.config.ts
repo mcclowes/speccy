@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   base: './',
   resolve: {
@@ -31,6 +31,28 @@ export default defineConfig({
           new URL('../../packages/core/src/index.ts', import.meta.url),
         ),
       },
+      ...(mode === 'test'
+        ? []
+        : [
+            {
+              find: /^(?:node:)?buffer$/,
+              replacement: fileURLToPath(
+                new URL('./src/browser-node/buffer.ts', import.meta.url),
+              ),
+            },
+            {
+              find: /^(?:node:)?path$/,
+              replacement: fileURLToPath(
+                new URL('./src/browser-node/path.ts', import.meta.url),
+              ),
+            },
+            {
+              find: /^(?:node:)?fs$/,
+              replacement: fileURLToPath(
+                new URL('./src/browser-node/fs.ts', import.meta.url),
+              ),
+            },
+          ]),
     ],
   },
   build: {
@@ -57,4 +79,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
