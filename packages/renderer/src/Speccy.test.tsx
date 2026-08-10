@@ -615,13 +615,11 @@ describe('Speccy navigation', () => {
       navigation.getByRole('link', { name: /System ready/ }),
     ).toBeInTheDocument();
 
-    fireEvent.click(navigation.getByRole('button', { name: 'Companies' }));
     fireEvent.click(navigation.getByRole('link', { name: /Company updated/ }));
     expect(
       screen.getByRole('heading', { level: 1, name: 'Company updated' }),
     ).toBeInTheDocument();
 
-    fireEvent.click(navigation.getByRole('button', { name: 'Other webhooks' }));
     fireEvent.click(navigation.getByRole('link', { name: /System ready/ }));
     expect(
       screen.getByRole('heading', { level: 1, name: 'System ready' }),
@@ -1682,7 +1680,7 @@ describe('Speccy navigation', () => {
   });
 
   it('collapses and expands endpoint groups', () => {
-    render(<Speccy spec={spec} />);
+    const { unmount } = render(<Speccy spec={spec} />);
 
     const toggle = screen.getByRole('button', { name: 'Companies' });
     const navigation = screen.getByRole('navigation', {
@@ -1698,9 +1696,17 @@ describe('Speccy navigation', () => {
     expect(
       within(navigation).getByRole('link', { name: /List companies/ }),
     ).toBeInTheDocument();
+
+    unmount();
+    render(<Speccy spec={spec} />);
+
+    expect(screen.getByRole('button', { name: 'Companies' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
   });
 
-  it('keeps only one endpoint group expanded', () => {
+  it('keeps endpoint groups independently expanded by default', () => {
     render(
       <Speccy
         spec={{
@@ -1727,14 +1733,45 @@ describe('Speccy navigation', () => {
     expect(companies).toHaveAttribute('aria-expanded', 'true');
 
     fireEvent.click(connections);
-    expect(companies).toHaveAttribute('aria-expanded', 'false');
+    expect(companies).toHaveAttribute('aria-expanded', 'true');
     expect(connections).toHaveAttribute('aria-expanded', 'true');
     expect(
-      navigation.queryByRole('link', { name: /List companies/ }),
-    ).not.toBeInTheDocument();
+      navigation.getByRole('link', { name: /List companies/ }),
+    ).toBeInTheDocument();
     expect(
       navigation.getByRole('link', { name: /List connections/ }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps only one endpoint group expanded when configured', () => {
+    render(
+      <Speccy
+        spec={{
+          ...spec,
+          paths: {
+            ...spec.paths,
+            '/connections': {
+              get: { tags: ['Connections'], summary: 'List connections' },
+            },
+          },
+        }}
+        singleExpandedSidebarGroup
+      />,
+    );
+
+    const navigation = within(
+      screen.getByRole('navigation', { name: 'API reference' }),
+    );
+    const companies = navigation.getByRole('button', { name: 'Companies' });
+    const connections = navigation.getByRole('button', {
+      name: 'Connections',
+    });
+
+    fireEvent.click(companies);
+    fireEvent.click(connections);
+
+    expect(companies).toHaveAttribute('aria-expanded', 'false');
+    expect(connections).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('allows the active endpoint group to be collapsed', () => {

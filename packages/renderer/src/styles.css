@@ -539,8 +539,7 @@ related:
 .sp-nav-operations {
   margin: 3px 4px 10px 8px;
   padding: 3px 0 3px 7px;
-  border-left: 1px solid
-    color-mix(in srgb, var(--sp-accent) 24%, var(--sp-line));
+  border-left: 1px solid color-mix(in srgb, var(--sp-accent) 14%, transparent);
 }
 .sp-disclosure-chevron {
   display: inline-block;

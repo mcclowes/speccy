@@ -57,7 +57,7 @@ export function Reference({ spec }) {
 }
 ```
 
-`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `defaultExpanded`, `logo`, `className`, and `onError`.
+`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `singleExpandedSidebarGroup`, `defaultExpanded`, `logo`, `className`, and `onError`.
 
 Tags can display an icon in the sidebar and tag headings with Speccy's `x-icon` extension:
 

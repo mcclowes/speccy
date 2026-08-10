@@ -439,6 +439,7 @@ function NavigationGroup({
   tag,
   operations,
   searching,
+  singleExpanded,
   open,
   onOpenChange,
   activeTag,
@@ -446,10 +447,12 @@ function NavigationGroup({
   onNavigate,
   onNavigateTag,
   hrefForRoute,
+  storageKey,
 }: {
   tag: TagModel;
   operations: OperationModel[];
   searching: boolean;
+  singleExpanded: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   activeTag?: TagModel;
@@ -457,13 +460,18 @@ function NavigationGroup({
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
+  storageKey: string;
 }) {
+  const [independentlyOpen, setIndependentlyOpen] = useLocalState(
+    storageKey,
+    false,
+  );
   const groupRef = useRef<HTMLDivElement>(null);
   const wasActiveRouteWithinGroup = useRef(false);
   const activeRouteIsWithinGroup =
     activeTag === tag ||
     operations.some((item) => item.id === activeOperationId);
-  const expanded = searching || open;
+  const expanded = searching || (singleExpanded ? open : independentlyOpen);
   const operationListId = `sp-nav-${slugify(tag.name)}`;
   const subgroupedOperations = new Map<string, OperationModel[]>();
   const navigationItems: Array<
@@ -503,9 +511,15 @@ function NavigationGroup({
 
   useEffect(() => {
     if (activeRouteIsWithinGroup && !wasActiveRouteWithinGroup.current)
-      onOpenChange(true);
+      if (singleExpanded) onOpenChange(true);
+      else setIndependentlyOpen(true);
     wasActiveRouteWithinGroup.current = activeRouteIsWithinGroup;
-  }, [activeRouteIsWithinGroup, onOpenChange]);
+  }, [
+    activeRouteIsWithinGroup,
+    onOpenChange,
+    setIndependentlyOpen,
+    singleExpanded,
+  ]);
 
   useEffect(() => {
     if (!activeRouteIsWithinGroup || !expanded) return;
@@ -519,7 +533,10 @@ function NavigationGroup({
       <button
         type="button"
         className={`sp-nav-tag ${tag.icon ? 'has-icon ' : ''}${activeRouteIsWithinGroup ? 'is-active' : ''}`}
-        onClick={() => onOpenChange(!expanded)}
+        onClick={() => {
+          if (singleExpanded) onOpenChange(!expanded);
+          else setIndependentlyOpen(!expanded);
+        }}
         aria-expanded={expanded}
         aria-controls={operationListId}
       >
@@ -568,6 +585,7 @@ function NavigationTags({
   tags,
   matches,
   searching,
+  singleExpanded,
   openTag,
   onOpenTagChange,
   activeTag,
@@ -575,10 +593,12 @@ function NavigationTags({
   onNavigate,
   onNavigateTag,
   hrefForRoute,
+  storageScope,
 }: {
   tags: TagModel[];
   matches: (item: OperationModel) => boolean;
   searching: boolean;
+  singleExpanded: boolean;
   openTag: string | null;
   onOpenTagChange: (tag: string | null) => void;
   activeTag?: TagModel;
@@ -586,6 +606,7 @@ function NavigationTags({
   onNavigate: (operationId?: string) => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
+  storageScope: string;
 }) {
   return (
     <>
@@ -597,6 +618,7 @@ function NavigationTags({
             tag={tag}
             operations={operations}
             searching={searching}
+            singleExpanded={singleExpanded}
             open={openTag === tag.name}
             onOpenChange={(open) => onOpenTagChange(open ? tag.name : null)}
             activeTag={activeTag}
@@ -604,6 +626,7 @@ function NavigationTags({
             onNavigate={onNavigate}
             onNavigateTag={onNavigateTag}
             hrefForRoute={hrefForRoute}
+            storageKey={`${storageScope}:navigation:${tag.name}`}
             key={tag.name}
           />
         ))}
@@ -714,6 +737,7 @@ export function Speccy({
   className = '',
   defaultExpanded: _defaultExpanded = false,
   showSidebar = true,
+  singleExpandedSidebarGroup = false,
   showThemeToggle = true,
   theme = 'system',
   accentColor = '#6d5dfc',
@@ -1085,6 +1109,7 @@ export function Speccy({
                           tags={visibleTags}
                           matches={matchesFilter}
                           searching={Boolean(normalizedFilter)}
+                          singleExpanded={singleExpandedSidebarGroup}
                           openTag={openNavigationTag}
                           onOpenTagChange={setOpenNavigationTag}
                           activeTag={activeTag}
@@ -1100,6 +1125,7 @@ export function Speccy({
                     tags={ungroupedTags}
                     matches={matchesFilter}
                     searching={Boolean(normalizedFilter)}
+                    singleExpanded={singleExpandedSidebarGroup}
                     openTag={openNavigationTag}
                     onOpenTagChange={setOpenNavigationTag}
                     activeTag={activeTag}
@@ -1114,6 +1140,7 @@ export function Speccy({
                   tags={model.tags}
                   matches={matchesFilter}
                   searching={Boolean(normalizedFilter)}
+                  singleExpanded={singleExpandedSidebarGroup}
                   openTag={openNavigationTag}
                   onOpenTagChange={setOpenNavigationTag}
                   activeTag={activeTag}

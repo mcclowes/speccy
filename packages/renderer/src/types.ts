@@ -20,6 +20,8 @@ export interface SpeccyProps {
   className?: string;
   defaultExpanded?: boolean;
   showSidebar?: boolean;
+  /** Closes the previously expanded sidebar group when another is opened. */
+  singleExpandedSidebarGroup?: boolean;
   /** Shows the renderer's persistent light/dark theme control. */
   showThemeToggle?: boolean;
   theme?: 'light' | 'dark' | 'system';
