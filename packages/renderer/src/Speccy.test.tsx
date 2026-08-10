@@ -438,7 +438,7 @@ describe('Speccy navigation', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows the response spec browser without extra response context', () => {
+  it('labels responses with their standard HTTP status phrase without repeating the description', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(
       <Speccy
@@ -463,15 +463,12 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    expect(screen.queryByText('OK')).toBeNull();
-    expect(document.querySelector('.sp-response-summary')).toBeNull();
+    expect(screen.getByText('OK')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: '412' }));
+    expect(screen.getByText('Precondition Failed')).toBeInTheDocument();
     expect(
-      screen.queryByText(
-        'The company data has changed since it was last read.',
-      ),
-    ).toBeNull();
-    expect(screen.queryByText('Precondition Failed')).toBeNull();
+      screen.getByText('The company data has changed since it was last read.'),
+    ).toBeInTheDocument();
   });
 
   it('opens a tag overview from an explicit navigation item', () => {
@@ -1578,7 +1575,9 @@ describe('Speccy navigation', () => {
     expect(screen.getByRole('tabpanel').parentElement).toHaveClass(
       'sp-response-content',
     );
-    expect(container.querySelector('.sp-response-summary')).toBeNull();
+    expect(
+      container.querySelector('.sp-response-summary')?.parentElement,
+    ).toHaveClass('sp-response-content');
     const headers = screen.getByText('Headers').closest('.sp-detail-list');
     const responseBody = container.querySelector('.sp-media-list');
     expect(headers?.compareDocumentPosition(responseBody!)).toBe(
@@ -1618,7 +1617,7 @@ describe('Speccy navigation', () => {
       'aria-selected',
       'true',
     );
-    expect(screen.queryByText('Company missing')).toBeNull();
+    expect(screen.getByText('Company missing')).toBeInTheDocument();
     expect(screen.getAllByText(/"missing"/)).toHaveLength(1);
   });
 
