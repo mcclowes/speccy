@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -13,6 +14,7 @@ afterEach(() => {
   cleanup();
   window.history.replaceState({}, '', '/');
   window.localStorage.clear();
+  vi.unstubAllGlobals();
 });
 
 const spec = {
@@ -26,7 +28,7 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
-  it('shows missing-description hints only when authoring hints are enabled', () => {
+  it('collapses authoring hints and opens all findings from View all', () => {
     const { rerender } = render(<Speccy spec={spec} />);
 
     expect(
@@ -36,19 +38,21 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByText('This API has no description.'),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Hide hints' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
     expect(
       screen.queryByText('This API has no description.'),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
+    expect(
+      screen.getByText('This API has no description.'),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'View all' }));
     expect(
       screen.getByRole('dialog', { name: 'API health' }),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole('button', { name: 'Ignore this rule' }).length,
     ).toBeGreaterThan(0);
-    fireEvent.click(screen.getByLabelText('API health actions'));
-    fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
     expect(screen.getAllByText('This API has no description.')).toHaveLength(2);
   });
 
@@ -938,6 +942,59 @@ describe('Speccy navigation', () => {
     expect(aside).toContainElement(screen.getByText('https://api.example.com'));
     expect(aside).toContainElement(
       screen.getByRole('button', { name: 'Authorization: API key' }),
+    );
+  });
+
+  it('moves the request builder to the end of compact endpoint pages', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    let resize: ResizeObserverCallback | undefined;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          resize = callback;
+        }
+
+        observe() {}
+        disconnect() {}
+        unobserve() {}
+      },
+    );
+
+    render(
+      <Speccy
+        spec={{
+          ...spec,
+          paths: {
+            '/companies': {
+              get: {
+                tags: ['Companies'],
+                summary: 'List companies',
+                operationId: 'get-companies',
+                responses: { '200': { description: 'Success' } },
+              },
+            },
+          },
+        }}
+        basePath="/api"
+      />,
+    );
+
+    const endpoint = document.querySelector<HTMLElement>('.sp-endpoint');
+    expect(endpoint).not.toBeNull();
+    act(() => {
+      resize?.(
+        [
+          {
+            contentRect: { width: 800 },
+          } as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver,
+      );
+    });
+
+    expect(endpoint?.lastElementChild).toBe(
+      screen.getByRole('complementary', { name: 'Request builder' }),
     );
   });
 

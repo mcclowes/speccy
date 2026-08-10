@@ -159,36 +159,53 @@ type DiagnosticNavigationProps = {
 
 export function InlineDiagnostics({
   diagnostics,
-  onHide,
+  onViewAll,
   routeForDiagnostic,
   hrefForRoute,
   onNavigate,
 }: {
   diagnostics: ApiDiagnostic[];
-  onHide: () => void;
+  onViewAll: () => void;
 } & DiagnosticNavigationProps) {
+  const [expanded, setExpanded] = useState(true);
   if (!diagnostics.length) return null;
   return (
-    <div className="sp-inline-diagnostics">
-      <button type="button" className="sp-inline-hide" onClick={onHide}>
-        Hide hints
-      </button>
-      {diagnostics.slice(0, 3).map((diagnostic) => {
-        const route = routeForDiagnostic?.(diagnostic);
-        return (
-          <DiagnosticCard
-            diagnostic={diagnostic}
-            route={route}
-            href={route && hrefForRoute?.(route)}
-            onNavigate={onNavigate}
-            key={diagnostic.id}
-          />
-        );
-      })}
-      {diagnostics.length > 3 && (
-        <span className="sp-inline-more">
-          And {diagnostics.length - 3} more in API health
+    <div className={`sp-inline-diagnostics ${expanded ? '' : 'is-collapsed'}`}>
+      <div className="sp-inline-controls">
+        <span>
+          {diagnostics.length} hint{diagnostics.length === 1 ? '' : 's'}
         </span>
+        <button type="button" onClick={onViewAll}>
+          View all
+        </button>
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? 'Collapse' : 'Expand'}
+        </button>
+      </div>
+      {expanded && (
+        <>
+          {diagnostics.slice(0, 3).map((diagnostic) => {
+            const route = routeForDiagnostic?.(diagnostic);
+            return (
+              <DiagnosticCard
+                diagnostic={diagnostic}
+                route={route}
+                href={route && hrefForRoute?.(route)}
+                onNavigate={onNavigate}
+                key={diagnostic.id}
+              />
+            );
+          })}
+          {diagnostics.length > 3 && (
+            <span className="sp-inline-more">
+              And {diagnostics.length - 3} more
+            </span>
+          )}
+        </>
       )}
     </div>
   );
@@ -197,21 +214,23 @@ export function InlineDiagnostics({
 export function DeveloperDiagnostics({
   diagnostics,
   currentPageDiagnostics,
+  open,
+  onOpenChange,
+  scope,
+  onScopeChange,
   storageScope,
-  showInlineHints,
-  onShowInlineHintsChange,
   routeForDiagnostic,
   hrefForRoute,
   onNavigate,
 }: {
   diagnostics: ApiDiagnostic[];
   currentPageDiagnostics?: ApiDiagnostic[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  scope: 'page' | 'all';
+  onScopeChange: (scope: 'page' | 'all') => void;
   storageScope: string;
-  showInlineHints: boolean;
-  onShowInlineHintsChange: (show: boolean) => void;
 } & DiagnosticNavigationProps) {
-  const [open, setOpen] = useState(false);
-  const [scope, setScope] = useState<'page' | 'all'>('all');
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState(false);
@@ -263,8 +282,8 @@ export function DeveloperDiagnostics({
         type="button"
         className={`sp-diagnostics-trigger ${allVisible.some((diagnostic) => diagnostic.severity === 'issue') ? 'has-issues' : ''}`}
         onClick={() => {
-          setScope(currentPageDiagnostics ? 'page' : 'all');
-          setOpen(true);
+          onScopeChange(currentPageDiagnostics ? 'page' : 'all');
+          onOpenChange(true);
         }}
         aria-label={`API health: ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`}
       >
@@ -276,7 +295,7 @@ export function DeveloperDiagnostics({
         <div
           className="sp-diagnostics-backdrop"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setOpen(false);
+            if (event.target === event.currentTarget) onOpenChange(false);
           }}
         >
           <aside
@@ -303,12 +322,6 @@ export function DeveloperDiagnostics({
                   <div>
                     <button
                       type="button"
-                      onClick={() => onShowInlineHintsChange(!showInlineHints)}
-                    >
-                      {showInlineHints ? 'Hide hints' : 'Show hints'}
-                    </button>
-                    <button
-                      type="button"
                       onClick={copyAll}
                       disabled={visible.length === 0}
                     >
@@ -332,7 +345,7 @@ export function DeveloperDiagnostics({
                 <button
                   type="button"
                   className="sp-diagnostics-close"
-                  onClick={() => setOpen(false)}
+                  onClick={() => onOpenChange(false)}
                   aria-label="Close API health"
                 >
                   ×
@@ -346,7 +359,7 @@ export function DeveloperDiagnostics({
                   role="tab"
                   aria-selected={scope === 'page'}
                   className={scope === 'page' ? 'is-active' : ''}
-                  onClick={() => setScope('page')}
+                  onClick={() => onScopeChange('page')}
                 >
                   This endpoint <span>{pageVisible.length}</span>
                 </button>
@@ -355,7 +368,7 @@ export function DeveloperDiagnostics({
                   role="tab"
                   aria-selected={scope === 'all'}
                   className={scope === 'all' ? 'is-active' : ''}
-                  onClick={() => setScope('all')}
+                  onClick={() => onScopeChange('all')}
                 >
                   All API <span>{allVisible.length}</span>
                 </button>
@@ -394,7 +407,7 @@ export function DeveloperDiagnostics({
                     route={diagnosticRoute}
                     href={diagnosticRoute && hrefForRoute?.(diagnosticRoute)}
                     onNavigate={(route) => {
-                      setOpen(false);
+                      onOpenChange(false);
                       onNavigate?.(route);
                     }}
                     onIgnore={ignore}

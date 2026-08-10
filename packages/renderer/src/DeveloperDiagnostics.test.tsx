@@ -81,8 +81,10 @@ describe('developer diagnostics layout', () => {
       <DeveloperDiagnostics
         diagnostics={findings}
         storageScope="test"
-        showInlineHints
-        onShowInlineHintsChange={() => undefined}
+        open
+        onOpenChange={() => undefined}
+        scope="all"
+        onScopeChange={() => undefined}
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
@@ -113,12 +115,13 @@ describe('developer diagnostics layout', () => {
       <DeveloperDiagnostics
         diagnostics={findings}
         storageScope="test"
-        showInlineHints
-        onShowInlineHintsChange={() => undefined}
+        open
+        onOpenChange={() => undefined}
+        scope="all"
+        onScopeChange={() => undefined}
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
     fireEvent.click(screen.getByLabelText('API health actions'));
     fireEvent.click(screen.getByRole('button', { name: 'Copy all' }));
 
@@ -131,17 +134,18 @@ describe('developer diagnostics layout', () => {
   });
 
   it('opens on findings for the current endpoint and allows viewing all API findings', () => {
-    render(
+    const onScopeChange = vi.fn();
+    const view = render(
       <DeveloperDiagnostics
         diagnostics={[...findings, apiFinding]}
         currentPageDiagnostics={findings}
         storageScope="test"
-        showInlineHints
-        onShowInlineHintsChange={() => undefined}
+        open
+        onOpenChange={() => undefined}
+        scope="page"
+        onScopeChange={onScopeChange}
       />,
     );
-
-    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
 
     expect(screen.getByRole('tab', { name: /This endpoint/ })).toHaveAttribute(
       'aria-selected',
@@ -155,31 +159,39 @@ describe('developer diagnostics layout', () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: /All API/ }));
+    expect(onScopeChange).toHaveBeenCalledWith('all');
+    view.rerender(
+      <DeveloperDiagnostics
+        diagnostics={[...findings, apiFinding]}
+        currentPageDiagnostics={findings}
+        storageScope="test"
+        open
+        onOpenChange={() => undefined}
+        scope="all"
+        onScopeChange={onScopeChange}
+      />,
+    );
 
     expect(screen.getByText('API has no description.')).toBeVisible();
   });
 
-  it('lets users hide contextual hints and restore them from API health', () => {
-    const onHide = vi.fn();
-    const onShowInlineHintsChange = vi.fn();
-    render(
-      <>
-        <InlineDiagnostics diagnostics={findings} onHide={onHide} />
-        <DeveloperDiagnostics
-          diagnostics={findings}
-          storageScope="test"
-          showInlineHints={false}
-          onShowInlineHintsChange={onShowInlineHintsChange}
-        />
-      </>,
-    );
+  it('collapses contextual hints and opens the full API health overlay', () => {
+    const onViewAll = vi.fn();
+    render(<InlineDiagnostics diagnostics={findings} onViewAll={onViewAll} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Hide hints' }));
-    expect(onHide).toHaveBeenCalledOnce();
+    expect(
+      screen.getByText('GET /companies has no description.'),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(
+      screen.queryByText('GET /companies has no description.'),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
+    expect(
+      screen.getByText('GET /companies has no description.'),
+    ).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: /API health:/ }));
-    fireEvent.click(screen.getByLabelText('API health actions'));
-    fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
-    expect(onShowInlineHintsChange).toHaveBeenCalledWith(true);
+    fireEvent.click(screen.getByRole('button', { name: 'View all' }));
+    expect(onViewAll).toHaveBeenCalledOnce();
   });
 });

@@ -75,6 +75,29 @@ function operationTitle(item: OperationModel): string {
   );
 }
 
+const COMPACT_ENDPOINT_WIDTH = 900;
+
+function useCompactEndpointLayout(element: HTMLElement | null): boolean {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    if (!element || typeof ResizeObserver === 'undefined') return;
+
+    const update = (width: number) => {
+      if (width > 0) setCompact(width <= COMPACT_ENDPOINT_WIDTH);
+    };
+    update(element.getBoundingClientRect().width);
+
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) update(entry.contentRect.width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element]);
+
+  return compact;
+}
+
 function OperationBadge({
   item,
   compact = false,
@@ -173,8 +196,7 @@ function EndpointPage({
   storageScope,
   parameterPrototype,
   diagnostics = [],
-  showInlineHints,
-  onHideInlineHints,
+  onViewAllDiagnostics,
   onNavigateTag,
   hrefForRoute,
 }: {
@@ -185,11 +207,14 @@ function EndpointPage({
   storageScope: string;
   parameterPrototype?: boolean;
   diagnostics?: ReturnType<typeof analyzeOpenApi>;
-  showInlineHints: boolean;
-  onHideInlineHints: () => void;
+  onViewAllDiagnostics: () => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
 }) {
+  const [endpointElement, setEndpointElement] = useState<HTMLElement | null>(
+    null,
+  );
+  const compactLayout = useCompactEndpointLayout(endpointElement);
   const parameters = [
     ...(item.pathItem.parameters ?? []),
     ...(item.operation.parameters ?? []),
@@ -197,7 +222,11 @@ function EndpointPage({
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
   return (
-    <article id={item.id} className={`sp-endpoint sp-method-${item.method}`}>
+    <article
+      id={item.id}
+      className={`sp-endpoint sp-method-${item.method}`}
+      ref={setEndpointElement}
+    >
       <div className={`sp-endpoint-hero ${isWebhook ? 'is-webhook' : ''}`}>
         <header className="sp-endpoint-header">
           <a
@@ -217,16 +246,14 @@ function EndpointPage({
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
           <Markdown>{item.operation.description}</Markdown>
-          {showInlineHints && (
-            <InlineDiagnostics
-              diagnostics={diagnostics.filter(
-                (diagnostic) => diagnostic.operationId === item.id,
-              )}
-              onHide={onHideInlineHints}
-            />
-          )}
+          <InlineDiagnostics
+            diagnostics={diagnostics.filter(
+              (diagnostic) => diagnostic.operationId === item.id,
+            )}
+            onViewAll={onViewAllDiagnostics}
+          />
         </header>
-        {!isWebhook && (
+        {!isWebhook && !compactLayout && (
           <RequestRail
             item={item}
             server={server}
@@ -294,6 +321,18 @@ function EndpointPage({
       )}
       {item.operation.callbacks && (
         <CallbackList callbacks={item.operation.callbacks} server={server} />
+      )}
+      {!isWebhook && compactLayout && (
+        <RequestRail
+          item={item}
+          server={server}
+          security={document.security}
+          securitySchemes={
+            document.components?.securitySchemes ?? document.securityDefinitions
+          }
+          storageScope={storageScope}
+          parameterPrototype={parameterPrototype}
+        />
       )}
     </article>
   );
@@ -672,16 +711,14 @@ function TagOverview({
   tag,
   operations,
   diagnostics = [],
-  showInlineHints,
-  onHideInlineHints,
+  onViewAllDiagnostics,
   onNavigate,
   hrefForRoute,
 }: {
   tag: TagModel;
   operations: OperationModel[];
   diagnostics?: ReturnType<typeof analyzeOpenApi>;
-  showInlineHints: boolean;
-  onHideInlineHints: () => void;
+  onViewAllDiagnostics: () => void;
   onNavigate: (operationId: string) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
 }) {
@@ -693,15 +730,13 @@ function TagOverview({
           {tag.name}
         </h1>
         <Markdown>{tag.description}</Markdown>
-        {showInlineHints && (
-          <InlineDiagnostics
-            diagnostics={diagnostics.filter(
-              (diagnostic) =>
-                diagnostic.tag === tag.name && !diagnostic.operationId,
-            )}
-            onHide={onHideInlineHints}
-          />
-        )}
+        <InlineDiagnostics
+          diagnostics={diagnostics.filter(
+            (diagnostic) =>
+              diagnostic.tag === tag.name && !diagnostic.operationId,
+          )}
+          onViewAll={onViewAllDiagnostics}
+        />
         <Markdown className="sp-tag-long-description">
           {tag.longDescription}
         </Markdown>
@@ -790,10 +825,14 @@ export function Speccy({
   );
   const basePath = basePathProp;
   const storageScope = `speccy:${basePath || '/'}:${result.model?.document.info?.title ?? 'api'}`;
-  const [showInlineHints, setShowInlineHints] = useLocalState(
-    `${storageScope}:show-inline-hints`,
-    true,
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [diagnosticsScope, setDiagnosticsScope] = useState<'page' | 'all'>(
+    'all',
   );
+  const viewAllDiagnostics = () => {
+    setDiagnosticsScope('all');
+    setDiagnosticsOpen(true);
+  };
   const previousTheme = useRef(theme);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -1117,6 +1156,7 @@ export function Speccy({
                           onNavigate={navigate}
                           onNavigateTag={navigateTag}
                           hrefForRoute={hrefForRoute}
+                          storageScope={storageScope}
                         />
                       </section>
                     );
@@ -1133,6 +1173,7 @@ export function Speccy({
                     onNavigate={navigate}
                     onNavigateTag={navigateTag}
                     hrefForRoute={hrefForRoute}
+                    storageScope={storageScope}
                   />
                 </>
               ) : (
@@ -1148,6 +1189,7 @@ export function Speccy({
                   onNavigate={navigate}
                   onNavigateTag={navigateTag}
                   hrefForRoute={hrefForRoute}
+                  storageScope={storageScope}
                 />
               )}
               {normalizedFilter && filteredOperationCount === 0 && (
@@ -1212,12 +1254,10 @@ export function Speccy({
               </div>
               <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
               <Markdown>{model.document.info?.description}</Markdown>
-              {showInlineHints && (
-                <InlineDiagnostics
-                  diagnostics={overviewDiagnostics}
-                  onHide={() => setShowInlineHints(false)}
-                />
-              )}
+              <InlineDiagnostics
+                diagnostics={overviewDiagnostics}
+                onViewAll={viewAllDiagnostics}
+              />
             </div>
             <aside className="sp-hero-aside">
               <OpenApiDownload document={result.document ?? model.document} />
@@ -1278,8 +1318,7 @@ export function Speccy({
             tag={activeTag}
             operations={activeTag.operations}
             diagnostics={diagnostics}
-            showInlineHints={showInlineHints}
-            onHideInlineHints={() => setShowInlineHints(false)}
+            onViewAllDiagnostics={viewAllDiagnostics}
             onNavigate={navigate}
             hrefForRoute={hrefForRoute}
           />
@@ -1301,8 +1340,7 @@ export function Speccy({
               storageScope={storageScope}
               parameterPrototype={parameterPrototype}
               diagnostics={diagnostics}
-              showInlineHints={showInlineHints}
-              onHideInlineHints={() => setShowInlineHints(false)}
+              onViewAllDiagnostics={viewAllDiagnostics}
               onNavigateTag={navigateTag}
               hrefForRoute={hrefForRoute}
               key={activeOperation.id}
@@ -1351,8 +1389,10 @@ export function Speccy({
               : undefined
           }
           storageScope={storageScope}
-          showInlineHints={showInlineHints}
-          onShowInlineHintsChange={setShowInlineHints}
+          open={diagnosticsOpen}
+          onOpenChange={setDiagnosticsOpen}
+          scope={diagnosticsScope}
+          onScopeChange={setDiagnosticsScope}
           routeForDiagnostic={routeForDiagnostic}
           hrefForRoute={hrefForRoute}
           onNavigate={navigateDiagnostic}
