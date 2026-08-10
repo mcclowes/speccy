@@ -1638,6 +1638,14 @@ describe('Speccy navigation', () => {
     ).toHaveClass('sp-response-content');
     const headers = screen.getByText('Headers').closest('.sp-detail-list');
     const responseBody = container.querySelector('.sp-media-list');
+    expect(
+      within(headers as HTMLElement).getByText('request-ref'),
+    ).toBeVisible();
+    expect(within(headers as HTMLElement).getByText('string')).toBeVisible();
+    expect(within(responseBody as HTMLElement).getByText('Body')).toBeVisible();
+    expect(
+      within(responseBody as HTMLElement).getByText('application/json'),
+    ).toBeVisible();
     expect(headers?.compareDocumentPosition(responseBody!)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );

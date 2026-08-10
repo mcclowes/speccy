@@ -472,12 +472,14 @@ export function SchemaView({
 
 export function MediaContent({
   content,
+  title,
   collapseObjects = false,
   showExamples = true,
   showRootDescription = true,
   exampleValue,
 }: {
   content?: Record<string, MediaType>;
+  title?: string;
   collapseObjects?: boolean;
   showExamples?: boolean;
   showRootDescription?: boolean;
@@ -488,7 +490,10 @@ export function MediaContent({
     <div className="sp-media-list">
       {Object.entries(content).map(([mediaType, media]) => (
         <section className="sp-media" key={mediaType}>
-          <div className="sp-media-type">{mediaType}</div>
+          <div className="sp-media-heading">
+            {title && <strong>{title}</strong>}
+            <div className="sp-media-type">{mediaType}</div>
+          </div>
           <SchemaView
             schema={media.schema}
             collapseObjects={collapseObjects}

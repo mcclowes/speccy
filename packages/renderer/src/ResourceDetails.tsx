@@ -105,16 +105,17 @@ export function ResponseDetails({
         <div className="sp-detail-list">
           <strong>Headers</strong>
           {Object.entries(response.headers).map(([name, header]) => (
-            <div key={name}>
-              <code>{name}</code>
-              <Markdown>{header.description}</Markdown>
-              <SchemaView schema={header.schema} />
-            </div>
+            <SchemaView
+              key={name}
+              name={name}
+              schema={{ ...header.schema, description: header.description }}
+            />
           ))}
         </div>
       )}
       <MediaContent
         content={response.content}
+        title="Body"
         collapseObjects={collapseObjects}
         showExamples={showExamples}
         showRootDescription={showRootDescription}

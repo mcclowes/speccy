@@ -3225,9 +3225,20 @@ related:
 .sp-schema-example > span::after {
   content: ':';
 }
+.sp-media-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+.sp-media-heading > strong {
+  font-weight: 600;
+}
 .sp-media-type {
   width: fit-content;
-  margin: 0 0 8px auto;
+  margin-left: auto;
   padding: 3px 7px;
   color: var(--sp-muted);
   border: 1px solid var(--sp-line);
@@ -3287,6 +3298,15 @@ related:
   padding-top: 12px;
   border-top: 1px solid var(--sp-line);
   font-size: 11px;
+}
+.sp-detail-list > strong {
+  font-weight: 600;
+}
+.sp-detail-list > .sp-schema {
+  overflow: clip;
+  border: 1px solid var(--sp-line);
+  border-radius: 8px;
+  background: var(--sp-surface);
 }
 .sp-response-content .sp-detail-list + .sp-media-list,
 .sp-response-body .sp-detail-list + .sp-media-list {
