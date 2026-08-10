@@ -85,7 +85,7 @@ describe('endpoint parameter layout', () => {
     expect(within(documentation).queryByText('filter1')).not.toBeInTheDocument();
   });
 
-  it('keeps parameter details compact until requested', () => {
+  it('renders schema examples in the parameter body, outside the metadata row', () => {
     window.history.replaceState({}, '', '/api/get-company');
     const { container } = render(<Speccy spec={{
       openapi: '3.1.0',
@@ -99,7 +99,7 @@ describe('endpoint parameter layout', () => {
               name: 'companyId',
               in: 'path',
               description: 'Unique identifier for a company.',
-              schema: { type: 'string', format: 'uuid', default: 'company-123' },
+              schema: { type: 'string', format: 'uuid', example: 'company-123' },
             }],
           },
         },
@@ -107,15 +107,12 @@ describe('endpoint parameter layout', () => {
     }} basePath="/api" />);
 
     const parameter = container.querySelector<HTMLElement>('.sp-endpoint-parameter');
-    expect(within(parameter!).getByText('string · uuid')).toBeInTheDocument();
-    expect(within(parameter!).queryByText('Unique identifier for a company.')).not.toBeInTheDocument();
-    expect(within(parameter!).queryByText('Default:')).not.toBeInTheDocument();
+    const metadata = parameter?.querySelector<HTMLElement>('.sp-resource-heading');
+    const example = screen.getByText('company-123').closest<HTMLElement>('.sp-example');
 
-    fireEvent.click(within(parameter!).getByRole('button', { name: 'Show details for companyId' }));
-
-    expect(within(parameter!).getByText('Unique identifier for a company.')).toBeInTheDocument();
-    expect(within(parameter!).getByText('Default:')).toBeInTheDocument();
-    expect(within(parameter!).getByText('"company-123"')).toBeInTheDocument();
+    expect(example).toBeInTheDocument();
+    expect(parameter).toContainElement(example);
+    expect(metadata).not.toContainElement(example);
   });
 
   it('summarizes array parameters without rendering a duplicate items row', () => {

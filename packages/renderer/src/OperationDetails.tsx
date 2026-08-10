@@ -22,7 +22,8 @@ import { DisclosureChevron, HTTP_METHOD_LABELS, httpMethodLabel } from './Design
 import { EyeIcon } from './EyeIcon';
 import { Markdown } from './Markdown';
 import { RequestSample } from './RequestSample';
-import { ParameterDetails, ResponseDetails } from './ResourceDetails';
+import { ResponseDetails } from './ResourceDetails';
+import { SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
 
@@ -102,8 +103,20 @@ const DEFAULT_VISIBLE_PARAMETERS = 5;
 const MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS = 3;
 
 function ParameterCard({ location, parameter, index }: { location: string; parameter: Parameter; index: number }) {
+  const example = parameter.example !== undefined ? parameter.example : parameter.schema?.example;
+  const schema = {
+    ...parameter.schema,
+    description: parameter.description ?? parameter.schema?.description,
+  };
+
   return <div className="sp-endpoint-parameter" key={`${location}-${parameter.name}-${index}`}>
-    <ParameterDetails parameter={parameter} summaryOnly />
+    <SchemaView
+      name={parameter.name ?? 'unnamed'}
+      schema={schema}
+      required={parameter.required}
+      summaryOnly
+      exampleValue={example}
+    />
   </div>;
 }
 
