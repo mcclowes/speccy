@@ -274,34 +274,16 @@ function EndpointPage({
       )}
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
-          {!isWebhook &&
-            parameters.length === 0 &&
-            !item.operation.requestBody && (
-              <div className="sp-endpoint-section sp-request-intro">
-                <SecurityRequirements
-                  requirements={requirements}
-                  schemes={document.components?.securitySchemes}
-                />
-                <div className="sp-request-empty">
-                  <strong>No request parameters</strong>
-                  <span>
-                    This endpoint doesn’t accept query parameters or a request
-                    body.
-                  </span>
-                </div>
-              </div>
-            )}
-          {!isWebhook &&
-            (parameters.length > 0 || item.operation.requestBody) && (
-              <EndpointRequestDetails
-                path={item.path}
-                parameters={parameters}
-                body={item.operation.requestBody}
-                security={requirements}
-                securitySchemes={document.components?.securitySchemes}
-                parameterPrototype={parameterPrototype}
-              />
-            )}
+          {!isWebhook && (
+            <EndpointRequestDetails
+              path={item.path}
+              parameters={parameters}
+              body={item.operation.requestBody}
+              security={requirements}
+              securitySchemes={document.components?.securitySchemes}
+              parameterPrototype={parameterPrototype}
+            />
+          )}
           {isWebhook && item.operation.requestBody && (
             <section className="sp-endpoint-section sp-request-body">
               <h2>

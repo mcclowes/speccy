@@ -748,6 +748,14 @@ export function EndpointRequestDetails({
             requirements={security}
             schemes={securitySchemes}
           />
+          {parameters.length === 0 && !body && (
+            <div className="sp-request-empty">
+              <strong>No request parameters</strong>
+              <span>
+                This endpoint doesn’t accept query parameters or a request body.
+              </span>
+            </div>
+          )}
         </div>
         <GroupedParameterList
           parameters={parameters}

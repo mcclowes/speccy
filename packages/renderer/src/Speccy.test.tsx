@@ -294,9 +294,9 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders an endpoint without request parameters', () => {
+  it('renders a path example for an endpoint without request parameters', () => {
     window.history.replaceState({}, '', '/api/get-companies');
-    render(<Speccy spec={spec} basePath="/api" />);
+    const { container } = render(<Speccy spec={spec} basePath="/api" />);
 
     expect(screen.getByText('No request parameters')).toBeInTheDocument();
     expect(
@@ -304,6 +304,14 @@ describe('Speccy navigation', () => {
         'This endpoint doesn’t accept query parameters or a request body.',
       ),
     ).toBeInTheDocument();
+    const grid = container.querySelector('.sp-endpoint-request-grid');
+    const example = screen
+      .getByText('Request example')
+      .closest<HTMLElement>('.sp-request-example');
+
+    expect(grid).toContainElement(example);
+    expect(within(example!).getByText('Path')).toBeInTheDocument();
+    expect(within(example!).getByText('/companies')).toBeInTheDocument();
   });
 
   it('updates the rendered theme when the theme prop changes', () => {
@@ -799,6 +807,7 @@ describe('Speccy navigation', () => {
     fireEvent.change(screen.getByRole('textbox', { name: /companyId/ }), {
       target: { value: 'co 123' },
     });
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
     expect(
       screen.getByText(
         /https:\/\/api\.example\.com\/companies\/co%20123\?page=1/,
@@ -843,6 +852,7 @@ describe('Speccy navigation', () => {
 
     expect(screen.getByRole('textbox', { name: /tags/ })).toHaveValue('');
     expect(screen.getByRole('textbox', { name: /cursor/ })).toHaveValue('');
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
     expect(
       screen.getByText(/https:\/\/api\.example\.com\/companies/),
     ).toBeInTheDocument();
@@ -893,6 +903,7 @@ describe('Speccy navigation', () => {
       within(requestBuilder).getByLabelText('Required'),
     ).toBeInTheDocument();
     fireEvent.change(authorization, { target: { value: 'secret token' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
 
     expect(
       screen.queryByText(/secret(?:\+|%20| )token/),
@@ -1039,6 +1050,7 @@ describe('Speccy navigation', () => {
     fireEvent.change(screen.getByLabelText('tenant_key'), {
       target: { value: 'tenant-secret' },
     });
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
 
     expect(screen.queryByLabelText('auth_token')).not.toBeInTheDocument();
     expect(screen.getByText(/X-API-Key: ••••••••/)).toBeInTheDocument();
@@ -1142,6 +1154,7 @@ describe('Speccy navigation', () => {
     );
 
     const requestBody = screen.getByRole('textbox', { name: 'Request body' });
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
     expect(requestBody).toBeRequired();
     expect(
       within(requestBody.closest('label')!).getByTitle('Required'),
@@ -2030,6 +2043,7 @@ describe('Speccy navigation', () => {
     });
     unmount();
     render(<Speccy spec={securedSpec} basePath="/api" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Code snippet' }));
 
     expect(screen.getByRole('textbox', { name: /companyId/ })).toHaveValue(
       'company-42',
