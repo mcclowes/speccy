@@ -7,7 +7,7 @@
  * ---
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useRef, useState } from 'react';
 import {
   type MediaType,
   type OperationModel,
@@ -574,10 +574,12 @@ function RequestExampleSection({
   label,
   value,
   code = false,
+  children,
 }: {
   label: string;
   value: string;
   code?: boolean;
+  children?: ReactNode;
 }) {
   return (
     <section className="sp-request-example-section">
@@ -590,10 +592,35 @@ function RequestExampleSection({
         />
       </header>
       <pre className={code ? undefined : 'sp-code-numbered'}>
-        <code>{code ? value : <CodeLines value={value} />}</code>
+        <code>{children ?? (code ? value : <CodeLines value={value} />)}</code>
       </pre>
     </section>
   );
+}
+
+function highlightedResolvedPath(path: string, parameters: Parameter[]) {
+  const examples = new Map(
+    parameters.map((parameter) => [
+      parameter.name,
+      encodeURIComponent(String(parameterExample(parameter))),
+    ]),
+  );
+
+  return path.split(/(\{[^{}]+\})/g).map((part, index) => {
+    const name =
+      part.startsWith('{') && part.endsWith('}')
+        ? part.slice(1, -1)
+        : undefined;
+    const example = name ? examples.get(name) : undefined;
+
+    return example === undefined ? (
+      <Fragment key={`${part}-${index}`}>{part}</Fragment>
+    ) : (
+      <span className="sp-path-parameter" key={`${part}-${index}`}>
+        {example}
+      </span>
+    );
+  });
 }
 
 export function EndpointRequestDetails({
@@ -682,7 +709,9 @@ export function EndpointRequestDetails({
         <div className="sp-code-title">
           <span>{title}</span>
         </div>
-        <RequestExampleSection label="Path" value={resolvedPath} code />
+        <RequestExampleSection label="Path" value={resolvedPath} code>
+          {highlightedResolvedPath(path, pathParameters)}
+        </RequestExampleSection>
         {queryParameters.length > 0 && (
           <RequestExampleSection
             label="Query parameters"

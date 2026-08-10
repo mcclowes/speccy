@@ -1198,6 +1198,12 @@ describe('Speccy navigation', () => {
     expect(example).toHaveTextContent(
       '/companies/company-123/categories/bank-fee',
     );
+    expect(within(example!).getByText('company-123')).toHaveClass(
+      'sp-path-parameter',
+    );
+    expect(within(example!).getByText('bank-fee')).toHaveClass(
+      'sp-path-parameter',
+    );
     expect(within(example!).getByText('Query parameters')).toBeInTheDocument();
     expect(example).toHaveTextContent('"pageSize": 25');
     expect(within(example!).getByText('Headers')).toBeInTheDocument();
