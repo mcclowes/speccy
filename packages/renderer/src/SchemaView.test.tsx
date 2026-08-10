@@ -6,6 +6,14 @@ import { MediaContent, SchemaView } from './SchemaView';
 afterEach(cleanup);
 
 describe('SchemaView composition', () => {
+  it('does not wrap endpoint request body schemas in a second border', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /:is\(\.sp-request-body, \.sp-endpoint-responses\) \.sp-media\s*\{[^}]*padding:\s*0;[^}]*border:\s*0;/s,
+    );
+  });
+
   it('keeps the field inspector sticky within long schemas', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 

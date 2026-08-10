@@ -3247,9 +3247,6 @@ related:
   background: var(--sp-surface-soft);
 }
 :is(.sp-request-body, .sp-endpoint-responses) .sp-media {
-  background: var(--sp-surface);
-}
-.sp-endpoint-responses .sp-media {
   padding: 0;
   border: 0;
   background: transparent;
