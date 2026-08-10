@@ -40,6 +40,16 @@ related:
   --sp-json-literal: #9a4564;
   --sp-code-border: #dddde5;
   --sp-code-control: #f5f5f8;
+  --sp-danger: #d24859;
+  --sp-danger-text: #8b2534;
+  --sp-danger-surface: #fff4f5;
+  --sp-danger-line: #efcbd0;
+  --sp-success: #25a878;
+  --sp-success-text: #167c5a;
+  --sp-code-success: #63d6ab;
+  --sp-response-error: #d24872;
+  --sp-warning: #b27b00;
+  --sp-diagnostic-error: #c43d50;
   color-scheme: light;
   color: var(--sp-text);
   background: var(--sp-bg);
@@ -380,7 +390,7 @@ related:
 }
 .sp-search-group button small {
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-search-group button small svg {
@@ -638,7 +648,7 @@ related:
 .sp-method-badge {
   width: fit-content;
   color: #5148bd;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-weight: 500;
   text-align: center;
 }
@@ -1109,7 +1119,7 @@ related:
 .sp-diff-scope-detail {
   overflow: hidden;
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1268,20 +1278,20 @@ related:
   white-space: pre;
 }
 .sp-diff-line.is-before {
-  background: color-mix(in srgb, #d24859 18%, var(--sp-code));
+  background: color-mix(in srgb, var(--sp-diff-breaking) 18%, var(--sp-code));
 }
 .sp-diff-line.is-before .sp-diff-line-number,
 .sp-diff-line.is-before .sp-diff-line-marker {
-  color: #d24859;
-  background: color-mix(in srgb, #d24859 12%, var(--sp-code));
+  color: var(--sp-diff-breaking);
+  background: color-mix(in srgb, var(--sp-diff-breaking) 12%, var(--sp-code));
 }
 .sp-diff-line.is-after {
-  background: color-mix(in srgb, #138963 18%, var(--sp-code));
+  background: color-mix(in srgb, var(--sp-diff-compatible) 18%, var(--sp-code));
 }
 .sp-diff-line.is-after .sp-diff-line-number,
 .sp-diff-line.is-after .sp-diff-line-marker {
-  color: #138963;
-  background: color-mix(in srgb, #138963 12%, var(--sp-code));
+  color: var(--sp-diff-compatible);
+  background: color-mix(in srgb, var(--sp-diff-compatible) 12%, var(--sp-code));
 }
 .sp-diff-line.is-empty {
   background: color-mix(in srgb, var(--sp-muted) 5%, var(--sp-code));
@@ -1626,7 +1636,7 @@ related:
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 10px;
   white-space: nowrap;
   transition:
@@ -1637,10 +1647,10 @@ related:
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #d24872;
+  background: var(--sp-response-error);
 }
 .sp-response-tab.is-success > span {
-  background: #25a878;
+  background: var(--sp-success);
 }
 .sp-response-tab:hover {
   color: var(--sp-text);
@@ -1707,12 +1717,12 @@ related:
 }
 .sp-response-summary {
   padding: 11px 14px;
-  border-left: 2px solid #d24872;
+  border-left: 2px solid var(--sp-response-error);
   border-radius: 6px;
   background: var(--sp-surface-soft);
 }
 .sp-response-summary.is-success {
-  border-left-color: #25a878;
+  border-left-color: var(--sp-success);
 }
 .sp-response-label {
   display: flex;
@@ -1725,13 +1735,13 @@ related:
   font-weight: 600;
 }
 .sp-response-code {
-  color: #d24872;
-  font-family: 'DM Mono', monospace;
+  color: var(--sp-response-error);
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 11px;
   font-weight: 600;
 }
 .sp-response-summary.is-success .sp-response-code {
-  color: #25a878;
+  color: var(--sp-success);
 }
 .sp-response-summary > .sp-markdown {
   margin-top: 9px;
@@ -1959,7 +1969,7 @@ related:
   transition: border-color 140ms ease;
 }
 .sp-authorization-card.is-warning {
-  border-color: color-mix(in srgb, #d24859 62%, var(--sp-line));
+  border-color: color-mix(in srgb, var(--sp-danger) 62%, var(--sp-line));
 }
 .sp-authorization-header {
   display: flex;
@@ -1998,10 +2008,10 @@ related:
   flex: 0 0 20px;
   width: 20px;
   height: 20px;
-  color: #167c5a;
-  border: 1px solid color-mix(in srgb, #167c5a 45%, transparent);
+  color: var(--sp-success-text);
+  border: 1px solid color-mix(in srgb, var(--sp-success-text) 45%, transparent);
   border-radius: 50%;
-  background: color-mix(in srgb, #25a878 10%, var(--sp-surface));
+  background: color-mix(in srgb, var(--sp-success) 10%, var(--sp-surface));
   font-size: 11px;
   font-weight: 700;
   place-items: center;
@@ -2016,9 +2026,9 @@ related:
 .sp-authorization-warning {
   margin: 0 0 14px;
   padding: 9px 10px;
-  color: #9c3344;
+  color: var(--sp-danger-text);
   border-radius: 6px;
-  background: color-mix(in srgb, #d24859 9%, var(--sp-surface));
+  background: color-mix(in srgb, var(--sp-danger) 9%, var(--sp-surface));
   font-size: 10px;
   font-weight: 600;
   line-height: 1.45;
@@ -2069,7 +2079,7 @@ related:
   gap: 5px;
 }
 .sp-field b {
-  color: #d24859;
+  color: var(--sp-danger);
 }
 .sp-field small {
   color: var(--sp-muted);
@@ -2085,7 +2095,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 7px;
   outline: none;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 10px;
   transition:
     border-color 140ms ease,
@@ -2135,7 +2145,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 7px;
   outline: none;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 10px;
   line-height: 1.55;
   transition:
@@ -2150,7 +2160,7 @@ related:
 .sp-rail-card h3 small {
   margin-left: 5px;
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
   font-weight: 400;
 }
@@ -2229,8 +2239,8 @@ related:
   font-size: 10px;
 }
 .sp-live-response-head span {
-  color: #63d6ab;
-  font-family: 'DM Mono', monospace;
+  color: var(--sp-code-success);
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
 }
 .sp-live-response pre {
   overflow: auto;
@@ -2239,17 +2249,17 @@ related:
   padding: 18px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font:
-    10px/1.75 'DM Mono',
-    monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
+  font-size: 10px;
+  line-height: 1.75;
 }
 .sp-live-response.is-error {
-  color: #8b2534;
-  background: #fff4f5;
-  border-color: #efcbd0;
+  color: var(--sp-danger-text);
+  background: var(--sp-danger-surface);
+  border-color: var(--sp-danger-line);
 }
 .sp-live-response.is-error .sp-live-response-head {
-  border-color: #efcbd0;
+  border-color: var(--sp-danger-line);
 }
 .sp-live-response.is-error p {
   margin: 0;
@@ -2358,7 +2368,7 @@ related:
   text-transform: uppercase;
 }
 .sp-required {
-  color: #d24859;
+  color: var(--sp-danger);
   font-size: 11px;
   font-weight: 700;
 }
@@ -2533,7 +2543,7 @@ related:
   color: var(--sp-accent);
   border-radius: 5px;
   background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-schema-primitive-details:not(:empty) {
@@ -2577,7 +2587,7 @@ related:
 }
 .sp-schema-explorer-header > div > span {
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-schema-explorer-object-icon {
@@ -2589,7 +2599,7 @@ related:
   color: var(--sp-accent);
   border-radius: 5px;
   background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-schema-explorer-rows {
@@ -2723,7 +2733,7 @@ related:
   min-width: 0;
   flex: 0 1 auto;
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
   white-space: nowrap;
 }
@@ -2996,7 +3006,7 @@ related:
 }
 .sp-type {
   color: var(--sp-muted);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-schema-meta code {
@@ -3065,7 +3075,7 @@ related:
   color: var(--sp-muted);
   border: 1px solid var(--sp-line);
   border-radius: 5px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 9px;
 }
 .sp-media-list {
@@ -3271,11 +3281,11 @@ related:
   font-size: 11px;
 }
 .sp-status {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   color: var(--sp-muted);
 }
 .sp-status.is-success {
-  color: #14815f;
+  color: var(--sp-success-text);
 }
 .sp-response-body {
   padding: 0 0 17px 54px;
@@ -3442,10 +3452,10 @@ related:
   margin: 40px auto;
   max-width: 680px;
   padding: 24px;
-  border: 1px solid #efcbd0;
+  border: 1px solid var(--sp-danger-line);
   border-radius: 12px;
-  color: #8b2534;
-  background: #fff4f5;
+  color: var(--sp-danger-text);
+  background: var(--sp-danger-surface);
 }
 .sp-error p {
   margin: 6px 0 0;
@@ -3535,12 +3545,12 @@ related:
   place-items: center;
   color: #fff;
   border-radius: 50%;
-  background: #b27b00;
+  background: var(--sp-warning);
   font-size: 10px;
   font-weight: 800;
 }
 .sp-diagnostics-trigger.has-issues > span {
-  background: #c43d50;
+  background: var(--sp-diagnostic-error);
 }
 .sp-diagnostics-trigger small {
   min-width: 20px;
@@ -3773,17 +3783,17 @@ related:
   padding: 12px 13px;
   color: var(--sp-text);
   border: 1px solid var(--sp-line);
-  border-left: 3px solid #b27b00;
+  border-left: 3px solid var(--sp-warning);
   border-radius: 8px;
   background: var(--sp-surface);
   font-size: 11px;
   line-height: 1.5;
 }
 .sp-diagnostic-card.is-issue {
-  border-left-color: #c43d50;
+  border-left-color: var(--sp-diagnostic-error);
 }
 .sp-diagnostic-card.is-suggestion {
-  border-left-color: #6d5dfc;
+  border-left-color: var(--sp-accent);
 }
 .sp-diagnostic-card-head {
   min-width: 0;
