@@ -87,6 +87,7 @@ export function SchemaView({
   depth = 0,
   collapseObjects = false,
   showExample = true,
+  showRootDescription = true,
   summaryOnly = false,
   exampleValue,
 }: {
@@ -96,6 +97,7 @@ export function SchemaView({
   depth?: number;
   collapseObjects?: boolean;
   showExample?: boolean;
+  showRootDescription?: boolean;
   summaryOnly?: boolean;
   exampleValue?: unknown;
 }) {
@@ -113,6 +115,7 @@ export function SchemaView({
       <SchemaExplorer
         schema={schema}
         showExample={showExample}
+        showRootDescription={showRootDescription}
         exampleValue={exampleValue}
       />
     );
@@ -406,11 +409,13 @@ export function MediaContent({
   content,
   collapseObjects = false,
   showExamples = true,
+  showRootDescription = true,
   exampleValue,
 }: {
   content?: Record<string, MediaType>;
   collapseObjects?: boolean;
   showExamples?: boolean;
+  showRootDescription?: boolean;
   exampleValue?: unknown;
 }) {
   if (!content || Object.keys(content).length === 0) return null;
@@ -423,6 +428,7 @@ export function MediaContent({
             schema={media.schema}
             collapseObjects={collapseObjects}
             showExample={showExamples}
+            showRootDescription={showRootDescription}
             exampleValue={exampleValue}
           />
           {showExamples && media.example !== undefined && (

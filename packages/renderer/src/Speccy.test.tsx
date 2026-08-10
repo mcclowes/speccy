@@ -1531,6 +1531,7 @@ describe('Speccy navigation', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
+                          description: 'A company response payload.',
                           properties: {
                             state: {
                               type: 'string',
@@ -1590,6 +1591,7 @@ describe('Speccy navigation', () => {
       responseBody?.querySelector('.sp-schema-explorer'),
     ).toBeInTheDocument();
     expect(responseBody?.querySelector('.sp-schema-object')).toBeNull();
+    expect(screen.queryByText('A company response payload.')).toBeNull();
     expect(
       screen.queryByText('The current company state.'),
     ).not.toBeInTheDocument();

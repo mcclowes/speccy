@@ -88,12 +88,14 @@ export function ResponseDetails({
   density = 'comfortable',
   collapseObjects = false,
   showExamples = true,
+  showRootDescription = true,
   exampleValue,
 }: {
   response: ResponseObject;
   density?: ResourceDensity;
   collapseObjects?: boolean;
   showExamples?: boolean;
+  showRootDescription?: boolean;
   exampleValue?: unknown;
 }) {
   return (
@@ -115,6 +117,7 @@ export function ResponseDetails({
         content={response.content}
         collapseObjects={collapseObjects}
         showExamples={showExamples}
+        showRootDescription={showRootDescription}
         exampleValue={exampleValue}
       />
       {response.links && (

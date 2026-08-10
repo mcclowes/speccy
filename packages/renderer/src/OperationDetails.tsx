@@ -796,6 +796,7 @@ function EndpointResponseBody({
             response={{ ...response, description: undefined }}
             collapseObjects
             showExamples={false}
+            showRootDescription={false}
             exampleValue={activeExample?.value}
           />
         </div>

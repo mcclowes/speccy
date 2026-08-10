@@ -301,11 +301,13 @@ export function SchemaExplorer({
   schema,
   showExample,
   showHeader = true,
+  showRootDescription = true,
   exampleValue,
 }: {
   schema: SchemaObject;
   showExample: boolean;
   showHeader?: boolean;
+  showRootDescription?: boolean;
   exampleValue?: unknown;
 }) {
   const structuralSchema = structuralObjectSchema(schema);
@@ -344,11 +346,12 @@ export function SchemaExplorer({
 
   return (
     <div className="sp-schema-explorer">
-      {(schema.description ?? structuralSchema.description) && (
-        <Markdown className="sp-schema-explorer-root-description">
-          {schema.description ?? structuralSchema.description}
-        </Markdown>
-      )}
+      {showRootDescription &&
+        (schema.description ?? structuralSchema.description) && (
+          <Markdown className="sp-schema-explorer-root-description">
+            {schema.description ?? structuralSchema.description}
+          </Markdown>
+        )}
       <div
         className={`sp-schema-explorer-shell${selected ? ' has-selection' : ''}`}
       >
