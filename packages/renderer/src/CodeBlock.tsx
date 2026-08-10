@@ -54,6 +54,103 @@ function CodeLines({ value }: { value: string }) {
   );
 }
 
+function highlightedJsonPrimitive(value: unknown): ReactNode {
+  if (typeof value === 'string') return <span className="sp-json-string">{JSON.stringify(value)}</span>;
+  if (typeof value === 'number') return <span className="sp-json-number">{JSON.stringify(value)}</span>;
+  return <span className="sp-json-literal">{value === undefined ? 'null' : JSON.stringify(value)}</span>;
+}
+
+function FoldToggle({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="sp-code-fold" aria-label={collapsed ? 'Expand' : 'Collapse'} onClick={onToggle}>
+      {collapsed ? '▸' : '▾'}
+    </button>
+  );
+}
+
+function jsonRows({
+  value,
+  depth,
+  keyLabel,
+  trailingComma,
+  path,
+  collapsed,
+  toggle,
+}: {
+  value: unknown;
+  depth: number;
+  keyLabel?: ReactNode;
+  trailingComma: boolean;
+  path: string;
+  collapsed: Set<string>;
+  toggle: (path: string) => void;
+}): ReactNode[] {
+  const indent = '  '.repeat(depth);
+  const comma = trailingComma ? ',' : '';
+
+  const container = Array.isArray(value) ? 'array' : value !== null && typeof value === 'object' ? 'object' : null;
+  if (!container) {
+    return [<span className="sp-code-line" key={path}>{indent}{keyLabel}{highlightedJsonPrimitive(value)}{comma}</span>];
+  }
+
+  const [openChar, closeChar] = container === 'array' ? ['[', ']'] : ['{', '}'];
+  const entries = container === 'array'
+    ? (value as unknown[]).map((item, index) => ({ key: undefined as string | undefined, value: item, pathPart: `[${index}]` }))
+    : Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => ({ key, value: entryValue, pathPart: `.${key}` }));
+
+  if (entries.length === 0) {
+    return [<span className="sp-code-line" key={path}>{indent}{keyLabel}{openChar}{closeChar}{comma}</span>];
+  }
+
+  const isCollapsed = collapsed.has(path);
+  const count = entries.length;
+  const summary = container === 'array' ? `${count} item${count === 1 ? '' : 's'}` : `${count} key${count === 1 ? '' : 's'}`;
+
+  const openRow = (
+    <span className="sp-code-line" key={`${path}-open`}>
+      {indent}
+      <FoldToggle collapsed={isCollapsed} onToggle={() => toggle(path)} />
+      {keyLabel}{openChar}
+      {isCollapsed && <span className="sp-code-fold-summary">{summary}</span>}
+      {isCollapsed && `${closeChar}${comma}`}
+    </span>
+  );
+
+  if (isCollapsed) return [openRow];
+
+  const childRows = entries.flatMap((entry, index) =>
+    jsonRows({
+      value: entry.value,
+      depth: depth + 1,
+      keyLabel: entry.key !== undefined ? <><span className="sp-json-key">{JSON.stringify(entry.key)}</span>{': '}</> : undefined,
+      trailingComma: index < entries.length - 1,
+      path: `${path}${entry.pathPart}`,
+      collapsed,
+      toggle,
+    }),
+  );
+
+  const closeRow = <span className="sp-code-line" key={`${path}-close`}>{indent}{closeChar}{comma}</span>;
+  return [openRow, ...childRows, closeRow];
+}
+
+function CollapsibleJson({ value }: { value: unknown }) {
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  function toggle(path: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  }
+
+  return <>{jsonRows({ value, depth: 0, trailingComma: false, path: 'root', collapsed, toggle })}</>;
+}
+
 export function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -73,6 +170,7 @@ export function CodeBlock({
   className = '',
   copyable = true,
   lineNumbers = false,
+  collapsibleValue,
 }: {
   value: string;
   copyValue?: string;
@@ -80,6 +178,8 @@ export function CodeBlock({
   className?: string;
   copyable?: boolean;
   lineNumbers?: boolean;
+  /** Raw (pre-serialization) JSON value. When set, renders as a foldable tree instead of the flat `value` text; `value` still drives copying. */
+  collapsibleValue?: unknown;
 }) {
   return (
     <div className={`sp-code-block ${className}`.trim()}>
@@ -90,7 +190,11 @@ export function CodeBlock({
         </div>
       )}
       <pre className={lineNumbers ? 'sp-code-numbered' : ''}>
-        <code>{lineNumbers ? <CodeLines value={value} /> : highlightedJson(value)}</code>
+        <code>
+          {collapsibleValue !== undefined
+            ? <CollapsibleJson value={collapsibleValue} />
+            : lineNumbers ? <CodeLines value={value} /> : highlightedJson(value)}
+        </code>
       </pre>
     </div>
   );

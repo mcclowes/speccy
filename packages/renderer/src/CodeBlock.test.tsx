@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { CodeBlock } from './CodeBlock';
 
@@ -43,5 +43,26 @@ describe('CodeBlock', () => {
     const nameLine = lines[1]!;
     expect(nameLine).toHaveTextContent('"name": "Speccy"');
     expect(nameLine.querySelector('.sp-json-key')).toHaveTextContent('"name"');
+  });
+
+  it('folds and unfolds objects and arrays when collapsibleValue is set', () => {
+    const value = { supplierRef: { id: '8Ge', name: 'Speccy' }, tags: ['a', 'b'], empty: {} };
+    const { container } = render(
+      <CodeBlock value={JSON.stringify(value, null, 2)} lineNumbers collapsibleValue={value} />,
+    );
+
+    const expandedLines = container.querySelectorAll('.sp-code-line');
+    expect(container.querySelector('.sp-code-fold-summary')).not.toBeInTheDocument();
+
+    const supplierRefLine = screen.getByText('"supplierRef"').closest<HTMLElement>('.sp-code-line')!;
+    fireEvent.click(within(supplierRefLine).getByRole('button', { name: 'Collapse' }));
+
+    expect(within(supplierRefLine).getByRole('button', { name: 'Expand' })).toBeInTheDocument();
+    expect(supplierRefLine).toHaveTextContent('2 keys');
+    expect(container.querySelectorAll('.sp-code-line').length).toBeLessThan(expandedLines.length);
+    expect(screen.queryByText('"8Ge"')).not.toBeInTheDocument();
+
+    fireEvent.click(within(supplierRefLine).getByRole('button', { name: 'Expand' }));
+    expect(screen.getByText('"8Ge"')).toBeInTheDocument();
   });
 });

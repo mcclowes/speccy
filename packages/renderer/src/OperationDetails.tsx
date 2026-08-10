@@ -231,7 +231,7 @@ function ResponseExamplePanel({ examples, activeIndex, setActiveIndex }: {
     <><span>Response example</span><select className="sp-example-select" aria-label="Response example" value={activeIndex} onChange={(event) => setActiveIndex(Number(event.target.value))}>{examples.map((example, index) => <option value={index} key={`${example.label}-${index}`}>{example.label}</option>)}</select></>
   ) : 'Response example';
 
-  return <CodeBlock className="sp-rail-code sp-response-example" title={title} value={JSON.stringify(activeExample.value, null, 2)} lineNumbers />;
+  return <CodeBlock className="sp-rail-code sp-response-example" title={title} value={JSON.stringify(activeExample.value, null, 2)} lineNumbers collapsibleValue={activeExample.value} />;
 }
 
 function EndpointResponseBody({ code, response }: { code: string; response: ResponseObject }) {
