@@ -345,6 +345,12 @@ body {
 .studio-url + .studio-workspace .sp-sidebar {
   height: calc(100vh - 120px);
 }
+@media (max-width: 900px) {
+  .studio .sp-sidebar,
+  .studio-url + .studio-workspace .sp-sidebar {
+    height: 100vh;
+  }
+}
 
 .studio-home {
   flex: 1;
