@@ -25,7 +25,7 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "release": "npm run build && changeset publish",
-    "version-packages": "changeset version",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
