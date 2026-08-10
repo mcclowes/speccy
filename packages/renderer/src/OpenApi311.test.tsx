@@ -6,6 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { OpenAPIDocument } from 'speccy-core';
 import { Speccy } from './Speccy';
 
 afterEach(() => {
@@ -264,7 +265,7 @@ describe('OpenAPI 3.1.1 conformance', () => {
   });
 
   it('renders external documentation, encodings, and complete security schemes', () => {
-    const spec = {
+    const spec: OpenAPIDocument = {
       openapi: '3.1.1',
       info: { title: 'Remaining objects', version: '1.0.0' },
       paths: {
@@ -315,7 +316,7 @@ describe('OpenAPI 3.1.1 conformance', () => {
           },
         },
       },
-    } as const;
+    };
     const { rerender } = render(
       <Speccy
         route={{ page: 'operation', operationId: 'upload' }}
@@ -339,5 +340,99 @@ describe('OpenAPI 3.1.1 conformance', () => {
     );
     expect(screen.getByText('mutualTLS')).toBeInTheDocument();
     expect(screen.getByText('https://example.com/refresh')).toBeInTheDocument();
+  });
+
+  it('renders the remaining metadata, example, link, and XML fields', () => {
+    const spec: OpenAPIDocument = {
+      openapi: '3.1.1',
+      info: {
+        title: 'Field coverage API',
+        version: '1.0.0',
+        termsOfService: 'https://example.com/terms',
+        contact: {
+          name: 'API support',
+          url: 'https://example.com/support',
+          email: 'support@example.com',
+        },
+      },
+      servers: [
+        {
+          url: 'https://{region}.example.com',
+          variables: {
+            region: { default: 'eu', enum: ['eu', 'us'] },
+          },
+        },
+      ],
+      paths: {
+        '/pets': {
+          get: {
+            operationId: 'pets',
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                examples: {
+                  small: { summary: 'Small page', value: 10 },
+                },
+              },
+            ],
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: {
+            type: 'object',
+            xml: {
+              name: 'pet',
+              namespace: 'https://example.com/pets',
+              prefix: 'p',
+              wrapped: true,
+            },
+            externalDocs: {
+              description: 'Pet schema guide',
+              url: 'https://example.com/pet-schema',
+            },
+          },
+        },
+        links: {
+          PetOwner: {
+            operationId: 'owner',
+            requestBody: '$response.body#/owner',
+            server: { url: 'https://owners.example.com' },
+          },
+        },
+      },
+    };
+    const { rerender } = render(<Speccy spec={spec} />);
+
+    expect(
+      screen.getByRole('link', { name: 'Terms of service' }),
+    ).toHaveAttribute('href', 'https://example.com/terms');
+    expect(screen.getByRole('link', { name: 'API support' })).toHaveAttribute(
+      'href',
+      'https://example.com/support',
+    );
+    expect(screen.getByText('support@example.com')).toBeInTheDocument();
+    expect(screen.getByText(/eu, us/)).toBeInTheDocument();
+
+    rerender(
+      <Speccy route={{ page: 'operation', operationId: 'pets' }} spec={spec} />,
+    );
+    expect(screen.getByText('Small page')).toBeInTheDocument();
+
+    rerender(
+      <Speccy route={{ page: 'reference', section: 'schemas' }} spec={spec} />,
+    );
+    expect(
+      screen.getByRole('link', { name: 'Pet schema guide' }),
+    ).toHaveAttribute('href', 'https://example.com/pet-schema');
+    expect(screen.getByText(/XML name: pet/)).toBeInTheDocument();
+
+    rerender(
+      <Speccy route={{ page: 'reference', section: 'links' }} spec={spec} />,
+    );
+    expect(screen.getByText('$response.body#/owner')).toBeInTheDocument();
+    expect(screen.getByText('https://owners.example.com')).toBeInTheDocument();
   });
 });

@@ -40,7 +40,7 @@ import { serializeRequestBody } from './requestBodySerialization';
 import { RequestSample } from './RequestSample';
 import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
 import { SchemaExplorer } from './SchemaExplorer';
-import { SchemaView } from './SchemaView';
+import { JsonValue, SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
 import { useLocalState } from './useLocalState';
 import styles from './OperationDetails.module.css';
@@ -292,6 +292,13 @@ function ParameterCard({
         summaryOnly
         exampleValue={example}
       />
+      {Object.entries(parameter.examples ?? {}).map(([name, item]) => (
+        <div key={name}>
+          <strong>{item.summary ?? name}</strong>
+          <Markdown>{item.description}</Markdown>
+          <JsonValue value={item.value ?? item.externalValue} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -323,20 +330,31 @@ function ParameterExplorer({
   );
 
   return (
-    <SchemaExplorer
-      schema={{
-        title,
-        type: 'object',
-        properties,
-        required: items
-          .filter((parameter) => parameter.required)
-          .map((parameter) => parameter.name)
-          .filter((name): name is string => Boolean(name)),
-      }}
-      showExample
-      showHeader={false}
-      exampleValue={examples}
-    />
+    <>
+      <SchemaExplorer
+        schema={{
+          title,
+          type: 'object',
+          properties,
+          required: items
+            .filter((parameter) => parameter.required)
+            .map((parameter) => parameter.name)
+            .filter((name): name is string => Boolean(name)),
+        }}
+        showExample
+        showHeader={false}
+        exampleValue={examples}
+      />
+      {items.flatMap((parameter) =>
+        Object.entries(parameter.examples ?? {}).map(([name, item]) => (
+          <div key={`${parameter.name}-${name}`}>
+            <strong>{item.summary ?? name}</strong>
+            <Markdown>{item.description}</Markdown>
+            <JsonValue value={item.value ?? item.externalValue} />
+          </div>
+        )),
+      )}
+    </>
   );
 }
 

@@ -153,6 +153,8 @@ export function SchemaView({
     depth === 0 &&
     !name &&
     !summaryOnly &&
+    !schema.xml &&
+    !schema.externalDocs &&
     Object.keys(displayExplorerSchema.properties ?? {}).length > 0
   ) {
     return (
@@ -328,6 +330,22 @@ export function SchemaView({
       <Markdown className="sp-schema-description">
         {schema.description}
       </Markdown>
+      {schema.externalDocs?.url && (
+        <p>
+          <a href={schema.externalDocs.url}>
+            {schema.externalDocs.description ?? 'External documentation'}
+          </a>
+        </p>
+      )}
+      {schema.xml && (
+        <p className="sp-schema-meta">
+          XML name: {schema.xml.name ?? 'default'}
+          {schema.xml.namespace && `; namespace: ${schema.xml.namespace}`}
+          {schema.xml.prefix && `; prefix: ${schema.xml.prefix}`}
+          {schema.xml.attribute && '; attribute'}
+          {schema.xml.wrapped && '; wrapped'}
+        </p>
+      )}
       {enumValues && (
         <p className="sp-schema-meta sp-schema-enum">
           <span>Enum:</span>

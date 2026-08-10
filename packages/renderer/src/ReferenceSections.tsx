@@ -381,6 +381,21 @@ export function DocumentReference({
                 <code>{parameter}</code>: <code>{JSON.stringify(value)}</code>
               </div>
             ))}
+            {link.requestBody !== undefined && (
+              <div>
+                Request body:{' '}
+                <code>
+                  {typeof link.requestBody === 'string'
+                    ? link.requestBody
+                    : JSON.stringify(link.requestBody)}
+                </code>
+              </div>
+            )}
+            {link.server?.url && (
+              <div>
+                Server: <code>{link.server.url}</code>
+              </div>
+            )}
           </>
         ))}
       {activeKey === 'callbacks' &&

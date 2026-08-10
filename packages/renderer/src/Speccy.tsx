@@ -1268,6 +1268,34 @@ export function Speccy({
               <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
               <Markdown>{model.document.info?.summary}</Markdown>
               <Markdown>{model.document.info?.description}</Markdown>
+              {model.document.info?.termsOfService && (
+                <p>
+                  <a href={model.document.info.termsOfService}>
+                    Terms of service
+                  </a>
+                </p>
+              )}
+              {model.document.info?.contact && (
+                <p>
+                  Contact:{' '}
+                  {model.document.info.contact.url ? (
+                    <a href={model.document.info.contact.url}>
+                      {model.document.info.contact.name ??
+                        model.document.info.contact.url}
+                    </a>
+                  ) : (
+                    model.document.info.contact.name
+                  )}
+                  {model.document.info.contact.email && (
+                    <>
+                      {' '}
+                      <a href={`mailto:${model.document.info.contact.email}`}>
+                        {model.document.info.contact.email}
+                      </a>
+                    </>
+                  )}
+                </p>
+              )}
               {model.document.info?.license && (
                 <p>
                   License:{' '}
@@ -1316,6 +1344,8 @@ export function Speccy({
                           ([name, variable]) => (
                             <small key={name}>
                               <code>{name}</code>
+                              {variable.enum &&
+                                ` (${variable.enum.join(', ')})`}
                               {variable.description &&
                                 `: ${variable.description}`}
                             </small>
