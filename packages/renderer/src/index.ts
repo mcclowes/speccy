@@ -28,6 +28,7 @@ export {
   createReferenceModel,
   normalizeDocument,
   parseSpec,
+  resolveExternalRefs,
   resolveRefs,
 } from 'speccy-core';
 export type { SpeccyProps, SpeccyRoute } from './types';
@@ -55,6 +56,7 @@ export type {
   OasdiffChange,
   OasdiffSource,
   OpenAPIDocument,
+  OpenApiDocumentLoader,
   Operation,
   Parameter,
   RequestBody,

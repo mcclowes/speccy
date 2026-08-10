@@ -6,7 +6,7 @@
  * ---
  */
 
-import type { OpenAPIDocument } from 'speccy-core';
+import type { OpenAPIDocument, SchemaObject } from 'speccy-core';
 
 const bookSchema = {
   type: 'object',
@@ -216,12 +216,8 @@ export const LIBRARY_V2 = library('2.0.0', (document) => {
 
   // Warning: a newly deprecated operation, and a loan status clients have never handled.
   document.paths!['/members/search']!.get!.deprecated = true;
-  document.components!.schemas!.Loan!.properties!.status = loanStatus([
-    'active',
-    'overdue',
-    'returned',
-    'pending_review',
-  ]);
+  (document.components!.schemas!.Loan as SchemaObject).properties!.status =
+    loanStatus(['active', 'overdue', 'returned', 'pending_review']);
 
   // Compatible: a new filter, a new operation, and a new optional member field.
   document.paths!['/books']!.get!.parameters = [
@@ -256,10 +252,11 @@ export const LIBRARY_V2 = library('2.0.0', (document) => {
       },
     },
   };
-  document.components!.schemas!.Member!.properties!.avatarUrl = {
-    type: 'string',
-    format: 'uri',
-  };
+  (document.components!.schemas!.Member as SchemaObject).properties!.avatarUrl =
+    {
+      type: 'string',
+      format: 'uri',
+    };
 
   // Documentation: the same behavior, described more precisely.
   document.paths!['/loans']!.get!.description =

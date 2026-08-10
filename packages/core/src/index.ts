@@ -3,6 +3,8 @@ export { diffSpecs } from './diffSpecs';
 export type { DiffSpecsOptions } from './diffSpecs';
 export { adaptOasdiffChangelog } from './oasdiff';
 export { bundleFragmentedSpec } from './fragmentedSpec';
+export { resolveExternalRefs } from './externalRefs';
+export type { OpenApiDocumentLoader } from './externalRefs';
 export {
   HTTP_METHODS,
   createReferenceModel,

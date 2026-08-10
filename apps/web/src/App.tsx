@@ -20,7 +20,11 @@ import {
   type SpectralDiagnosticInput,
   type Theme,
 } from 'speccy-renderer';
-import { bundleFragmentedSpec, parseSpec } from 'speccy-core';
+import {
+  bundleFragmentedSpec,
+  parseSpec,
+  resolveExternalRefs,
+} from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
 import { parseInitialLocation, previewHref } from './previewUrls';
 import {
@@ -373,11 +377,14 @@ export function App() {
     setLoading(true);
     setMessage('');
     try {
-      const response = await fetch(nextUrl);
-      if (!response.ok)
-        throw new Error(`The server returned ${response.status}.`);
+      const document = await resolveExternalRefs(nextUrl, async (uri) => {
+        const response = await fetch(uri);
+        if (!response.ok)
+          throw new Error(`The server returned ${response.status}.`);
+        return response.text();
+      });
       applySource(
-        await response.text(),
+        JSON.stringify(document, null, 2),
         new URL(nextUrl).pathname.split('/').pop() || nextUrl,
         existingId,
         nextUrl,
