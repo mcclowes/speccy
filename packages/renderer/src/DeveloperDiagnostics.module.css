@@ -11,6 +11,10 @@
   gap: 8px;
   padding: 1px;
 }
+.sp-inline-findings {
+  display: grid;
+  gap: 12px;
+}
 .sp-inline-controls {
   justify-self: end;
   display: flex;

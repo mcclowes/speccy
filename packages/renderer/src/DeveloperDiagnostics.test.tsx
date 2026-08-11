@@ -73,6 +73,7 @@ describe('developer diagnostics layout', () => {
     expect(css).toMatch(
       /\.sp-inline-diagnostics \{[^}]*width: 380px;[^}]*max-width: calc\(100dvw - 40px\);[^}]*max-height: calc\(100dvh - 112px\);/,
     );
+    expect(css).toMatch(/\.sp-inline-findings \{[^}]*gap: 12px;/);
     expect(css).toMatch(
       /\.sp-diagnostics-trigger \{[^}]*max-width: calc\(100dvw - 40px\);/,
     );

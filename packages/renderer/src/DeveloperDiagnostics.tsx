@@ -203,7 +203,7 @@ export function InlineDiagnostics({
         </button>
       </div>
       {expanded && (
-        <DisclosureContent>
+        <DisclosureContent className={scoped('sp-inline-findings')}>
           {diagnostics.slice(0, 3).map((diagnostic) => {
             const route = routeForDiagnostic?.(diagnostic);
             return (
