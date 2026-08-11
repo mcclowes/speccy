@@ -545,7 +545,7 @@ function NavigationGroup({
 
   const operationLink = (item: OperationModel) => (
     <a
-      className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active' : ''}`}
+      className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active ' : ''}${item.operation.deprecated ? 'is-deprecated' : ''}`}
       href={hrefForRoute({ page: 'operation', operationId: item.id })}
       aria-current={activeOperationId === item.id ? 'page' : undefined}
       onClick={(event) => {

@@ -536,6 +536,9 @@ related:
   color: var(--sp-text);
   background: color-mix(in srgb, var(--sp-accent) 10%, transparent);
 }
+.sp-nav-operation.is-deprecated {
+  opacity: 0.5;
+}
 .sp-nav-operation-label {
   overflow: hidden;
   text-overflow: ellipsis;

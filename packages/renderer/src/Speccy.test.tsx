@@ -54,6 +54,9 @@ describe('Speccy navigation', () => {
     const navigation = within(
       screen.getByRole('navigation', { name: 'API reference' }),
     );
+    expect(
+      navigation.getByRole('link', { name: /List companies/ }),
+    ).toHaveClass('is-deprecated');
     expect(navigation.getByText('deprecated')).toBeInTheDocument();
 
     const heading = screen.getByRole('heading', { name: 'List companies' });
