@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.7.1
+
+### Patch Changes
+
+- [`6a26613`](https://github.com/mcclowes/speccy/commit/6a266138309bd404e10558857a761da241f7f539) Thanks [@mcclowes](https://github.com/mcclowes)! - Add spacing between floating API health findings.
+
+- Updated dependencies []:
+  - speccy-core@0.7.1
+
 ## 0.7.0
 
 ### Patch Changes
