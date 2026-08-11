@@ -59,8 +59,9 @@ describe('Speccy navigation', () => {
     ).toHaveClass('is-deprecated');
     expect(navigation.getByText('deprecated')).toBeInTheDocument();
 
-    const address = screen
-      .getByRole('heading', { name: 'List companies' })
+    const heading = screen.getByRole('heading', { name: 'List companies' });
+    expect(heading.closest('.sp-endpoint-title')).toHaveClass('is-deprecated');
+    const address = heading
       .closest('.sp-endpoint-header')
       ?.querySelector('.sp-endpoint-address');
     expect(address?.firstElementChild).toHaveTextContent('deprecated');

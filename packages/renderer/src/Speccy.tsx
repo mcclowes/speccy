@@ -251,7 +251,9 @@ function EndpointPage({
           >
             {item.tag}
           </a>
-          <div className="sp-endpoint-title">
+          <div
+            className={`sp-endpoint-title${item.operation.deprecated ? ' is-deprecated' : ''}`}
+          >
             <h1>{operationTitle(item)}</h1>
           </div>
           <div className="sp-endpoint-address">
