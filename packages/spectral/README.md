@@ -16,7 +16,7 @@ const diagnostics = await runSpectral(source);
 
 `runSpectral` accepts a parsed OpenAPI document or raw YAML/JSON source text and resolves to `SpectralDiagnosticInput[]`: `{ code, message, severity, path, range }` for each finding. Pass source text rather than a parsed object to preserve source ranges.
 
-The result drops straight into `speccy-core`'s `analyzeOpenApi({ spectral })` or the renderer's `spectralDiagnostics` prop:
+The result drops straight into `speccy-core`'s `analyzeOpenApi(document, { spectral })` or the renderer's `spectralDiagnostics` prop:
 
 ```tsx
 <Speccy spec={source} showDeveloperHints spectralDiagnostics={diagnostics} />
@@ -24,7 +24,7 @@ The result drops straight into `speccy-core`'s `analyzeOpenApi({ spectral })` or
 
 ## How Speccy uses it
 
-The Docusaurus plugin imports it at build time and merges the output into the generated route's diagnostics during development builds. The web studio imports it lazily in the browser so Spectral never lands in the initial bundle. Both patterns work: the package ships ESM and CJS builds and runs in Node and the browser.
+The Docusaurus plugin imports it at build time and merges the output into the generated route's diagnostics during development builds, unless the route sets `renderer.showDeveloperHints: false`. The web studio imports it lazily in the browser so Spectral never lands in the initial bundle. Both patterns work: the package ships ESM and CJS builds and runs in Node and the browser.
 
 ## Scope
 

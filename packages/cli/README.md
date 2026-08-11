@@ -6,6 +6,8 @@ Lint OpenAPI documents and report breaking changes from the command line, so the
 npm install --save-dev speccy-cli
 ```
 
+Requires Node.js 24 or newer.
+
 ## Commands
 
 ```sh

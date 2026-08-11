@@ -39,10 +39,9 @@ Vite prints the local URL. Open a `.yaml`, `.yml`, or `.json` document, paste so
 
 ```sh
 npm run build:mac
-open apps/macos/Speccy.app
 ```
 
-The build runs the renderer and web builds, embeds the resulting assets, runs the Swift tests, and creates an unsigned local app at `apps/macos/Speccy.app`. Distribution outside your machine still requires your Apple signing and notarization identity.
+The build runs the renderer and web builds, embeds the resulting assets, runs the Swift tests, and creates and opens an unsigned local app at `apps/macos/Speccy.app`. Distribution outside your machine still requires your Apple signing and notarization identity.
 
 ## Use the React renderer
 
@@ -117,7 +116,7 @@ npm install
 npm run dev
 ```
 
-The generated project keeps its OpenAPI source, branding, and base path in `speccy.config.ts`. `npm run build` produces static assets for Cloudflare Pages, Netlify, Vercel, S3, or another static host. Use Docusaurus instead when the site also needs guides, tutorials, or other prose documentation.
+The generated project keeps its OpenAPI source, branding, and base path in `speccy.config.ts`. `npm run build` produces static assets for Cloudflare Pages, Netlify, Vercel, S3, or another static host; configure the host to serve `index.html` for unknown paths so direct links to operations work (Netlify and Vercel configs are included). Use Docusaurus instead when the site also needs guides, tutorials, or other prose documentation.
 
 ## Review an API in CI
 
@@ -125,15 +124,17 @@ The generated project keeps its OpenAPI source, branding, and base path in `spec
 npx speccy-cli diff origin/main:openapi.yaml openapi.yaml
 ```
 
-Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` checks ten rule categories covering OpenAPI conformance, documentation, operations, resource design, errors, auth, pagination, data modeling, lifecycle, and change safety, the same Speccy rules the renderer shows in its developer view. Add `--format markdown` for output ready to post as a pull request comment.
+Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` checks nine rule categories covering OpenAPI conformance, documentation, operations, resource design, errors, auth, pagination, data modeling, and lifecycle, the same Speccy rules the renderer shows in its developer view; `--against` adds the tenth, change safety, by comparing with a previous revision. Add `--format markdown` for output ready to post as a pull request comment.
 
-Each spec argument accepts a file path, a git ref, or an https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
+Each spec argument accepts a file path, a git ref, or an http or https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
 
 Speccy's own CI dogfoods this command on pull requests. It builds the CLI from the proposed changes, compares the repository's managed cards example with the base branch, and publishes the Markdown report in the workflow summary.
 
 For several specs and a persistent pull request comment, use the GitHub Action:
 
 ```yaml
+on: pull_request
+
 permissions:
   contents: read
   pull-requests: write
@@ -149,7 +150,7 @@ steps:
         Multi=reference/multi.yml
 ```
 
-Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. The repository remains responsible for generating any spec files before this step.
+Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, diffs each document, lints each revision for API health findings, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. It only runs on `pull_request` events, and the repository remains responsible for generating any spec files before this step. The `version`, `fail-on`, `health-fail-on`, `comment`, and `github-token` inputs adjust the defaults; see [action.yml](action.yml).
 
 Generated documents can provide their base and revision artifacts explicitly:
 
@@ -159,6 +160,8 @@ with:
     Admin=.speccy/base/_build/admin.yml => _build/admin.yml
     Multi=.speccy/base/_build/multi.yml => _build/multi.yml
 ```
+
+This form reads both artifacts straight from the checkout, so it works without `fetch-depth: 0`.
 
 ## Check everything
 
@@ -194,7 +197,8 @@ The screenshot set is small, so it stays in regular Git. Git LFS would add an ex
 ## Project structure
 
 ```text
-action/               GitHub Action wrapper around speccy-cli
+action.yml            GitHub Action definition
+action/               Action implementation wrapping speccy-cli
 apps/
   web/                Standalone Vite studio
   macos/              Native SwiftUI shell and packager
@@ -206,4 +210,6 @@ packages/
   docusaurus-plugin/  Docusaurus build plugin and MDX component
   create-speccy-reference/ Standalone reference project generator
   spectral/           Optional Spectral linting integration
+docs/                 Conformance matrix, decision records, release checklist
+test-fixtures/        Consumer project used by the Action's CI test
 ```
