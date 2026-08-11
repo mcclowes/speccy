@@ -1,5 +1,14 @@
 # speccy-cli
 
+## 0.6.0
+
+### Patch Changes
+
+- [`2eac959`](https://github.com/mcclowes/speccy/commit/2eac959936db2519c797d83a884f855d57597471) Thanks [@mcclowes](https://github.com/mcclowes)! - Fix the documented `--no-color` flag, which was rejected as an unknown option and exited 2.
+
+- Updated dependencies []:
+  - speccy-core@0.6.0
+
 ## 0.5.0
 
 ### Patch Changes
