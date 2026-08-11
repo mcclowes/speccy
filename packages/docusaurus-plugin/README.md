@@ -27,7 +27,17 @@ export default {
 };
 ```
 
-The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL.
+The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL. The plugin also publishes the rendered description at `/api/openapi.yaml`, adjusted for the site's `baseUrl`, and links to it from the overview.
+
+Add a public Postman collection through the renderer settings:
+
+```ts
+renderer: {
+  postmanCollectionUrl: 'https://www.postman.com/example/collection',
+}
+```
+
+Set `renderer.openApiUrl` only when the description is hosted somewhere else. This overrides the generated link without changing the file emitted by the plugin.
 
 To embed a reference in MDX:
 

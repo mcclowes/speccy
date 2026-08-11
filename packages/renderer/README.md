@@ -23,6 +23,16 @@ export function ApiReference({ spec }) {
 
 Set `tryIt={false}` to hide the interactive request builder and prevent visitors from sending API requests. Static request and response documentation remains visible.
 
+Set `openApiUrl` when the rendered description is available at a public URL. The overview will link to it and offer a copy action, which gives users a stable URL to import into Postman and other API clients. Set `postmanCollectionUrl` to add a Run in Postman action for a public collection maintained by the API publisher.
+
+```tsx
+<Speccy
+  spec={spec}
+  openApiUrl="/api/openapi.yaml"
+  postmanCollectionUrl="https://www.postman.com/example/collection"
+/>
+```
+
 Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference. This works for operations, path items, webhooks, parameters, schema properties, and reusable components. The downloadable document is not yet filtered ([#34](https://github.com/mcclowes/speccy/issues/34)), so don't rely on the marker to keep internal surface out of a published download.
 
 ```yaml
