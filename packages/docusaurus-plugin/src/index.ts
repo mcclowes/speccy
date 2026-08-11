@@ -7,9 +7,9 @@
  * ---
  */
 
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { isAbsolute, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
 import {
@@ -39,6 +39,31 @@ export interface SpeccyPluginContent {
   spec: string | OpenAPIDocument;
   route: string;
   renderer: Omit<SpeccyProps, 'spec'>;
+}
+
+function joinUrlPath(...parts: string[]): string {
+  return `/${parts
+    .flatMap((part) => part.split('/'))
+    .filter(Boolean)
+    .join('/')}`;
+}
+
+export function publicSpecUrl(baseUrl: string, route: string): string {
+  return joinUrlPath(baseUrl, route, 'openapi.yaml');
+}
+
+export async function writePublicSpec(
+  outDir: string,
+  route: string,
+  spec: string | OpenAPIDocument,
+): Promise<string> {
+  const path = resolve(outDir, `.${normalizeRoute(route)}`, 'openapi.yaml');
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(
+    path,
+    typeof spec === 'string' ? spec : `${JSON.stringify(spec, null, 2)}\n`,
+  );
+  return path;
 }
 
 const REFERENCE_SECTIONS = [
@@ -128,7 +153,9 @@ export default function speccyPlugin(
     },
     async loadContent() {
       const spec = await loadSpec(options, context.siteDir);
-      const renderer = options.renderer ?? {};
+      const route = normalizeRoute(options.route);
+      const renderer = { ...options.renderer };
+      renderer.openApiUrl ??= publicSpecUrl(context.baseUrl, route);
       if (
         process.env.NODE_ENV !== 'production' &&
         renderer.showDeveloperHints !== false
@@ -140,7 +167,7 @@ export default function speccyPlugin(
       }
       return {
         spec,
-        route: normalizeRoute(options.route),
+        route,
         renderer,
       };
     },
@@ -166,6 +193,9 @@ export default function speccyPlugin(
           modules: { reference: dataPath },
         });
       }
+    },
+    async postBuild({ content, outDir }) {
+      await writePublicSpec(outDir, content.route, content.spec);
     },
   };
 }

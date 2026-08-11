@@ -1,13 +1,33 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { loadSpec, normalizeRoute, referenceRoutes } from './index';
+import {
+  loadSpec,
+  normalizeRoute,
+  publicSpecUrl,
+  referenceRoutes,
+  writePublicSpec,
+} from './index';
 
 describe('normalizeRoute', () => {
   it('adds a leading slash and strips trailing slashes', () => {
     expect(normalizeRoute('reference/')).toBe('/reference');
     expect(normalizeRoute('/')).toBe('/');
+  });
+});
+
+describe('public OpenAPI description', () => {
+  it('builds a URL under the Docusaurus base and API route', () => {
+    expect(publicSpecUrl('/docs/', '/api')).toBe('/docs/api/openapi.yaml');
+  });
+
+  it('writes the rendered description under the API route', async () => {
+    const outDir = await mkdtemp(join(tmpdir(), 'speccy-build-'));
+    const path = await writePublicSpec(outDir, '/api', 'openapi: 3.1.0\n');
+
+    expect(path).toBe(join(outDir, 'api', 'openapi.yaml'));
+    await expect(readFile(path, 'utf8')).resolves.toBe('openapi: 3.1.0\n');
   });
 });
 

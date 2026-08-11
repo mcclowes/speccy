@@ -15,6 +15,8 @@ export function App() {
       logo={logo}
       showSidebar
       tryIt={config.tryIt}
+      openApiUrl={config.openApiUrl}
+      postmanCollectionUrl={config.postmanCollectionUrl}
     />
   );
 }

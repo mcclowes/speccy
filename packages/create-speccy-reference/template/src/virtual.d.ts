@@ -7,5 +7,7 @@ declare module 'virtual:speccy-reference' {
     basePath: string;
     logo?: string;
     tryIt?: boolean;
+    openApiUrl: string;
+    postmanCollectionUrl?: string;
   };
 }
