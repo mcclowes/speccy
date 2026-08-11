@@ -251,7 +251,12 @@ function EndpointPage({
           >
             {item.tag}
           </a>
-          <h1>{operationTitle(item)}</h1>
+          <div className="sp-endpoint-title">
+            <h1>{operationTitle(item)}</h1>
+            {item.operation.deprecated && (
+              <span className="sp-deprecated">deprecated</span>
+            )}
+          </div>
           <div className="sp-endpoint-address">
             <OperationBadge item={item} />
             <ApiPath value={item.path} wrap />
@@ -552,7 +557,12 @@ function NavigationGroup({
       <span className="sp-nav-operation-label">
         {item.operation.summary ?? item.path}
       </span>
-      <OperationBadge item={item} compact />
+      <span className="sp-nav-operation-meta">
+        {item.operation.deprecated && (
+          <span className="sp-deprecated">deprecated</span>
+        )}
+        <OperationBadge item={item} compact />
+      </span>
     </a>
   );
 

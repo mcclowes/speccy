@@ -30,6 +30,38 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('labels deprecated operations in the sidebar and operation header', () => {
+    const deprecatedSpec = {
+      ...spec,
+      paths: {
+        '/companies': {
+          get: {
+            tags: ['Companies'],
+            summary: 'List companies',
+            deprecated: true,
+          },
+        },
+      },
+    };
+
+    render(
+      <Speccy
+        spec={deprecatedSpec}
+        route={{ page: 'operation', operationId: 'get-companies' }}
+      />,
+    );
+
+    const navigation = within(
+      screen.getByRole('navigation', { name: 'API reference' }),
+    );
+    expect(navigation.getByText('deprecated')).toBeInTheDocument();
+
+    const heading = screen.getByRole('heading', { name: 'List companies' });
+    expect(heading.closest('.sp-endpoint-header')).toHaveTextContent(
+      'deprecated',
+    );
+  });
+
   it('shows the API version by default and allows it to be hidden', () => {
     const versionedSpec = {
       ...spec,

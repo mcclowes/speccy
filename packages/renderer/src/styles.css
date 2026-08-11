@@ -541,6 +541,11 @@ related:
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.sp-nav-operation-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
 .sp-nav-subgroup {
   position: relative;
   margin: 8px 0 10px 8px;
@@ -873,11 +878,25 @@ related:
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.sp-endpoint-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
 .sp-endpoint-header h1 {
-  margin: 0 0 18px;
+  margin: 0;
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.045em;
+}
+.sp-endpoint-title .sp-deprecated {
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 .sp-endpoint-header > .sp-markdown {
   max-width: 760px;
@@ -2467,7 +2486,7 @@ related:
     grid-column: 3;
     grid-row: 1 / 3;
   }
-  .sp-deprecated {
+  .sp-operation-summary > .sp-deprecated {
     display: none;
   }
   .sp-operation-main {
