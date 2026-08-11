@@ -1,0 +1,215 @@
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  color: var(--sp-muted);
+  background: var(--sp-surface-soft);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.625rem;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    transform 80ms ease;
+}
+
+.copy:active {
+  transform: translateY(1px);
+}
+
+.copy.copied {
+  color: var(--sp-accent);
+  background: color-mix(in srgb, var(--sp-accent) 12%, var(--sp-surface-soft));
+}
+
+.copyCompact {
+  padding: 3px;
+  color: var(--sp-muted);
+  border: 0;
+  background: transparent;
+  opacity: 0.65;
+}
+
+.copyCompact:hover,
+.copyCompact:focus-visible {
+  opacity: 1;
+}
+
+.copy::before {
+  content: '';
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.copy.copied::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E");
+}
+
+.body {
+  position: relative;
+}
+
+.body > .copy {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
+  color: var(--sp-code-text);
+  background: transparent;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #8e8f9c;
+  font-size: 0.625rem;
+}
+
+.block {
+  min-width: 0;
+  color: var(--sp-code-text);
+  background: var(--sp-code);
+  font-size: 0.625rem;
+}
+
+.block pre {
+  overflow: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+
+.block pre.numbered {
+  counter-reset: sp-line;
+  padding-left: 10px;
+  white-space: pre;
+}
+
+.numbered .line {
+  position: relative;
+  display: block;
+  padding-left: 4em;
+}
+
+.numbered .line::before {
+  content: counter(sp-line);
+  counter-increment: sp-line;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.7em;
+  color: var(--sp-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.fold {
+  position: absolute;
+  top: 0;
+  left: 2.1em;
+  width: 0.9em;
+  padding: 0;
+  color: var(--sp-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  text-align: center;
+  user-select: none;
+}
+
+.fold > span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  transition: transform 120ms ease;
+}
+
+.fold[aria-expanded='false'] > span {
+  transform: translate(-1px, -1px) rotate(-45deg);
+}
+
+.fold:hover {
+  color: var(--sp-code-text);
+}
+
+.foldSummary {
+  padding: 0 0.3em;
+  color: var(--sp-muted);
+  font-style: italic;
+}
+
+.clipWindow {
+  position: relative;
+}
+
+.clip.truncated .clipWindow > pre {
+  max-height: 360px;
+  overflow: hidden;
+}
+
+.clip:not(.truncated) .clipWindow > pre {
+  max-height: none;
+}
+
+.clip.truncated .clipWindow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 56px;
+  background: linear-gradient(transparent, var(--sp-code));
+  pointer-events: none;
+}
+
+.expand {
+  width: 100%;
+  padding: 10px 14px;
+  color: var(--sp-code-text);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--sp-code-border);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 120ms ease;
+}
+
+.expand:hover,
+.expand:focus-visible {
+  background: var(--sp-code-control);
+}
+
+.jsonKey {
+  color: var(--sp-json-key);
+}
+
+.jsonString {
+  color: var(--sp-json-string);
+}
+
+.jsonNumber {
+  color: var(--sp-json-number);
+}
+
+.jsonLiteral {
+  color: var(--sp-json-literal);
+}

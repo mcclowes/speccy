@@ -8,6 +8,14 @@
  */
 
 import { useState, type ReactNode } from 'react';
+import styles from './CodeBlock.module.css';
+
+const jsonClass = {
+  key: styles.jsonKey,
+  string: styles.jsonString,
+  number: styles.jsonNumber,
+  literal: styles.jsonLiteral,
+};
 
 const JSON_TOKEN_PATTERN =
   /("(?:\\.|[^"\\])*")(?=\s*:)|("(?:\\.|[^"\\])*")|(-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b/g;
@@ -27,7 +35,7 @@ function highlightedJsonLine(line: string): ReactNode {
           ? 'number'
           : 'literal';
     tokens.push(
-      <span className={`sp-json-${type}`} key={index}>
+      <span className={`sp-json-${type} ${jsonClass[type]}`} key={index}>
         {match[0]}
       </span>,
     );
@@ -59,7 +67,7 @@ export function CodeLines({ value }: { value: string }) {
   return (
     <>
       {value.split('\n').map((line, index) => (
-        <span className="sp-code-line" key={index}>
+        <span className={`sp-code-line ${styles.line}`} key={index}>
           {isJson ? highlightedJsonLine(line) : line}
         </span>
       ))}
@@ -69,11 +77,19 @@ export function CodeLines({ value }: { value: string }) {
 
 function highlightedJsonPrimitive(value: unknown): ReactNode {
   if (typeof value === 'string')
-    return <span className="sp-json-string">{JSON.stringify(value)}</span>;
+    return (
+      <span className={`sp-json-string ${styles.jsonString}`}>
+        {JSON.stringify(value)}
+      </span>
+    );
   if (typeof value === 'number')
-    return <span className="sp-json-number">{JSON.stringify(value)}</span>;
+    return (
+      <span className={`sp-json-number ${styles.jsonNumber}`}>
+        {JSON.stringify(value)}
+      </span>
+    );
   return (
-    <span className="sp-json-literal">
+    <span className={`sp-json-literal ${styles.jsonLiteral}`}>
       {value === undefined ? 'null' : JSON.stringify(value)}
     </span>
   );
@@ -89,7 +105,7 @@ function FoldToggle({
   return (
     <button
       type="button"
-      className="sp-code-fold"
+      className={`sp-code-fold ${styles.fold}`}
       aria-label={collapsed ? 'Expand' : 'Collapse'}
       aria-expanded={!collapsed}
       onClick={onToggle}
@@ -126,7 +142,7 @@ function jsonRows({
       : null;
   if (!container) {
     return [
-      <span className="sp-code-line" key={path}>
+      <span className={`sp-code-line ${styles.line}`} key={path}>
         {indent}
         {keyLabel}
         {highlightedJsonPrimitive(value)}
@@ -153,7 +169,7 @@ function jsonRows({
 
   if (entries.length === 0) {
     return [
-      <span className="sp-code-line" key={path}>
+      <span className={`sp-code-line ${styles.line}`} key={path}>
         {indent}
         {keyLabel}
         {openChar}
@@ -171,12 +187,16 @@ function jsonRows({
       : `${count} key${count === 1 ? '' : 's'}`;
 
   const openRow = (
-    <span className="sp-code-line" key={`${path}-open`}>
+    <span className={`sp-code-line ${styles.line}`} key={`${path}-open`}>
       {indent}
       <FoldToggle collapsed={isCollapsed} onToggle={() => toggle(path)} />
       {keyLabel}
       {openChar}
-      {isCollapsed && <span className="sp-code-fold-summary">{summary}</span>}
+      {isCollapsed && (
+        <span className={`sp-code-fold-summary ${styles.foldSummary}`}>
+          {summary}
+        </span>
+      )}
       {isCollapsed && `${closeChar}${comma}`}
     </span>
   );
@@ -190,7 +210,9 @@ function jsonRows({
       keyLabel:
         entry.key !== undefined ? (
           <>
-            <span className="sp-json-key">{JSON.stringify(entry.key)}</span>
+            <span className={`sp-json-key ${styles.jsonKey}`}>
+              {JSON.stringify(entry.key)}
+            </span>
             {': '}
           </>
         ) : undefined,
@@ -202,7 +224,7 @@ function jsonRows({
   );
 
   const closeRow = (
-    <span className="sp-code-line" key={`${path}-close`}>
+    <span className={`sp-code-line ${styles.line}`} key={`${path}-close`}>
       {indent}
       {closeChar}
       {comma}
@@ -253,11 +275,15 @@ export function TruncatedCode({
     return <>{children}</>;
 
   return (
-    <div className={`sp-code-clip${expanded ? '' : ' is-truncated'}`}>
-      <div className="sp-code-clip-window">{children}</div>
+    <div
+      className={`sp-code-clip ${styles.clip}${expanded ? '' : ` is-truncated ${styles.truncated}`}`}
+    >
+      <div className={`sp-code-clip-window ${styles.clipWindow}`}>
+        {children}
+      </div>
       <button
         type="button"
-        className="sp-code-expand"
+        className={`sp-code-expand ${styles.expand}`}
         aria-expanded={expanded}
         onClick={() => setExpanded(!expanded)}
       >
@@ -286,7 +312,7 @@ export function CopyButton({
 
   return (
     <button
-      className={`sp-copy${compact ? ' sp-copy-compact' : ''}${copied ? ' is-copied' : ''}`}
+      className={`sp-copy ${styles.copy}${compact ? ` sp-copy-compact ${styles.copyCompact}` : ''}${copied ? ` is-copied ${styles.copied}` : ''}`}
       type="button"
       onClick={copy}
       aria-label={copied ? 'Copied' : label}
@@ -323,7 +349,7 @@ export function CodeBlock({
   truncateLabel?: string;
 }) {
   const code = (
-    <pre className={lineNumbers ? 'sp-code-numbered' : ''}>
+    <pre className={lineNumbers ? `sp-code-numbered ${styles.numbered}` : ''}>
       <code>
         {collapsibleValue !== undefined ? (
           <CollapsibleJson value={collapsibleValue} />
@@ -337,10 +363,10 @@ export function CodeBlock({
   );
 
   return (
-    <div className={`sp-code-block ${className}`.trim()}>
+    <div className={`sp-code-block ${styles.block} ${className}`.trim()}>
       {(title || copyable) && (
         <div
-          className={`sp-code-title${!title && copyable ? ' sp-code-title-copy-only' : ''}`}
+          className={`sp-code-title ${styles.title}${!title && copyable ? ' sp-code-title-copy-only' : ''}`}
         >
           <span>{title}</span>
           {copyable && copyPlacement === 'title' && (
@@ -348,7 +374,7 @@ export function CodeBlock({
           )}
         </div>
       )}
-      <div className="sp-code-body">
+      <div className={`sp-code-body ${styles.body}`}>
         {copyable && copyPlacement === 'body' && (
           <CopyButton value={copyValue} label={copyLabel} compact />
         )}
