@@ -29,6 +29,14 @@ export default {
 
 The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL. The plugin also publishes the rendered description at `/api/openapi.yaml`, adjusted for the site's `baseUrl`, and links to it from the overview.
 
+By default, the plugin builds a static page for the overview, each endpoint, each tag, and each component section. These pages share one copy of the OpenAPI document. For very large references where build speed matters more than server-rendered deep links, use one client-routed page instead:
+
+```ts
+{
+  routeGeneration: 'client',
+}
+```
+
 Add a public Postman collection through the renderer settings:
 
 ```ts

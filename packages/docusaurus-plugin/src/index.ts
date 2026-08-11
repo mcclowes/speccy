@@ -31,6 +31,8 @@ export interface SpeccyPluginOptions {
   spec?: string | OpenAPIDocument;
   /** Remote YAML or JSON document fetched during the Docusaurus build. */
   specUrl?: string;
+  /** Builds each reference page statically, or uses one client-routed catch-all page. Defaults to static. */
+  routeGeneration?: 'static' | 'client';
   /** Renderer settings applied to the generated route. */
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
@@ -38,6 +40,7 @@ export interface SpeccyPluginOptions {
 export interface SpeccyPluginContent {
   spec: string | OpenAPIDocument;
   route: string;
+  routeGeneration: 'static' | 'client';
   renderer: Omit<SpeccyProps, 'spec'>;
 }
 
@@ -107,10 +110,21 @@ export function referenceRoutes(
     ).map((section) => ({ page: 'reference' as const, section })),
   ];
 
-  return routes.map((route) => ({
+  const generated = routes.map((route) => ({
     path: routePath(route, basePath, { operationSegment: '' }),
     route,
   }));
+  const routeByPath = new Map<string, SpeccyRoute>();
+  for (const item of generated) {
+    const existing = routeByPath.get(item.path);
+    if (existing) {
+      throw new Error(
+        `Speccy routes ${JSON.stringify(existing)} and ${JSON.stringify(item.route)} both generate ${item.path}. Use unique operation IDs and tag names.`,
+      );
+    }
+    routeByPath.set(item.path, item.route);
+  }
+  return generated;
 }
 
 export function normalizeRoute(route = '/api'): string {
@@ -168,29 +182,49 @@ export default function speccyPlugin(
       return {
         spec,
         route,
+        routeGeneration: options.routeGeneration ?? 'static',
         renderer,
       };
     },
     async contentLoaded({ content, actions }) {
       const component = fileURLToPath(new URL('./page.js', import.meta.url));
+      const dataName =
+        content.route.split('/').filter(Boolean).join('-') || 'root';
+      const referenceDataPath = await actions.createData(
+        `speccy-reference-${dataName}.json`,
+        JSON.stringify({
+          spec: content.spec,
+          route: content.route,
+          renderer: content.renderer,
+        }),
+      );
+
+      if (content.routeGeneration === 'client') {
+        actions.addRoute({
+          path: content.route,
+          exact: false,
+          component,
+          modules: { reference: referenceDataPath },
+        });
+        return;
+      }
+
       for (const [index, generated] of referenceRoutes(
         content.spec,
         content.route,
       ).entries()) {
-        const dataPath = await actions.createData(
-          `speccy-reference-${index}.json`,
-          JSON.stringify({
-            spec: content.spec,
-            route: content.route,
-            initialRoute: generated.route,
-            renderer: content.renderer,
-          }),
+        const routeDataPath = await actions.createData(
+          `speccy-route-${dataName}-${index}.json`,
+          JSON.stringify(generated.route),
         );
         actions.addRoute({
           path: generated.path,
           exact: true,
           component,
-          modules: { reference: dataPath },
+          modules: {
+            reference: referenceDataPath,
+            initialRoute: routeDataPath,
+          },
         });
       }
     },

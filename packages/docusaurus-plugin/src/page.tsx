@@ -17,14 +17,15 @@ import type {
 interface ReferenceData {
   spec: string | OpenAPIDocument;
   route: string;
-  initialRoute?: SpeccyRoute;
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
 
 export default function SpeccyPage({
   reference,
+  initialRoute,
 }: {
   reference: ReferenceData;
+  initialRoute?: SpeccyRoute;
 }) {
   return (
     <OpenAPI
@@ -33,7 +34,7 @@ export default function SpeccyPage({
       showSidebar
       showDeveloperHints={process.env.NODE_ENV !== 'production'}
       {...reference.renderer}
-      initialRoute={reference.initialRoute}
+      initialRoute={initialRoute}
     />
   );
 }

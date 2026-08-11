@@ -1,8 +1,9 @@
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  default as speccyPlugin,
   loadSpec,
   normalizeRoute,
   publicSpecUrl,
@@ -89,6 +90,96 @@ describe('referenceRoutes', () => {
           route: { page: 'reference', section: 'schemas' },
         },
       ]),
+    );
+  });
+
+  it('rejects generated route collisions', () => {
+    expect(() =>
+      referenceRoutes(
+        {
+          openapi: '3.1.0',
+          info: { title: 'Test API' },
+          tags: [{ name: 'Credit cards' }, { name: 'Credit-cards' }],
+          paths: {
+            '/credit-cards': {
+              get: { tags: ['Credit cards'] },
+              post: { tags: ['Credit-cards'] },
+            },
+          },
+        },
+        '/api',
+      ),
+    ).toThrow('both generate /api/tags/credit-cards');
+  });
+});
+
+describe('route generation', () => {
+  const spec = {
+    openapi: '3.1.0',
+    info: { title: 'Test API' },
+    paths: {
+      '/companies': {
+        get: { operationId: 'listCompanies' },
+      },
+    },
+  };
+
+  async function generate(routeGeneration?: 'static' | 'client') {
+    const createData = vi.fn(
+      async (name: string, _data: string) => `/data/${name}`,
+    );
+    const addRoute = vi.fn();
+    const plugin = speccyPlugin({ siteDir: '/site', baseUrl: '/' } as never, {
+      spec,
+      routeGeneration,
+    });
+
+    await plugin.contentLoaded?.({
+      content: {
+        spec,
+        route: '/api',
+        routeGeneration: routeGeneration ?? 'static',
+        renderer: {},
+      },
+      actions: { createData, addRoute },
+    } as never);
+
+    return { createData, addRoute };
+  }
+
+  it('shares one spec module across static routes', async () => {
+    const { createData, addRoute } = await generate();
+
+    expect(addRoute).toHaveBeenCalledTimes(3);
+    expect(createData).toHaveBeenCalledTimes(4);
+    expect(createData.mock.calls[0]?.[1]).toContain('"spec"');
+    expect(
+      createData.mock.calls
+        .slice(1)
+        .every(([, data]) => !data.includes('"spec"')),
+    ).toBe(true);
+    expect(addRoute.mock.calls[1]?.[0]).toMatchObject({
+      path: '/api/listcompanies',
+      exact: true,
+      modules: {
+        reference: expect.stringContaining('speccy-reference-api.json'),
+        initialRoute: expect.stringContaining('speccy-route-api-1.json'),
+      },
+    });
+  });
+
+  it('supports one client-routed catch-all page', async () => {
+    const { createData, addRoute } = await generate('client');
+
+    expect(createData).toHaveBeenCalledTimes(1);
+    expect(addRoute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/api',
+        exact: false,
+        modules: {
+          reference: expect.stringContaining('speccy-reference-api.json'),
+        },
+      }),
     );
   });
 });
