@@ -1,5 +1,19 @@
 # docusaurus-plugin-speccy
 
+## 0.6.0
+
+### Minor Changes
+
+- [`5ea5ccf`](https://github.com/mcclowes/speccy/commit/5ea5ccf24b34cf6b907f3feff80bb5f35af72696) Thanks [@mcclowes](https://github.com/mcclowes)! - Add public OpenAPI description links, stable generated description URLs, and configurable Run in Postman actions.
+
+- [`76b75b2`](https://github.com/mcclowes/speccy/commit/76b75b21df04af210452deab91cc3c8a5a5c46f6) Thanks [@mcclowes](https://github.com/mcclowes)! - Generate static reference routes by default, share one OpenAPI document between them, and add a client-routed fallback mode.
+
+### Patch Changes
+
+- Updated dependencies [[`5ea5ccf`](https://github.com/mcclowes/speccy/commit/5ea5ccf24b34cf6b907f3feff80bb5f35af72696), [`2345c84`](https://github.com/mcclowes/speccy/commit/2345c8497f1f099f2ba6a234a7b165f2835da73b)]:
+  - speccy-renderer@0.6.0
+  - speccy-spectral@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes

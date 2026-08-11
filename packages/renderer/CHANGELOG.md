@@ -1,5 +1,18 @@
 # speccy-renderer
 
+## 0.6.0
+
+### Minor Changes
+
+- [`5ea5ccf`](https://github.com/mcclowes/speccy/commit/5ea5ccf24b34cf6b907f3feff80bb5f35af72696) Thanks [@mcclowes](https://github.com/mcclowes)! - Add public OpenAPI description links, stable generated description URLs, and configurable Run in Postman actions.
+
+- [`2345c84`](https://github.com/mcclowes/speccy/commit/2345c8497f1f099f2ba6a234a7b165f2835da73b) Thanks [@mcclowes](https://github.com/mcclowes)! - Add a `showApiVersion` renderer setting for hiding the API version in the overview heading.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - speccy-core@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
