@@ -29,12 +29,16 @@ describe('endpoint parameter layout', () => {
     );
   });
 
-  it('indents subgroups behind a nested navigation guide', () => {
+  it('indents subgroup pages behind a guide without indenting the heading', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 
     expect(css).toMatch(
-      /\.sp-nav-subgroup \{[^}]*margin: 8px 0 10px 8px;[^}]*padding-left: 7px;[^}]*border-left: 1px solid/,
+      /\.sp-nav-subgroup \{[^}]*margin: 8px 0 10px 8px;[^}]*padding-left: 7px;/,
     );
+    expect(css).toMatch(
+      /\.sp-nav-subgroup::before \{[^}]*top: 24px;[^}]*border-left: 1px solid/,
+    );
+    expect(css).toMatch(/\.sp-nav-subgroup > h3 \{[^}]*margin: 0 0 0 -15px;/);
     expect(css).toMatch(
       /\.sp-sidebar \.sp-nav-subgroup > h3 \{[^}]*padding-left: 12px;/,
     );

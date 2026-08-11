@@ -658,12 +658,20 @@ related:
   white-space: nowrap;
 }
 .sp-nav-subgroup {
+  position: relative;
   margin: 8px 0 10px 8px;
   padding-left: 7px;
+}
+.sp-nav-subgroup::before {
+  position: absolute;
+  top: 24px;
+  bottom: 0;
+  left: 0;
   border-left: 1px solid color-mix(in srgb, var(--sp-accent) 14%, transparent);
+  content: '';
 }
 .sp-nav-subgroup > h3 {
-  margin: 0;
+  margin: 0 0 0 -15px;
   padding: 4px 8px 3px;
   color: var(--sp-muted);
   font-size: 0.625rem;
