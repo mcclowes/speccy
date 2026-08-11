@@ -1,14 +1,15 @@
 /**
- * PROTOTYPE: Three treatments for API-reference links inside documentation,
- * switchable with ?variant=A|B|C. Delete or absorb after choosing a direction.
+ * PROTOTYPE: Four treatments for API-reference links inside documentation,
+ * switchable with ?variant=A|B|C|D. Delete or absorb after choosing a direction.
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { CodeBlock } from './CodeBlock';
 import { ApiPath, MethodBadge } from './DesignSystem';
 import styles from './OperationReferences.prototype.stories.module.css';
 
-const variants = ['A', 'B', 'C'] as const;
+const variants = ['A', 'B', 'C', 'D'] as const;
 type Variant = (typeof variants)[number];
 type Theme = 'light' | 'dark';
 
@@ -16,7 +17,70 @@ const variantNames: Record<Variant, string> = {
   A: 'Prose first',
   B: 'Endpoint strip',
   C: 'Reference card',
+  D: 'Operation preview',
 };
+
+const requestExample = JSON.stringify(
+  {
+    profileId: '10001',
+    tag: 'customer-123',
+    rootUser: {
+      name: 'Alex',
+      surname: 'Morgan',
+      email: 'alex@example.com',
+      mobile: { countryCode: '+44', number: '7700900123' },
+      companyPosition: 'DIRECTOR',
+      dateOfBirth: { year: 1990, month: 1, day: 1 },
+    },
+    company: {
+      name: 'Example Studio Ltd',
+      tradingName: 'Example Studio',
+      type: 'PRIVATE_LIMITED_COMPANY',
+      industry: 'SOFTWARE_SERVICES',
+      website: 'https://example.com',
+      registrationNumber: '12345678',
+      registrationCountry: 'GB',
+      registeredAddress: {
+        addressLine1: '20 Example Street',
+        city: 'London',
+        postCode: 'EC1A 1AA',
+        country: 'GB',
+      },
+      expectedMonthlySpend: {
+        currency: 'GBP',
+        amount: 250000,
+      },
+    },
+  },
+  null,
+  2,
+);
+
+const responseExample = JSON.stringify(
+  {
+    id: 'f51dca47-44a9-4bd5-9d89-33a9ad63d6e4',
+    profileId: '10001',
+    tag: 'customer-123',
+    rootUser: {
+      id: 'c3a0a4cf-6243-49ea-aa5d-2b92acb2d9f4',
+      email: 'alex@example.com',
+      state: 'ACTIVE',
+    },
+    company: {
+      name: 'Example Studio Ltd',
+      type: 'PRIVATE_LIMITED_COMPANY',
+      registrationNumber: '12345678',
+    },
+    verification: {
+      email: 'PENDING',
+      mobile: 'PENDING',
+      dueDiligence: 'NOT_STARTED',
+    },
+    createdAt: '2026-08-11T09:42:17Z',
+  },
+  null,
+  2,
+);
 
 const operations = {
   create: {
@@ -80,6 +144,46 @@ function ReferenceCard({ operation }: { operation: Operation }) {
         View operation <span aria-hidden="true">→</span>
       </span>
     </a>
+  );
+}
+
+function OperationPreview({ operation }: { operation: Operation }) {
+  const [tab, setTab] = useState<'request' | 'response'>('request');
+  const value = tab === 'request' ? requestExample : responseExample;
+
+  return (
+    <section className={styles.operationPreview}>
+      <header className={styles.previewHeader}>
+        <span className={styles.endpointIdentity}>
+          <MethodBadge method={operation.method} />
+          <ApiPath value={operation.path} wrap />
+        </span>
+        <a href="#operation-reference">
+          Open API reference <span aria-hidden="true">↗</span>
+        </a>
+      </header>
+      <div className={styles.previewTabs} role="tablist" aria-label="Example">
+        {(['request', 'response'] as const).map((name) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === name}
+            onClick={() => setTab(name)}
+            key={name}
+          >
+            {name[0]!.toUpperCase() + name.slice(1)}
+          </button>
+        ))}
+      </div>
+      <div className={styles.previewCode} role="tabpanel">
+        <CodeBlock
+          value={value}
+          copyPlacement="body"
+          copyLabel={`Copy ${tab}`}
+          truncateLabel={tab}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -164,6 +268,25 @@ function VariantC() {
   );
 }
 
+function VariantD() {
+  return (
+    <DocsFrame>
+      <section className={styles.prose}>
+        <h2>Create the corporate</h2>
+        <p>
+          Submit the root user and company details. The response includes the
+          corporate ID required by the rest of the onboarding flow.
+        </p>
+        <OperationPreview operation={operations.create} />
+        <p>
+          Save the returned ID, then continue by verifying the root user&apos;s
+          email address.
+        </p>
+      </section>
+    </DocsFrame>
+  );
+}
+
 function readVariant(): Variant {
   const value = new URLSearchParams(window.location.search).get('variant');
   return variants.includes(value as Variant) ? (value as Variant) : 'A';
@@ -205,7 +328,13 @@ function Prototype() {
   });
 
   const VariantComponent =
-    variant === 'A' ? VariantA : variant === 'B' ? VariantB : VariantC;
+    variant === 'A'
+      ? VariantA
+      : variant === 'B'
+        ? VariantB
+        : variant === 'C'
+          ? VariantC
+          : VariantD;
 
   return (
     <div
@@ -255,4 +384,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ThreeDirections: Story = {};
+export const FourDirections: Story = {};
