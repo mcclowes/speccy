@@ -1149,7 +1149,7 @@ export function Speccy({
                   navigate();
                 }}
               >
-                All endpoints
+                All operations
               </a>
               {model.tagGroups.length > 0 ? (
                 <>
