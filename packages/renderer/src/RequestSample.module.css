@@ -57,7 +57,7 @@
   gap: 8px;
   min-width: 120px;
   padding: 4px 8px;
-  background: var(--sp-code-control);
+  background: var(--sp-surface);
   border: 1px solid var(--sp-code-border);
   border-radius: 6px;
   cursor: pointer;

@@ -1254,8 +1254,11 @@ related:
   font: inherit;
   cursor: pointer;
 }
-:is(.sp-response-example, .sp-request-example) .sp-example-select {
+.sp-response-example .sp-example-select {
   background: var(--sp-bg);
+}
+.sp-request-example .sp-example-select {
+  background: var(--sp-surface);
 }
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section {
   margin-top: 0;
