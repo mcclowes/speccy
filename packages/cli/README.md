@@ -31,6 +31,14 @@ speccy diff origin/main:openapi.yaml openapi.yaml
 
 If the diff base ref exists but does not contain the file, the spec is new on this branch and `diff` exits clean. A missing revision or lint target is an error. If the ref itself is unreachable, which usually means a shallow clone, the command says so rather than reporting your whole API as added.
 
+## Bundle multi-document specs
+
+`speccy-cli` doesn't include a bundle command. Use the open-source [Redocly CLI](https://redocly.com/docs/cli/commands/bundle/) to create a standard YAML or JSON document before passing it to tools that don't load external references:
+
+```sh
+npx redocly bundle openapi.yaml --output openapi.bundled.yaml
+```
+
 ## Options
 
 | Option                              | Meaning                                                                                                                                                                                                                  |

@@ -22,9 +22,21 @@ See the [public package decision](docs/decisions/001-public-package-surface.md) 
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
-Speccy supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. The web studio and Mac app resolve multi-document references automatically; the React component renders a single document, so bundle external references first with `speccy-core`. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
+Speccy supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. The web studio and Mac app resolve multi-document references automatically; the React component renders a single document, so bundle external references first. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
 
 Speccy also accepts other OpenAPI 3.x descriptions and Swagger 2 documents. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
+
+## Bundle multi-document specs
+
+Speccy doesn't produce distributable OpenAPI bundles. Use the open-source [Redocly CLI](https://redocly.com/docs/cli/commands/bundle/) when a Speccy integration or another downstream tool needs one document:
+
+```sh
+npm install --save-dev @redocly/cli
+npx redocly bundle openapi.yaml --output openapi.bundled.yaml
+npx redocly bundle openapi.yaml --output openapi.bundled.json
+```
+
+The output extension selects YAML or JSON. Redocly resolves cross-file references while retaining local component references, which keeps recursive schemas valid and avoids the duplication caused by full dereferencing.
 
 ## Run the web studio
 
