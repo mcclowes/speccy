@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import codeBlockStyles from './CodeBlock.module.css';
 import { Speccy } from './Speccy';
 import type { SpeccyRoute } from './types';
 
@@ -1404,6 +1405,10 @@ describe('Speccy navigation', () => {
       .getByText('Request example')
       .closest<HTMLElement>('.sp-request-example');
     expect(example).toBeInTheDocument();
+    expect(example).toHaveClass(codeBlockStyles.block!);
+    expect(
+      within(example!).getByText('Request example').parentElement,
+    ).toHaveClass(codeBlockStyles.title!);
     expect(example).toHaveTextContent(
       '/companies/company-123/categories/bank-fee',
     );
@@ -1418,6 +1423,9 @@ describe('Speccy navigation', () => {
     const querySection = within(example!)
       .getByText('Query parameters')
       .closest<HTMLElement>('.sp-request-example-section')!;
+    expect(querySection.querySelector('pre')).toHaveClass(
+      codeBlockStyles.numbered!,
+    );
     const queryToggle = within(querySection).getByRole('button', {
       name: 'Collapse',
     });

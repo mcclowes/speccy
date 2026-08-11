@@ -26,6 +26,7 @@ import {
   CopyButton,
   TruncatedCode,
 } from './CodeBlock';
+import codeBlockStyles from './CodeBlock.module.css';
 import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
@@ -706,7 +707,11 @@ function RequestExampleSection({
   children?: ReactNode;
 }) {
   const content = (
-    <pre className={code ? undefined : 'sp-code-numbered'}>
+    <pre
+      className={
+        code ? undefined : `sp-code-numbered ${codeBlockStyles.numbered}`
+      }
+    >
       <code>
         {children ??
           (collapsibleValue !== undefined ? (
@@ -866,8 +871,10 @@ export function EndpointRequestDetails({
           </section>
         )}
       </div>
-      <aside className="sp-code-block sp-request-example">
-        <div className="sp-code-title">
+      <aside
+        className={`sp-code-block ${codeBlockStyles.block} sp-request-example`}
+      >
+        <div className={`sp-code-title ${codeBlockStyles.title}`}>
           <span>{title}</span>
         </div>
         <RequestExampleSection label="Path" value={resolvedPath} code>
