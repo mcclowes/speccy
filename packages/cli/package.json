@@ -1,6 +1,6 @@
 {
   "name": "speccy-cli",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Lint OpenAPI documents and report breaking changes from the command line.",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "node": ">=24"
   },
   "dependencies": {
-    "speccy-core": "^0.4.4"
+    "speccy-core": "^0.5.0"
   },
   "devDependencies": {
     "tsup": "^8.5.0",
