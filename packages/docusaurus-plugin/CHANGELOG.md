@@ -1,5 +1,17 @@
 # docusaurus-plugin-speccy
 
+## 0.7.0
+
+### Minor Changes
+
+- [`cbab1d7`](https://github.com/mcclowes/speccy/commit/cbab1d76ada2e73f61798fce33060dce09bb648f) Thanks [@mcclowes](https://github.com/mcclowes)! - Wrap generated references in the Docusaurus layout, add route-specific metadata, and document multiple static reference instances.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - speccy-spectral@0.7.0
+  - speccy-renderer@0.7.0
+
 ## 0.6.0
 
 ### Minor Changes
