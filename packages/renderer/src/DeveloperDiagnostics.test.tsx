@@ -71,9 +71,11 @@ describe('developer diagnostics layout', () => {
       /\.sp-inline-diagnostics \{[^}]*position: fixed;[^}]*right: 20px;[^}]*bottom: 72px;/,
     );
     expect(css).toMatch(
-      /\.sp-inline-diagnostics \{[^}]*width: 380px;[^}]*max-width: calc\(100% - 40px\);[^}]*max-height: calc\(100vh - 112px\);/,
+      /\.sp-inline-diagnostics \{[^}]*width: 380px;[^}]*max-width: calc\(100dvw - 40px\);[^}]*max-height: calc\(100dvh - 112px\);/,
     );
-    expect(css).not.toContain('calc(100vw -');
+    expect(css).toMatch(
+      /\.sp-diagnostics-trigger \{[^}]*max-width: calc\(100dvw - 40px\);/,
+    );
     expect(css).not.toMatch(/\.sp-inline-diagnostics \{[^}]*margin-top:/);
   });
 

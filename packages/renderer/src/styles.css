@@ -2492,12 +2492,13 @@ related:
     right: 12px;
     bottom: 64px;
     width: 360px;
-    max-width: calc(100% - 24px);
-    max-height: calc(100vh - 88px);
+    max-width: calc(100dvw - 24px);
+    max-height: calc(100dvh - 88px);
   }
   .sp-diagnostics-trigger {
     right: 12px;
     bottom: 12px;
+    max-width: calc(100dvw - 24px);
   }
 }
 

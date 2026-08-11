@@ -4,8 +4,8 @@
   bottom: 72px;
   z-index: 18;
   width: 380px;
-  max-width: calc(100% - 40px);
-  max-height: calc(100vh - 112px);
+  max-width: calc(100dvw - 40px);
+  max-height: calc(100dvh - 112px);
   overflow: hidden auto;
   display: grid;
   gap: 8px;
@@ -58,6 +58,7 @@
   right: 20px;
   bottom: 20px;
   z-index: 19;
+  max-width: calc(100dvw - 40px);
   min-height: 40px;
   display: flex;
   align-items: center;
