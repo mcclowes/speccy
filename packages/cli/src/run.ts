@@ -91,6 +91,7 @@ export async function run(
     ({ positionals, values } = parseArgs({
       args: argv,
       allowPositionals: true,
+      allowNegative: true,
       options: {
         format: { type: 'string' },
         'fail-on': { type: 'string' },

@@ -46,6 +46,14 @@ describe('run', () => {
     expect(h.out.join('\n')).toContain('speccy lint');
   });
 
+  it('accepts the documented --no-color flag', async () => {
+    const h = harness({ 'openapi.yaml': BASE });
+    await expect(run(['lint', 'openapi.yaml', '--no-color'], h)).resolves.toBe(
+      0,
+    );
+    expect(h.err.join('\n')).not.toContain('Unknown option');
+  });
+
   it('rejects an unknown command with the tool failure code', async () => {
     const h = harness();
     await expect(run(['explode', 'a.yaml'], h)).resolves.toBe(2);
