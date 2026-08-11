@@ -662,7 +662,7 @@ related:
 }
 .sp-nav-subgroup > h3 {
   margin: 0;
-  padding: 4px 8px 3px;
+  padding: 4px 8px 3px 16px;
   color: var(--sp-muted);
   font-size: 0.625rem;
   font-weight: 700;
@@ -2781,6 +2781,9 @@ related:
     padding-left: 8px;
   }
   .sp-sidebar .sp-nav-subgroup > .sp-nav-operation {
+    padding-left: 20px;
+  }
+  .sp-sidebar .sp-nav-subgroup > h3 {
     padding-left: 20px;
   }
   .sp-sidebar .sp-nav-heading,

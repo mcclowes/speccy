@@ -29,6 +29,17 @@ describe('endpoint parameter layout', () => {
     );
   });
 
+  it('aligns subgroup headings with their operation labels', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-nav-subgroup > h3 \{[^}]*padding: 4px 8px 3px 16px;/,
+    );
+    expect(css).toMatch(
+      /\.sp-sidebar \.sp-nav-subgroup > h3 \{[^}]*padding-left: 20px;/,
+    );
+  });
+
   it('progressively reveals long parameter groups', () => {
     window.history.replaceState({}, '', '/api/list-companies');
     const parameters = Array.from({ length: 8 }, (_, index) => ({
