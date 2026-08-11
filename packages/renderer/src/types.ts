@@ -51,4 +51,8 @@ export interface SpeccyProps {
   parameterPrototype?: boolean;
   /** Shows the interactive request builder and allows API requests to be sent. Defaults to true. */
   tryIt?: boolean;
+  /** Public URL for importing the rendered OpenAPI description into API clients. */
+  openApiUrl?: string;
+  /** Public Postman collection URL shown as a Run in Postman action. */
+  postmanCollectionUrl?: string;
 }

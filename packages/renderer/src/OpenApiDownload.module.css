@@ -18,7 +18,9 @@
   padding: 0 20px;
 }
 
-.options button {
+.options > button,
+.options > a,
+.urlOption > a {
   width: 100%;
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) 18px;
@@ -31,13 +33,16 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
-.options button:last-child {
+.options > :last-child {
   border-bottom: 0;
 }
 
-.options button:hover strong {
+.options > button:hover strong,
+.options > a:hover strong,
+.urlOption > a:hover strong {
   color: var(--sp-accent);
 }
 
@@ -65,4 +70,36 @@
 
 .yamlFormat {
   color: var(--sp-muted);
+}
+
+.openapiFormat {
+  color: var(--sp-accent);
+}
+
+.urlOption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--sp-line);
+}
+
+.urlOption > a {
+  border-bottom: 0;
+}
+
+.urlOption > button {
+  width: auto;
+  border-bottom: 0;
+}
+
+.postmanMark {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ff6c37;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 800;
 }

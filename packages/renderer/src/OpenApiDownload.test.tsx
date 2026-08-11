@@ -39,4 +39,40 @@ describe('OpenApiDownload', () => {
     expect(click).toHaveBeenCalledOnce();
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:openapi');
   });
+
+  it('links to a public description and copies its URL', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <OpenApiDownload
+        document={{ openapi: '3.1.0', paths: {} }}
+        openApiUrl="https://api.example.com/openapi.yaml"
+      />,
+    );
+
+    expect(
+      screen.getByRole('link', { name: /open openapi description/i }),
+    ).toHaveAttribute('href', 'https://api.example.com/openapi.yaml');
+    fireEvent.click(screen.getByRole('button', { name: /copy/i }));
+    expect(writeText).toHaveBeenCalledWith(
+      'https://api.example.com/openapi.yaml',
+    );
+  });
+
+  it('links to a configured Postman collection', () => {
+    render(
+      <OpenApiDownload
+        document={{ openapi: '3.1.0', paths: {} }}
+        postmanCollectionUrl="https://www.postman.com/example/collection"
+      />,
+    );
+
+    expect(
+      screen.getByRole('link', { name: /run in postman/i }),
+    ).toHaveAttribute('href', 'https://www.postman.com/example/collection');
+  });
 });

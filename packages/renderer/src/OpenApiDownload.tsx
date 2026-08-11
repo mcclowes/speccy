@@ -9,6 +9,7 @@
 
 import { stringify as stringifyYaml } from 'yaml';
 import type { OpenAPIDocument } from 'speccy-core';
+import { CopyButton } from './CodeBlock';
 import styles from './OpenApiDownload.module.css';
 
 type DownloadFormat = 'json' | 'yaml';
@@ -48,7 +49,35 @@ function DownloadIcon() {
   );
 }
 
-export function OpenApiDownload({ document }: { document: OpenAPIDocument }) {
+function ExternalIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14 4h6v6" />
+      <path d="m20 4-9 9" />
+      <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
+    </svg>
+  );
+}
+
+export interface OpenApiDownloadProps {
+  document: OpenAPIDocument;
+  openApiUrl?: string;
+  postmanCollectionUrl?: string;
+}
+
+export function OpenApiDownload({
+  document,
+  openApiUrl,
+  postmanCollectionUrl,
+}: OpenApiDownloadProps) {
   return (
     <section
       className={`sp-download-card ${styles.card}`}
@@ -71,6 +100,30 @@ export function OpenApiDownload({ document }: { document: OpenAPIDocument }) {
             <DownloadIcon />
           </button>
         ))}
+        {openApiUrl && (
+          <div className={styles.urlOption}>
+            <a href={openApiUrl}>
+              <span className={`${styles.format} ${styles.openapiFormat}`}>
+                API
+              </span>
+              <strong>Open OpenAPI description</strong>
+              <ExternalIcon />
+            </a>
+            <CopyButton value={openApiUrl} compact />
+          </div>
+        )}
+        {postmanCollectionUrl && (
+          <a
+            className={styles.postmanOption}
+            href={postmanCollectionUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span className={styles.postmanMark}>P</span>
+            <strong>Run in Postman</strong>
+            <ExternalIcon />
+          </a>
+        )}
       </div>
     </section>
   );

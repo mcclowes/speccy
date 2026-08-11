@@ -802,6 +802,8 @@ export function Speccy({
   spectralDiagnostics,
   parameterPrototype = true,
   tryIt = true,
+  openApiUrl,
+  postmanCollectionUrl,
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {
@@ -1342,7 +1344,11 @@ export function Speccy({
               />
             </div>
             <aside className="sp-hero-aside">
-              <OpenApiDownload document={result.document ?? model.document} />
+              <OpenApiDownload
+                document={result.document ?? model.document}
+                openApiUrl={openApiUrl}
+                postmanCollectionUrl={postmanCollectionUrl}
+              />
               {model.document.servers?.map(
                 (item, index) =>
                   item.url &&

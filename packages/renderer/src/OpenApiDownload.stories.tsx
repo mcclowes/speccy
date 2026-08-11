@@ -19,3 +19,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const WithIntegrations: Story = {
+  args: {
+    openApiUrl: '/openapi.yaml',
+    postmanCollectionUrl: 'https://www.postman.com/example/collection',
+  },
+};
