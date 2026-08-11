@@ -28,7 +28,7 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 
 Hosts that own routing can also pass `route`, `onNavigate`, and `hrefForRoute` to control navigation instead of letting Speccy write to browser history.
 
-The Docusaurus `OpenAPI` component ships embedding defaults that differ from this table: `showSidebar` and `showThemeToggle` are `false`, and `theme` is `inherit` so the reference follows the site's color mode.
+The Docusaurus integration ships defaults that differ from this table. The `OpenAPI` component and generated routes both default `theme` to `inherit` and `showThemeToggle` to `false`, so the reference follows the site's color mode. The `OpenAPI` component also hides the sidebar (`showSidebar: false`), and generated routes enable `showDeveloperHints` during development builds.
 
 ## Theme
 
@@ -46,4 +46,4 @@ Hide the sidebar when the surrounding application already supplies navigation:
 <Speccy spec={spec} showSidebar={false} />
 ```
 
-Search and stable endpoint pages are part of the sidebar experience. For a complete reference, keep the sidebar enabled and mount Speccy on its own route.
+Hiding the sidebar removes its navigation filter, though the Cmd/Ctrl+K quick search still works. For a complete reference with stable endpoint pages, keep the sidebar enabled and mount Speccy on its own route.

@@ -5,7 +5,7 @@ description: Generate an API reference route or embed Speccy directly in an MDX 
 
 # Docusaurus
 
-`docusaurus-plugin-speccy` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options, with different defaults: the generated route shows the sidebar and theme toggle, while the embedded component hides them and inherits the site theme.
+`docusaurus-plugin-speccy` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options, with different defaults: the generated route shows the sidebar, while the embedded component hides it. Both inherit the site's color mode.
 
 Install the [plugin](https://www.npmjs.com/package/docusaurus-plugin-speccy):
 
@@ -35,7 +35,7 @@ export default {
 };
 ```
 
-The document is loaded during the Docusaurus build. A missing file fails the build; a document that doesn't parse renders an in-page error instead of an empty reference.
+The document is loaded during the Docusaurus build. A missing file or a document that doesn't parse fails the build, so a broken reference never ships.
 
 Use `specUrl` in place of `spec` to fetch a remote document at build time:
 
@@ -59,7 +59,9 @@ import spec from '@site/static/openapi.json';
 <OpenAPI spec={spec} />
 ```
 
-The component defaults to an embedded layout and hides its internal sidebar; set `showSidebar` to add it back. You can pass any renderer option, including `theme`, `accentColor`, `logo`, and `basePath`.
+The component defaults to an embedded layout and hides its internal sidebar; set `showSidebar` to add it back. You can pass any renderer option, including `theme`, `accentColor`, `logo`, and `basePath`. A document that doesn't parse renders an in-page error instead of an empty reference.
+
+Registering the plugin in `plugins` also loads the renderer stylesheet. If you embed the component without registering the plugin, import `docusaurus-plugin-speccy/styles.css` once yourself.
 
 Set `renderer.tryIt` to `false` for a generated route, or pass `tryIt={false}` to `OpenAPI`, to publish static request documentation without allowing live API requests.
 

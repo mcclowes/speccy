@@ -22,7 +22,7 @@ See the [public package decision](docs/decisions/001-public-package-surface.md) 
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
 - `apps/docusaurus-demo` - a production-build integration fixture
 
-The renderer supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
+Speccy supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. The web studio and Mac app resolve multi-document references automatically; the React component renders a single document, so bundle external references first with `speccy-core`. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
 
 Speccy also accepts other OpenAPI 3.x descriptions and Swagger 2 documents. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
 
@@ -58,7 +58,7 @@ export function Reference({ spec }) {
 }
 ```
 
-`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `showApiVersion`, `singleExpandedSidebarGroup`, `showThemeToggle`, `logo`, `className`, and `onError`.
+`spec` can be a parsed object or a YAML/JSON string. Options also include `showSidebar`, `showApiVersion`, `singleExpandedSidebarGroup`, `showThemeToggle`, `logo`, `className`, and `onError`; the [configuration reference](apps/docusaurus-demo/docs/configuration.md) documents the wider set, including navigation control and developer hints.
 
 Set `tryIt={false}` to publish static request documentation without the interactive request builder, its generated request samples, or live API calls. Shared web preview links accept `tryIt=0` for the same behavior.
 

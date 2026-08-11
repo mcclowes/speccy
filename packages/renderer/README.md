@@ -21,7 +21,7 @@ export function ApiReference({ spec }) {
 
 `spec` accepts a parsed object or a YAML/JSON string. Configure your host to serve the application shell for URLs beneath `basePath`, including direct links to operations, tags, and reusable components.
 
-Set `tryIt={false}` to hide the interactive request builder and prevent visitors from sending API requests. Static request and response documentation remains visible.
+Set `tryIt={false}` to remove the interactive request builder, its generated request samples, and the ability to send API requests. Response documentation remains visible.
 
 Set `openApiUrl` when the rendered description is available at a public URL. The overview will link to it and offer a copy action, which gives users a stable URL to import into Postman and other API clients. Set `postmanCollectionUrl` to add a Run in Postman action for a public collection maintained by the API publisher.
 
@@ -45,7 +45,7 @@ paths:
 
 ## Show API health guidance
 
-Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design, webhooks, and change safety.
+Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design including webhook envelopes, and change safety.
 
 ```tsx
 <Speccy spec={currentSpec} previousSpec={publishedSpec} showDeveloperHints />
