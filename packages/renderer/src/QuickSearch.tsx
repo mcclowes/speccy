@@ -13,6 +13,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { WebhookIcon } from './WebhookIcon';
+import styles from './QuickSearch.module.css';
 
 export type SearchResult = {
   id: string;
@@ -93,19 +94,19 @@ export function QuickSearch({
   let resultIndex = 0;
   return (
     <div
-      className="sp-search-backdrop"
+      className={`sp-search-backdrop ${styles.backdrop}`}
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <div
-        className="sp-search-dialog"
+        className={`sp-search-dialog ${styles.dialog}`}
         role="dialog"
         aria-modal="true"
         aria-label="Search API reference"
       >
-        <div className="sp-search-input">
+        <div className={`sp-search-input ${styles.input}`}>
           <span aria-hidden="true">⌕</span>
           <input
             autoFocus
@@ -124,12 +125,16 @@ export function QuickSearch({
           <kbd>Esc</kbd>
         </div>
         <div
-          className="sp-search-results"
+          className={`sp-search-results ${styles.results}`}
           id="sp-search-results"
           role="listbox"
         >
           {grouped.map(([group, items]) => (
-            <section className="sp-search-group" aria-label={group} key={group}>
+            <section
+              className={`sp-search-group ${styles.group}`}
+              aria-label={group}
+              key={group}
+            >
               <h2>{group}</h2>
               {items.map((result) => {
                 const index = resultIndex++;
@@ -139,7 +144,9 @@ export function QuickSearch({
                     type="button"
                     role="option"
                     aria-selected={index === activeIndex}
-                    className={index === activeIndex ? 'is-active' : ''}
+                    className={
+                      index === activeIndex ? `is-active ${styles.active}` : ''
+                    }
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => select(result)}
                     key={result.id}
@@ -156,12 +163,12 @@ export function QuickSearch({
             </section>
           ))}
           {matches.length === 0 && (
-            <div className="sp-search-empty" role="status">
+            <div className={`sp-search-empty ${styles.empty}`} role="status">
               No results for “{query}”.
             </div>
           )}
         </div>
-        <div className="sp-search-help">
+        <div className={`sp-search-help ${styles.help}`}>
           <span>
             <kbd>↑</kbd>
             <kbd>↓</kbd> Navigate
