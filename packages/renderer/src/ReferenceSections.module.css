@@ -22,13 +22,13 @@
   border-left: 1px solid var(--sp-line);
 }
 
-.toc strong {
+:global(.speccy) .toc strong {
   display: block;
   margin-bottom: 8px;
   font-size: 0.625rem;
 }
 
-.toc a {
+:global(.speccy) .toc a {
   display: block;
   overflow: hidden;
   padding: 5px 8px;
@@ -42,12 +42,12 @@
     background-color 120ms ease;
 }
 
-.toc a:hover {
+:global(.speccy) .toc a:hover {
   color: var(--sp-text);
   background: var(--sp-surface-soft);
 }
 
-.toc a.active {
+:global(.speccy) .toc a.active {
   color: var(--sp-text);
   background: color-mix(in srgb, var(--sp-accent) 10%, transparent);
 }
@@ -65,7 +65,7 @@
   scroll-margin-top: 24px;
 }
 
-.card h3 {
+:global(.speccy) .card h3 {
   margin: 0 0 14px;
   font-size: 1rem;
 }
@@ -106,7 +106,7 @@
     font-weight: 700;
   }
 
-  .jump select {
+  :global(.speccy) .jump select {
     width: 100%;
     height: 40px;
     padding: 0 12px;

@@ -15,6 +15,10 @@ test('packs global and component styles in the public stylesheet', () => {
   assert.match(css, /\.OpenApiDownload_card \{/);
   assert.match(css, /\.RequestSample_sample \{/);
   assert.match(css, /\.Markdown_markdown \{/);
+  assert.match(css, /\.speccy \.CodeBlock_block pre \{/);
+  assert.match(css, /\.speccy \.ExampleSelect_select \{/);
+  assert.match(css, /\.speccy \.QuickSearch_group button \{/);
+  assert.match(css, /\.speccy \.ReferenceSections_toc a \{/);
   assert.ok(
     css.includes(`.speccy code {
   padding: 0;

@@ -30,7 +30,7 @@
   color: var(--sp-muted);
 }
 
-.input input {
+:global(.speccy) .input input {
   min-width: 0;
   height: 100%;
   flex: 1;
@@ -42,8 +42,8 @@
   font-size: 0.875rem;
 }
 
-.input kbd,
-.help kbd {
+:global(.speccy) .input kbd,
+:global(.speccy) .help kbd {
   padding: 2px 5px;
   color: inherit;
   background: var(--sp-surface-soft);
@@ -61,7 +61,7 @@
   padding: 8px;
 }
 
-.group h2 {
+:global(.speccy) .group h2 {
   margin: 0;
   padding: 9px 9px 5px;
   color: var(--sp-muted);
@@ -71,7 +71,7 @@
   text-transform: uppercase;
 }
 
-.group button {
+:global(.speccy) .group button {
   width: 100%;
   min-height: 46px;
   display: grid;
@@ -88,23 +88,23 @@
   transition: background-color 120ms ease;
 }
 
-.group button.active {
+:global(.speccy) .group button.active {
   background: color-mix(in srgb, var(--sp-accent) 10%, var(--sp-surface));
 }
 
-.group button span {
+:global(.speccy) .group button span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.group button small {
+:global(.speccy) .group button small {
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 0.5625rem;
 }
 
-.group button small svg {
+:global(.speccy) .group button small svg {
   width: 11px;
   height: 11px;
   vertical-align: -2px;
@@ -126,7 +126,7 @@
   font-size: 0.5625rem;
 }
 
-.help span {
+:global(.speccy) .help span {
   display: flex;
   align-items: center;
   gap: 4px;

@@ -58,7 +58,7 @@
   position: relative;
 }
 
-.body > .copy {
+:global(.speccy) .body > .copy {
   position: absolute;
   z-index: 1;
   top: 14px;
@@ -83,7 +83,7 @@
   font-size: 0.625rem;
 }
 
-.block pre {
+:global(.speccy) .block pre {
   overflow: auto;
   margin: 0;
   white-space: pre-wrap;
@@ -91,19 +91,19 @@
   font: inherit;
 }
 
-.block pre.numbered {
+:global(.speccy) .block pre.numbered {
   counter-reset: sp-line;
   padding-left: 10px;
   white-space: pre;
 }
 
-.numbered .line {
+:global(.speccy) .numbered .line {
   position: relative;
   display: block;
   padding-left: 4em;
 }
 
-.numbered .line::before {
+:global(.speccy) .numbered .line::before {
   content: counter(sp-line);
   counter-increment: sp-line;
   position: absolute;
@@ -131,7 +131,7 @@
   user-select: none;
 }
 
-.fold > span {
+:global(.speccy) .fold > span {
   display: inline-block;
   width: 5px;
   height: 5px;
@@ -141,7 +141,7 @@
   transition: transform 120ms ease;
 }
 
-.fold[aria-expanded='false'] > span {
+:global(.speccy) .fold[aria-expanded='false'] > span {
   transform: translate(-1px, -1px) rotate(-45deg);
 }
 
@@ -159,12 +159,12 @@
   position: relative;
 }
 
-.clip.truncated .clipWindow > pre {
+:global(.speccy) .clip.truncated .clipWindow > pre {
   max-height: 360px;
   overflow: hidden;
 }
 
-.clip:not(.truncated) .clipWindow > pre {
+:global(.speccy) .clip:not(.truncated) .clipWindow > pre {
   max-height: none;
 }
 
