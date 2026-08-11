@@ -16,4 +16,21 @@ describe('request control surfaces', () => {
       /\.language summary \{[^}]*background: var\(--sp-surface\);/,
     );
   });
+
+  it('uses a compact trigger and page surface for optional parameters', () => {
+    const operationStyles = readFileSync(
+      'src/OperationDetails.module.css',
+      'utf8',
+    );
+
+    expect(operationStyles).toMatch(
+      /\.addOptionalParameter \{[^}]*500 0\.6875rem Manrope,/,
+    );
+    expect(operationStyles).toMatch(
+      /\.optionalParameterMenu \{[^}]*background: var\(--sp-bg\);/,
+    );
+    expect(operationStyles).toMatch(
+      /\.optionalParameterMenu > input \{[^}]*background: var\(--sp-bg\);/,
+    );
+  });
 });

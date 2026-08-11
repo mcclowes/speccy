@@ -113,7 +113,7 @@
   background: transparent;
   cursor: pointer;
   font:
-    500 0.75rem Manrope,
+    500 0.6875rem Manrope,
     sans-serif;
   transition: color 120ms ease;
 }
@@ -133,7 +133,7 @@
   padding: 7px;
   border: 1px solid var(--sp-line);
   border-radius: 9px;
-  background: var(--sp-surface);
+  background: var(--sp-bg);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
 }
 
@@ -145,7 +145,7 @@
   border: 1px solid var(--sp-line);
   border-radius: 6px;
   outline: none;
-  background: var(--sp-surface-soft);
+  background: var(--sp-bg);
   font:
     0.625rem Manrope,
     sans-serif;
