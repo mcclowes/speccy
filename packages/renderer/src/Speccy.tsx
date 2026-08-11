@@ -147,8 +147,11 @@ function RequestBodyView({
   if (!body) return null;
   return (
     <section className="sp-section">
-      <h4>Request body {body.required && <RequiredMark />}</h4>
-      <RequestBodyDetails body={body} density="compact" />
+      <RequestBodyDetails
+        body={body}
+        density="compact"
+        title={<h4>Request body</h4>}
+      />
     </section>
   );
 }

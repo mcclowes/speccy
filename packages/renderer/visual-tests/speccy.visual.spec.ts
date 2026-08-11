@@ -104,6 +104,27 @@ test('request example headings match their code block backgrounds', async ({
   expect(backgrounds.header).toBe(backgrounds.code);
 });
 
+test('request body heading aligns with its media type', async ({ page }) => {
+  await page.goto(
+    '/iframe.html?id=design-system-resource-details--request-body-example&viewMode=story',
+  );
+
+  const heading = page.locator('.sp-media-title');
+  const mediaType = page.locator('.sp-media-type');
+  await expect(heading).toBeVisible();
+  await expect(mediaType).toBeVisible();
+
+  const [headingBox, mediaTypeBox] = await Promise.all([
+    heading.boundingBox(),
+    mediaType.boundingBox(),
+  ]);
+  expect(headingBox).not.toBeNull();
+  expect(mediaTypeBox).not.toBeNull();
+  const headingCenter = headingBox!.y + headingBox!.height / 2;
+  const mediaTypeCenter = mediaTypeBox!.y + mediaTypeBox!.height / 2;
+  expect(Math.abs(headingCenter - mediaTypeCenter)).toBeLessThan(1);
+});
+
 test('long server details stay contained at every responsive size', async ({
   page,
 }) => {

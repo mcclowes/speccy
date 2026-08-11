@@ -857,9 +857,9 @@ export function EndpointRequestDetails({
         />
         {body && (
           <section className="sp-endpoint-section sp-request-body">
-            <h3>Request body {body.required && <RequiredMark />}</h3>
             <RequestBodyDetails
               body={body}
+              title={<h3>Request body</h3>}
               showExamples={false}
               exampleValue={activeExample?.value}
             />

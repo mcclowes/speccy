@@ -13,6 +13,7 @@ import type {
   ResponseObject,
   SchemaObject,
 } from 'speccy-core';
+import type { ReactNode } from 'react';
 import { RequiredMark } from './DesignSystem';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
@@ -68,21 +69,23 @@ export function RequestBodyDetails({
   collapseObjects?: boolean;
   showExamples?: boolean;
   exampleValue?: unknown;
-  title?: string;
+  title?: ReactNode;
 }) {
   return (
     <div
       className={`sp-resource-details sp-request-body-details is-${density}`}
     >
-      {title && (
-        <div className="sp-resource-title">
-          {title}
-          {body.required && <RequiredMark />}
-        </div>
-      )}
       <Markdown>{body.description}</Markdown>
       <MediaContent
         content={body.content}
+        title={
+          title && (
+            <>
+              {title}
+              {body.required && <RequiredMark />}
+            </>
+          )
+        }
         collapseObjects={collapseObjects}
         showExamples={showExamples}
         exampleValue={exampleValue}

@@ -2191,8 +2191,15 @@ related:
   margin-bottom: 8px;
   font-size: 0.6875rem;
 }
-.sp-media-heading > strong {
+.sp-media-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
+}
+.sp-media-title :is(h3, h4) {
+  margin: 0;
+  font-size: inherit;
 }
 .sp-media-type {
   width: fit-content;

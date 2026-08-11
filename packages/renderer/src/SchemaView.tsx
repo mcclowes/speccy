@@ -7,7 +7,7 @@
  * ---
  */
 
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
@@ -644,7 +644,7 @@ export function MediaContent({
   exampleValue,
 }: {
   content?: Record<string, MediaType>;
-  title?: string;
+  title?: ReactNode;
   collapseObjects?: boolean;
   showExamples?: boolean;
   showRootDescription?: boolean;
@@ -656,7 +656,7 @@ export function MediaContent({
       {Object.entries(content).map(([mediaType, media]) => (
         <section className="sp-media" key={mediaType}>
           <div className="sp-media-heading">
-            {title && <strong>{title}</strong>}
+            {title && <div className="sp-media-title">{title}</div>}
             <div className="sp-media-type">{mediaType}</div>
           </div>
           <SchemaView
