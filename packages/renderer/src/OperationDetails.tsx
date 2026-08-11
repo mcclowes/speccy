@@ -1627,7 +1627,9 @@ export function RequestRail({
             <p>{result.error}</p>
           ) : (
             <pre>
-              <code>{result.body}</code>
+              <code>
+                <CodeLines value={result.body ?? ''} />
+              </code>
             </pre>
           )}
         </section>

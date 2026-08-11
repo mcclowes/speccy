@@ -1215,6 +1215,13 @@ describe('Speccy navigation', () => {
 
     expect(await screen.findByText('201 Created')).toBeInTheDocument();
     expect(screen.getByText(/"company-42"/)).toBeInTheDocument();
+    const liveResponse = screen.getByText('Response').closest('section');
+    expect(liveResponse?.querySelector('.sp-json-key')).toHaveTextContent(
+      '"id"',
+    );
+    expect(liveResponse?.querySelector('.sp-json-string')).toHaveTextContent(
+      '"company-42"',
+    );
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.example.com/companies',
       expect.objectContaining({
