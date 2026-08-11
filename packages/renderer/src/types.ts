@@ -32,6 +32,8 @@ export interface SpeccyProps {
   basePath?: string;
   /** Current route when navigation is controlled by the host application. */
   route?: SpeccyRoute;
+  /** Initial route for server rendering. Browser history remains uncontrolled. */
+  initialRoute?: SpeccyRoute;
   /** Handles navigation in controlled mode instead of writing to browser history. */
   onNavigate?: (route: SpeccyRoute) => void;
   /** Creates link targets in controlled mode. */

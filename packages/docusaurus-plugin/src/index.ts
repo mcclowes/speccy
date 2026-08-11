@@ -12,7 +12,14 @@ import { createRequire } from 'node:module';
 import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
-import type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';
+import {
+  createReferenceModel,
+  parseSpec,
+  routePath,
+  type OpenAPIDocument,
+  type SpeccyProps,
+  type SpeccyRoute,
+} from 'speccy-renderer';
 import { runSpectral } from 'speccy-spectral';
 
 const require = createRequire(import.meta.url);
@@ -32,6 +39,53 @@ export interface SpeccyPluginContent {
   spec: string | OpenAPIDocument;
   route: string;
   renderer: Omit<SpeccyProps, 'spec'>;
+}
+
+const REFERENCE_SECTIONS = [
+  'schemas',
+  'parameters',
+  'requestBodies',
+  'responses',
+  'headers',
+  'examples',
+  'links',
+  'callbacks',
+  'securitySchemes',
+] as const;
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export function referenceRoutes(
+  spec: string | OpenAPIDocument,
+  basePath: string,
+): Array<{ path: string; route: SpeccyRoute }> {
+  const model = createReferenceModel(parseSpec(spec));
+  const routes: SpeccyRoute[] = [
+    { page: 'overview' },
+    ...[...model.operations, ...model.webhooks].map((operation) => ({
+      page: 'operation' as const,
+      operationId: operation.id,
+    })),
+    ...model.tags.map((tag) => ({
+      page: 'tag' as const,
+      tag: slugify(tag.name) || tag.name,
+    })),
+    ...REFERENCE_SECTIONS.filter(
+      (section) =>
+        Object.keys(model.document.components?.[section] ?? {}).length > 0,
+    ).map((section) => ({ page: 'reference' as const, section })),
+  ];
+
+  return routes.map((route) => ({
+    path: routePath(route, basePath, { operationSegment: '' }),
+    route,
+  }));
 }
 
 export function normalizeRoute(route = '/api'): string {
@@ -91,20 +145,27 @@ export default function speccyPlugin(
       };
     },
     async contentLoaded({ content, actions }) {
-      const dataPath = await actions.createData(
-        'speccy-reference.json',
-        JSON.stringify({
-          spec: content.spec,
-          route: content.route,
-          renderer: content.renderer,
-        }),
-      );
-      actions.addRoute({
-        path: content.route,
-        exact: false,
-        component: fileURLToPath(new URL('./page.js', import.meta.url)),
-        modules: { reference: dataPath },
-      });
+      const component = fileURLToPath(new URL('./page.js', import.meta.url));
+      for (const [index, generated] of referenceRoutes(
+        content.spec,
+        content.route,
+      ).entries()) {
+        const dataPath = await actions.createData(
+          `speccy-reference-${index}.json`,
+          JSON.stringify({
+            spec: content.spec,
+            route: content.route,
+            initialRoute: generated.route,
+            renderer: content.renderer,
+          }),
+        );
+        actions.addRoute({
+          path: generated.path,
+          exact: true,
+          component,
+          modules: { reference: dataPath },
+        });
+      }
     },
   };
 }

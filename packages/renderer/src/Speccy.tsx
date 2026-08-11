@@ -792,6 +792,7 @@ export function Speccy({
   logo,
   basePath: basePathProp = '/',
   route,
+  initialRoute,
   onNavigate,
   hrefForRoute: controlledHrefForRoute,
   onError,
@@ -867,7 +868,10 @@ export function Speccy({
       return undefined;
     return parsed ? routeKey(parsed) : undefined;
   };
-  const [internalRoute, setInternalRoute] = useState(routeFromPath);
+  const [internalRoute, setInternalRoute] = useState(
+    () =>
+      routeFromPath() ?? (initialRoute ? routeKey(initialRoute) : undefined),
+  );
   const activeRoute = route ? routeKey(route) : internalRoute;
   const hrefForRoute = (nextRoute: SpeccyRoute) =>
     controlledHrefForRoute?.(nextRoute) ??

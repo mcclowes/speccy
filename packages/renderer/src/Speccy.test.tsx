@@ -7,14 +7,15 @@ import {
   within,
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Speccy } from './Speccy';
 import type { SpeccyRoute } from './types';
 
 afterEach(() => {
+  vi.unstubAllGlobals();
   cleanup();
   window.history.replaceState({}, '', '/');
   window.localStorage.clear();
-  vi.unstubAllGlobals();
 });
 
 const spec = {
@@ -292,6 +293,23 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: 'Operations' }),
     ).toBeInTheDocument();
+  });
+
+  it('can server-render a known initial endpoint without showing the overview', () => {
+    vi.stubGlobal('window', undefined);
+    const markup = renderToStaticMarkup(
+      <Speccy
+        spec={spec}
+        basePath="/api"
+        initialRoute={{
+          page: 'operation',
+          operationId: 'get-companies',
+        }}
+      />,
+    );
+
+    expect(markup).toContain('<h1>List companies</h1>');
+    expect(markup).not.toContain('<h1>Test API</h1>');
   });
 
   it('omits the interactive request builder when trying requests is disabled', () => {

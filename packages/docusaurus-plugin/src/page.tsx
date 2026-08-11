@@ -8,11 +8,16 @@
  */
 
 import { OpenAPI } from './client';
-import type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';
+import type {
+  OpenAPIDocument,
+  SpeccyProps,
+  SpeccyRoute,
+} from 'speccy-renderer';
 
 interface ReferenceData {
   spec: string | OpenAPIDocument;
   route: string;
+  initialRoute?: SpeccyRoute;
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
 
@@ -28,6 +33,7 @@ export default function SpeccyPage({
       showSidebar
       showDeveloperHints={process.env.NODE_ENV !== 'production'}
       {...reference.renderer}
+      initialRoute={reference.initialRoute}
     />
   );
 }
