@@ -1,5 +1,12 @@
 # speccy-spectral
 
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - speccy-core@0.7.2
+
 ## 0.7.1
 
 ### Patch Changes

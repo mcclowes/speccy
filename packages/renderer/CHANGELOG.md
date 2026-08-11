@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.7.2
+
+### Patch Changes
+
+- [`d3a3fee`](https://github.com/mcclowes/speccy/commit/d3a3fee7386baab137b238254e21f9b9755a6e9f) Thanks [@mcclowes](https://github.com/mcclowes)! - Improve API reference scanning and interaction by labeling deprecated operations, presenting request media types as body alternatives, and making schema field details toggle on row click.
+
+- Updated dependencies []:
+  - speccy-core@0.7.2
+
 ## 0.7.1
 
 ### Patch Changes
