@@ -56,11 +56,13 @@ Speccy also accepts raw YAML and JSON strings. Parsing errors are rendered in pl
 Speccy uses the browser history API and creates routes beneath `basePath`:
 
 ```text
-/api                         API overview
-/api/list-books              Operation
-/api/tags/books              Tag overview
-/api/reference/schemas/book  Reusable schema
+/api                     API overview
+/api/list-books          Operation, from the slugified operationId
+/api/tags/books          Tag overview
+/api/reference/schemas   Reusable schemas section
 ```
+
+Operation URLs use the slugified `operationId` (or an ID derived from the method and path). Individual reusable components are anchors within their section page rather than routes of their own.
 
 Configure your host to serve the React application for these routes. Static hosts usually call this an SPA fallback or rewrite.
 

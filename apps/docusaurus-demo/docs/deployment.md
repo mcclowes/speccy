@@ -32,7 +32,7 @@ Build the site normally:
 npm run build
 ```
 
-Deploy the generated `build` directory to your host. If the site lives below a domain subpath, set Docusaurus `baseUrl` and keep the plugin route relative to it.
+Deploy the generated `build` directory to your host. If the site lives below a domain subpath, set Docusaurus `baseUrl` and include it in the plugin `route`. Unlike navbar `to` values, the route is not resolved against `baseUrl`: a site at `baseUrl: '/speccy/'` uses `route: '/speccy/api'` alongside `to: '/api'` in the navbar.
 
 ## React applications
 

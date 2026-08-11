@@ -59,9 +59,9 @@ export function Reference({ spec }) {
 }
 ```
 
-`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `singleExpandedSidebarGroup`, `defaultExpanded`, `logo`, `className`, and `onError`.
+`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `singleExpandedSidebarGroup`, `showThemeToggle`, `logo`, `className`, and `onError`.
 
-Set `tryIt={false}` to publish static request documentation without the interactive request builder or live API calls. Shared web preview links accept `tryIt=0` for the same behavior.
+Set `tryIt={false}` to publish static request documentation without the interactive request builder, its generated request samples, or live API calls. Shared web preview links accept `tryIt=0` for the same behavior.
 
 Tags can display an icon in the sidebar and tag headings with Speccy's `x-icon` extension:
 
@@ -125,7 +125,7 @@ The generated project keeps its OpenAPI source, branding, and base path in `spec
 npx speccy-cli diff origin/main:openapi.yaml openapi.yaml
 ```
 
-Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` reports documentation, design, error, auth, pagination, and data modeling problems from the same rule set the renderer shows in its developer view. Add `--format markdown` for output ready to post as a pull request comment.
+Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` checks ten rule categories covering OpenAPI conformance, documentation, operations, resource design, errors, auth, pagination, data modeling, lifecycle, and change safety, the same Speccy rules the renderer shows in its developer view. Add `--format markdown` for output ready to post as a pull request comment.
 
 Each spec argument accepts a file path, a git ref, or an https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
 
@@ -166,7 +166,7 @@ with:
 npm run check
 ```
 
-This typechecks every TypeScript package, runs the renderer, plugin, and studio tests, builds all packages, and performs a real Docusaurus production build. Run `npm run build:mac` separately for the native target.
+This lints, format-checks, and typechecks the repository, runs every package and Action test suite, builds all packages, and performs a real Docusaurus production build. Run `npm run build:mac` separately for the native target.
 
 Package changes use Changesets for versions and changelogs. See the [release checklist](docs/releases.md) for npm provenance, GitHub releases, and maintenance of the `v1` Action tag.
 
@@ -178,9 +178,9 @@ Run the renderer stories in Storybook:
 npm run storybook
 ```
 
-The stories cover representative overview and endpoint states in light, dark, desktop, and mobile layouts. Build the static Storybook with `npm run build:storybook`.
+The stories cover representative overview and endpoint states in light and dark themes. Build the static Storybook with `npm run build:storybook`.
 
-Playwright compares those stories with committed screenshots:
+Playwright captures those stories at desktop, tablet, and mobile sizes and compares them with committed screenshots:
 
 ```sh
 npx playwright install chromium
@@ -194,6 +194,7 @@ The screenshot set is small, so it stays in regular Git. Git LFS would add an ex
 ## Project structure
 
 ```text
+action/               GitHub Action wrapper around speccy-cli
 apps/
   web/                Standalone Vite studio
   macos/              Native SwiftUI shell and packager
@@ -204,4 +205,5 @@ packages/
   renderer/           Shared React UI and styles
   docusaurus-plugin/  Docusaurus build plugin and MDX component
   create-speccy-reference/ Standalone reference project generator
+  spectral/           Optional Spectral linting integration
 ```

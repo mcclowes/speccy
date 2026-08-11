@@ -5,7 +5,7 @@ description: Generate an API reference route or embed Speccy directly in an MDX 
 
 # Docusaurus
 
-`docusaurus-plugin-speccy` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options.
+`docusaurus-plugin-speccy` supports a generated route and an embeddable component. Both use the same renderer and accept the same visual options, with different defaults: the generated route shows the sidebar and theme toggle, while the embedded component hides them and inherits the site theme.
 
 Install the [plugin](https://www.npmjs.com/package/docusaurus-plugin-speccy):
 
@@ -35,7 +35,7 @@ export default {
 };
 ```
 
-The document is loaded during the Docusaurus build. A missing or invalid file fails the build instead of publishing an empty reference.
+The document is loaded during the Docusaurus build. A missing file fails the build; a document that doesn't parse renders an in-page error instead of an empty reference.
 
 Use `specUrl` in place of `spec` to fetch a remote document at build time:
 
@@ -56,10 +56,10 @@ Use the client component when the reference belongs inside a guide or a custom d
 import { OpenAPI } from 'docusaurus-plugin-speccy/client';
 import spec from '@site/static/openapi.json';
 
-<OpenAPI spec={spec} showSidebar={false} />
+<OpenAPI spec={spec} />
 ```
 
-The component defaults to an embedded layout. You can pass any renderer option, including `theme`, `accentColor`, `logo`, and `basePath`.
+The component defaults to an embedded layout and hides its internal sidebar; set `showSidebar` to add it back. You can pass any renderer option, including `theme`, `accentColor`, `logo`, and `basePath`.
 
 Set `renderer.tryIt` to `false` for a generated route, or pass `tryIt={false}` to `OpenAPI`, to publish static request documentation without allowing live API requests.
 

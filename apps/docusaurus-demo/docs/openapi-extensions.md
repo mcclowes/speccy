@@ -61,6 +61,18 @@ tags:
 
 Both fields support Markdown.
 
+## Internal objects
+
+Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference and the downloadable document. This works for operations, path items, webhooks, parameters, schema properties, and reusable components:
+
+```yaml
+paths:
+  /admin/audit-log:
+    get:
+      x-internal: true
+      summary: Read the audit log
+```
+
 ## Tag icons
 
 Use Speccy’s `x-icon` extension to show an image beside a tag in the sidebar and tag headings:

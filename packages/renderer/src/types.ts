@@ -28,7 +28,7 @@ export interface SpeccyProps {
   theme?: 'light' | 'dark' | 'system' | 'inherit';
   accentColor?: string;
   logo?: React.ReactNode;
-  /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/${operationId}`. */
+  /** URL prefix for endpoint pages. Each operation is rendered at `${basePath}/` plus its slugified operation ID. */
   basePath?: string;
   /** Current route when navigation is controlled by the host application. */
   route?: SpeccyRoute;

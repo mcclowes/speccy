@@ -6,7 +6,7 @@ Changesets owns package versions and changelogs. All public Speccy packages are 
 
 - [ ] Bootstrap any package name that doesn't exist on npm with one interactive `npm publish --access public` using 2FA. npm can't attach a trusted publisher until the package exists.
 - [ ] In every package's npm settings, add a GitHub Actions trusted publisher for user `mcclowes`, repository `speccy`, and workflow `release.yml`. Allow `npm publish`.
-- [ ] Keep Node 24 or newer and npm 11.5.1 or newer in the release job. Older npm clients can't exchange the GitHub OIDC identity for short-lived npm credentials.
+- [ ] Keep Node 24 or newer and npm 11.5.1 or newer in the release job. Older npm clients can't exchange the GitHub OIDC identity for short-lived npm credentials. The workflow pins Node 24 and relies on its bundled npm; nothing asserts the npm version, so check it when changing the setup-node step.
 - [ ] Keep `id-token: write` on the release job. No npm publish token or repository secret is needed.
 - [ ] Confirm trusted publishing creates provenance automatically. Don't add a separate provenance token or disable provenance in package configuration.
 - [ ] Allow GitHub Actions to create pull requests in the repository settings.
@@ -26,7 +26,7 @@ Changesets owns package versions and changelogs. All public Speccy packages are 
 - [ ] Confirm every public package has the same version in the `Version packages` pull request.
 - [ ] Review each generated `CHANGELOG.md`, including dependency-only release notes.
 - [ ] Confirm `package-lock.json` contains the new workspace versions and internal dependency ranges.
-- [ ] Let the full CI suite pass, including the external-style Action fixture.
+- [ ] Let the full CI suite pass. The external-style Action fixture currently pins an older published CLI, so it exercises the Action wrapper rather than the release under review ([#32](https://github.com/mcclowes/speccy/issues/32)).
 - [ ] Merge the release pull request without manually publishing or creating tags.
 
 ## After publication
