@@ -1,5 +1,15 @@
 # create-speccy-reference
 
+## 0.6.0
+
+### Minor Changes
+
+- [`5ea5ccf`](https://github.com/mcclowes/speccy/commit/5ea5ccf24b34cf6b907f3feff80bb5f35af72696) Thanks [@mcclowes](https://github.com/mcclowes)! - Add public OpenAPI description links, stable generated description URLs, and configurable Run in Postman actions.
+
+### Patch Changes
+
+- [`80ab42d`](https://github.com/mcclowes/speccy/commit/80ab42de86fe67ecc5441c37d6e88fc21261a142) Thanks [@mcclowes](https://github.com/mcclowes)! - Scaffolded projects install the current speccy-renderer instead of a stale ^0.3.0 pin.
+
 ## 0.5.0
 
 ### Minor Changes
