@@ -87,6 +87,23 @@ test('long response example expands on its initial render', async ({
     .toBe(true);
 });
 
+test('request example headings match their code block backgrounds', async ({
+  page,
+}) => {
+  await page.goto(
+    '/iframe.html?id=renderer-speccy--long-endpoint-path&viewMode=story',
+  );
+
+  const section = page.locator('.sp-request-example-section').first();
+  const backgrounds = await section.evaluate((element) => ({
+    header: getComputedStyle(element.querySelector('header')!).backgroundColor,
+    code: getComputedStyle(element.closest('.sp-request-example')!)
+      .backgroundColor,
+  }));
+
+  expect(backgrounds.header).toBe(backgrounds.code);
+});
+
 test('long server details stay contained at every responsive size', async ({
   page,
 }) => {
