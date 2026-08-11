@@ -384,4 +384,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const FourDirections: Story = {};
+// Keep the original export name because Storybook derives bookmarked story IDs
+// from it. The visible name can change without breaking those URLs.
+export const ThreeDirections: Story = { name: 'Four directions' };
