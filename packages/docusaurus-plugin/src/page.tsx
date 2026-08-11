@@ -7,7 +7,9 @@
  * ---
  */
 
+import Layout from '@theme/Layout';
 import { OpenAPI } from './client';
+import { referenceMetadata } from './metadata';
 import type {
   OpenAPIDocument,
   SpeccyProps,
@@ -17,6 +19,7 @@ import type {
 interface ReferenceData {
   spec: string | OpenAPIDocument;
   route: string;
+  layout: false | { noFooter: boolean };
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
 
@@ -27,7 +30,7 @@ export default function SpeccyPage({
   reference: ReferenceData;
   initialRoute?: SpeccyRoute;
 }) {
-  return (
+  const referenceElement = (
     <OpenAPI
       spec={reference.spec}
       basePath={reference.route}
@@ -36,5 +39,18 @@ export default function SpeccyPage({
       {...reference.renderer}
       initialRoute={initialRoute}
     />
+  );
+
+  if (reference.layout === false) return referenceElement;
+
+  const metadata = referenceMetadata(reference.spec, initialRoute);
+  return (
+    <Layout
+      title={metadata.title}
+      description={metadata.description}
+      noFooter={reference.layout.noFooter}
+    >
+      {referenceElement}
+    </Layout>
   );
 }

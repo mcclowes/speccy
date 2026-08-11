@@ -29,6 +29,25 @@ export default {
 
 The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL. The plugin also publishes the rendered description at `/api/openapi.yaml`, adjusted for the site's `baseUrl`, and links to it from the overview.
 
+Register the plugin more than once to publish several references. Every instance needs a unique Docusaurus `id`:
+
+```ts
+plugins: [
+  [
+    'docusaurus-plugin-speccy',
+    { id: 'payments', route: '/api', spec: './static/payments.yaml' },
+  ],
+  [
+    'docusaurus-plugin-speccy',
+    {
+      id: 'backoffice',
+      route: '/api/backoffice',
+      spec: './static/backoffice.yaml',
+    },
+  ],
+];
+```
+
 By default, the plugin builds a static page for the overview, each endpoint, each tag, and each component section. These pages share one copy of the OpenAPI document. For very large references where build speed matters more than server-rendered deep links, use one client-routed page instead:
 
 ```ts
@@ -36,6 +55,8 @@ By default, the plugin builds a static page for the overview, each endpoint, eac
   routeGeneration: 'client',
 }
 ```
+
+Generated pages use the Docusaurus layout, including its navbar and route-specific title and description metadata. The footer is hidden by default so the reference can use the available height. Show it with `layout: { noFooter: false }`, or set `layout: false` to render the reference without the Docusaurus page shell.
 
 Add a public Postman collection through the renderer settings:
 

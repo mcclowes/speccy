@@ -139,6 +139,7 @@ describe('route generation', () => {
         spec,
         route: '/api',
         routeGeneration: routeGeneration ?? 'static',
+        layout: { noFooter: true },
         renderer: {},
       },
       actions: { createData, addRoute },
@@ -181,5 +182,43 @@ describe('route generation', () => {
         },
       }),
     );
+  });
+
+  it('supports nested static plugin instances with distinct IDs', async () => {
+    const routes: string[] = [];
+
+    for (const [id, route] of [
+      ['multi', '/api'],
+      ['backoffice', '/api/backoffice'],
+    ] as const) {
+      const plugin = speccyPlugin({ siteDir: '/site', baseUrl: '/' } as never, {
+        id,
+        spec,
+        route,
+      });
+      await plugin.contentLoaded?.({
+        content: {
+          spec,
+          route,
+          routeGeneration: 'static',
+          layout: { noFooter: true },
+          renderer: {},
+        },
+        actions: {
+          createData: async (name: string) => `/data/${id}/${name}`,
+          addRoute: ({ path }: { path: string }) => routes.push(path),
+        },
+      } as never);
+    }
+
+    expect(routes).toEqual(
+      expect.arrayContaining([
+        '/api',
+        '/api/listcompanies',
+        '/api/backoffice',
+        '/api/backoffice/listcompanies',
+      ]),
+    );
+    expect(new Set(routes)).toHaveProperty('size', routes.length);
   });
 });

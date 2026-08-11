@@ -21,10 +21,13 @@ import {
   type SpeccyRoute,
 } from 'speccy-renderer';
 import { runSpectral } from 'speccy-spectral';
+import { slugifyReferenceName } from './metadata';
 
 const require = createRequire(import.meta.url);
 
 export interface SpeccyPluginOptions {
+  /** Unique Docusaurus plugin instance ID. Required when registering more than one reference. */
+  id?: string;
   /** Route where the reference is mounted. Defaults to /api. */
   route?: string;
   /** Local YAML or JSON file, resolved from the Docusaurus site directory. */
@@ -33,6 +36,8 @@ export interface SpeccyPluginOptions {
   specUrl?: string;
   /** Builds each reference page statically, or uses one client-routed catch-all page. Defaults to static. */
   routeGeneration?: 'static' | 'client';
+  /** Docusaurus page layout settings, or false for an unwrapped full-page reference. */
+  layout?: false | { noFooter?: boolean };
   /** Renderer settings applied to the generated route. */
   renderer?: Omit<SpeccyProps, 'spec'>;
 }
@@ -41,6 +46,7 @@ export interface SpeccyPluginContent {
   spec: string | OpenAPIDocument;
   route: string;
   routeGeneration: 'static' | 'client';
+  layout: false | { noFooter: boolean };
   renderer: Omit<SpeccyProps, 'spec'>;
 }
 
@@ -81,14 +87,6 @@ const REFERENCE_SECTIONS = [
   'securitySchemes',
 ] as const;
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 export function referenceRoutes(
   spec: string | OpenAPIDocument,
   basePath: string,
@@ -102,7 +100,7 @@ export function referenceRoutes(
     })),
     ...model.tags.map((tag) => ({
       page: 'tag' as const,
-      tag: slugify(tag.name) || tag.name,
+      tag: slugifyReferenceName(tag.name) || tag.name,
     })),
     ...REFERENCE_SECTIONS.filter(
       (section) =>
@@ -183,6 +181,10 @@ export default function speccyPlugin(
         spec,
         route,
         routeGeneration: options.routeGeneration ?? 'static',
+        layout:
+          options.layout === false
+            ? false
+            : { noFooter: options.layout?.noFooter ?? true },
         renderer,
       };
     },
@@ -195,6 +197,7 @@ export default function speccyPlugin(
         JSON.stringify({
           spec: content.spec,
           route: content.route,
+          layout: content.layout,
           renderer: content.renderer,
         }),
       );
