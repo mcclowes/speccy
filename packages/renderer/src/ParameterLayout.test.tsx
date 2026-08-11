@@ -29,14 +29,14 @@ describe('endpoint parameter layout', () => {
     );
   });
 
-  it('aligns subgroup headings with their operation labels', () => {
+  it('indents subgroups behind a nested navigation guide', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 
     expect(css).toMatch(
-      /\.sp-nav-subgroup > h3 \{[^}]*padding: 4px 8px 3px 16px;/,
+      /\.sp-nav-subgroup \{[^}]*margin: 8px 0 10px 8px;[^}]*padding-left: 7px;[^}]*border-left: 1px solid/,
     );
     expect(css).toMatch(
-      /\.sp-sidebar \.sp-nav-subgroup > h3 \{[^}]*padding-left: 20px;/,
+      /\.sp-sidebar \.sp-nav-subgroup > h3 \{[^}]*padding-left: 12px;/,
     );
   });
 
