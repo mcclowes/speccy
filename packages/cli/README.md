@@ -13,11 +13,13 @@ speccy lint <spec> [options]
 speccy diff <base> <revision> [options]
 ```
 
-Every spec argument accepts three forms, tried in that order:
+Every spec argument accepts three forms:
 
+- an http or https URL
 - a file path, `openapi.yaml`
 - a git ref, `main:openapi.yaml` or `origin/main:api/openapi.yaml`
-- an https URL
+
+Resolution tries a URL first, then an existing file, then a git ref, so a local file whose name contains a colon shadows the same-named ref.
 
 That makes the common CI comparison a one-liner:
 
@@ -25,7 +27,7 @@ That makes the common CI comparison a one-liner:
 speccy diff origin/main:openapi.yaml openapi.yaml
 ```
 
-If the ref exists but does not contain the file, the spec is new on this branch and the command exits clean. If the ref itself is unreachable, which usually means a shallow clone, the command says so rather than reporting your whole API as added.
+If the diff base ref exists but does not contain the file, the spec is new on this branch and `diff` exits clean. A missing revision or lint target is an error. If the ref itself is unreachable, which usually means a shallow clone, the command says so rather than reporting your whole API as added.
 
 ## Options
 
@@ -35,6 +37,7 @@ If the ref exists but does not contain the file, the spec is new on this branch 
 | `--fail-on <severity>`              | Exit 1 at or above this severity. Lint takes `issue`, `warning`, `suggestion`, or `never`, defaulting to `issue`. Diff takes `breaking`, `warning`, `compatible`, `documentation`, or `never`, defaulting to `breaking`. |
 | `--against <spec>`                  | Adds change-safety findings to a lint by comparing against a previous document.                                                                                                                                          |
 | `--no-color`                        | Never colorize terminal output. `NO_COLOR` is respected too.                                                                                                                                                             |
+| `--help`, `-h`                      | Print usage and exit 0.                                                                                                                                                                                                  |
 
 ## Exit codes
 

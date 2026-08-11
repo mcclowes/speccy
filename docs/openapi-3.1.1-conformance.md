@@ -16,7 +16,8 @@ Those behaviors are outside a documentation renderer's boundary. Unknown JSON
 Schema vocabularies and specification extensions are preserved even when Speccy
 cannot assign them custom presentation semantics. The one deliberate exception
 is Speccy's own `x-internal` marker: nodes marked internal are removed from the
-rendered reference and the downloadable document.
+rendered reference (the download is not yet filtered, see
+[#34](https://github.com/mcclowes/speccy/issues/34)).
 
 ## Conformance matrix
 

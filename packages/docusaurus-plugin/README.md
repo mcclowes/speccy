@@ -1,6 +1,6 @@
 # Speccy for Docusaurus
 
-Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a full reference route from a local file, a remote URL, or an inline document. The same renderer can be embedded in MDX. The package is published as [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy).
+Speccy adds a clean OpenAPI reference to a Docusaurus 3 site. It can build a full reference route from a local file or a remote URL, and the same renderer can be embedded in MDX with an inline document. The package is published as [`docusaurus-plugin-speccy`](https://www.npmjs.com/package/docusaurus-plugin-speccy).
 
 ## Install
 
@@ -27,7 +27,7 @@ export default {
 };
 ```
 
-The reference is now available at `/api`.
+The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL.
 
 To embed a reference in MDX:
 
@@ -42,6 +42,6 @@ Embedded references hide their internal sidebar by default. Set `showSidebar` to
 
 Set `renderer.tryIt` to `false` on a generated route, or pass `tryIt={false}` to an embedded `OpenAPI` component, to hide the request builder and prevent visitors from sending requests.
 
-Speccy follows Docusaurus's selected color mode, typography, and base font size by default. Set `renderer.theme` or `showThemeToggle` if the reference needs its own theme controls instead.
+Speccy follows Docusaurus's selected color mode, typography, and base font size by default. Set `renderer.theme` or `renderer.showThemeToggle` if the reference needs its own theme controls instead.
 
-Generated references show Speccy's API health guidance during local Docusaurus development and hide it in production builds. Override this with `renderer.showDeveloperHints` when you need explicit control. You can also pass `previousSpec` and `spectralDiagnostics` through the renderer options.
+Generated references show Speccy's API health guidance during local Docusaurus development and hide it in production builds. Override this with `renderer.showDeveloperHints` when you need explicit control; note the plugin only runs Spectral during development builds, so forcing hints on in production shows Speccy's own guidance without Spectral findings. You can also pass `previousSpec` and `spectralDiagnostics` through the renderer options.

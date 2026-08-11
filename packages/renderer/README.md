@@ -23,7 +23,7 @@ export function ApiReference({ spec }) {
 
 Set `tryIt={false}` to hide the interactive request builder and prevent visitors from sending API requests. Static request and response documentation remains visible.
 
-Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference and downloadable document. This works for operations, path items, webhooks, parameters, schema properties, and reusable components.
+Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference. This works for operations, path items, webhooks, parameters, schema properties, and reusable components. The downloadable document is not yet filtered ([#34](https://github.com/mcclowes/speccy/issues/34)), so don't rely on the marker to keep internal surface out of a published download.
 
 ```yaml
 paths:
@@ -41,7 +41,7 @@ Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextua
 <Speccy spec={currentSpec} previousSpec={publishedSpec} showDeveloperHints />
 ```
 
-Speccy runs Spectral's standard OAS ruleset automatically. Pass additional results from your own configured Spectral run through `spectralDiagnostics`. Speccy preserves the rule ID, severity, object path, and source range, and labels these findings separately from its own design guidance.
+The renderer doesn't run Spectral itself; hosts wire it up. The Docusaurus plugin and the web studio run Spectral's standard OAS ruleset and pass the results in. Do the same from your own Spectral run through `spectralDiagnostics`: Speccy preserves the rule ID, severity, object path, and source range, and labels these findings separately from its own design guidance.
 
 ```tsx
 <Speccy spec={spec} showDeveloperHints spectralDiagnostics={spectralResults} />
@@ -78,6 +78,6 @@ export function ApiDiff() {
 }
 ```
 
-The adapter maps oasdiff levels, rule IDs, operation details, fingerprints, and source locations. Use `operationMetadata` when you want to add tags or a more specific object location from your OpenAPI document. The view supports severity and area filters, text search, deep links, source locations, and expandable before-and-after values. Keeping comparison outside the component avoids shipping a platform-specific diff engine to the browser and keeps remote `$ref` loading behind the host's security boundary.
+The adapter maps oasdiff levels, rule IDs, operation details, fingerprints, and source locations. Use `operationMetadata` when you want to add tags or a more specific object location from your OpenAPI document. The view supports severity and area filters, text search, deep links, source locations, and expandable before-and-after values. Keeping comparison outside the component lets hosts use external diff engines like oasdiff and keeps remote `$ref` loading behind the host's security boundary.
 
 See the [Speccy documentation](https://github.com/mcclowes/speccy#readme) for renderer options, Docusaurus integration, and standalone reference sites.

@@ -63,7 +63,7 @@ Both fields support Markdown.
 
 ## Internal objects
 
-Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference and the downloadable document. This works for operations, path items, webhooks, parameters, schema properties, and reusable components:
+Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference. This works for operations, path items, webhooks, parameters, schema properties, and reusable components:
 
 ```yaml
 paths:
