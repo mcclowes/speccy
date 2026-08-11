@@ -599,6 +599,8 @@ describe('SchemaView composition', () => {
     expect(screen.getByRole('button', { name: 'self string' })).toBeVisible();
 
     fireEvent.click(row);
+    expect(row).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByText('Hypermedia links.')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'self string' })).toBeVisible();
   });
 

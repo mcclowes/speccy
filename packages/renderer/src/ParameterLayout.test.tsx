@@ -298,6 +298,18 @@ describe('endpoint parameter layout', () => {
     ).toBeVisible();
 
     fireEvent.click(
+      within(documentation).getByRole('button', {
+        name: 'companyId * string · uuid',
+      }),
+    );
+    expect(
+      within(documentation).queryByText('Unique identifier for a company.'),
+    ).not.toBeInTheDocument();
+    expect(
+      documentation.querySelector('.sp-schema-explorer-inspector'),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
       within(documentation).getByRole('button', { name: 'include enum' }),
     );
     expect(

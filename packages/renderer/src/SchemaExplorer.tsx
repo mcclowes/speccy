@@ -401,6 +401,12 @@ export function SchemaExplorer({
     });
   };
 
+  const select = (path: string[]) => {
+    setSelectedPath((current) =>
+      current.join('.') === path.join('.') ? [] : path,
+    );
+  };
+
   return (
     <div className={scoped('sp-schema-explorer')}>
       {showRootDescription &&
@@ -437,7 +443,7 @@ export function SchemaExplorer({
               fields={fields}
               selectedPath={selected?.path.join('.') ?? ''}
               expandedPaths={expandedPaths}
-              onSelect={setSelectedPath}
+              onSelect={select}
               onToggle={toggle}
             />
           </div>
