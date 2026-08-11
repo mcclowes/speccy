@@ -1,5 +1,11 @@
 # create-speccy-reference
 
+## 0.7.1
+
+### Patch Changes
+
+- [`4a59aef`](https://github.com/mcclowes/speccy/commit/4a59aef1ca75446f780e31c70c9e90d9321e8051) Thanks [@mcclowes](https://github.com/mcclowes)! - Support Node.js 22 and newer.
+
 ## 0.7.0
 
 ## 0.6.0
