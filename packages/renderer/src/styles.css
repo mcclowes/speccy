@@ -525,6 +525,9 @@ related:
 .sp-nav-tag-group .sp-nav-group {
   margin: 4px 0;
 }
+.sp-nav-tag-group + .sp-nav-group {
+  margin-top: 32px;
+}
 /* Sticky within .sp-nav-group, so the next section's header pushes it off; the negative top tucks it into .sp-nav-scroll's top padding */
 .sp-nav-tag {
   position: sticky;
