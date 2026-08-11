@@ -106,7 +106,7 @@
   position: relative;
 }
 
-.addOptionalParameter {
+.parameterCardHeader .addOptionalParameter {
   padding: 0;
   color: var(--sp-muted);
   border: 0;

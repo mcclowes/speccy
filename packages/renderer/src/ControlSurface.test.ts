@@ -27,7 +27,7 @@ describe('request control surfaces', () => {
     );
 
     expect(operationStyles).toMatch(
-      /\.addOptionalParameter \{[^}]*500 0\.6875rem Manrope,/,
+      /\.parameterCardHeader \.addOptionalParameter \{[^}]*500 0\.6875rem Manrope,/,
     );
     expect(operationStyles).toMatch(
       /\.optionalParameterMenu \{[^}]*background: var\(--sp-bg\);/,
