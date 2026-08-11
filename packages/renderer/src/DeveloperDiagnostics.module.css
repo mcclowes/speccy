@@ -3,7 +3,8 @@
   right: 20px;
   bottom: 72px;
   z-index: 18;
-  width: min(380px, calc(100vw - 40px));
+  width: 380px;
+  max-width: calc(100% - 40px);
   max-height: calc(100vh - 112px);
   overflow: hidden auto;
   display: grid;

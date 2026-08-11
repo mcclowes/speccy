@@ -2886,7 +2886,8 @@ related:
   .sp-inline-diagnostics {
     right: 12px;
     bottom: 64px;
-    width: min(360px, calc(100vw - 24px));
+    width: 360px;
+    max-width: calc(100% - 24px);
     max-height: calc(100vh - 88px);
   }
   .sp-diagnostics-trigger {
