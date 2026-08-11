@@ -200,6 +200,7 @@ function EndpointPage({
   document,
   storageScope,
   parameterPrototype,
+  tryIt,
   diagnostics = [],
   onViewAllDiagnostics,
   onNavigateTag,
@@ -211,6 +212,7 @@ function EndpointPage({
   document: OpenAPIDocument;
   storageScope: string;
   parameterPrototype?: boolean;
+  tryIt: boolean;
   diagnostics?: ReturnType<typeof analyzeOpenApi>;
   onViewAllDiagnostics: () => void;
   onNavigateTag: (tag: TagModel) => void;
@@ -269,7 +271,7 @@ function EndpointPage({
             onViewAll={onViewAllDiagnostics}
           />
         </header>
-        {!isWebhook && !compactLayout && (
+        {tryIt && !isWebhook && !compactLayout && (
           <RequestRail
             item={item}
             server={effectiveServer}
@@ -323,7 +325,7 @@ function EndpointPage({
           server={effectiveServer}
         />
       )}
-      {!isWebhook && compactLayout && (
+      {tryIt && !isWebhook && compactLayout && (
         <RequestRail
           item={item}
           server={effectiveServer}
@@ -797,6 +799,7 @@ export function Speccy({
   previousSpec,
   spectralDiagnostics,
   parameterPrototype = true,
+  tryIt = true,
 }: SpeccyProps) {
   const result = useMemo(() => {
     try {
@@ -1426,6 +1429,7 @@ export function Speccy({
               document={model.document}
               storageScope={storageScope}
               parameterPrototype={parameterPrototype}
+              tryIt={tryIt}
               diagnostics={diagnostics}
               onViewAllDiagnostics={viewAllDiagnostics}
               onNavigateTag={navigateTag}

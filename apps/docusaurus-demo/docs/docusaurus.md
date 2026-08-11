@@ -61,6 +61,8 @@ import spec from '@site/static/openapi.json';
 
 The component defaults to an embedded layout. You can pass any renderer option, including `theme`, `accentColor`, `logo`, and `basePath`.
 
+Set `renderer.tryIt` to `false` for a generated route, or pass `tryIt={false}` to `OpenAPI`, to publish static request documentation without allowing live API requests.
+
 ## Add it to navigation
 
 The generated route behaves like any other Docusaurus page:

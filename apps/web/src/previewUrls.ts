@@ -14,6 +14,7 @@ export interface PreviewSource {
   source: string;
   sourceUrl?: string;
   name?: string;
+  tryIt?: boolean;
 }
 
 export function parseInitialLocation(
@@ -26,6 +27,7 @@ export function parseInitialLocation(
     source: fragment.get('source') ?? '',
     name: fragment.get('name') ?? undefined,
     sourceUrl: search.get('url') ?? undefined,
+    tryIt: search.get('tryIt') === '0' ? false : undefined,
   };
 }
 
@@ -37,6 +39,7 @@ export function previewHref(
 ): string {
   const target = new URL(referenceHref('preview', route), origin);
   target.searchParams.set('preview', '1');
+  if (preview.tryIt === false) target.searchParams.set('tryIt', '0');
   if (preview.sourceUrl) target.searchParams.set('url', preview.sourceUrl);
   else
     target.hash = new URLSearchParams({

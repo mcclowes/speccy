@@ -414,7 +414,12 @@ export function App() {
       return referenceHref(activeId, nextRoute, sourceUrl || undefined);
     return previewHref(
       nextRoute,
-      { source, sourceUrl: sourceUrl || undefined, name: fileName },
+      {
+        source,
+        sourceUrl: sourceUrl || undefined,
+        name: fileName,
+        tryIt: location.tryIt,
+      },
       window.location.origin,
     );
   }
@@ -479,6 +484,7 @@ export function App() {
             onNavigate={navigateRenderer}
             hrefForRoute={rendererHref}
             parameterPrototype
+            tryIt={location.tryIt}
           />
         )}
       </main>

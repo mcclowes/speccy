@@ -61,6 +61,8 @@ export function Reference({ spec }) {
 
 `spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `singleExpandedSidebarGroup`, `defaultExpanded`, `logo`, `className`, and `onError`.
 
+Set `tryIt={false}` to publish static request documentation without the interactive request builder or live API calls. Shared web preview links accept `tryIt=0` for the same behavior.
+
 Tags can display an icon in the sidebar and tag headings with Speccy's `x-icon` extension:
 
 ```yaml

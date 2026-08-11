@@ -14,6 +14,7 @@ export function App() {
       theme={config.theme}
       logo={logo}
       showSidebar
+      tryIt={config.tryIt}
     />
   );
 }

@@ -45,4 +45,6 @@ export interface SpeccyProps {
   spectralDiagnostics?: SpectralDiagnosticInput[];
   /** Separates required parameters from optional parameters added on demand. Defaults to true. */
   parameterPrototype?: boolean;
+  /** Shows the interactive request builder and allows API requests to be sent. Defaults to true. */
+  tryIt?: boolean;
 }

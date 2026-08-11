@@ -29,4 +29,10 @@ describe('OpenAPI', () => {
       theme: 'dark',
     });
   });
+
+  it('forwards the try-it opt-out to the shared renderer', () => {
+    const element = OpenAPI({ spec, tryIt: false });
+
+    expect(element.props.tryIt).toBe(false);
+  });
 });

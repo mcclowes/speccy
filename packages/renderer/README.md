@@ -21,6 +21,8 @@ export function ApiReference({ spec }) {
 
 `spec` accepts a parsed object or a YAML/JSON string. Configure your host to serve the application shell for URLs beneath `basePath`, including direct links to operations, tags, and reusable components.
 
+Set `tryIt={false}` to hide the interactive request builder and prevent visitors from sending API requests. Static request and response documentation remains visible.
+
 Mark any OpenAPI object with `x-internal: true` to omit it from the rendered reference and downloadable document. This works for operations, path items, webhooks, parameters, schema properties, and reusable components.
 
 ```yaml

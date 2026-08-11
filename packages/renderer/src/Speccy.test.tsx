@@ -294,6 +294,22 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
   });
 
+  it('omits the interactive request builder when trying requests is disabled', () => {
+    window.history.replaceState({}, '', '/api/get-companies');
+    render(<Speccy spec={spec} basePath="/api" tryIt={false} />);
+
+    expect(
+      screen.queryByRole('complementary', { name: 'Request builder' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Send request' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Request' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('No request parameters')).toBeInTheDocument();
+  });
+
   it('renders a path example for an endpoint without request parameters', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     const { container } = render(<Speccy spec={spec} basePath="/api" />);

@@ -16,6 +16,7 @@ describe('preview URLs', () => {
       source: '{}',
       name: 'Catalog',
       sourceUrl: undefined,
+      tryIt: undefined,
     });
   });
 
@@ -33,5 +34,17 @@ describe('preview URLs', () => {
       'https://example.com/openapi.yaml',
     );
     expect(href.hash).toBe('');
+  });
+
+  it('preserves a disabled try-it panel in shared previews', () => {
+    const href = previewHref(
+      { page: 'overview' },
+      { source: '{}', tryIt: false },
+      'https://speccy.test',
+      true,
+    );
+
+    expect(new URL(href).searchParams.get('tryIt')).toBe('0');
+    expect(parseInitialLocation(new URL(href)).tryIt).toBe(false);
   });
 });

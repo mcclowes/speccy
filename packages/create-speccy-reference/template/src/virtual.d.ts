@@ -6,5 +6,6 @@ declare module 'virtual:speccy-reference' {
     theme?: 'light' | 'dark' | 'system';
     basePath: string;
     logo?: string;
+    tryIt?: boolean;
   };
 }

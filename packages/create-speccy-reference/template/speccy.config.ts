@@ -4,5 +4,6 @@ export default {
   accentColor: '#6d5dfc',
   theme: 'system' as const,
   basePath: '/',
+  // tryIt: false,
   // logo: '/logo.svg',
 };
