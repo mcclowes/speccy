@@ -1137,23 +1137,6 @@ related:
   align-items: center;
   gap: 10px;
 }
-.sp-example-select {
-  min-width: 0;
-  max-width: 180px;
-  padding: 4px 24px 4px 7px;
-  color: var(--sp-code-text);
-  border: 1px solid var(--sp-code-border);
-  border-radius: 5px;
-  background: var(--sp-code-control);
-  font: inherit;
-  cursor: pointer;
-}
-.sp-response-example .sp-example-select {
-  background: var(--sp-bg);
-}
-.sp-request-example .sp-example-select {
-  background: var(--sp-surface);
-}
 :is(.sp-hero-aside, .sp-request-intro) .sp-security-section {
   margin-top: 0;
   padding: 14px 22px;

@@ -7,6 +7,8 @@
  * ---
  */
 
+import styles from './ExampleSelect.module.css';
+
 export interface ExampleSelectOption {
   label: string;
   key?: string;
@@ -25,7 +27,7 @@ export function ExampleSelect({
 }) {
   return (
     <select
-      className="sp-example-select"
+      className={`sp-example-select ${styles.select}`}
       aria-label={label}
       value={value}
       onChange={(event) => onChange(Number(event.target.value))}
