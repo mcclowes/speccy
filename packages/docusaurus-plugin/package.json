@@ -1,6 +1,6 @@
 {
   "name": "docusaurus-plugin-speccy",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Render elegant OpenAPI reference pages in Docusaurus.",
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "speccy-renderer": "^0.6.0",
-    "speccy-spectral": "^0.6.0"
+    "speccy-renderer": "^0.7.0",
+    "speccy-spectral": "^0.7.0"
   }
 }
