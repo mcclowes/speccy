@@ -1,6 +1,6 @@
 {
   "name": "speccy-core",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Headless OpenAPI parsing, analysis, and diffing for Speccy.",
   "repository": {
     "type": "git",
