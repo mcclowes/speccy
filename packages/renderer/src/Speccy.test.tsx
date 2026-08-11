@@ -29,6 +29,21 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('shows the API version by default and allows it to be hidden', () => {
+    const versionedSpec = {
+      ...spec,
+      info: { title: 'Test API', version: '2026-08-11' },
+    };
+    const { rerender } = render(<Speccy spec={versionedSpec} />);
+
+    expect(screen.getByText('2026-08-11')).toBeInTheDocument();
+
+    rerender(<Speccy spec={versionedSpec} showApiVersion={false} />);
+
+    expect(screen.queryByText('2026-08-11')).not.toBeInTheDocument();
+    expect(screen.getByText('API reference')).toBeInTheDocument();
+  });
+
   it('collapses authoring hints and opens all findings from View all', () => {
     const { rerender } = render(<Speccy spec={spec} />);
 

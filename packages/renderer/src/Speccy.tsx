@@ -785,6 +785,7 @@ export function Speccy({
   className = '',
   defaultExpanded: _defaultExpanded = false,
   showSidebar = true,
+  showApiVersion = true,
   singleExpandedSidebarGroup = false,
   showThemeToggle = true,
   theme = 'system',
@@ -1268,12 +1269,17 @@ export function Speccy({
           <header className="sp-hero" id="sp-overview">
             <div className="sp-hero-intro">
               <div className="sp-eyebrow">
-                API reference{' '}
-                <span>
-                  {model.document.info?.version ??
-                    model.document.openapi ??
-                    model.document.swagger}
-                </span>
+                API reference
+                {showApiVersion && (
+                  <>
+                    {' '}
+                    <span>
+                      {model.document.info?.version ??
+                        model.document.openapi ??
+                        model.document.swagger}
+                    </span>
+                  </>
+                )}
               </div>
               <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
               <Markdown>{model.document.info?.summary}</Markdown>

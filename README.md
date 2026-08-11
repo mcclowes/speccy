@@ -59,7 +59,7 @@ export function Reference({ spec }) {
 }
 ```
 
-`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `singleExpandedSidebarGroup`, `showThemeToggle`, `logo`, `className`, and `onError`.
+`spec` can be a parsed object or a YAML/JSON string. The public options also include `showSidebar`, `showApiVersion`, `singleExpandedSidebarGroup`, `showThemeToggle`, `logo`, `className`, and `onError`.
 
 Set `tryIt={false}` to publish static request documentation without the interactive request builder, its generated request samples, or live API calls. Shared web preview links accept `tryIt=0` for the same behavior.
 

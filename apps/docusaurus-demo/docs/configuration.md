@@ -14,6 +14,7 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 | `theme`                      | `light`, `dark`, `system`, or `inherit` | `system`  | Renderer color theme; `inherit` follows the host page           |
 | `accentColor`                | string                                  | `#6d5dfc` | Accent color used for focus and active states                   |
 | `showSidebar`                | boolean                                 | `true`    | Show the navigation and filter sidebar                          |
+| `showApiVersion`             | boolean                                 | `true`    | Show the API version in the overview heading                    |
 | `singleExpandedSidebarGroup` | boolean                                 | `false`   | Close the previous sidebar group when another group opens       |
 | `showThemeToggle`            | boolean                                 | `true`    | Show the persistent light/dark theme control                    |
 | `tryIt`                      | boolean                                 | `true`    | Show the request builder and its generated request samples      |
