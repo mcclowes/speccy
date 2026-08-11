@@ -43,7 +43,7 @@
 }
 .sp-schema-explorer-shell.has-selection {
   grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
-  min-height: 420px;
+  min-height: 300px;
 }
 .sp-schema-explorer-tree {
   min-width: 0;
