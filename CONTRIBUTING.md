@@ -4,7 +4,7 @@ Thanks for helping improve Speccy.
 
 ## Set up the repository
 
-Install Node.js 24 or newer, clone the repository, and install the locked dependencies:
+Install Node.js 22 or newer, clone the repository, and install the locked dependencies:
 
 ```sh
 npm ci

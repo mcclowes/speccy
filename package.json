@@ -30,7 +30,7 @@
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",

@@ -12,13 +12,17 @@ permissions:
 
 jobs:
   check:
-    name: Check
+    name: Check (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm run check
@@ -34,7 +38,7 @@ jobs:
           path: speccy-action
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 22
       - name: Create a clean consumer workspace
         run: cp -R speccy-action/test-fixtures/github-action consumer
       - name: Run the checked-out Action as a consumer
