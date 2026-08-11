@@ -253,11 +253,11 @@ function EndpointPage({
           </a>
           <div className="sp-endpoint-title">
             <h1>{operationTitle(item)}</h1>
+          </div>
+          <div className="sp-endpoint-address">
             {item.operation.deprecated && (
               <span className="sp-deprecated">deprecated</span>
             )}
-          </div>
-          <div className="sp-endpoint-address">
             <OperationBadge item={item} />
             <ApiPath value={item.path} wrap />
             <CopyButton value={item.path} label="Copy endpoint path" compact />

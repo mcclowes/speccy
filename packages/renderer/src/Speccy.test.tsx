@@ -59,10 +59,13 @@ describe('Speccy navigation', () => {
     ).toHaveClass('is-deprecated');
     expect(navigation.getByText('deprecated')).toBeInTheDocument();
 
-    const heading = screen.getByRole('heading', { name: 'List companies' });
-    expect(heading.closest('.sp-endpoint-header')).toHaveTextContent(
-      'deprecated',
-    );
+    const address = screen
+      .getByRole('heading', { name: 'List companies' })
+      .closest('.sp-endpoint-header')
+      ?.querySelector('.sp-endpoint-address');
+    expect(address?.firstElementChild).toHaveTextContent('deprecated');
+    expect(address?.children[1]).toHaveTextContent('GET');
+    expect(address).toHaveTextContent('deprecatedGET/companies');
   });
 
   it('shows the API version by default and allows it to be hidden', () => {
