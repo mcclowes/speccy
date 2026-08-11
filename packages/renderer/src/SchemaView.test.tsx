@@ -69,6 +69,41 @@ describe('SchemaView composition', () => {
     );
   });
 
+  it('presents multiple media types as alternative body representations', () => {
+    const { container } = render(
+      <MediaContent
+        title="Body"
+        content={{
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: { count: { type: 'number' } },
+            },
+          },
+          'application/pdf': {
+            schema: { type: 'string', format: 'binary' },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Body')).toBeVisible();
+    expect(screen.getByRole('combobox', { name: 'Media type' })).toHaveValue(
+      '0',
+    );
+    expect(screen.getByRole('button', { name: 'count number' })).toBeVisible();
+    expect(container.querySelectorAll('.sp-media')).toHaveLength(1);
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Media type' }), {
+      target: { value: '1' },
+    });
+
+    expect(screen.getByText('string · binary')).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: 'count number' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('shows a schema title alongside its type', () => {
     render(<SchemaView schema={{ title: 'Connection', type: 'object' }} />);
 

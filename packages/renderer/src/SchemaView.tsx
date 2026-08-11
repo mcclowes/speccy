@@ -650,61 +650,73 @@ export function MediaContent({
   showRootDescription?: boolean;
   exampleValue?: unknown;
 }) {
-  if (!content || Object.keys(content).length === 0) return null;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const entries = Object.entries(content ?? {});
+  if (entries.length === 0) return null;
+  const activeEntry = entries[activeIndex] ?? entries[0]!;
+  const [mediaType, media] = activeEntry;
+
   return (
     <div className="sp-media-list">
-      {Object.entries(content).map(([mediaType, media]) => (
-        <section className="sp-media" key={mediaType}>
-          <div className="sp-media-heading">
-            {title && <div className="sp-media-title">{title}</div>}
+      <section className="sp-media" key={mediaType}>
+        <div className="sp-media-heading">
+          {title && <div className="sp-media-title">{title}</div>}
+          {entries.length > 1 ? (
+            <ExampleSelect
+              label="Media type"
+              value={activeIndex}
+              onChange={setActiveIndex}
+              options={entries.map(([entryMediaType]) => ({
+                key: entryMediaType,
+                label: entryMediaType,
+              }))}
+            />
+          ) : (
             <div className="sp-media-type">{mediaType}</div>
+          )}
+        </div>
+        <SchemaView
+          schema={media.schema}
+          collapseObjects={collapseObjects}
+          showExample={showExamples}
+          showRootDescription={showRootDescription}
+          exampleValue={exampleValue}
+        />
+        {media.encoding && (
+          <div className="sp-media-encoding">
+            <strong>Encoding</strong>
+            {Object.entries(media.encoding).map(([property, encoding]) => (
+              <div key={property}>
+                <code>{property}</code>
+                {encoding.contentType && (
+                  <span> content type: {encoding.contentType}</span>
+                )}
+                {encoding.style && <span> style: {encoding.style}</span>}
+                {encoding.explode !== undefined && (
+                  <span> explode: {String(encoding.explode)}</span>
+                )}
+                {encoding.allowReserved !== undefined && (
+                  <span> allow reserved: {String(encoding.allowReserved)}</span>
+                )}
+                {Object.entries(encoding.headers ?? {}).map(
+                  ([name, header]) => (
+                    <div key={name}>
+                      Header <code>{name}</code>
+                      <Markdown>{header.description}</Markdown>
+                    </div>
+                  ),
+                )}
+              </div>
+            ))}
           </div>
-          <SchemaView
-            schema={media.schema}
-            collapseObjects={collapseObjects}
-            showExample={showExamples}
-            showRootDescription={showRootDescription}
-            exampleValue={exampleValue}
-          />
-          {media.encoding && (
-            <div className="sp-media-encoding">
-              <strong>Encoding</strong>
-              {Object.entries(media.encoding).map(([property, encoding]) => (
-                <div key={property}>
-                  <code>{property}</code>
-                  {encoding.contentType && (
-                    <span> content type: {encoding.contentType}</span>
-                  )}
-                  {encoding.style && <span> style: {encoding.style}</span>}
-                  {encoding.explode !== undefined && (
-                    <span> explode: {String(encoding.explode)}</span>
-                  )}
-                  {encoding.allowReserved !== undefined && (
-                    <span>
-                      {' '}
-                      allow reserved: {String(encoding.allowReserved)}
-                    </span>
-                  )}
-                  {Object.entries(encoding.headers ?? {}).map(
-                    ([name, header]) => (
-                      <div key={name}>
-                        Header <code>{name}</code>
-                        <Markdown>{header.description}</Markdown>
-                      </div>
-                    ),
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {showExamples && media.example !== undefined && (
-            <JsonValue value={media.example} />
-          )}
-          {showExamples && media.examples && (
-            <NamedMediaExamples examples={media.examples} />
-          )}
-        </section>
-      ))}
+        )}
+        {showExamples && media.example !== undefined && (
+          <JsonValue value={media.example} />
+        )}
+        {showExamples && media.examples && (
+          <NamedMediaExamples examples={media.examples} />
+        )}
+      </section>
     </div>
   );
 }
