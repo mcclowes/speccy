@@ -4,6 +4,7 @@
  * related:
  *   - ./SchemaView.tsx - Supplies schema, media, and example presentation.
  *   - ./Speccy.tsx - Places these sections in the full API reference.
+ *   - ./ReferenceSections.module.css - Styles reference navigation, cards, and in-page navigation.
  * ---
  */
 
@@ -18,6 +19,7 @@ import {
 import { JsonValue, SchemaView } from './SchemaView';
 import type { OpenAPIDocument, SecurityScheme } from 'speccy-core';
 import { useLocalState } from './useLocalState';
+import styles from './ReferenceSections.module.css';
 
 export const REFERENCE_GROUPS = [
   ['schemas', 'Schemas'],
@@ -158,7 +160,10 @@ function Section({
   }
 
   return (
-    <section className="sp-tag sp-reference-section" id={id}>
+    <section
+      className={`sp-tag sp-reference-section ${styles.section}`}
+      id={id}
+    >
       <div className="sp-tag-heading">
         <div>
           <span className="sp-tag-kicker">Reference</span>
@@ -166,7 +171,7 @@ function Section({
         </div>
       </div>
       {names.length > 1 && (
-        <label className="sp-reference-jump">
+        <label className={`sp-reference-jump ${styles.jump}`}>
           <span>Jump to {title.toLowerCase()}</span>
           <select
             value={activeId}
@@ -180,11 +185,11 @@ function Section({
           </select>
         </label>
       )}
-      <div className="sp-reference-layout">
-        <div className="sp-reference-cards">{children}</div>
+      <div className={`sp-reference-layout ${styles.layout}`}>
+        <div className={`sp-reference-cards ${styles.cards}`}>{children}</div>
         {names.length > 1 && (
           <nav
-            className="sp-reference-toc"
+            className={`sp-reference-toc ${styles.toc}`}
             aria-label={`${title} on this page`}
           >
             <strong>On this page</strong>
@@ -193,7 +198,9 @@ function Section({
                 const anchor = componentAnchorId(activeKey, name);
                 return (
                   <a
-                    className={activeId === anchor ? 'is-active' : ''}
+                    className={
+                      activeId === anchor ? `is-active ${styles.active}` : ''
+                    }
                     aria-current={activeId === anchor ? 'location' : undefined}
                     href={`#${anchor}`}
                     onClick={(event) => {
@@ -224,7 +231,7 @@ function Card({
   children: ReactNode;
 }) {
   return (
-    <article className="sp-component-card" id={id}>
+    <article className={`sp-component-card ${styles.card}`} id={id}>
       <h3>{name}</h3>
       {children}
     </article>
@@ -277,7 +284,7 @@ function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
       )}
       {flows &&
         entries(flows).map(([name, flow]) => (
-          <div className="sp-auth-flow" key={name}>
+          <div className={`sp-auth-flow ${styles.authFlow}`} key={name}>
             <strong>{name}</strong>
             {flow.authorizationUrl && (
               <p>
@@ -422,7 +429,10 @@ export function DocumentReference({
                           ].includes(method),
                         )
                         .map(([method, operation]) => (
-                          <span className="sp-callback-method" key={method}>
+                          <span
+                            className={`sp-callback-method ${styles.callbackMethod}`}
+                            key={method}
+                          >
                             {method.toUpperCase()} {operationLabel(operation)}
                           </span>
                         ))}
@@ -451,7 +461,10 @@ export function DocumentReference({
                 ].includes(method),
               )
               .map(([method, operation]) => (
-                <div className="sp-callback-method" key={method}>
+                <div
+                  className={`sp-callback-method ${styles.callbackMethod}`}
+                  key={method}
+                >
                   {method.toUpperCase()} {operationLabel(operation)}
                 </div>
               ))}
