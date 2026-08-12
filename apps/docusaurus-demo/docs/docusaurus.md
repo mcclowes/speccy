@@ -65,6 +65,25 @@ Registering the plugin in `plugins` also loads the renderer stylesheet. If you e
 
 Set `renderer.tryIt` to `false` for a generated route, or pass `tryIt={false}` to `OpenAPI`, to publish static request documentation without allowing live API requests.
 
+### Link a guide to an operation
+
+The client package includes several endpoint treatments for guide pages:
+
+```mdx
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'docusaurus-plugin-speccy/client';
+
+Call <OperationLink method="post" path="/fruit" href="/api/addFruit" /> from a sentence.
+
+<EndpointStrip method="post" path="/fruit" href="/api/addFruit" />
+```
+
+Use `OperationCard` for collections and `OperationPreview` when the guide needs an inline request and response example. Pass the operation's generated reference URL through `href`.
+
 ## Add it to navigation
 
 The generated route behaves like any other Docusaurus page:

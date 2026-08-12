@@ -17,6 +17,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./docs": {
+      "types": "./dist/docs.d.ts",
+      "import": "./dist/docs.js",
+      "default": "./dist/docs.js"
+    },
     "./styles.css": "./dist/styles.css"
   },
   "files": [

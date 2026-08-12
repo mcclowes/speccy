@@ -23,6 +23,39 @@ export function ApiReference({ spec }) {
 
 Set `tryIt={false}` to remove the interactive request builder, its generated request samples, and the ability to send API requests. Response documentation remains visible.
 
+## Link guides to operations
+
+Use the documentation components when prose needs to point readers into the API reference. They share the renderer's method badges, paths, themes, and code presentation:
+
+```tsx
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'speccy-renderer/docs';
+
+<p>
+  Call{' '}
+  <OperationLink
+    method="post"
+    path="/corporates"
+    href="/api/create-corporate"
+  />{' '}
+  to create the identity.
+</p>
+
+<OperationCard
+  method="post"
+  path="/corporates"
+  summary="Create a corporate identity"
+  description="Creates the identity and its root user."
+  href="/api/create-corporate"
+/>
+```
+
+`EndpointStrip` presents the same operation as a full-width callout. `OperationPreview` adds request and optional response examples. Each component accepts a normal `href` and optional `onClick`, so it works with static links or client-side navigation.
+
 Set `openApiUrl` when the rendered description is available at a public URL. The overview will link to it and offer a copy action, which gives users a stable URL to import into Postman and other API clients. Set `postmanCollectionUrl` to add a Run in Postman action for a public collection maintained by the API publisher.
 
 ```tsx

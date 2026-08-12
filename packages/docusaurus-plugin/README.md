@@ -81,6 +81,31 @@ Embedded references hide their internal sidebar by default. Set `showSidebar` to
 
 Set `renderer.tryIt` to `false` on a generated route, or pass `tryIt={false}` to an embedded `OpenAPI` component, to hide the request builder and prevent visitors from sending requests.
 
+### Link guides to operations
+
+The client entry point also exports four MDX-friendly treatments for linking guide content to an operation:
+
+```mdx
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'docusaurus-plugin-speccy/client';
+
+Call <OperationLink method="post" path="/corporates" href="/api/create-corporate" /> to create the identity.
+
+<OperationCard
+  method="post"
+  path="/corporates"
+  summary="Create a corporate identity"
+  description="Creates the identity and its root user."
+  href="/api/create-corporate"
+/>
+```
+
+Use `OperationLink` inside prose, `EndpointStrip` for a full-width callout, `OperationCard` in operation collections, and `OperationPreview` when the guide should include request and response examples. They use ordinary links, so provide the generated operation URL for the relevant reference.
+
 Speccy follows Docusaurus's selected color mode, typography, and base font size by default. For independent theme controls, set `renderer.theme` to a value other than `inherit`, and add `renderer.showThemeToggle: true` to give visitors a toggle; the toggle only appears when both are set.
 
 Generated references show Speccy's API health guidance during local Docusaurus development and hide it in production builds. Override this with `renderer.showDeveloperHints` when you need explicit control; note the plugin only runs Spectral during development builds, so forcing hints on in production shows Speccy's own guidance without Spectral findings. You can also pass `previousSpec` and `spectralDiagnostics` through the renderer options.

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { OpenAPI } from './client';
+import {
+  EndpointStrip,
+  OpenAPI,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from './client';
 
 const spec = { openapi: '3.1.0', info: { title: 'Test API', version: '1' } };
 
@@ -34,5 +40,14 @@ describe('OpenAPI', () => {
     const element = OpenAPI({ spec, tryIt: false });
 
     expect(element.props.tryIt).toBe(false);
+  });
+});
+
+describe('documentation components', () => {
+  it('re-exports every operation reference treatment', () => {
+    expect(OperationLink).toBeTypeOf('function');
+    expect(EndpointStrip).toBeTypeOf('function');
+    expect(OperationCard).toBeTypeOf('function');
+    expect(OperationPreview).toBeTypeOf('function');
   });
 });

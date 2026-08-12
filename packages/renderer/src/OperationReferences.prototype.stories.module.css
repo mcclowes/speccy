@@ -58,76 +58,6 @@
   line-height: 1.75;
 }
 
-.inlineLink {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  padding: 1px 5px 2px;
-  color: var(--sp-text);
-  background: color-mix(in srgb, var(--sp-accent) 8%, var(--sp-surface));
-  border-radius: 5px;
-  box-shadow: inset 0 -1px color-mix(in srgb, var(--sp-accent) 35%, transparent);
-  transition:
-    background 140ms ease,
-    box-shadow 140ms ease;
-}
-
-.inlineLink:hover {
-  background: color-mix(in srgb, var(--sp-accent) 13%, var(--sp-surface));
-  box-shadow: inset 0 -2px var(--sp-accent);
-}
-
-.inlineLink :global(.sp-method-badge) {
-  transform: translateY(-1px);
-}
-
-.inlineLink :global(.sp-api-path) {
-  font-size: 0.86em;
-}
-
-.endpointStrip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  min-height: 64px;
-  margin: 2px 0 14px;
-  padding: 12px 16px;
-  background: var(--sp-surface);
-  border: 1px solid var(--sp-line);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--sp-text) 5%, transparent);
-  transition:
-    border-color 140ms ease,
-    transform 140ms ease;
-}
-
-.endpointStrip:hover {
-  border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line));
-  transform: translateY(-1px);
-}
-
-.endpointIdentity,
-.cardTopline {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.endpointIdentity :global(.sp-api-path) {
-  overflow-wrap: anywhere;
-  font-size: 0.85rem;
-}
-
-.endpointAction,
-.cardAction {
-  flex: 0 0 auto;
-  color: var(--sp-accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -135,142 +65,9 @@
   margin-top: 8px;
 }
 
-.referenceCard {
-  display: flex;
-  flex-direction: column;
-  min-height: 220px;
-  padding: 20px;
-  overflow: hidden;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--sp-accent) 7%, var(--sp-surface)),
-    var(--sp-surface) 48%
-  );
-  border: 1px solid var(--sp-line);
-  border-radius: 14px;
-  transition:
-    border-color 140ms ease,
-    transform 140ms ease;
-}
-
-.referenceCard:first-child {
+.cardGrid > :first-child {
   grid-column: span 2;
   min-height: 190px;
-}
-
-.referenceCard:hover {
-  border-color: color-mix(in srgb, var(--sp-accent) 55%, var(--sp-line));
-  transform: translateY(-2px);
-}
-
-.cardTopline {
-  margin-bottom: 24px;
-  color: var(--sp-muted);
-}
-
-.cardTopline :global(.sp-api-path) {
-  overflow-wrap: anywhere;
-  font-size: 0.72rem;
-}
-
-.referenceCard strong {
-  margin-bottom: 8px;
-  font-size: 1.05rem;
-  letter-spacing: -0.012em;
-}
-
-.cardDescription {
-  color: var(--sp-muted);
-  font-size: 0.83rem;
-  line-height: 1.6;
-}
-
-.cardAction {
-  margin-top: auto;
-  padding-top: 22px;
-}
-
-.operationPreview {
-  margin: 8px 0 14px;
-  overflow: hidden;
-  background: var(--sp-surface);
-  border: 1px solid var(--sp-line);
-  border-radius: 14px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--sp-text) 7%, transparent);
-}
-
-.previewHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 18px 20px;
-}
-
-.previewHeader :global(.sp-api-path) {
-  overflow-wrap: anywhere;
-  font-size: 0.86rem;
-}
-
-.previewHeader > a {
-  flex: 0 0 auto;
-  color: var(--sp-accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.previewTabs {
-  display: flex;
-  gap: 22px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--sp-line);
-}
-
-.previewTabs button {
-  position: relative;
-  padding: 4px 0 11px;
-  color: var(--sp-muted);
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.previewTabs button[aria-selected='true'] {
-  color: var(--sp-text);
-}
-
-.previewTabs button[aria-selected='true']::after {
-  position: absolute;
-  right: 0;
-  bottom: -1px;
-  left: 0;
-  height: 2px;
-  content: '';
-  background: var(--sp-accent);
-  border-radius: 2px 2px 0 0;
-}
-
-.previewTabs button:focus-visible {
-  outline: 2px solid var(--sp-accent);
-  outline-offset: 4px;
-}
-
-.previewCode {
-  padding: 16px;
-}
-
-.previewCode :global(.sp-code-block) {
-  overflow: hidden;
-  border: 1px solid var(--sp-code-border);
-  border-radius: 9px;
-}
-
-.previewCode :global(.sp-code-block pre) {
-  padding: 16px 18px;
-  font-size: 0.72rem;
-  line-height: 1.65;
 }
 
 .switcher {
@@ -331,23 +128,11 @@
     margin-bottom: 34px;
   }
 
-  .endpointStrip {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .previewHeader {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-
   .cardGrid {
     grid-template-columns: 1fr;
   }
 
-  .referenceCard:first-child {
+  .cardGrid > :first-child {
     grid-column: auto;
   }
 

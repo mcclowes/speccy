@@ -19,6 +19,7 @@ test('packs global and component styles in the public stylesheet', () => {
   assert.match(css, /\.speccy \.ExampleSelect_select \{/);
   assert.match(css, /\.speccy \.QuickSearch_group button \{/);
   assert.match(css, /\.speccy \.ReferenceSections_toc a \{/);
+  assert.match(css, /\.OperationReference_endpointStrip \{/);
   assert.ok(
     css.includes(`.speccy code {
   padding: 0;
@@ -58,6 +59,7 @@ test('packs global and component styles in the public stylesheet', () => {
     );
     assert.ok(files.some(({ path }) => path === 'dist/styles.css'));
     assert.ok(!files.some(({ path }) => path === 'dist/index.css'));
+    assert.ok(!files.some(({ path }) => path === 'dist/docs.css'));
   } finally {
     rmSync(cache, { force: true, recursive: true });
   }
@@ -68,5 +70,6 @@ test('exports ESM entry points through the default condition', () => {
   const corePackage = JSON.parse(readFileSync('../core/package.json', 'utf8'));
 
   assert.equal(rendererPackage.exports['.'].default, './dist/index.js');
+  assert.equal(rendererPackage.exports['./docs'].default, './dist/docs.js');
   assert.equal(corePackage.exports['.'].default, './dist/index.js');
 });

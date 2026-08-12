@@ -31,3 +31,14 @@ export function OpenAPI({
 
 export { Speccy } from 'speccy-renderer';
 export type { OpenAPIDocument, SpeccyProps } from 'speccy-renderer';
+export {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'speccy-renderer/docs';
+export type {
+  DescribedOperationReferenceProps,
+  OperationPreviewProps,
+  OperationReferenceProps,
+} from 'speccy-renderer/docs';
