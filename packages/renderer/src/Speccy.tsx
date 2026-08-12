@@ -333,16 +333,22 @@ function EndpointPage({
         />
       )}
       {tryIt && !isWebhook && compactLayout && (
-        <RequestRail
-          item={item}
-          server={effectiveServer}
-          security={document.security}
-          securitySchemes={
-            document.components?.securitySchemes ?? document.securityDefinitions
-          }
-          storageScope={storageScope}
-          parameterPrototype={parameterPrototype}
-        />
+        <>
+          <div className="sp-request-heading sp-try-it-heading">
+            <h2>Try it out</h2>
+          </div>
+          <RequestRail
+            item={item}
+            server={effectiveServer}
+            security={document.security}
+            securitySchemes={
+              document.components?.securitySchemes ??
+              document.securityDefinitions
+            }
+            storageScope={storageScope}
+            parameterPrototype={parameterPrototype}
+          />
+        </>
       )}
     </article>
   );

@@ -959,6 +959,12 @@ related:
   line-height: 1.2;
   letter-spacing: -0.03em;
 }
+.sp-try-it-heading {
+  margin-top: 46px;
+}
+.sp-try-it-heading + .sp-request-rail {
+  margin-top: 0;
+}
 .sp-endpoint-section {
   margin: 0 0 46px;
 }

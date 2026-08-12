@@ -1102,6 +1102,9 @@ describe('Speccy navigation', () => {
 
     const endpoint = document.querySelector<HTMLElement>('.sp-endpoint');
     expect(endpoint).not.toBeNull();
+    expect(
+      screen.queryByRole('heading', { level: 2, name: 'Try it out' }),
+    ).not.toBeInTheDocument();
     act(() => {
       resize?.(
         [
@@ -1116,6 +1119,9 @@ describe('Speccy navigation', () => {
     expect(endpoint?.lastElementChild).toBe(
       screen.getByRole('complementary', { name: 'Request builder' }),
     );
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Try it out' }),
+    ).toBeInTheDocument();
   });
 
   it('selects alternative authorization methods and includes combined credentials', () => {
