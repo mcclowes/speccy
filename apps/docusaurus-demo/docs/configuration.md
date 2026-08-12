@@ -28,6 +28,16 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 
 Hosts that own routing can also pass `route`, `onNavigate`, and `hrefForRoute` to control navigation instead of letting Speccy write to browser history.
 
+Set `info.x-icon` in the OpenAPI document to show a brand mark beside the API title. An explicit `logo` component prop takes precedence.
+
+```yaml
+info:
+  title: Luma Library API
+  x-icon:
+    url: /img/luma.svg
+    alt: Luma
+```
+
 The Docusaurus integration ships defaults that differ from this table. The `OpenAPI` component and generated routes both default `theme` to `inherit` and `showThemeToggle` to `false`, so the reference follows the site's color mode. The `OpenAPI` component also hides the sidebar (`showSidebar: false`), and generated routes enable `showDeveloperHints` during development builds.
 
 ## Theme

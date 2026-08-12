@@ -27,6 +27,7 @@ export interface OpenAPIDocument {
     termsOfService?: string;
     contact?: { name?: string; url?: string; email?: string };
     license?: { name?: string; identifier?: string; url?: string };
+    'x-icon'?: { url?: string; alt?: string };
   };
   servers?: ServerObject[];
   externalDocs?: ExternalDocumentationObject;

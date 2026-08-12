@@ -174,6 +174,46 @@ describe('Speccy navigation', () => {
     expect(container.querySelector('.sp-brand')).not.toHaveClass('has-logo');
   });
 
+  it('renders info.x-icon beside the API title', () => {
+    const { container } = render(
+      <Speccy
+        spec={{
+          ...spec,
+          info: {
+            ...spec.info,
+            'x-icon': { url: '/icons/test.svg', alt: 'Test brand' },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Test brand' })).toHaveAttribute(
+      'src',
+      '/icons/test.svg',
+    );
+    expect(container.querySelector('.sp-brand')).toHaveClass('has-logo');
+  });
+
+  it('prefers the logo prop over info.x-icon', () => {
+    render(
+      <Speccy
+        spec={{
+          ...spec,
+          info: {
+            ...spec.info,
+            'x-icon': { url: '/icons/test.svg', alt: 'Spec brand' },
+          },
+        }}
+        logo={<span aria-label="Custom brand">S</span>}
+      />,
+    );
+
+    expect(screen.getByLabelText('Custom brand')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('img', { name: 'Spec brand' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('keeps the taller brand row when a logo is provided', () => {
     const { container } = render(
       <Speccy spec={spec} logo={<span aria-label="Logo">S</span>} />,

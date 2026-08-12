@@ -5,6 +5,7 @@
  *   - ../../core/src/model.ts - Parses input and builds tag and operation groups.
  *   - ./OperationDetails.tsx - Owns request execution and operation detail presentation.
  *   - ./QuickSearch.tsx - Owns searchable keyboard navigation.
+ *   - ./Speccy.module.css - Owns component-specific renderer styles.
  *   - ./styles.css - Owns the visual system and responsive layout.
  *   - ./types.ts - Declares the public component API.
  * ---
@@ -65,6 +66,7 @@ import {
   ResponseDetails,
 } from './ResourceDetails';
 import { parseRoutePath, routePath } from './routing';
+import styles from './Speccy.module.css';
 import type { SpeccyProps, SpeccyRoute } from './types';
 import { ThemeToggle, type Theme } from './ThemeToggle';
 import { useLocalState } from './useLocalState';
@@ -1109,6 +1111,19 @@ export function Speccy({
     ),
   ];
 
+  const infoIcon = model.document.info?.['x-icon'];
+  const brandLogo =
+    logo ??
+    (infoIcon?.url ? (
+      <span className="sp-brand-mark">
+        <img
+          className={styles.brandIcon}
+          src={infoIcon.url}
+          alt={infoIcon.alt ?? ''}
+        />
+      </span>
+    ) : null);
+
   return (
     <div
       ref={rootRef}
@@ -1147,14 +1162,14 @@ export function Speccy({
             aria-label="API reference"
           >
             <a
-              className={logo ? 'sp-brand has-logo' : 'sp-brand'}
+              className={brandLogo ? 'sp-brand has-logo' : 'sp-brand'}
               href={hrefForRoute({ page: 'overview' })}
               onClick={(event) => {
                 event.preventDefault();
                 navigate();
               }}
             >
-              {logo}
+              {brandLogo}
               <span>{model.document.info?.title ?? 'API reference'}</span>
             </a>
             <div className="sp-nav-scroll">
