@@ -41,7 +41,7 @@ paths:
                 customerId: $response.body#/id
 ```
 
-Callbacks describe requests the API may send after the operation. Speccy includes each callback operation and its runtime expression in the workflow card, then renders the full callback contract below the operation:
+Callbacks describe HTTP requests the API may send after the operation. Speccy includes each callback operation and its runtime expression in the workflow card. Below the operation, it labels the callback as an API-initiated request, shows where the destination URL comes from, and keeps the full request contract collapsed until the reader needs it:
 
 ```yaml
 paths:
@@ -57,6 +57,8 @@ paths:
                 '204':
                   description: Status received
 ```
+
+A callback uses HTTP, but it isn't a REST resource exposed by the API. The direction is reversed: the API becomes the HTTP client and calls a URL supplied by the original caller. Use a callback for a request-specific destination. Use a top-level webhook when subscribers register independently and receive events across many operations.
 
 OpenAPI has no equivalent reverse relationship for operations that must happen first. Use `x-speccy-prerequisites` with an array of operation IDs (or objects with `operationId`, `operationRef`, and an optional `description`):
 

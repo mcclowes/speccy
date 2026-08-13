@@ -1207,7 +1207,7 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders callback methods in declaration order', () => {
+  it('presents callbacks as API-initiated requests in declaration order', () => {
     window.history.replaceState({}, '', '/api/source');
     render(
       <Speccy
@@ -1237,7 +1237,19 @@ describe('Speccy navigation', () => {
 
     const callback = screen
       .getByRole('heading', { name: 'notification' })
-      .closest('.sp-callback')!;
+      .closest<HTMLElement>('.sp-callback')!;
+    expect(
+      screen.getByText(
+        'After this operation, the API may send an HTTP request to a URL supplied by the caller.',
+      ),
+    ).toBeVisible();
+    expect(
+      within(callback).getByText('Destination from the original request'),
+    ).toBeVisible();
+    expect(
+      within(callback).getByText('{$request.body#/callbackUrl}'),
+    ).toBeVisible();
+    expect(within(callback).getByText('API-initiated request')).toBeVisible();
     const operations = [...callback.querySelectorAll('.sp-operation')];
     expect(
       operations.map(
@@ -1246,9 +1258,13 @@ describe('Speccy navigation', () => {
       ),
     ).toEqual(['Create notification', 'Inspect notification']);
     expect(operations.map((operation) => operation.className)).toEqual([
-      'sp-operation sp-method-post',
-      'sp-operation sp-method-get',
+      'sp-operation sp-method-post sp-callback-operation',
+      'sp-operation sp-method-get sp-callback-operation',
     ]);
+    expect(
+      within(callback).getByRole('button', { name: /Create notification/ }),
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(within(callback).queryByRole('complementary')).toBeNull();
   });
 
   it('updates the request sample from endpoint parameters', () => {

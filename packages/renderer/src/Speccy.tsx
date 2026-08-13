@@ -477,10 +477,12 @@ function OperationCard({
   item,
   server,
   defaultExpanded,
+  context = 'operation',
 }: {
   item: OperationModel;
   server: string;
   defaultExpanded: boolean;
+  context?: 'operation' | 'callback';
 }) {
   const [open, setOpen] = useState(defaultExpanded);
   const parameters = [
@@ -493,15 +495,22 @@ function OperationCard({
     ? expandServerUrl(scopedServer.url, scopedServer.variables)
     : server;
   return (
-    <article id={item.id} className={`sp-operation sp-method-${item.method}`}>
+    <article
+      id={item.id}
+      className={`sp-operation sp-method-${item.method}${context === 'callback' ? ' sp-callback-operation' : ''}`}
+    >
       <button
         type="button"
         className="sp-operation-summary"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
-        <OperationBadge item={item} />
-        <ApiPath value={item.path} />
+        {context === 'callback' ? (
+          <MethodBadge method={item.method} />
+        ) : (
+          <OperationBadge item={item} />
+        )}
+        {context === 'operation' && <ApiPath value={item.path} />}
         <span className="sp-operation-name">{operationTitle(item)}</span>
         <span className="sp-operation-metadata">
           <LifecycleBadge item={item} />
@@ -541,7 +550,9 @@ function OperationCard({
               />
             )}
           </div>
-          <CodeSample item={item} server={effectiveServer} />
+          {context === 'operation' && (
+            <CodeSample item={item} server={effectiveServer} />
+          )}
         </div>
       )}
     </article>
@@ -556,18 +567,28 @@ function CallbackList({
   server: string;
 }) {
   return (
-    <section className="sp-section">
+    <section className="sp-section sp-callbacks">
       <h4>Callbacks</h4>
+      <p className="sp-callbacks-intro">
+        After this operation, the API may send an HTTP request to a URL supplied
+        by the caller.
+      </p>
       {Object.entries(callbacks).map(([name, callback]) => (
         <div className="sp-callback" key={name}>
-          <h5>{name}</h5>
+          <div className="sp-callback-heading">
+            <h5>{name}</h5>
+            <span>API-initiated request</span>
+          </div>
           {Object.entries(callback)
             .filter(([expression]) => expression !== '$ref')
             .map(
               ([expression, pathItem]) =>
                 typeof pathItem !== 'string' && (
                   <div key={expression}>
-                    <code className="sp-callback-expression">{expression}</code>
+                    <div className="sp-callback-destination">
+                      <span>Destination from the original request</span>
+                      <code>{expression}</code>
+                    </div>
                     {operationsInDeclarationOrder(pathItem).map(
                       ([method, operation]) => {
                         const item: OperationModel = {
@@ -586,7 +607,8 @@ function CallbackList({
                             key={method}
                             item={item}
                             server={server}
-                            defaultExpanded
+                            defaultExpanded={false}
+                            context="callback"
                           />
                         );
                       },

@@ -2326,22 +2326,57 @@ related:
 }
 .sp-callback {
   margin-top: 12px;
-  padding: 14px;
   border: 1px solid var(--sp-line);
-  border-radius: 9px;
+  border-radius: 12px;
+  overflow: hidden;
 }
-.sp-callback h5 {
-  margin: 0 0 10px;
+.sp-callbacks-intro {
+  max-width: 62ch;
+  margin: -4px 0 16px;
+  color: var(--sp-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
 }
-.sp-callback-expression {
-  display: block;
-  overflow-wrap: anywhere;
-  margin-bottom: 8px;
+.sp-callback-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-callback-heading h5 {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+.sp-callback-heading span,
+.sp-callback-destination > span {
   color: var(--sp-muted);
   font-size: 0.625rem;
 }
+.sp-callback-destination {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--sp-field-head);
+}
+.sp-callback-destination code {
+  overflow-wrap: anywhere;
+  color: var(--sp-text);
+  font-size: 0.6875rem;
+}
 .sp-callback .sp-operation {
-  margin-top: 8px;
+  margin: 12px;
+  border-radius: 9px;
+  box-shadow: none;
+}
+.sp-callback-operation .sp-operation-summary {
+  min-height: 56px;
+  grid-template-columns: 60px minmax(0, 1fr) auto auto;
+  padding: 10px 14px;
+}
+.sp-callback-operation .sp-operation-body {
+  grid-template-columns: 1fr;
 }
 .sp-response {
   border-bottom: 1px solid var(--sp-line);
