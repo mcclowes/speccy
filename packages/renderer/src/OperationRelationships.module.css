@@ -1,7 +1,7 @@
 .relationships {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
   align-items: start;
   margin: 28px 0 0;
   padding: 12px 0;
@@ -95,11 +95,6 @@ a.card:hover {
 }
 
 @media (max-width: 700px) {
-  .relationships {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
   .groups {
     gap: 8px;
   }
