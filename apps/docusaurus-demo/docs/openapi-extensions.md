@@ -7,6 +7,40 @@ description: Organize and enrich a Speccy reference with vendor extensions.
 
 Speccy works with standard OpenAPI fields first. A small set of `x-` extensions handles presentation details that OpenAPI doesn’t model.
 
+## Operation workflows
+
+OpenAPI’s standard [Link Object](https://spec.openapis.org/oas/v3.1.2.html#link-object) describes an operation that a client may call after receiving a particular response. Speccy presents response links as possible next operations:
+
+```yaml
+paths:
+  /customers:
+    post:
+      operationId: createCustomer
+      responses:
+        '201':
+          description: Customer created
+          links:
+            getCustomer:
+              operationId: getCustomer
+              parameters:
+                customerId: $response.body#/id
+```
+
+OpenAPI has no equivalent reverse relationship for operations that must happen first. Use `x-speccy-prerequisites` with an array of operation IDs (or objects with `operationId`, `operationRef`, and an optional `description`):
+
+```yaml
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      x-speccy-prerequisites:
+        - operationId: createCustomer
+          description: Create the customer that owns the payment.
+        - verifyCustomer
+```
+
+Speccy shows prerequisites and response links together on the operation page. These fields document workflow relationships; they do not make the calls or enforce server-side state.
+
 ## Tag groups
 
 Use Redocly’s `x-tagGroups` extension to place related tags beneath a shared sidebar heading:

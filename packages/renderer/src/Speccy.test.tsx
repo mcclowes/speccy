@@ -30,6 +30,91 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('links prerequisites and response successors from the operation workflow', () => {
+    const onNavigate = vi.fn();
+    const workflowSpec = {
+      openapi: '3.1.0',
+      info: { title: 'Workflow API' },
+      paths: {
+        '/customers': {
+          post: {
+            operationId: 'createCustomer',
+            summary: 'Create a customer',
+            responses: { '201': { description: 'Created' } },
+          },
+        },
+        '/payments': {
+          post: {
+            operationId: 'createPayment',
+            summary: 'Create a payment',
+            'x-speccy-prerequisites': [
+              {
+                operationId: 'createCustomer',
+                description: 'A payment needs an owner.',
+              },
+            ],
+            responses: {
+              '201': {
+                description: 'Created',
+                links: {
+                  getPayment: {
+                    operationRef: '#/paths/~1payments~1%7BpaymentId%7D/get',
+                    description: 'Read the newly created payment.',
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/payments/{paymentId}': {
+          get: {
+            operationId: 'getPayment',
+            summary: 'Get a payment',
+            responses: { '200': { description: 'Found' } },
+          },
+        },
+      },
+    };
+
+    render(
+      <Speccy
+        spec={workflowSpec}
+        route={{ page: 'operation', operationId: 'createpayment' }}
+        hrefForRoute={(route) =>
+          route.page === 'operation' ? `/operations/${route.operationId}` : '/'
+        }
+        onNavigate={onNavigate}
+      />,
+    );
+
+    const workflow = screen
+      .getByRole('heading', { name: 'Workflow' })
+      .closest<HTMLElement>('section')!;
+    expect(workflow).toBeVisible();
+    expect(
+      within(workflow).getByText('A payment needs an owner.'),
+    ).toBeVisible();
+    expect(
+      screen.getAllByText('Read the newly created payment.')[0],
+    ).toBeVisible();
+    expect(within(workflow).getByText('After a 201 response')).toBeVisible();
+
+    const prerequisite = within(workflow).getByRole('link', {
+      name: /Create a customer/,
+    });
+    expect(prerequisite).toHaveAttribute('href', '/operations/createcustomer');
+    fireEvent.click(prerequisite);
+    expect(onNavigate).toHaveBeenCalledWith({
+      page: 'operation',
+      operationId: 'createcustomer',
+    });
+
+    const successor = within(workflow).getByRole('link', {
+      name: /Get a payment/,
+    });
+    expect(successor).toHaveAttribute('href', '/operations/getpayment');
+  });
+
   it('labels deprecated operations in the sidebar and operation header', () => {
     const deprecatedSpec = {
       ...spec,

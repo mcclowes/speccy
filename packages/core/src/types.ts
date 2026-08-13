@@ -95,6 +95,7 @@ export interface PathItem extends Partial<Record<HttpMethod, Operation>> {
 export interface Operation extends SpecificationExtensions {
   tags?: string[];
   'x-tagSubgroup'?: string;
+  'x-speccy-prerequisites'?: OperationReference[];
   summary?: string;
   description?: string;
   operationId?: string;
@@ -109,6 +110,14 @@ export interface Operation extends SpecificationExtensions {
   consumes?: string[];
   produces?: string[];
 }
+
+export type OperationReference =
+  | string
+  | {
+      operationId?: string;
+      operationRef?: string;
+      description?: string;
+    };
 
 export type SecurityRequirement = Record<string, string[]>;
 

@@ -45,6 +45,7 @@ import {
 } from './DeveloperDiagnostics';
 import { Markdown } from './Markdown';
 import { OpenApiDownload } from './OpenApiDownload';
+import { OperationRelationships } from './OperationRelationships';
 import {
   CodeSample,
   EndpointResponses,
@@ -207,6 +208,8 @@ function EndpointPage({
   onViewAllDiagnostics,
   onNavigateTag,
   hrefForRoute,
+  operations,
+  onNavigateOperation,
 }: {
   item: OperationModel;
   tag: TagModel;
@@ -219,6 +222,8 @@ function EndpointPage({
   onViewAllDiagnostics: () => void;
   onNavigateTag: (tag: TagModel) => void;
   hrefForRoute: (route: SpeccyRoute) => string;
+  operations: OperationModel[];
+  onNavigateOperation: (operationId: string) => void;
 }) {
   const [endpointElement, setEndpointElement] = useState<HTMLElement | null>(
     null,
@@ -294,6 +299,14 @@ function EndpointPage({
           />
         )}
       </div>
+      <OperationRelationships
+        item={item}
+        operations={operations}
+        hrefForOperation={(operationId) =>
+          hrefForRoute({ page: 'operation', operationId })
+        }
+        onNavigate={onNavigateOperation}
+      />
       {!isWebhook && (
         <div className="sp-request-heading">
           <h2>Request</h2>
@@ -1483,6 +1496,8 @@ export function Speccy({
               onViewAllDiagnostics={viewAllDiagnostics}
               onNavigateTag={navigateTag}
               hrefForRoute={hrefForRoute}
+              operations={[...model.operations, ...model.webhooks]}
+              onNavigateOperation={navigate}
               key={activeOperation.id}
             />
           </section>

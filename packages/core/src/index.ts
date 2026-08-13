@@ -54,6 +54,7 @@ export type {
   MediaType,
   OpenAPIDocument,
   Operation,
+  OperationReference,
   Parameter,
   PathItem,
   RequestBody,
