@@ -1,5 +1,19 @@
 # docusaurus-plugin-speccy
 
+## 0.8.0
+
+### Minor Changes
+
+- [`7c5d767`](https://github.com/mcclowes/speccy/commit/7c5d767f310283433a6e18d42b1f96407bf1810f) Thanks [@mcclowes](https://github.com/mcclowes)! - Render operation lifecycle badges from `x-speccy-lifecycle` metadata.
+
+- [`942176b`](https://github.com/mcclowes/speccy/commit/942176b020f64d882481371a0cd7f07c923e5498) Thanks [@mcclowes](https://github.com/mcclowes)! - Add portable operation links, strips, cards, and request/response previews for React and Docusaurus documentation.
+
+### Patch Changes
+
+- Updated dependencies [[`1326b39`](https://github.com/mcclowes/speccy/commit/1326b3906f6d1a0dd90db47212d4428987ac445c), [`7c5d767`](https://github.com/mcclowes/speccy/commit/7c5d767f310283433a6e18d42b1f96407bf1810f), [`ce7ced8`](https://github.com/mcclowes/speccy/commit/ce7ced8109ec9ee4699d96080d03cb9082ca9a90), [`fae971a`](https://github.com/mcclowes/speccy/commit/fae971a23e1d5e6328c90ae8165207d9e9282d8a), [`a5a0811`](https://github.com/mcclowes/speccy/commit/a5a08110f08ef4c4158daccff501b44ab506e4b5), [`942176b`](https://github.com/mcclowes/speccy/commit/942176b020f64d882481371a0cd7f07c923e5498)]:
+  - speccy-renderer@0.8.0
+  - speccy-spectral@0.8.0
+
 ## 0.7.2
 
 ### Patch Changes

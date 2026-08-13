@@ -1,5 +1,26 @@
 # speccy-renderer
 
+## 0.8.0
+
+### Minor Changes
+
+- [`1326b39`](https://github.com/mcclowes/speccy/commit/1326b3906f6d1a0dd90db47212d4428987ac445c) Thanks [@mcclowes](https://github.com/mcclowes)! - Show callback operations and runtime expressions in operation workflow context.
+
+- [`7c5d767`](https://github.com/mcclowes/speccy/commit/7c5d767f310283433a6e18d42b1f96407bf1810f) Thanks [@mcclowes](https://github.com/mcclowes)! - Render operation lifecycle badges from `x-speccy-lifecycle` metadata.
+
+- [`fae971a`](https://github.com/mcclowes/speccy/commit/fae971a23e1d5e6328c90ae8165207d9e9282d8a) Thanks [@mcclowes](https://github.com/mcclowes)! - Connect operations and emitted webhooks through bidirectional workflow links.
+
+- [`942176b`](https://github.com/mcclowes/speccy/commit/942176b020f64d882481371a0cd7f07c923e5498) Thanks [@mcclowes](https://github.com/mcclowes)! - Add portable operation links, strips, cards, and request/response previews for React and Docusaurus documentation.
+
+### Patch Changes
+
+- [`ce7ced8`](https://github.com/mcclowes/speccy/commit/ce7ced8109ec9ee4699d96080d03cb9082ca9a90) Thanks [@mcclowes](https://github.com/mcclowes)! - Present operation workflows in a card that starts collapsed.
+
+- [`a5a0811`](https://github.com/mcclowes/speccy/commit/a5a08110f08ef4c4158daccff501b44ab506e4b5) Thanks [@mcclowes](https://github.com/mcclowes)! - Cancel copied-state updates when a code block unmounts.
+
+- Updated dependencies [[`7c5d767`](https://github.com/mcclowes/speccy/commit/7c5d767f310283433a6e18d42b1f96407bf1810f), [`fae971a`](https://github.com/mcclowes/speccy/commit/fae971a23e1d5e6328c90ae8165207d9e9282d8a), [`f7aec02`](https://github.com/mcclowes/speccy/commit/f7aec02344e8f627472b0b96bf9c1b8fc0c29398)]:
+  - speccy-core@0.8.0
+
 ## 0.7.2
 
 ### Patch Changes
