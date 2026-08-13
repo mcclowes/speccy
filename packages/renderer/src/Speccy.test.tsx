@@ -1120,14 +1120,18 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a webhook as a read-only event using its webhook name as the title', () => {
+  it('renders a webhook event and sends its payload to a user-supplied target', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(null, { status: 204, statusText: 'No Content' }),
+      );
     render(
       <Speccy
         spec={{
           openapi: '3.1.0',
           info: { title: 'Webhook API' },
           paths: {},
-          security: [{ apiKey: [] }],
           webhooks: {
             'Account categories updated': {
               post: {
@@ -1151,11 +1155,6 @@ describe('Speccy navigation', () => {
                 },
                 responses: { '204': { description: 'Webhook accepted.' } },
               },
-            },
-          },
-          components: {
-            securitySchemes: {
-              apiKey: { type: 'apiKey', in: 'header', name: 'Authorization' },
             },
           },
         }}
@@ -1193,15 +1192,32 @@ describe('Speccy navigation', () => {
       screen.getByRole('button', { name: 'quotaRemaining integer' }),
     ).toBeVisible();
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
+    const tester = screen.getByRole('complementary', {
+      name: 'Webhook tester',
+    });
+    expect(tester).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Send test webhook' }));
+    expect(screen.getByText('Webhook failed')).toBeInTheDocument();
     expect(
-      screen.queryByRole('complementary', { name: 'Request builder' }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'Send request' }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Authorization: API key'),
-    ).not.toBeInTheDocument();
+      screen.getByText('Enter a valid HTTP or HTTPS target URL.'),
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.change(
+      screen.getByRole('textbox', { name: 'Webhook target URL' }),
+      {
+        target: { value: 'https://receiver.example.com/hooks/books' },
+      },
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Send test webhook' }));
+    expect(await screen.findByText('204 No Content')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://receiver.example.com/hooks/books',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ payload: { quotaRemaining: 11993 } }, null, 2),
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
     expect(
       screen.getByRole('heading', { level: 2, name: 'Responses' }),
     ).toBeInTheDocument();

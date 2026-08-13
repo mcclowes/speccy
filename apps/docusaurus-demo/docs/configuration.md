@@ -17,7 +17,7 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 | `showApiVersion`             | boolean                                 | `true`    | Show the API version in the overview heading                    |
 | `singleExpandedSidebarGroup` | boolean                                 | `false`   | Close the previous sidebar group when another group opens       |
 | `showThemeToggle`            | boolean                                 | `true`    | Show the persistent light/dark theme control                    |
-| `tryIt`                      | boolean                                 | `true`    | Show the request builder and its generated request samples      |
+| `tryIt`                      | boolean                                 | `true`    | Show endpoint request builders and webhook testers              |
 | `parameterPrototype`         | boolean                                 | `true`    | Separate required parameters from optional ones added on demand |
 | `showDeveloperHints`         | boolean                                 | `false`   | Show authoring guidance and the API health drawer               |
 | `previousSpec`               | object or string                        | none      | Earlier document used to surface potentially breaking changes   |

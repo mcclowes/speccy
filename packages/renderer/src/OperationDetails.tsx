@@ -1060,14 +1060,19 @@ export function RequestRail({
   const [optionalPickerQuery, setOptionalPickerQuery] = useState('');
   const optionalPickerRef = useRef<HTMLDivElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
+  const isWebhook = item.source === 'webhook';
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const bodyExamples = requestBuilderBodyExamples(
     bodyMedia?.[0],
     bodyMedia?.[1],
   );
-  const [activeBodyExample, setActiveBodyExample] = useState(0);
+  const initialBodyExample = isWebhook && bodyExamples.length > 1 ? 1 : 0;
+  const [activeBodyExample, setActiveBodyExample] =
+    useState(initialBodyExample);
   const [body, setBody] = useState(() =>
-    requiredRequestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
+    isWebhook && bodyExamples[initialBodyExample]
+      ? formatRequestBodyValue(bodyExamples[initialBodyExample].value)
+      : requiredRequestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
   );
   const [result, setResult] = useState<{
     status?: number;
@@ -1076,6 +1081,10 @@ export function RequestRail({
     error?: string;
   }>();
   const [executing, setExecuting] = useState(false);
+  const [webhookTarget, setWebhookTarget] = useLocalState(
+    `${storageScope}:webhook-target:${item.id}`,
+    '',
+  );
   let requestPath = item.path;
   const query: Array<[string, string, boolean]> = [];
   const headers: string[] = [];
@@ -1259,8 +1268,14 @@ export function RequestRail({
       .join('&');
   const serializedQuery = queryString(query);
   const serializedMaskedQuery = queryString(maskedQuery);
-  const requestUrl = `${server.replace(/\/$/, '')}${requestPath}${serializedQuery ? `?${serializedQuery}` : ''}`;
-  const maskedRequestUrl = `${server.replace(/\/$/, '')}${requestPath}${serializedMaskedQuery ? `?${serializedMaskedQuery}` : ''}`;
+  const webhookUrl = (target: string, queryValue: string) =>
+    `${target.trim()}${queryValue ? `${target.includes('?') ? '&' : '?'}${queryValue}` : ''}`;
+  const requestUrl = isWebhook
+    ? webhookUrl(webhookTarget, serializedQuery)
+    : `${server.replace(/\/$/, '')}${requestPath}${serializedQuery ? `?${serializedQuery}` : ''}`;
+  const maskedRequestUrl = isWebhook
+    ? webhookUrl(webhookTarget, serializedMaskedQuery)
+    : `${server.replace(/\/$/, '')}${requestPath}${serializedMaskedQuery ? `?${serializedMaskedQuery}` : ''}`;
   const requestHeaders = headers.reduce<Record<string, string>>(
     (result, header) => {
       const separator = header.indexOf(':');
@@ -1274,6 +1289,17 @@ export function RequestRail({
     {},
   );
   async function executeRequest() {
+    if (isWebhook) {
+      try {
+        const target = new URL(webhookTarget);
+        if (target.protocol !== 'http:' && target.protocol !== 'https:')
+          throw new Error();
+      } catch {
+        setResult({ error: 'Enter a valid HTTP or HTTPS target URL.' });
+        return;
+      }
+    }
+
     if (!authorizationComplete) {
       setAuthorizationExpanded(true);
       setAuthorizationWarning(true);
@@ -1329,7 +1355,27 @@ export function RequestRail({
   }
 
   return (
-    <aside className="sp-request-rail" aria-label="Request builder">
+    <aside
+      className="sp-request-rail"
+      aria-label={isWebhook ? 'Webhook tester' : 'Request builder'}
+    >
+      {isWebhook && (
+        <section className="sp-rail-card">
+          <label className="sp-field">
+            <span>
+              Target URL <RequiredMark />
+            </span>
+            <input
+              type="url"
+              aria-label="Webhook target URL"
+              required
+              value={webhookTarget}
+              onChange={(event) => setWebhookTarget(event.target.value)}
+              placeholder="https://example.com/webhooks"
+            />
+          </label>
+        </section>
+      )}
       {activeSchemes.length > 0 && (
         <section
           className={`sp-rail-card sp-authorization-card${authorizationWarning ? ' is-warning' : ''}`}
@@ -1613,7 +1659,14 @@ export function RequestRail({
         disabled={executing}
         onClick={() => void executeRequest()}
       >
-        <SendIcon /> <span>{executing ? 'Sending…' : 'Send request'}</span>
+        <SendIcon />{' '}
+        <span>
+          {executing
+            ? 'Sending…'
+            : isWebhook
+              ? 'Send test webhook'
+              : 'Send request'}
+        </span>
       </button>
       {result && (
         <section
@@ -1621,7 +1674,13 @@ export function RequestRail({
           aria-live="polite"
         >
           <div className="sp-live-response-head">
-            <strong>{result.error ? 'Request failed' : 'Response'}</strong>
+            <strong>
+              {result.error
+                ? isWebhook
+                  ? 'Webhook failed'
+                  : 'Request failed'
+                : 'Response'}
+            </strong>
             {result.status !== undefined && (
               <span>
                 {result.status} {result.statusText}

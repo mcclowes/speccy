@@ -95,6 +95,8 @@ webhooks:
 
 Speccy lists `Book indexed` under **Events emitted** on `createBook`. The webhook's own workflow lists `Create book` under **Triggered by operations**. The reverse relationship is derived from `x-speccy-webhooks`, so it cannot drift independently.
 
+When interactive requests are enabled, each webhook page also includes a webhook tester. Enter the receiving endpoint's target URL, adjust the payload, headers, or authorization described by the webhook operation, then select **Send test webhook**. Speccy sends the documented HTTP request directly from the browser and shows the receiver's status and response body. The target must allow the documentation site's origin through CORS. Set `tryIt` to `false` to disable both endpoint requests and webhook testing.
+
 ## Tag groups
 
 Use Redocly’s `x-tagGroups` extension to place related tags beneath a shared sidebar heading:

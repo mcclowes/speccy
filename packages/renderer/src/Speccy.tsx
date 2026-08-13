@@ -321,7 +321,7 @@ function EndpointPage({
             onNavigate={onNavigateOperation}
           />
         </header>
-        {tryIt && !isWebhook && !compactLayout && (
+        {tryIt && !compactLayout && (
           <RequestRail
             item={item}
             server={effectiveServer}
@@ -376,7 +376,7 @@ function EndpointPage({
           server={effectiveServer}
         />
       )}
-      {tryIt && !isWebhook && compactLayout && (
+      {tryIt && compactLayout && (
         <>
           <div className="sp-request-heading sp-try-it-heading">
             <h2>Try it out</h2>
