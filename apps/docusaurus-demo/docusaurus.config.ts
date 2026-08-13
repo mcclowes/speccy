@@ -24,7 +24,7 @@ const config: Config = {
       {
         route: isVercel ? '/api' : '/speccy/api',
         spec: './static/openapi.yaml',
-        renderer: { accentColor: '#6d5dfc', theme: 'system' },
+        renderer: { accentColor: '#6d5dfc', theme: 'inherit' },
       },
     ],
   ],
