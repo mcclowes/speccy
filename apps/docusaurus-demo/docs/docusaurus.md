@@ -99,4 +99,4 @@ themeConfig: {
 }
 ```
 
-This documentation site uses the same setup. Its [live API example](/api) is also the plugin’s production-build fixture.
+This documentation site uses the same setup. Its [live Orchard API example](/api) is also the plugin’s production-build fixture. It demonstrates multiple auth schemes, reusable components, request and response examples, pagination, callbacks, webhooks, operation links, and Speccy’s workflow extensions.

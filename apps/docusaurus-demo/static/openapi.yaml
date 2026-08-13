@@ -1,62 +1,778 @@
 openapi: 3.1.0
 info:
   title: Orchard API
-  version: 1.0.0
-  description: A compact example used to verify Speccy inside a real Docusaurus build.
+  version: 1.4.0
+  summary: Plan harvests and track fruit from tree to store.
+  description: |
+    The Orchard API is a fictional but complete example of a Speccy reference.
+    It covers discovery, asynchronous harvests, inventory, callbacks, and webhooks.
+
+    Start by listing orchards, create a harvest for one of them, then follow the
+    response link to watch its progress.
+  contact:
+    name: Orchard developer support
+    url: https://orchard.example/developers
+    email: api@orchard.example
+  license:
+    name: MIT
+    identifier: MIT
 servers:
   - url: https://api.orchard.example/v1
+    description: Production
+  - url: https://sandbox.orchard.example/v1
+    description: Sandbox
+security:
+  - bearerAuth: []
 tags:
-  - name: Fruit
-    description: Inspect and manage the orchard's harvest.
+  - name: Orchards
+    description: Find orchards and inspect their growing conditions.
+    x-longDescription: |
+      ## Working with orchards
+
+      An orchard is the root resource for harvests and inventory. List orchards
+      first to find an `orchardId`, then use it when scheduling a harvest.
+  - name: Harvests
+    description: Schedule picking work and follow it through completion.
+    x-longDescription: |
+      Harvests run asynchronously. A successful create request returns `202`, a
+      status URL, and an optional callback when the work reaches a final state.
+  - name: Inventory
+    description: Inspect the lots produced by completed harvests.
+  - name: Events
+    description: Receive changes without polling.
+x-tagGroups:
+  - name: Orchard management
+    tags: [Orchards, Harvests]
+  - name: Produce
+    tags: [Inventory]
 paths:
-  /fruit:
+  /orchards:
     get:
-      tags: [Fruit]
-      x-tagSubgroup: Browse
-      operationId: listFruit
-      summary: List fruit
+      tags: [Orchards]
+      x-tagSubgroup: Discover
+      operationId: listOrchards
+      summary: List orchards
+      description: Returns orchards visible to the current organization.
       parameters:
-        - name: season
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: region
           in: query
-          description: Only return fruit harvested in this season.
+          description: Only return orchards in this region.
           schema:
-            type: string
-            enum: [spring, summer, autumn, winter]
+            $ref: '#/components/schemas/Region'
+        - name: crop
+          in: query
+          description: Only return orchards growing this crop.
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/FruitType'
+          style: form
+          explode: false
       responses:
         '200':
-          description: Fruit currently in the orchard.
+          description: A page of orchards.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Fruit'
+                $ref: '#/components/schemas/OrchardPage'
+              examples:
+                kent:
+                  $ref: '#/components/examples/KentOrchards'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
-      tags: [Fruit]
+      tags: [Orchards]
       x-tagSubgroup: Manage
-      operationId: addFruit
-      summary: Add fruit
+      x-speccy-lifecycle: beta
+      operationId: createOrchard
+      summary: Create an orchard
+      description: Registers an orchard and its initial blocks.
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        description: The orchard to register.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrchardRequest'
+            examples:
+              appleOrchard:
+                summary: A two-block apple orchard
+                value:
+                  name: Nightingale Farm
+                  region: kent
+                  blocks:
+                    - name: North slope
+                      crop: apple
+                      variety: Discovery
+                      treeCount: 240
+                    - name: Walled garden
+                      crop: apple
+                      variety: Egremont Russet
+                      treeCount: 80
+      responses:
+        '201':
+          description: The orchard was registered.
+          headers:
+            Location:
+              description: URL of the new orchard.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orchard'
+          links:
+            getCreatedOrchard:
+              operationId: getOrchard
+              description: Inspect the orchard that was just created.
+              parameters:
+                orchardId: $response.body#/id
+        '409':
+          description: An orchard with the supplied external ID already exists.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+              example:
+                issues:
+                  - issue: orchard.conflict.external_id
+                    severity: error
+                    correlationId: 4b3a2c1d-0000-4000-8000-abcdef123456
+                    dateTime: '2026-08-13T09:42:17Z'
+                    message:
+                      title: Orchard already registered
+                      detail: Use the existing orchard or provide a different external ID.
+                    links:
+                      documentation: https://orchard.example/developers/issues/orchard-conflict
+  /orchards/{orchardId}:
+    parameters:
+      - $ref: '#/components/parameters/OrchardId'
+    get:
+      tags: [Orchards]
+      x-tagSubgroup: Discover
+      operationId: getOrchard
+      summary: Get an orchard
+      responses:
+        '200':
+          description: The orchard and its growing blocks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Orchard'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /orchards/{orchardId}/harvests:
+    parameters:
+      - $ref: '#/components/parameters/OrchardId'
+    get:
+      tags: [Harvests]
+      x-tagSubgroup: Monitor
+      operationId: listHarvests
+      summary: List harvests
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: status
+          in: query
+          description: Only return harvests in this state.
+          schema:
+            type: string
+            enum:
+              [
+                harvest.scheduled,
+                harvest.in_progress,
+                harvest.completed,
+                harvest.canceled,
+              ]
+      responses:
+        '200':
+          description: A page of harvests, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Harvest'
+                  pagination:
+                    $ref: '#/components/schemas/CursorPage'
+    post:
+      tags: [Harvests]
+      x-tagSubgroup: Schedule
+      x-speccy-lifecycle: new
+      x-speccy-lifecycle-since: 2026-08-13
+      x-speccy-prerequisites:
+        - operationId: getOrchard
+          description: Check the orchard and choose a growing block.
+      x-speccy-webhooks:
+        - operationId: harvestReady
+          description: Emitted when the harvest completes and inventory is ready.
+      operationId: createHarvest
+      summary: Schedule a harvest
+      description: |
+        Schedules asynchronous picking work. Send an idempotency key if the
+        request may be retried.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Fruit'
+              $ref: '#/components/schemas/CreateHarvestRequest'
+            examples:
+              morningPick:
+                summary: Schedule a morning apple harvest
+                value:
+                  blockId: blk_north_slope
+                  scheduledFor: '2026-09-03'
+                  targetKilograms: 1800
+                  callbackUrl: https://warehouse.example/hooks/harvests
       responses:
-        '201':
-          description: The fruit was added.
+        '202':
+          description: The harvest was accepted for scheduling.
+          headers:
+            Location:
+              description: URL to poll for harvest status.
+              schema:
+                type: string
+                format: uri
+            Retry-After:
+              description: Suggested polling delay in seconds.
+              schema:
+                type: integer
+                example: 30
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Harvest'
+              example:
+                id: hrv_01J5Y8T3W4
+                orchardId: orc_nightingale
+                blockId: blk_north_slope
+                status: harvest.scheduled
+                scheduledFor: '2026-09-03'
+                targetKilograms: 1800
+                createdAt: '2026-08-13T09:42:17Z'
+          links:
+            monitorHarvest:
+              operationId: getHarvest
+              description: Poll the accepted harvest until it reaches a final state.
+              parameters:
+                harvestId: $response.body#/id
+        '422':
+          description: The request is valid JSON but cannot be scheduled.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+              examples:
+                outsideSeason:
+                  summary: Crop is outside its picking season
+                  value:
+                    issues:
+                      - issue: harvest.validation.outside_season
+                        severity: error
+                        correlationId: 755173a3-7ed1-4c01-b9d6-311f38ed783d
+                        dateTime: '2026-08-13T09:42:17Z'
+                        message:
+                          title: Harvest date is outside the picking season
+                          detail: Choose a date between September 1 and October 15.
+                        links:
+                          documentation: https://orchard.example/developers/harvest-seasons
+      callbacks:
+        harvestStatus:
+          '{$request.body#/callbackUrl}':
+            post:
+              operationId: receiveHarvestStatus
+              summary: Receive harvest status
+              description: Sent when the harvest completes or is canceled.
+              security:
+                - webhookSignature: []
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/HarvestEvent'
+              responses:
+                '204':
+                  description: Callback accepted.
+  /harvests/{harvestId}:
+    get:
+      tags: [Harvests]
+      x-tagSubgroup: Monitor
+      operationId: getHarvest
+      summary: Get a harvest
+      parameters:
+        - $ref: '#/components/parameters/HarvestId'
+      responses:
+        '200':
+          description: Current harvest state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Harvest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Harvests]
+      x-tagSubgroup: Schedule
+      operationId: cancelHarvest
+      summary: Cancel a harvest
+      description: A harvest can only be canceled before picking begins.
+      parameters:
+        - $ref: '#/components/parameters/HarvestId'
+      responses:
+        '204':
+          description: The harvest was canceled.
+        '409':
+          description: Picking has already begun, so the harvest cannot be canceled.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+  /inventory/lots:
+    get:
+      tags: [Inventory]
+      operationId: listInventoryLots
+      summary: List inventory lots
+      description: Returns packed fruit lots available to the current organization.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: qualityGrade
+          in: query
+          schema:
+            type: string
+            enum: [extra, class_i, class_ii, processing]
+        - name: packedAfter
+          in: query
+          description: Only return lots packed after this instant.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: A page of inventory lots.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InventoryLot'
+                  pagination:
+                    $ref: '#/components/schemas/CursorPage'
+              example:
+                data:
+                  - id: lot_01J6A1Q9NM
+                    harvestId: hrv_01J5Y8T3W4
+                    fruit: apple
+                    variety: Discovery
+                    qualityGrade: class_i
+                    weightKilograms: 1724.5
+                    packedAt: '2026-09-03T16:18:00Z'
+                pagination:
+                  nextCursor: null
+webhooks:
+  harvest.ready:
+    post:
+      tags: [Events]
+      operationId: harvestReady
+      summary: Harvest ready
+      description: Sent after fruit is packed and its inventory lots are available.
+      security:
+        - webhookSignature: []
+      parameters:
+        - name: X-Orchard-Delivery
+          in: header
+          required: true
+          description: Unique delivery ID for deduplication.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HarvestEvent'
+            example:
+              event: harvest.completed
+              createdAt: '2026-09-03T16:18:02Z'
+              data:
+                id: hrv_01J5Y8T3W4
+                orchardId: orc_nightingale
+                blockId: blk_north_slope
+                status: harvest.completed
+                scheduledFor: '2026-09-03'
+                targetKilograms: 1800
+                actualKilograms: 1724.5
+                createdAt: '2026-08-13T09:42:17Z'
+      responses:
+        '204':
+          description: Event accepted.
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: A short-lived organization access token.
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Orchard-Key
+      description: A server-side key used for orchard administration.
+    webhookSignature:
+      type: apiKey
+      in: header
+      name: X-Orchard-Signature
+      description: An HMAC-SHA256 signature of the raw request body.
+  parameters:
+    OrchardId:
+      name: orchardId
+      in: path
+      required: true
+      description: Stable orchard identifier.
+      schema:
+        type: string
+        pattern: '^orc_[a-z0-9_]+$'
+      example: orc_nightingale
+    HarvestId:
+      name: harvestId
+      in: path
+      required: true
+      description: Stable harvest identifier.
+      schema:
+        type: string
+        pattern: '^hrv_[A-Z0-9]+$'
+      example: hrv_01J5Y8T3W4
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of records to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor returned by the previous page.
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique key that makes retries safe for 24 hours.
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+      example: harvest-2026-09-03-north-slope
+  headers:
+    RequestId:
+      description: Identifier for tracing the request with support.
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Unauthorized:
+      description: The credential is missing, expired, or invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/IssueResponse'
+          example:
+            issues:
+              - issue: authentication.unauthorized.token_expired
+                severity: error
+                correlationId: 8cb247f3-9ddd-4514-8ef0-809c81b526f8
+                dateTime: '2026-08-13T09:42:17Z'
+                message:
+                  title: Access token expired
+                  detail: Request a new access token, then retry the request.
+    NotFound:
+      description: The requested resource does not exist or is not visible.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/IssueResponse'
+  examples:
+    KentOrchards:
+      summary: Orchards in Kent
+      value:
+        data:
+          - id: orc_nightingale
+            externalId: farm-1042
+            name: Nightingale Farm
+            region: kent
+            blocks:
+              - id: blk_north_slope
+                name: North slope
+                crop: apple
+                variety: Discovery
+                treeCount: 240
+            createdAt: '2024-02-14T10:12:00Z'
+        pagination:
+          nextCursor: eyJpZCI6Im9yY19uaWdodGluZ2FsZSJ9
   schemas:
-    Fruit:
+    OrchardPage:
       type: object
-      required: [name, variety]
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Orchard'
+        pagination:
+          $ref: '#/components/schemas/CursorPage'
+    CursorPage:
+      type: object
+      required: [nextCursor]
+      properties:
+        nextCursor:
+          type: [string, 'null']
+          description: Pass this value as `cursor`; null marks the final page.
+    Orchard:
+      type: object
+      required: [id, name, region, blocks, createdAt]
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: orc_nightingale
+        externalId:
+          type: string
+          description: Identifier from the farm management system.
+          example: farm-1042
+        name:
+          type: string
+          example: Nightingale Farm
+        region:
+          $ref: '#/components/schemas/Region'
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrchardBlock'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+    CreateOrchardRequest:
+      type: object
+      additionalProperties: false
+      required: [name, region, blocks]
+      properties:
+        externalId:
+          type: string
+          maxLength: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        region:
+          $ref: '#/components/schemas/Region'
+        blocks:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CreateOrchardBlock'
+    OrchardBlock:
+      allOf:
+        - $ref: '#/components/schemas/CreateOrchardBlock'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              readOnly: true
+              example: blk_north_slope
+    CreateOrchardBlock:
+      type: object
+      additionalProperties: false
+      required: [name, crop, variety, treeCount]
       properties:
         name:
           type: string
-          example: Apple
+          example: North slope
+        crop:
+          $ref: '#/components/schemas/FruitType'
         variety:
           type: string
           example: Discovery
-        pickedAt:
+        treeCount:
+          type: integer
+          minimum: 1
+          example: 240
+    Harvest:
+      type: object
+      required:
+        [
+          id,
+          orchardId,
+          blockId,
+          status,
+          scheduledFor,
+          targetKilograms,
+          createdAt,
+        ]
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: hrv_01J5Y8T3W4
+        orchardId:
+          type: string
+          readOnly: true
+          example: orc_nightingale
+        blockId:
+          type: string
+          example: blk_north_slope
+        status:
+          type: string
+          description: Present state of the harvest.
+          enum:
+            [
+              harvest.scheduled,
+              harvest.in_progress,
+              harvest.completed,
+              harvest.canceled,
+            ]
+        scheduledFor:
+          type: string
+          format: date
+        targetKilograms:
+          type: number
+          minimum: 0.1
+        actualKilograms:
+          type: number
+          minimum: 0
+          readOnly: true
+        createdAt:
           type: string
           format: date-time
+          readOnly: true
+    CreateHarvestRequest:
+      type: object
+      additionalProperties: false
+      required: [blockId, scheduledFor, targetKilograms]
+      properties:
+        blockId:
+          type: string
+        scheduledFor:
+          type: string
+          format: date
+        targetKilograms:
+          type: number
+          exclusiveMinimum: 0
+        callbackUrl:
+          type: string
+          format: uri
+          description: Optional HTTPS URL for final status updates.
+    InventoryLot:
+      type: object
+      required:
+        [id, harvestId, fruit, variety, qualityGrade, weightKilograms, packedAt]
+      properties:
+        id:
+          type: string
+          example: lot_01J6A1Q9NM
+        harvestId:
+          type: string
+        fruit:
+          $ref: '#/components/schemas/FruitType'
+        variety:
+          type: string
+        qualityGrade:
+          type: string
+          enum: [extra, class_i, class_ii, processing]
+        weightKilograms:
+          type: number
+          minimum: 0
+        packedAt:
+          type: string
+          format: date-time
+    HarvestEvent:
+      type: object
+      required: [event, createdAt, data]
+      properties:
+        event:
+          type: string
+          description: Past-tense event name.
+          enum: [harvest.completed, harvest.canceled]
+        createdAt:
+          type: string
+          format: date-time
+        data:
+          $ref: '#/components/schemas/Harvest'
+    IssueResponse:
+      type: object
+      required: [issues]
+      properties:
+        issues:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Issue'
+    Issue:
+      type: object
+      required: [issue, severity, correlationId, dateTime]
+      properties:
+        issue:
+          type: string
+          description: Namespaced machine-readable issue code.
+          example: harvest.validation.outside_season
+        severity:
+          type: string
+          enum: [error, warning, info]
+        correlationId:
+          type: string
+          format: uuid
+        dateTime:
+          type: string
+          format: date-time
+        message:
+          type: object
+          properties:
+            title:
+              type: string
+            detail:
+              type: string
+        links:
+          type: object
+          properties:
+            documentation:
+              type: string
+              format: uri
+            portal:
+              type: string
+              format: uri
+            api:
+              type: string
+              format: uri
+    FruitType:
+      type: string
+      enum: [apple, pear, plum, cherry]
+      example: apple
+    Region:
+      type: string
+      enum: [kent, herefordshire, somerset, normandy]
+      example: kent
