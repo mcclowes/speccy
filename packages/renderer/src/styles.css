@@ -986,8 +986,8 @@ related:
 .sp-endpoint-servers {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: baseline;
-  gap: 8px 14px;
+  align-items: center;
+  gap: 8px 10px;
   margin: -8px 0 22px;
   color: var(--sp-muted);
   font-size: 0.625rem;
@@ -1001,7 +1001,7 @@ related:
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
-  gap: 6px 14px;
+  gap: 6px;
 }
 .sp-endpoint-server {
   position: relative;
@@ -1009,6 +1009,18 @@ related:
   min-width: 0;
   align-items: baseline;
   gap: 6px;
+  padding: 3px 7px;
+  color: var(--sp-text);
+  border: 1px solid var(--sp-line);
+  border-radius: 5px;
+  background: var(--sp-surface-soft);
+  font-family: var(
+    --sp-mono-font-family,
+    'DM Mono',
+    ui-monospace,
+    monospace
+  );
+  line-height: 1.35;
 }
 .sp-endpoint-server:not(.is-unavailable) {
   cursor: help;
@@ -1048,9 +1060,7 @@ related:
 }
 .sp-endpoint-server > span {
   flex: none;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 .sp-endpoint-server code {
   min-width: 0;
