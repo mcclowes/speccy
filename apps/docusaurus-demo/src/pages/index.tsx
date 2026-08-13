@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationPreview,
+} from 'docusaurus-plugin-speccy/client';
+import {
+  SpecDiff,
+  Speccy,
+  type DiffReport,
+  type OpenAPIDocument,
+  type SpeccyRoute,
+} from 'speccy-renderer';
 import styles from './index.module.css';
 
 function scoped(className: string) {
@@ -13,6 +25,98 @@ function scoped(className: string) {
 }
 
 const installCommand = 'npm install speccy-renderer';
+
+const showcaseSpec: OpenAPIDocument = {
+  openapi: '3.1.0',
+  info: {
+    title: 'Orchard API',
+    version: '1.4.0',
+    description: 'Plan harvests and track fruit from tree to store.',
+  },
+  tags: [{ name: 'Harvests', description: 'Schedule and monitor picking.' }],
+  paths: {
+    '/orchards/{orchardId}/harvests': {
+      post: {
+        tags: ['Harvests'],
+        operationId: 'createHarvest',
+        summary: 'Schedule a harvest',
+        description: 'Creates picking work for an orchard and crop.',
+        parameters: [
+          {
+            name: 'orchardId',
+            in: 'path',
+            required: true,
+            description: 'The orchard to harvest.',
+            schema: { type: 'string', example: 'orch_01J7' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['startsAt', 'crop'],
+                properties: {
+                  startsAt: { type: 'string', format: 'date-time' },
+                  crop: { type: 'string', example: 'apple' },
+                  crewSize: { type: 'integer', example: 8 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '202': {
+            description: 'The harvest was scheduled.',
+            content: {
+              'application/json': {
+                example: { id: 'harvest_01K4', status: 'scheduled' },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const showcaseDiff: DiffReport = {
+  base: { title: 'Orchard API', version: '1.3.0' },
+  revision: { title: 'Orchard API', version: '1.4.0' },
+  changes: [
+    {
+      id: 'crew-size-required',
+      severity: 'breaking',
+      kind: 'changed',
+      method: 'post',
+      path: '/orchards/{orchardId}/harvests',
+      operationId: 'createHarvest',
+      scope: { area: 'request-body', label: 'crewSize' },
+      location: [
+        'paths',
+        '/orchards/{orchardId}/harvests',
+        'post',
+        'requestBody',
+      ],
+      message: 'crewSize is now required',
+      before: { required: ['startsAt', 'crop'] },
+      after: { required: ['startsAt', 'crop', 'crewSize'] },
+    },
+    {
+      id: 'harvest-summary',
+      severity: 'documentation',
+      kind: 'changed',
+      method: 'post',
+      path: '/orchards/{orchardId}/harvests',
+      operationId: 'createHarvest',
+      location: ['paths', '/orchards/{orchardId}/harvests', 'post', 'summary'],
+      message: 'Operation summary changed',
+      before: 'Create a harvest',
+      after: 'Schedule a harvest',
+    },
+  ],
+};
 
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
@@ -101,6 +205,8 @@ export default function Home() {
           />
         </section>
 
+        <RendererShowcase />
+
         <section className={scoped('home-section home-ways')}>
           <div className={scoped('home-ways-heading')}>
             <span className={scoped('home-kicker')}>
@@ -154,6 +260,187 @@ export default function Home() {
         </section>
       </main>
     </Layout>
+  );
+}
+
+function RendererShowcase() {
+  const [route, setRoute] = useState<SpeccyRoute>({
+    page: 'operation',
+    operationId: 'createharvest',
+  });
+
+  return (
+    <section className={scoped('home-renderer')}>
+      <div className={scoped('home-renderer-heading')}>
+        <div>
+          <span className={scoped('home-kicker')}>
+            <i />
+            The renderer, rendered
+          </span>
+          <h2>Every Speccy surface, in the open.</h2>
+        </div>
+        <p>
+          Explore the complete renderer, drop focused components into a guide,
+          review a contract change, or work with the same model directly in
+          code.
+        </p>
+      </div>
+
+      <ShowcaseRow
+        number="01"
+        eyebrow="Reference renderer"
+        title="The whole API, ready to explore."
+        text="Searchable navigation, endpoint detail, examples, schemas, and live requests come from one OpenAPI document."
+        href="/docs/react-renderer"
+      >
+        <div className={scoped('home-renderer-frame')}>
+          <Speccy
+            className={scoped('home-renderer-speccy')}
+            spec={showcaseSpec}
+            route={route}
+            onNavigate={setRoute}
+            hrefForRoute={(nextRoute) =>
+              nextRoute.page === 'operation'
+                ? `/api/${nextRoute.operationId}`
+                : '/api'
+            }
+            showDeveloperHints={false}
+            showThemeToggle={false}
+            theme="inherit"
+            tryIt={false}
+          />
+        </div>
+      </ShowcaseRow>
+
+      <ShowcaseRow
+        number="02"
+        eyebrow="React components"
+        title="Bring operations into the story."
+        text="Use the same method badges, links, cards, and examples inside guides, tutorials, changelogs, or your own React UI."
+        href="/docs/operation-components"
+        reverse
+      >
+        <div className={scoped('home-components-demo')}>
+          <span className={scoped('home-renderer-file')}>
+            harvest-guide.mdx
+          </span>
+          <h3>Schedule the first harvest</h3>
+          <p>
+            Find an orchard, then create picking work for the next available
+            window.
+          </p>
+          <EndpointStrip
+            method="get"
+            path="/orchards"
+            href="/api/listorchards"
+          />
+          <OperationCard
+            className={scoped('home-renderer-card')}
+            method="post"
+            path="/orchards/{orchardId}/harvests"
+            summary="Schedule a harvest"
+            description="Create picking work for an orchard and crop."
+            href="/api/createharvest"
+          />
+          <OperationPreview
+            className={scoped('home-renderer-operation')}
+            method="post"
+            path="/orchards/{orchardId}/harvests"
+            href="/api/createharvest"
+            requestExample={
+              '{\n  "startsAt": "2026-09-14T07:00:00Z",\n  "crop": "apple",\n  "crewSize": 8\n}'
+            }
+            responseExample={
+              '{\n  "id": "harvest_01K4",\n  "status": "scheduled",\n  "orchardId": "orch_01J7"\n}'
+            }
+          />
+        </div>
+      </ShowcaseRow>
+
+      <ShowcaseRow
+        number="03"
+        eyebrow="CI review"
+        title="See contract risk before merge."
+        text="Speccy compares the base and revision specs, groups semantic changes by severity, and publishes the same review in GitHub or your terminal."
+        href="/docs/ci-review"
+      >
+        <div className={scoped('home-diff-frame')}>
+          <SpecDiff
+            className={scoped('home-diff')}
+            title="API contract review"
+            headingLevel={3}
+            report={showcaseDiff}
+            theme="system"
+            accentColor="#6d5dfc"
+          />
+        </div>
+      </ShowcaseRow>
+
+      <ShowcaseRow
+        number="04"
+        eyebrow="In-code tooling"
+        title="Use the engine without the UI."
+        text="Parse, normalize, analyze, and compare OpenAPI documents with typed functions that run in Node, CI, or the browser."
+        href="/docs/react-renderer"
+        reverse
+      >
+        <div className={scoped('home-code-demo')}>
+          <div className={scoped('home-code-heading')}>
+            <span>review.ts</span>
+            <i>TypeScript</i>
+          </div>
+          <pre>
+            <code>{`import { analyzeOpenApi, diffSpecs } from 'speccy-core';
+
+const diagnostics = analyzeOpenApi(spec);
+const changes = diffSpecs(previous, spec);
+
+return {
+  issues: diagnostics.filter(({ severity }) => severity === 'issue'),
+  breaking: changes.changes.filter(({ severity }) => severity === 'breaking'),
+};`}</code>
+          </pre>
+          <div className={scoped('home-code-result')}>
+            <span>✓ Parsed OpenAPI 3.1</span>
+            <span>2 diagnostics</span>
+            <strong>1 breaking change</strong>
+          </div>
+        </div>
+      </ShowcaseRow>
+    </section>
+  );
+}
+
+function ShowcaseRow({
+  number,
+  eyebrow,
+  title,
+  text,
+  href,
+  reverse = false,
+  children,
+}: {
+  number: string;
+  eyebrow: string;
+  title: string;
+  text: string;
+  href: string;
+  reverse?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <article
+      className={scoped(`home-showcase-row ${reverse ? 'is-reverse' : ''}`)}
+    >
+      <div className={scoped('home-showcase-copy')}>
+        <span className={scoped('home-showcase-number')}>{number}</span>
+        <span className={scoped('home-showcase-eyebrow')}>{eyebrow}</span>
+        <h3>{title}</h3>
+        <p>{text}</p>
+        <Link to={href}>Explore {eyebrow.toLowerCase()} →</Link>
+      </div>
+      <div className={scoped('home-showcase-visual')}>{children}</div>
+    </article>
   );
 }
 
