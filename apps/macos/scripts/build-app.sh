@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ---
+# purpose: Builds Speccy.app; embeds fresh web assets, runs Swift tests, then assembles the bundle.
+# related:
+#   - ../Sources/SpeccyMac/ContentView.swift - Loads the embedded web bundle at runtime.
+# ---
 set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"

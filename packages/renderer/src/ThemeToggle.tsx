@@ -1,3 +1,12 @@
+/**
+ * ---
+ * purpose: Accessible sun/moon button that cycles the reference theme, resolving system preference.
+ * related:
+ *   - ./Speccy.tsx - Places the toggle in the reference chrome.
+ *   - ./ThemeToggle.module.css - Owns the toggle appearance.
+ * ---
+ */
+
 import styles from './ThemeToggle.module.css';
 
 export type Theme = 'light' | 'dark' | 'system' | 'inherit';

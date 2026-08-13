@@ -1,3 +1,12 @@
+/**
+ * ---
+ * purpose: Runs speccy-cli diff and lint per spec and upserts one marker-tagged PR comment.
+ * related:
+ *   - ../action.yml - Declares the Action inputs and invokes this script.
+ *   - ../packages/cli/src/run.ts - Implements the CLI behavior invoked via npx.
+ * ---
+ */
+
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 

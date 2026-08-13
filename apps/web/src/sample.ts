@@ -1,3 +1,11 @@
+/**
+ * ---
+ * purpose: Sample Luma Library OpenAPI document shown as the studio's first-run preview.
+ * related:
+ *   - ./App.tsx - Loads this document when no reference is open.
+ * ---
+ */
+
 import type { OpenAPIDocument } from 'speccy-renderer';
 
 export const SAMPLE_SPEC: OpenAPIDocument = {

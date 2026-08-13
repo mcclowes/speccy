@@ -1,3 +1,11 @@
+/**
+ * ---
+ * purpose: Docusaurus plugin that exports each docs page as plain markdown with rewritten links.
+ * related:
+ *   - ../../docusaurus.config.ts - Registers this plugin for the demo site.
+ * ---
+ */
+
 import fs from 'node:fs';
 import path from 'node:path';
 

@@ -1,4 +1,11 @@
-/** Converts `oasdiff changelog --format json` output into the renderer contract. */
+/**
+ * ---
+ * purpose: Adapts oasdiff changelog JSON into Speccy's semantic diff report contract.
+ * related:
+ *   - ./diff.ts - Defines the report contract produced here.
+ *   - ./diffSpecs.ts - Produces the same contract with the built-in comparator.
+ * ---
+ */
 
 import type {
   ApiChange,

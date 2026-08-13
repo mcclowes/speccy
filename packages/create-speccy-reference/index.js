@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 
+/**
+ * ---
+ * purpose: npm create speccy-reference scaffolder; copies the template and names the new package.
+ * related:
+ *   - ./template/package.json - Copied then personalized with the derived package name.
+ * ---
+ */
+
 import { cp, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,3 +1,12 @@
+/**
+ * ---
+ * purpose: Demo-site homepage showcasing embedded operation components, Speccy, and SpecDiff on a sample API.
+ * related:
+ *   - docusaurus-plugin-speccy/client - Embedded operation components rendered in the showcase.
+ *   - speccy-renderer - Full reference and diff renderers demonstrated here.
+ * ---
+ */
+
 import React, { useState } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
