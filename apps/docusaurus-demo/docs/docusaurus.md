@@ -84,7 +84,7 @@ Call <OperationLink method="post" path="/fruit" href="/api/addfruit" /> from a s
 <EndpointStrip method="post" path="/fruit" href="/api/addfruit" />
 ```
 
-Use `OperationCard` for collections and `OperationPreview` when the guide needs an inline request and response example. Pass the operation's generated reference URL through `href`.
+Use `OperationCard` for collections and `OperationPreview` when the guide needs an inline request and response example. Pass the operation's generated reference URL through `href`. See [operation components](./operation-components.mdx) for live examples and the full component API.
 
 ## Add it to navigation
 

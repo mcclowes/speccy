@@ -1,0 +1,120 @@
+---
+title: Operation components
+description: Connect guides and tutorials to operations in a Speccy API reference.
+---
+
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'docusaurus-plugin-speccy/client';
+
+# Operation components
+
+Use the operation components to connect a guide, tutorial, or changelog to the full API reference. They share Speccy's method badges, paths, color modes, and code presentation.
+
+In a React app, import them from the renderer's documentation entry point:
+
+```tsx
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'speccy-renderer/docs';
+import 'speccy-renderer/styles.css';
+```
+
+In Docusaurus MDX, import the same components from the plugin's client entry point. Registering the plugin already loads their styles:
+
+```mdx
+import {
+  EndpointStrip,
+  OperationCard,
+  OperationLink,
+  OperationPreview,
+} from 'docusaurus-plugin-speccy/client';
+```
+
+## Inline link
+
+`OperationLink` fits inside a sentence when the operation is part of an instruction.
+
+Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /> to register an orchard.
+
+```tsx
+<p>
+  Call{' '}
+  <OperationLink method="post" path="/orchards" href="/api/createorchard" /> to
+  register an orchard.
+</p>
+```
+
+## Endpoint strip
+
+`EndpointStrip` makes the operation the next step in a guide.
+
+<EndpointStrip
+  method="get"
+  path="/orchards/{orchardId}"
+  href="../api/getorchard"
+/>
+
+```tsx
+<EndpointStrip
+  method="get"
+  path="/orchards/{orchardId}"
+  href="/api/getorchard"
+/>
+```
+
+## Operation card
+
+`OperationCard` adds a summary and optional description. Use cards when readers need to choose from a small collection of related operations.
+
+<OperationCard
+  method="post"
+  path="/orchards"
+  summary="Create an orchard"
+  description="Register an orchard and its initial growing blocks."
+  href="../api/createorchard"
+/>
+
+```tsx
+<OperationCard
+  method="post"
+  path="/orchards"
+  summary="Create an orchard"
+  description="Register an orchard and its initial growing blocks."
+  href="/api/createorchard"
+/>
+```
+
+## Operation preview
+
+`OperationPreview` puts a request example, and optionally a response example, beside the operation link. Readers can switch between the examples and copy either one.
+
+<OperationPreview
+  method="post"
+  path="/orchards"
+  href="../api/createorchard"
+  requestExample={'{\n  "name": "Nightingale Farm",\n  "region": "kent"\n}'}
+  responseExample={'{\n  "id": "orch_01J7",\n  "name": "Nightingale Farm"\n}'}
+/>
+
+```tsx
+<OperationPreview
+  method="post"
+  path="/orchards"
+  href="/api/createorchard"
+  requestExample={'{\n  "name": "Nightingale Farm",\n  "region": "kent"\n}'}
+  responseExample={'{\n  "id": "orch_01J7",\n  "name": "Nightingale Farm"\n}'}
+/>
+```
+
+## Props and navigation
+
+Every component requires `method`, `path`, and `href`. `OperationCard` also requires `summary`, while `OperationPreview` requires `requestExample`. Their other content is optional.
+
+The components render ordinary links. Point `href` at the operation URL generated from its slugified `operationId`, and use `onClick` when your host needs to intercept navigation. `className` lets you add layout styles without replacing the Speccy treatment.

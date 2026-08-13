@@ -33,6 +33,8 @@ export function Reference() {
 
 The renderer fills its parent. Give the surrounding layout enough height for the sidebar and content.
 
+Use the [operation components](./operation-components.mdx) when a guide or tutorial needs to link readers to individual endpoints without embedding the full reference.
+
 ## Loading a document
 
 Fetch and parse the document yourself when you need loading states, authentication, caching, or custom error handling:
