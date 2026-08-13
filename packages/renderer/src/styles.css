@@ -81,7 +81,7 @@ related:
   vertical-align: baseline;
 }
 .speccy pre {
-  margin: -8px 0 22px;
+  margin: 0;
   padding: 0;
   overflow: visible;
   color: inherit;
@@ -985,7 +985,7 @@ related:
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px 10px;
-  margin: 0;
+  margin: -8px 0 22px;
   color: var(--sp-muted);
   font-size: 0.625rem;
 }
