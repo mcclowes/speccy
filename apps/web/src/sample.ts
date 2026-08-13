@@ -22,6 +22,10 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
       name: 'Reading lists',
       description: 'Build personal collections that stay in sync.',
     },
+    {
+      name: 'Accounts',
+      description: 'Register personal and business library accounts.',
+    },
   ],
   paths: {
     '/books': {
@@ -31,6 +35,7 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         summary: 'List books',
         description:
           'Returns a cursor-paginated list of books. Results can be narrowed by title, author, or ISBN.',
+        security: [{ oauth: ['books:read'] }, { apiKey: [] }],
         parameters: [
           {
             name: 'catalog',
@@ -101,6 +106,12 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         operationId: 'createBook',
         summary: 'Add a book',
         description: 'Adds a new edition to the catalog.',
+        'x-speccy-webhooks': [
+          {
+            operationId: 'bookIndexed',
+            description: 'Emitted after catalog indexing finishes.',
+          },
+        ],
         'x-speccy-prerequisites': [
           {
             operationId: 'listBooks',
@@ -279,9 +290,102 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         responses: { '201': { description: 'The reading list was created.' } },
       },
     },
+    '/accounts': {
+      post: {
+        tags: ['Accounts'],
+        operationId: 'createAccount',
+        summary: 'Create an account',
+        description:
+          'Registers a personal or business account. Business accounts must include a company name.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'accountType'],
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  accountType: {
+                    type: 'string',
+                    enum: ['personal', 'business'],
+                  },
+                  companyName: {
+                    type: 'string',
+                    description: 'Required when accountType is business.',
+                  },
+                },
+                if: {
+                  properties: {
+                    accountType: { const: 'business' },
+                  },
+                  required: ['accountType'],
+                },
+                then: { required: ['companyName'] },
+                else: {
+                  properties: {
+                    companyName: false,
+                  },
+                },
+                unevaluatedProperties: false,
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'The account was created.' },
+          '422': {
+            description: 'The account does not satisfy its conditional schema.',
+          },
+        },
+      },
+    },
+  },
+  webhooks: {
+    'book.indexed': {
+      post: {
+        tags: ['Books'],
+        operationId: 'bookIndexed',
+        summary: 'Book indexed',
+        description:
+          'Sent to registered webhook subscriptions after a book becomes searchable in the catalog.',
+        security: [{ callbackSignature: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['event', 'book'],
+                properties: {
+                  event: { type: 'string', const: 'book.indexed' },
+                  book: { $ref: '#/components/schemas/Book' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '204': { description: 'The event was received.' },
+        },
+      },
+    },
   },
   components: {
     securitySchemes: {
+      oauth: {
+        type: 'oauth2',
+        description: 'OAuth for signed-in Luma members and applications.',
+        flows: {
+          authorizationCode: {
+            authorizationUrl: 'https://auth.luma.example/authorize',
+            tokenUrl: 'https://auth.luma.example/token',
+            scopes: {
+              'books:read': 'Read books from the Luma catalog.',
+            },
+          },
+        },
+      },
       apiKey: {
         type: 'apiKey',
         in: 'header',
@@ -301,11 +405,26 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         type: 'object',
         required: ['id', 'title', 'author'],
         properties: {
-          id: { type: 'string', format: 'uuid', readOnly: true },
-          title: { type: 'string' },
-          author: { type: 'string' },
-          isbn: { type: 'string' },
-          publishedAt: { type: 'string', format: 'date' },
+          id: {
+            type: 'string',
+            format: 'uuid',
+            readOnly: true,
+            examples: ['6ba7b810-9dad-11d1-80b4-00c04fd430c8'],
+          },
+          title: {
+            type: 'string',
+            examples: ['The Left Hand of Darkness', 'Kindred'],
+          },
+          author: {
+            type: 'string',
+            examples: ['Ursula K. Le Guin', 'Octavia E. Butler'],
+          },
+          isbn: { type: 'string', examples: ['9780441478125'] },
+          publishedAt: {
+            type: 'string',
+            format: 'date',
+            examples: ['1969-03-01'],
+          },
         },
       },
     },

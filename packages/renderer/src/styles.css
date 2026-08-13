@@ -81,7 +81,7 @@ related:
   vertical-align: baseline;
 }
 .speccy pre {
-  margin: 0;
+  margin: -8px 0 22px;
   padding: 0;
   overflow: visible;
   color: inherit;
@@ -985,7 +985,7 @@ related:
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px 10px;
-  margin: -8px 0 22px;
+  margin: 0;
   color: var(--sp-muted);
   font-size: 0.625rem;
 }
@@ -1011,12 +1011,7 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 5px;
   background: var(--sp-surface-soft);
-  font-family: var(
-    --sp-mono-font-family,
-    'DM Mono',
-    ui-monospace,
-    monospace
-  );
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   line-height: 1.35;
 }
 .sp-endpoint-server:not(.is-unavailable) {
