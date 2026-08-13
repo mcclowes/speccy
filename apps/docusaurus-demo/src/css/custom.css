@@ -68,6 +68,10 @@ body {
 .theme-doc-markdown > p {
   line-height: 1.8;
 }
+.theme-doc-markdown table {
+  border-radius: 8px;
+  overflow: hidden;
+}
 
 .medium-zoom-overlay {
   z-index: 1000;
