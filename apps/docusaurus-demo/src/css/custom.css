@@ -11,7 +11,7 @@
   --ifm-font-family-base: Manrope, system-ui, sans-serif;
   --ifm-font-family-monospace: 'DM Mono', monospace;
   --ifm-heading-font-family: Manrope, system-ui, sans-serif;
-  --ifm-navbar-height: 68px;
+  --ifm-navbar-height: 56px;
   --site-ink: #17171c;
   --site-muted: #6f6f79;
   --site-line: #e8e7ec;
@@ -37,10 +37,6 @@ body {
 .navbar {
   border-bottom: 1px solid var(--site-line);
   box-shadow: none;
-}
-.navbar__inner {
-  max-width: 1440px;
-  margin: 0 auto;
 }
 .navbar__brand {
   letter-spacing: -0.03em;
