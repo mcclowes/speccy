@@ -19,6 +19,8 @@ Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference docum
 
 The Speccy Studio is for opening and reviewing specifications. It isn’t the production hosting shell.
 
+See [Speccy Studio](./studio.md) to open your own document or explore a catalog of public APIs.
+
 ## React
 
 Install the renderer:

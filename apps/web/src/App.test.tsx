@@ -72,6 +72,40 @@ describe('web app', () => {
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 
+  it('opens a public API from the catalog', async () => {
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: () =>
+        Promise.resolve(
+          JSON.stringify({ openapi: '3.0.0', info: { title: 'Stripe' } }),
+        ),
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Stripe API' }));
+
+    await screen.findByText('Preview');
+    expect(fetch).toHaveBeenCalledWith(
+      'https://raw.githubusercontent.com/stripe/openapi/master/latest/openapi.spec3.json',
+    );
+    expect(window.location.pathname).toMatch(/^\/references\/Stripe-/);
+  });
+
+  it('shows catalog loading errors on the home screen', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 503 }),
+    );
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Stripe API' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Couldn’t open that API. The server returned 503.',
+    );
+  });
+
   it('opens a repository discovered by the macOS app', async () => {
     const postMessage = vi.fn();
     window.webkit = {

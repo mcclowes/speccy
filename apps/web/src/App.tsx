@@ -5,13 +5,14 @@
  *   - ./sample.ts - Default document used for the first-run preview.
  *   - ./recentReferences.ts - Owns recent-reference identity and persistence.
  *   - ./previewUrls.ts - Creates and parses shareable preview links.
+ *   - ./apiCatalog.ts - Supplies curated public specifications for the home screen.
  *   - ./App.module.css - Viewer chrome and reference workspace styling.
  *   - ./studio.css - Document-level studio styles.
  *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   Speccy,
   ThemeToggle,
@@ -26,6 +27,7 @@ import {
   resolveExternalRefs,
 } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
+import { API_CATALOG } from './apiCatalog';
 import { parseInitialLocation, previewHref } from './previewUrls';
 import {
   addRecentReference,
@@ -372,6 +374,7 @@ export function App() {
     existingId?: string,
     referenceRoute: SpeccyRoute = { page: 'overview' },
     historyMode: 'push' | 'replace' | false = 'push',
+    displayName?: string,
   ) {
     if (!nextUrl.trim()) return;
     setLoading(true);
@@ -385,7 +388,7 @@ export function App() {
       });
       applySource(
         JSON.stringify(document, null, 2),
-        new URL(nextUrl).pathname.split('/').pop() || nextUrl,
+        displayName ?? new URL(nextUrl).pathname.split('/').pop() ?? nextUrl,
         existingId,
         nextUrl,
         referenceRoute,
@@ -710,6 +713,61 @@ export function App() {
               </div>
             </section>
           )}
+          <section
+            className={scoped('studio-recents studio-catalog')}
+            aria-labelledby="catalog-heading"
+          >
+            <div className={scoped('studio-section-heading')}>
+              <div>
+                <span className={scoped('studio-eyebrow')}>Explore</span>
+                <h2 id="catalog-heading">Popular complex APIs</h2>
+              </div>
+              <span>{API_CATALOG.length} public specifications</span>
+            </div>
+            <div className={scoped('studio-catalog-grid')}>
+              {API_CATALOG.map((api) => (
+                <button
+                  className={scoped('studio-catalog-card')}
+                  type="button"
+                  key={api.name}
+                  onClick={() =>
+                    void loadUrl(
+                      api.sourceUrl,
+                      undefined,
+                      { page: 'overview' },
+                      'push',
+                      api.name,
+                    )
+                  }
+                  disabled={loading}
+                  aria-label={`Open ${api.name} API`}
+                  style={{ '--catalog-color': api.color } as CSSProperties}
+                >
+                  <span
+                    className={scoped('studio-catalog-icon')}
+                    aria-hidden="true"
+                  >
+                    {api.name.slice(0, 1)}
+                  </span>
+                  <span className={scoped('studio-catalog-copy')}>
+                    <strong>{api.name}</strong>
+                    <span>{api.description}</span>
+                  </span>
+                  <span
+                    className={scoped('studio-recent-arrow')}
+                    aria-hidden="true"
+                  >
+                    ↗
+                  </span>
+                </button>
+              ))}
+            </div>
+            {message && (
+              <p className={scoped('studio-catalog-error')} role="alert">
+                Couldn’t open that API. {message}
+              </p>
+            )}
+          </section>
           <section
             className={scoped('studio-recents')}
             aria-labelledby="recent-heading"
