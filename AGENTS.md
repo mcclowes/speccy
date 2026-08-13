@@ -1,5 +1,9 @@
 # Repository instructions
 
+## Project identity
+
+- `speccy.report` is the registered domain for Speccy. Do not assume DNS or production hosting is configured until the repository documents that deployment.
+
 ## Public documentation
 
 - Treat public documentation as part of every user-facing feature or behavior change.
