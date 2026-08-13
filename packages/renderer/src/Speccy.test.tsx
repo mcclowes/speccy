@@ -1223,6 +1223,41 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
   });
 
+  it('identifies the target server when webhook delivery fails', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    );
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Webhook API' },
+          paths: {},
+          webhooks: {
+            delivered: {
+              post: { requestBody: { content: { 'application/json': {} } } },
+            },
+          },
+        }}
+        route={{ page: 'operation', operationId: 'webhook-post-delivered' }}
+      />,
+    );
+
+    fireEvent.change(
+      screen.getByRole('textbox', { name: 'Webhook target URL' }),
+      {
+        target: { value: 'https://receiver.example.com/webhook' },
+      },
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Send test webhook' }));
+
+    expect(
+      await screen.findByText(
+        'Failed to fetch. Check the target server URL, network connection, and CORS policy.',
+      ),
+    ).toBeInTheDocument();
+  });
+
   it('presents callbacks as API-initiated requests in declaration order', () => {
     window.history.replaceState({}, '', '/api/source');
     render(

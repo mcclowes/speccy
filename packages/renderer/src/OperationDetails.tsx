@@ -1347,7 +1347,7 @@ export function RequestRail({
       const detail =
         cause instanceof Error ? cause.message : 'The request failed.';
       setResult({
-        error: `${detail} Check the server URL, network connection, and CORS policy.`,
+        error: `${detail}${detail.endsWith('.') ? '' : '.'} Check the ${isWebhook ? 'target server URL' : 'server URL'}, network connection, and CORS policy.`,
       });
     } finally {
       setExecuting(false);
