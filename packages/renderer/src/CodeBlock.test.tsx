@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { CodeBlock } from './CodeBlock';
 
@@ -32,6 +32,28 @@ describe('CodeBlock', () => {
 
     rerender(<CodeBlock value="example" copyable={false} />);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('cancels the copied-state timer when unmounted', async () => {
+    vi.useFakeTimers();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+    });
+
+    try {
+      const { unmount } = render(<CodeBlock value="example" />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+      });
+
+      expect(vi.getTimerCount()).toBe(1);
+      unmount();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
   });
 
   it('highlights valid JSON without changing non-JSON samples', () => {

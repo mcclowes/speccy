@@ -7,7 +7,7 @@
  * ---
  */
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import styles from './CodeBlock.module.css';
 
 const jsonClass = {
@@ -303,11 +303,28 @@ export function CopyButton({
   compact?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const mounted = useRef(false);
+  const copiedTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (copiedTimer.current !== undefined)
+        window.clearTimeout(copiedTimer.current);
+    };
+  }, []);
 
   async function copy() {
     await navigator.clipboard?.writeText(value);
+    if (!mounted.current) return;
+    if (copiedTimer.current !== undefined)
+      window.clearTimeout(copiedTimer.current);
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
+    copiedTimer.current = window.setTimeout(() => {
+      setCopied(false);
+      copiedTimer.current = undefined;
+    }, 1200);
   }
 
   return (
