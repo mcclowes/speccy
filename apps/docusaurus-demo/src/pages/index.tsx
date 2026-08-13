@@ -396,8 +396,8 @@ const diagnostics = analyzeOpenApi(spec);
 const changes = diffSpecs(previous, spec);
 
 return {
-  issues: diagnostics.filter(({ severity }) => severity === 'issue'),
-  breaking: changes.changes.filter(({ severity }) => severity === 'breaking'),
+  issues: diagnostics.filter((diagnostic) => diagnostic.severity === 'issue'),
+  breaking: changes.changes.filter((change) => change.severity === 'breaking'),
 };`}</code>
           </pre>
           <div className={scoped('home-code-result')}>
