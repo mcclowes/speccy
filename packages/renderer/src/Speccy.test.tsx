@@ -30,6 +30,74 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('shows effective servers using operation, path, then document precedence', () => {
+    const serverSpec = {
+      openapi: '3.1.0',
+      info: { title: 'Server API' },
+      servers: [
+        { description: 'Sandbox', url: 'https://sandbox.example.com' },
+        { description: 'Production', url: 'https://api.example.com' },
+      ],
+      paths: {
+        '/inherited': {
+          get: { operationId: 'inherited', summary: 'Inherited servers' },
+        },
+        '/path-override': {
+          servers: [
+            { description: 'Path server', url: 'https://path.example.com' },
+          ],
+          get: { operationId: 'path-override', summary: 'Path override' },
+        },
+        '/operation-override': {
+          servers: [
+            { description: 'Path server', url: 'https://path.example.com' },
+          ],
+          get: {
+            operationId: 'operation-override',
+            summary: 'Operation override',
+            servers: [
+              {
+                description: 'Operation server',
+                url: 'https://{region}.example.com',
+                variables: { region: { default: 'eu' } },
+              },
+            ],
+          },
+        },
+      },
+    };
+    const { rerender } = render(
+      <Speccy
+        spec={serverSpec}
+        route={{ page: 'operation', operationId: 'inherited' }}
+      />,
+    );
+
+    let servers = screen.getByLabelText('Available servers');
+    expect(servers).toHaveTextContent('Sandboxhttps://sandbox.example.com');
+    expect(servers).toHaveTextContent('Productionhttps://api.example.com');
+
+    rerender(
+      <Speccy
+        spec={serverSpec}
+        route={{ page: 'operation', operationId: 'path-override' }}
+      />,
+    );
+    servers = screen.getByLabelText('Available servers');
+    expect(servers).toHaveTextContent('Path serverhttps://path.example.com');
+    expect(servers).not.toHaveTextContent('sandbox.example.com');
+
+    rerender(
+      <Speccy
+        spec={serverSpec}
+        route={{ page: 'operation', operationId: 'operation-override' }}
+      />,
+    );
+    servers = screen.getByLabelText('Available servers');
+    expect(servers).toHaveTextContent('Operation serverhttps://eu.example.com');
+    expect(servers).not.toHaveTextContent('path.example.com');
+  });
+
   it('links prerequisites and response successors from the operation workflow', () => {
     const onNavigate = vi.fn();
     const workflowSpec = {

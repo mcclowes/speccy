@@ -983,6 +983,34 @@ related:
 .sp-endpoint-address > :is(.sp-method-badge, .sp-copy) {
   flex: none;
 }
+.sp-endpoint-servers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+}
+.sp-endpoint-server {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+}
+.sp-endpoint-server > span {
+  flex: none;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sp-endpoint-server code {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .sp-path-parameter {
   color: var(--sp-accent);
   white-space: nowrap;

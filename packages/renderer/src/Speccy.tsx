@@ -28,6 +28,7 @@ import {
   type OpenAPIDocument,
   type OperationModel,
   type ResponseObject,
+  type ServerObject,
   type TagModel,
 } from 'speccy-core';
 import { CopyButton } from './CodeBlock';
@@ -261,10 +262,10 @@ function EndpointPage({
   ];
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
-  const scopedServer =
-    item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
-  const effectiveServer = scopedServer?.url
-    ? expandServerUrl(scopedServer.url, scopedServer.variables)
+  const servers = effectiveServers(item, document);
+  const primaryServer = servers[0];
+  const effectiveServer = primaryServer?.url
+    ? expandServerUrl(primaryServer.url, primaryServer.variables)
     : server;
   return (
     <article
@@ -298,6 +299,7 @@ function EndpointPage({
             <ApiPath value={item.path} wrap />
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
+          <EndpointServers servers={servers} />
           <Markdown>{item.operation.description}</Markdown>
           {item.operation.externalDocs?.url && (
             <a href={item.operation.externalDocs.url}>
@@ -393,6 +395,34 @@ function EndpointPage({
         </>
       )}
     </article>
+  );
+}
+
+function effectiveServers(
+  item: OperationModel,
+  document: OpenAPIDocument,
+): ServerObject[] {
+  return (
+    item.operation.servers ?? item.pathItem.servers ?? document.servers ?? []
+  );
+}
+
+function EndpointServers({ servers }: { servers: ServerObject[] }) {
+  const visibleServers = servers.filter((server) => server.url);
+  if (!visibleServers.length) return null;
+
+  return (
+    <div className="sp-endpoint-servers" aria-label="Available servers">
+      {visibleServers.map((server, index) => {
+        const url = expandServerUrl(server.url!, server.variables);
+        return (
+          <span className="sp-endpoint-server" key={`${server.url}-${index}`}>
+            {server.description && <span>{server.description}</span>}
+            <code title={url}>{url}</code>
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
