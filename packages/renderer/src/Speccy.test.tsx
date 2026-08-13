@@ -832,19 +832,64 @@ describe('Speccy navigation', () => {
     expect(screen.queryByText('No request parameters')).not.toBeInTheDocument();
   });
 
-  it('scrolls a directly opened endpoint into the sidebar viewport', () => {
+  it('scrolls a directly opened endpoint within the sidebar only', () => {
     const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView);
     scrollIntoView.mockClear();
+    const getBoundingClientRect = vi
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: Element) {
+        if (this.classList.contains('sp-nav-scroll'))
+          return {
+            top: 0,
+            bottom: 100,
+            left: 0,
+            right: 100,
+            width: 100,
+            height: 100,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+          };
+        if (this.getAttribute('aria-current') === 'page')
+          return {
+            top: 150,
+            bottom: 170,
+            left: 0,
+            right: 100,
+            width: 100,
+            height: 20,
+            x: 0,
+            y: 150,
+            toJSON: () => ({}),
+          };
+        return {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 0,
+          height: 0,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        };
+      });
     window.history.replaceState({}, '', '/api/get-companies');
 
     render(<Speccy spec={spec} basePath="/api" theme="light" />);
 
+    const navigation = screen.getByRole('navigation', {
+      name: 'API reference',
+    });
     expect(
-      within(
-        screen.getByRole('navigation', { name: 'API reference' }),
-      ).getByRole('link', { name: /List companies/ }),
+      within(navigation).getByRole('link', { name: /List companies/ }),
     ).toHaveAttribute('aria-current', 'page');
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(navigation.querySelector('.sp-nav-scroll')).toHaveProperty(
+      'scrollTop',
+      70,
+    );
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    getBoundingClientRect.mockRestore();
   });
 
   it('dismisses the optional parameter picker from outside clicks and Escape', () => {

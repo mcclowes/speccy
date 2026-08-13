@@ -83,6 +83,19 @@ function operationTitle(item: OperationModel): string {
 
 const COMPACT_ENDPOINT_WIDTH = 900;
 
+function scrollWithinContainer(
+  container: HTMLElement,
+  element: HTMLElement,
+): void {
+  const containerRect = container.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+
+  if (elementRect.top < containerRect.top)
+    container.scrollTop -= containerRect.top - elementRect.top;
+  else if (elementRect.bottom > containerRect.bottom)
+    container.scrollTop += elementRect.bottom - containerRect.bottom;
+}
+
 function useCompactEndpointLayout(element: HTMLElement | null): boolean {
   const [compact, setCompact] = useState(false);
 
@@ -733,9 +746,13 @@ function NavigationGroup({
 
   useEffect(() => {
     if (!activeRouteIsWithinGroup || !expanded) return;
-    groupRef.current
-      ?.querySelector('[aria-current="page"]')
-      ?.scrollIntoView({ block: 'nearest' });
+    const activeLink = groupRef.current?.querySelector<HTMLElement>(
+      '[aria-current="page"]',
+    );
+    const scrollContainer =
+      groupRef.current?.closest<HTMLElement>('.sp-nav-scroll');
+    if (activeLink && scrollContainer)
+      scrollWithinContainer(scrollContainer, activeLink);
   }, [activeRouteIsWithinGroup, activeOperationId, activeTag, expanded]);
 
   return (

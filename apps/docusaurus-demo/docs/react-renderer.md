@@ -33,7 +33,7 @@ export function Reference() {
 }
 ```
 
-The renderer fills its parent. Give the surrounding layout enough height for the sidebar and content.
+The renderer fills its parent. Give the surrounding layout enough height for the sidebar and content. When a route opens an endpoint, Speccy scrolls its own sidebar to the active item without changing the host page's scroll position.
 
 Use the [operation components](./operation-components.mdx) when a guide or tutorial needs to link readers to individual endpoints without embedding the full reference.
 
