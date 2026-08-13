@@ -22,13 +22,13 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 | `showDeveloperHints`         | boolean                                 | `false`   | Show authoring guidance and the API health drawer               |
 | `previousSpec`               | object or string                        | none      | Earlier document used to surface potentially breaking changes   |
 | `spectralDiagnostics`        | array                                   | none      | Spectral results shown alongside Speccy's built-in guidance     |
-| `logo`                       | React node                              | none      | Brand mark beside the API title                                 |
+| `logo`                       | React node                              | none      | Brand mark in the sidebar header; requires `showSidebar`        |
 | `className`                  | string                                  | empty     | Extra class on the renderer root                                |
 | `onError`                    | function                                | none      | Receive parsing and model errors                                |
 
 Hosts that own routing can also pass `route`, `onNavigate`, and `hrefForRoute` to control navigation instead of letting Speccy write to browser history.
 
-Set `info.x-icon` in the OpenAPI document to show a brand mark beside the API title. An explicit `logo` component prop takes precedence.
+Set `info.x-icon` in the OpenAPI document to show a brand mark beside the API title in the sidebar header, so it appears only when `showSidebar` is on. An explicit `logo` component prop takes precedence.
 
 ```yaml
 info:

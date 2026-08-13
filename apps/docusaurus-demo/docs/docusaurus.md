@@ -77,9 +77,9 @@ import {
   OperationPreview,
 } from 'docusaurus-plugin-speccy/client';
 
-Call <OperationLink method="post" path="/fruit" href="/api/addFruit" /> from a sentence.
+Call <OperationLink method="post" path="/fruit" href="/api/addfruit" /> from a sentence.
 
-<EndpointStrip method="post" path="/fruit" href="/api/addFruit" />
+<EndpointStrip method="post" path="/fruit" href="/api/addfruit" />
 ```
 
 Use `OperationCard` for collections and `OperationPreview` when the guide needs an inline request and response example. Pass the operation's generated reference URL through `href`.

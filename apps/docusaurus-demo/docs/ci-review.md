@@ -124,7 +124,7 @@ See [OpenAPI extensions](./openapi-extensions.md#operation-lifecycle) for how li
 
 ## Run the same checks locally
 
-The CLI reads the same `.speccyrc` file:
+`speccy lint` reads the same `.speccyrc` file from the directory it runs in. `speccy diff` doesn't use the config; its severity is controlled by `--fail-on` alone:
 
 ```sh
 npx speccy-cli lint openapi.yaml --against origin/main:openapi.yaml

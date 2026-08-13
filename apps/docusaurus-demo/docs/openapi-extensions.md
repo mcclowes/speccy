@@ -82,6 +82,7 @@ paths:
   /books:
     post:
       operationId: createBook
+      summary: Create book
       x-speccy-webhooks:
         - operationId: bookIndexed
           description: Emitted after catalog indexing finishes.
