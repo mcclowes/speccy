@@ -29,6 +29,15 @@ describe('endpoint parameter layout', () => {
     );
   });
 
+  it('keeps webhook documentation in the standard endpoint column', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-endpoint-hero \{[^}]*grid-template-columns: minmax\(0, 7fr\) minmax\(340px, 5fr\);/,
+    );
+    expect(css).not.toMatch(/\.sp-endpoint-hero\.is-webhook \{/);
+  });
+
   it('indents subgroup pages behind a guide without indenting the heading', () => {
     const css = readFileSync('src/styles.css', 'utf8');
 
