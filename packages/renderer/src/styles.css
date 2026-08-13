@@ -76,12 +76,7 @@ related:
   background: transparent;
   border: 0;
   border-radius: 0;
-  font-family: var(
-    --sp-mono-font-family,
-    'DM Mono',
-    ui-monospace,
-    monospace
-  );
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: inherit;
   vertical-align: baseline;
 }
@@ -1016,7 +1011,12 @@ related:
   border: 1px solid var(--sp-line);
   border-radius: 5px;
   background: var(--sp-surface-soft);
-  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
+  font-family: var(
+    --sp-mono-font-family,
+    'DM Mono',
+    ui-monospace,
+    monospace
+  );
   line-height: 1.35;
 }
 .sp-endpoint-server:not(.is-unavailable) {
