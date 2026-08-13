@@ -312,6 +312,14 @@ function EndpointPage({
             )}
             onViewAll={onViewAllDiagnostics}
           />
+          <OperationRelationships
+            item={item}
+            operations={operations}
+            hrefForOperation={(operationId) =>
+              hrefForRoute({ page: 'operation', operationId })
+            }
+            onNavigate={onNavigateOperation}
+          />
         </header>
         {tryIt && !isWebhook && !compactLayout && (
           <RequestRail
@@ -327,14 +335,6 @@ function EndpointPage({
           />
         )}
       </div>
-      <OperationRelationships
-        item={item}
-        operations={operations}
-        hrefForOperation={(operationId) =>
-          hrefForRoute({ page: 'operation', operationId })
-        }
-        onNavigate={onNavigateOperation}
-      />
       {!isWebhook && (
         <div className="sp-request-heading">
           <h2>Request</h2>
