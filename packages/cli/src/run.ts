@@ -19,6 +19,7 @@ import {
   type LintThreshold,
 } from './report';
 import { readSource, type SourceIO } from './sources';
+import { loadSpeccyConfig } from './config';
 
 /** Reserved for the tool itself failing, so CI can tell a broken spec from a breaking change. */
 const TOOL_FAILURE = 2;
@@ -135,10 +136,15 @@ export async function run(
       const previousSource = values.against
         ? await readSource(values.against as string, io)
         : undefined;
-      const diagnostics = analyzeOpenApi(
-        parseSpec(source),
-        previousSource ? { previousDocument: parseSpec(previousSource) } : {},
-      );
+      const config = await loadSpeccyConfig(io);
+      const diagnostics = analyzeOpenApi(parseSpec(source), {
+        previousDocument: previousSource
+          ? parseSpec(previousSource)
+          : undefined,
+        disabledRules: Object.entries(config.rules).flatMap(
+          ([rule, enabled]) => (enabled ? [] : [rule]),
+        ),
+      });
       write(formatLint(diagnostics, format, options));
       return lintExitCode(diagnostics, threshold);
     }

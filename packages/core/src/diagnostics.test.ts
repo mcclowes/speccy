@@ -87,6 +87,50 @@ describe('OpenAPI diagnostics', () => {
     );
   });
 
+  it('suggests lifecycle metadata for new operations unless disabled', () => {
+    const previous: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Payments', version: '1' },
+      paths: {},
+    };
+    const current: OpenAPIDocument = {
+      ...previous,
+      paths: {
+        '/payments': {
+          post: {
+            operationId: 'createPayment',
+            summary: 'Create a payment',
+          },
+        },
+        '/refunds': {
+          post: {
+            operationId: 'createRefund',
+            summary: 'Create a refund',
+            'x-speccy-lifecycle': 'beta',
+          },
+        },
+      },
+    };
+
+    const diagnostics = analyzeOpenApi(current, {
+      previousDocument: previous,
+    }).filter((diagnostic) => diagnostic.ruleId === 'new-operation-lifecycle');
+    expect(diagnostics).toEqual([
+      expect.objectContaining({
+        severity: 'suggestion',
+        operationId: 'createPayment',
+        path: ['paths', '/payments', 'post', 'x-speccy-lifecycle'],
+      }),
+    ]);
+
+    expect(
+      analyzeOpenApi(current, {
+        previousDocument: previous,
+        disabledRules: ['new-operation-lifecycle'],
+      }).some((diagnostic) => diagnostic.ruleId === 'new-operation-lifecycle'),
+    ).toBe(false);
+  });
+
   it('adapts every supplied Spectral result without dropping its location', () => {
     const diagnostics = adaptSpectralDiagnostics([
       {

@@ -49,6 +49,20 @@ npx redocly bundle openapi.yaml --output openapi.bundled.yaml
 | `--no-color`                        | Never colorize terminal output. `NO_COLOR` is respected too.                                                                                                                                                             |
 | `--help`, `-h`                      | Print usage and exit 0.                                                                                                                                                                                                  |
 
+## Repository configuration
+
+Add an optional `.speccyrc` JSON file at the repository root to configure rules. Rules are enabled by default. Set one to `false` to disable it:
+
+```json
+{
+  "rules": {
+    "new-operation-lifecycle": false
+  }
+}
+```
+
+When linting with `--against`, `new-operation-lifecycle` suggests adding `x-speccy-lifecycle: new` to newly added operations. The GitHub Action uses change-aware linting, so it follows the same configuration.
+
 ## Exit codes
 
 | Code | Meaning                            |

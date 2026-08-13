@@ -124,6 +124,8 @@ export async function review({
       [
         'lint',
         spec.revisionPath,
+        '--against',
+        spec.basePath ?? `${baseRef}:${spec.revisionPath}`,
         '--format',
         'markdown',
         '--fail-on',

@@ -397,6 +397,41 @@ function changeSafetyDiagnostics(
   });
 }
 
+function newOperationLifecycleDiagnostics(
+  previous: OpenAPIDocument,
+  current: OpenAPIDocument,
+): ApiDiagnostic[] {
+  return diffSpecs(previous, current).changes.flatMap((change) => {
+    if (!change.id.startsWith('operation-added:')) return [];
+    if (!change.method || !change.path) return [];
+    const operation = current.paths?.[change.path]?.[change.method];
+    const lifecycle = operation?.['x-speccy-lifecycle'];
+    if (
+      !operation ||
+      (typeof lifecycle === 'string' && lifecycle.trim().length > 0)
+    )
+      return [];
+
+    return [
+      {
+        id: `speccy:new-operation-lifecycle:${change.path}:${change.method}`,
+        ruleId: 'new-operation-lifecycle',
+        source: 'speccy' as const,
+        severity: 'suggestion' as const,
+        category: 'change-safety' as const,
+        message: `${change.method.toUpperCase()} ${change.path} is a new operation without lifecycle metadata.`,
+        rationale:
+          'A temporary badge helps existing consumers spot newly available capabilities.',
+        suggestion:
+          'Add `x-speccy-lifecycle: new`, then remove it after 30 days.',
+        path: [...change.location, 'x-speccy-lifecycle'],
+        operationId: change.operationId,
+        tag: change.tag,
+      },
+    ];
+  });
+}
+
 export function adaptSpectralDiagnostics(
   inputs: SpectralDiagnosticInput[],
 ): ApiDiagnostic[] {
@@ -424,6 +459,7 @@ export function analyzeOpenApi(
   options: {
     previousDocument?: OpenAPIDocument;
     spectral?: SpectralDiagnosticInput[];
+    disabledRules?: Iterable<string>;
   } = {},
 ): ApiDiagnostic[] {
   const resolvedDocument = resolveRefs(document);
@@ -1068,10 +1104,15 @@ export function analyzeOpenApi(
           });
     }
   }
-  if (options.previousDocument)
+  if (options.previousDocument) {
     diagnostics.push(
       ...changeSafetyDiagnostics(options.previousDocument, document),
+      ...newOperationLifecycleDiagnostics(options.previousDocument, document),
     );
+  }
   diagnostics.push(...adaptSpectralDiagnostics(options.spectral ?? []));
-  return diagnostics;
+  const disabledRules = new Set(options.disabledRules ?? []);
+  return diagnostics.filter(
+    (diagnostic) => !disabledRules.has(diagnostic.ruleId),
+  );
 }

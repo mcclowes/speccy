@@ -149,6 +149,62 @@ describe('run', () => {
     ).toBe(true);
   });
 
+  it('suggests lifecycle metadata for new operations', async () => {
+    const revision = BASE.replace(
+      'paths:',
+      `paths:\n  /refunds:\n    post:\n      operationId: createRefund\n      summary: Create a refund\n      description: Records a refund.\n      responses: {"201": {description: Created}}`,
+    );
+    const h = harness({ 'base.yaml': BASE, 'head.yaml': revision });
+
+    await run(
+      ['lint', 'head.yaml', '--against', 'base.yaml', '--format', 'json'],
+      h,
+    );
+
+    expect(
+      (JSON.parse(h.out.join('')) as Array<{ ruleId: string }>).some(
+        (finding) => finding.ruleId === 'new-operation-lifecycle',
+      ),
+    ).toBe(true);
+  });
+
+  it('reads disabled rules from .speccyrc', async () => {
+    const revision = BASE.replace(
+      'paths:',
+      `paths:\n  /refunds:\n    post:\n      operationId: createRefund\n      summary: Create a refund\n      description: Records a refund.\n      responses: {"201": {description: Created}}`,
+    );
+    const h = harness({
+      'base.yaml': BASE,
+      'head.yaml': revision,
+      '.speccyrc': JSON.stringify({
+        rules: { 'new-operation-lifecycle': false },
+      }),
+    });
+
+    await run(
+      ['lint', 'head.yaml', '--against', 'base.yaml', '--format', 'json'],
+      h,
+    );
+
+    expect(
+      (JSON.parse(h.out.join('')) as Array<{ ruleId: string }>).some(
+        (finding) => finding.ruleId === 'new-operation-lifecycle',
+      ),
+    ).toBe(false);
+  });
+
+  it('reports invalid .speccyrc rule values', async () => {
+    const h = harness({
+      'openapi.yaml': BASE,
+      '.speccyrc': JSON.stringify({
+        rules: { 'new-operation-lifecycle': 'off' },
+      }),
+    });
+
+    await expect(run(['lint', 'openapi.yaml'], h)).resolves.toBe(2);
+    expect(h.err.join('')).toContain('must be true or false');
+  });
+
   it('writes markdown ready to post as a comment', async () => {
     const h = harness({ 'base.yaml': BASE, 'head.yaml': REVISION });
     await run(['diff', 'base.yaml', 'head.yaml', '--format', 'markdown'], h);
