@@ -41,7 +41,7 @@ paths:
                 customerId: $response.body#/id
 ```
 
-Callbacks describe requests the API may send after the operation. Speccy includes each callback operation and its runtime expression in the workflow band, then renders the full callback contract below the operation:
+Callbacks describe requests the API may send after the operation. Speccy includes each callback operation and its runtime expression in the workflow card, then renders the full callback contract below the operation:
 
 ```yaml
 paths:
@@ -71,7 +71,7 @@ paths:
         - verifyCustomer
 ```
 
-Speccy shows prerequisites, response links, and callbacks together in a compact workflow band on the operation page. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
+Speccy shows prerequisites, response links, and callbacks together in a workflow card on the operation page. The card starts collapsed, so readers can open it when they need the wider operation context. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
 
 To connect a top-level webhook to the operations that may emit it, add `x-speccy-webhooks` to each triggering operation. Entries accept the same string, `operationId`, or `operationRef` forms as prerequisites:
 

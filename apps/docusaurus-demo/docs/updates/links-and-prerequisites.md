@@ -141,7 +141,7 @@ paths:
                   description: Status received
 ```
 
-Speccy shows `Report payment status`, its `POST` method, and the `{$request.body#/callbackUrl}` expression in the workflow band. It renders the callback's full request and response contract below the main operation.
+Speccy shows `Report payment status`, its `POST` method, and the `{$request.body#/callbackUrl}` expression in the collapsed workflow card. It renders the callback's full request and response contract below the main operation.
 
 Use a callback when the API initiates a later HTTP request to a caller-provided URL. Don't use one for polling, a client-initiated follow-up request, or a webhook whose destination isn't established by this operation. Top-level OpenAPI webhooks are a better fit for independently registered event subscriptions.
 

@@ -235,10 +235,16 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    const workflow = screen
-      .getByRole('heading', { name: 'Workflow' })
-      .closest<HTMLElement>('section')!;
-    expect(workflow).toBeVisible();
+    const workflowHeading = screen.getByRole('heading', { name: 'Workflow' });
+    const workflow = workflowHeading.closest<HTMLDetailsElement>('details')!;
+    expect(workflowHeading).toBeVisible();
+    expect(workflow).not.toHaveAttribute('open');
+    expect(
+      within(workflow).getByText('A payment needs an owner.'),
+    ).not.toBeVisible();
+
+    fireEvent.click(workflowHeading);
+    expect(workflow).toHaveAttribute('open');
     expect(
       within(workflow).getByText('A payment needs an owner.'),
     ).toBeVisible();
@@ -308,7 +314,8 @@ describe('Speccy navigation', () => {
 
     const webhookWorkflow = screen
       .getByRole('heading', { name: 'Workflow' })
-      .closest<HTMLElement>('section')!;
+      .closest<HTMLDetailsElement>('details')!;
+    fireEvent.click(within(webhookWorkflow).getByText('Workflow'));
     expect(
       within(webhookWorkflow).getByRole('heading', {
         name: 'Triggered by operations',

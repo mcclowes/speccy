@@ -14,7 +14,7 @@ import type {
   OperationReference,
 } from 'speccy-core';
 import { operationsInDeclarationOrder } from 'speccy-core';
-import { MethodBadge } from './DesignSystem';
+import { DisclosureChevron, MethodBadge } from './DesignSystem';
 import styles from './OperationRelationships.module.css';
 
 interface Relationship {
@@ -229,8 +229,11 @@ export function OperationRelationships({
     return null;
 
   return (
-    <section className={styles.relationships} aria-labelledby="workflow-title">
-      <h2 id="workflow-title">Workflow</h2>
+    <details className={styles.relationships} aria-labelledby="workflow-title">
+      <summary className={styles.summary}>
+        <h2 id="workflow-title">Workflow</h2>
+        <DisclosureChevron />
+      </summary>
       <div className={styles.groups}>
         {prerequisites.length > 0 && (
           <div className={styles.group}>
@@ -308,6 +311,6 @@ export function OperationRelationships({
           </div>
         )}
       </div>
-    </section>
+    </details>
   );
 }

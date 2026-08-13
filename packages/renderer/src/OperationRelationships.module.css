@@ -1,11 +1,40 @@
 .relationships {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  align-items: start;
   margin: 28px 0 0;
-  padding: 12px 0;
-  border-top: 1px solid var(--sp-line);
+  border: 1px solid var(--sp-line);
+  border-radius: 10px;
+  background: var(--sp-surface);
+  overflow: hidden;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary :global(.sp-disclosure-chevron) {
+  transform: rotate(-45deg);
+}
+
+.relationships[open] .summary :global(.sp-disclosure-chevron) {
+  transform: rotate(45deg);
+}
+
+.summary:hover {
+  background: var(--sp-surface-soft);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--sp-focus-ring, var(--sp-accent));
+  outline-offset: -2px;
 }
 
 .relationships h2,
@@ -14,7 +43,6 @@
 }
 
 .relationships h2 {
-  padding-top: 2px;
   font-size: 0.6875rem;
   letter-spacing: 0.075em;
   text-transform: uppercase;
@@ -24,6 +52,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--sp-line);
 }
 
 .group {
