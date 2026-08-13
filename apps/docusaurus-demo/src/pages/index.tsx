@@ -330,6 +330,7 @@ function RendererShowcase() {
             window.
           </p>
           <EndpointStrip
+            className={scoped('home-renderer-strip')}
             method="get"
             path="/orchards"
             href="/api/listorchards"

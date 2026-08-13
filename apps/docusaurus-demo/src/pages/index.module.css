@@ -495,13 +495,19 @@
   font-size: 0.88rem;
   line-height: 1.7;
 }
+.home-renderer-strip,
 .home-renderer-card,
 .home-renderer-operation {
   --sp-accent: var(--ifm-color-primary);
   --sp-surface: var(--site-paper);
+  --sp-surface-soft: color-mix(in srgb, var(--site-paper) 94%, var(--site-ink));
   --sp-text: var(--site-ink);
   --sp-muted: var(--site-muted);
   --sp-line: var(--site-line);
+  --sp-code: color-mix(in srgb, var(--site-paper) 95%, var(--site-ink));
+  --sp-code-text: var(--site-ink);
+  --sp-code-border: var(--site-line);
+  --sp-code-control: var(--sp-surface-soft);
   margin-bottom: 0 !important;
 }
 .home-renderer-card {
