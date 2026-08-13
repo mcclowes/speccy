@@ -5,45 +5,13 @@
 }
 
 :global(.sp-request-context) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
+  display: grid;
+  gap: 12px;
   margin-bottom: 22px;
 }
 
 :global(.sp-request-context .sp-endpoint-servers) {
   margin: 0;
-}
-
-:global(.sp-request-context .sp-security-section) {
-  width: fit-content;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-:global(.sp-request-context .sp-security-toggle) {
-  width: auto;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid var(--sp-line);
-  border-radius: 5px;
-  background: var(--sp-surface-soft);
-  font-size: 0.6875rem;
-}
-
-:global(.sp-request-context .sp-security-info) {
-  display: none;
-}
-
-:global(.sp-request-context .sp-security-heading + .sp-security-requirements) {
-  width: min(420px, calc(100vw - 40px));
-  margin-top: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--sp-line);
-  border-radius: 8px;
-  background: var(--sp-surface);
 }
 
 :global(.sp-request-context:empty) {
