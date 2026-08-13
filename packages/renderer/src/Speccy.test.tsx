@@ -152,7 +152,7 @@ describe('Speccy navigation', () => {
     ).not.toHaveClass('is-unavailable');
   });
 
-  it('links prerequisites and response successors from the operation workflow', () => {
+  it('shows prerequisites, response successors, and callbacks in the operation workflow', () => {
     const onNavigate = vi.fn();
     const workflowSpec = {
       openapi: '3.1.0',
@@ -175,6 +175,17 @@ describe('Speccy navigation', () => {
                 description: 'A payment needs an owner.',
               },
             ],
+            callbacks: {
+              paymentStatus: {
+                '{$request.body#/callbackUrl}': {
+                  post: {
+                    summary: 'Report payment status',
+                    description: 'Reports the final payment status.',
+                    responses: { '204': { description: 'Received' } },
+                  },
+                },
+              },
+            },
             responses: {
               '201': {
                 description: 'Created',
@@ -220,6 +231,22 @@ describe('Speccy navigation', () => {
       screen.getAllByText('Read the newly created payment.')[0],
     ).toBeVisible();
     expect(within(workflow).getByText('After a 201 response')).toBeVisible();
+    const callbackGroup = within(workflow)
+      .getByRole('heading', { name: 'Callbacks from this operation' })
+      .closest<HTMLElement>('div')!;
+    expect(callbackGroup).toBeVisible();
+    expect(
+      within(callbackGroup).getByText('Report payment status'),
+    ).toBeVisible();
+    expect(
+      within(callbackGroup).getByText(
+        'paymentStatus · {$request.body#/callbackUrl}',
+      ),
+    ).toBeVisible();
+    expect(within(callbackGroup).getByText('POST')).toBeVisible();
+    expect(
+      within(callbackGroup).getByText('Reports the final payment status.'),
+    ).toBeVisible();
     expect(within(workflow).queryByText('/customers')).not.toBeInTheDocument();
     expect(
       within(workflow).queryByText('/payments/{paymentId}'),

@@ -26,6 +26,6 @@ Read the package changelogs for the complete record:
 
 ## Latest guidance
 
-### [Document operation workflows with links and prerequisites](./links-and-prerequisites.md)
+### [Document operation workflows with links, prerequisites, and callbacks](./links-and-prerequisites.md)
 
-Show readers what must happen before an operation and where they can go after its response, without burying the workflow in prose.
+Show readers what must happen before an operation, where they can go after its response, and which requests the API may send back.

@@ -1,18 +1,19 @@
 ---
-title: Document workflows with links and prerequisites
-description: Connect related API operations so readers can see what comes before a request and what can follow its response.
+title: Document workflows with links, prerequisites, and callbacks
+description: Show readers what comes before an operation, what can follow its response, and which requests the API may send back.
 ---
 
-# Document workflows with links and prerequisites
+# Document workflows with links, prerequisites, and callbacks
 
 An endpoint rarely stands alone. Creating a payment may require a customer, and its successful response may lead naturally to fetching, capturing, or refunding that payment. If those relationships exist only in prose, readers have to reconstruct the workflow themselves.
 
-Speccy combines two complementary forms of operation relationship:
+Speccy combines three complementary forms of operation relationship:
 
 - OpenAPI links describe what a caller can do after a particular response.
 - `x-speccy-prerequisites` describes what must already have happened before the operation can be called.
+- OpenAPI callbacks describe requests the API may later send to the caller.
 
-Together they give an operation a useful sense of place: what gets you here, and where can you go next?
+Together they give an operation a useful sense of place: what gets you here, where can you go next, and what might come back to you?
 
 ## Use links for response-driven next steps
 
@@ -113,18 +114,54 @@ x-speccy-prerequisites:
 
 The description should explain the dependency, not repeat the linked operation's summary.
 
-## Use both to describe the full path
+## Use callbacks for API-initiated requests
+
+An OpenAPI Callback Object describes a request that the API may send after the original operation. Its key is a runtime expression that tells the API where to send that request, commonly using a callback URL supplied in the request body.
+
+```yaml
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      summary: Create a payment
+      callbacks:
+        paymentStatus:
+          '{$request.body#/callbackUrl}':
+            post:
+              summary: Report payment status
+              description: Reports the final status of the payment.
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/PaymentStatus'
+              responses:
+                '204':
+                  description: Status received
+```
+
+Speccy shows `Report payment status`, its `POST` method, and the `{$request.body#/callbackUrl}` expression in the workflow band. It renders the callback's full request and response contract below the main operation.
+
+Use a callback when the API initiates a later HTTP request to a caller-provided URL. Don't use one for polling, a client-initiated follow-up request, or a webhook whose destination isn't established by this operation. Top-level OpenAPI webhooks are a better fit for independently registered event subscriptions.
+
+The runtime expression is part of the contract. Make sure it points to a value the original request supplies, and document callback authentication and retry behavior in the callback operation's description.
+
+## Use all three to describe the full path
 
 A payment workflow might read like this:
 
 ```text
 Create customer → Create payment → Get payment
-       prerequisite ↑             ↑ 201 response link
+       prerequisite ↑       │     ↑ 201 response link
+                          callback
+                             ↓
+                    Report payment status
 ```
 
-On the `createPayment` page, Speccy presents these relationships together as workflow context. The reader can move backward to required setup and forward to likely next operations without searching the sidebar or opening several endpoint descriptions.
+On the `createPayment` page, Speccy presents these relationships together as workflow context. The reader can move backward to required setup, forward to likely next operations, and see which requests the API may send back without searching the sidebar or opening several endpoint descriptions.
 
-This is navigation and documentation, not orchestration. Links do not call the next operation, and prerequisites do not enforce server-side state. The API must still validate requirements and return useful errors when they are not met.
+This is navigation and documentation, not orchestration. Links don't call the next operation, prerequisites don't enforce server-side state, and callbacks don't register or deliver themselves. The API must still validate requirements, store callback destinations safely, authenticate deliveries, and handle retries.
 
 ## Keep the graph useful
 
@@ -136,11 +173,12 @@ A good relationship answers at least one concrete question:
 - Which response makes the next call possible?
 - Which returned value do I pass to that call?
 - Where should I go to inspect or continue the result?
+- Which later request will the API send me, and where will it send it?
 
-Use tags and subgroups for broad organization. Use links and prerequisites for causal relationships between specific operations.
+Use tags and subgroups for broad organization. Use links, prerequisites, and callbacks for causal relationships between specific operations.
 
 ## Check the result
 
-Make sure every referenced `operationId` exists and is unique. Then open the operation page and verify that the workflow reads in the right direction, descriptions add useful context, and response parameter expressions point to fields the response actually returns.
+Make sure every referenced `operationId` exists and is unique. Then open the operation page and verify that the workflow reads in the right direction, descriptions add useful context, response parameter expressions point to fields the response actually returns, and callback expressions point to values the original request supplies.
 
 See [OpenAPI extensions](../openapi-extensions.md#operation-workflows) for the compact extension reference.

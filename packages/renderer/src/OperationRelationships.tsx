@@ -1,6 +1,6 @@
 /**
  * ---
- * purpose: Presents prerequisite and response-linked operations as navigable workflow context.
+ * purpose: Presents prerequisites, response links, and callbacks as compact operation workflow context.
  * related:
  *   - ./Speccy.tsx - Places workflow context on operation pages and owns navigation.
  *   - ../../core/src/types.ts - Defines the x-speccy-prerequisites extension shape.
@@ -13,6 +13,7 @@ import type {
   OperationModel,
   OperationReference,
 } from 'speccy-core';
+import { operationsInDeclarationOrder } from 'speccy-core';
 import { MethodBadge } from './DesignSystem';
 import styles from './OperationRelationships.module.css';
 
@@ -21,6 +22,7 @@ interface Relationship {
   label: string;
   context?: string;
   description?: string;
+  method?: OperationModel['method'];
   target?: OperationModel;
 }
 
@@ -99,9 +101,12 @@ function RelationshipCard({
           ? operationLabel(relationship.target)
           : relationship.label}
       </span>
-      {relationship.target && (
+      {(relationship.target || relationship.method) && (
         <span className={styles.address}>
-          <MethodBadge method={relationship.target.method} compact />
+          <MethodBadge
+            method={relationship.target?.method ?? relationship.method!}
+            compact
+          />
         </span>
       )}
       {relationship.context && (
@@ -161,8 +166,29 @@ export function OperationRelationships({
         }),
       ),
   );
+  const callbacks = Object.entries(item.operation.callbacks ?? {}).flatMap(
+    ([name, callback]) =>
+      Object.entries(callback).flatMap(([expression, pathItem]) => {
+        if (expression === '$ref' || typeof pathItem === 'string') return [];
 
-  if (prerequisites.length === 0 && successors.length === 0) return null;
+        return operationsInDeclarationOrder(pathItem).map(
+          ([method, operation], index): Relationship => ({
+            key: `callback-${name}-${expression}-${method}-${index}`,
+            label: operation.summary ?? operation.operationId ?? name,
+            context: `${name} · ${expression}`,
+            description: operation.description,
+            method,
+          }),
+        );
+      }),
+  );
+
+  if (
+    prerequisites.length === 0 &&
+    successors.length === 0 &&
+    callbacks.length === 0
+  )
+    return null;
 
   return (
     <section className={styles.relationships} aria-labelledby="workflow-title">
@@ -188,6 +214,21 @@ export function OperationRelationships({
             <h3>Possible next operations</h3>
             <div className={styles.cards}>
               {successors.map((relationship) => (
+                <RelationshipCard
+                  relationship={relationship}
+                  hrefForOperation={hrefForOperation}
+                  onNavigate={onNavigate}
+                  key={relationship.key}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {callbacks.length > 0 && (
+          <div className={styles.group}>
+            <h3>Callbacks from this operation</h3>
+            <div className={styles.cards}>
+              {callbacks.map((relationship) => (
                 <RelationshipCard
                   relationship={relationship}
                   hrefForOperation={hrefForOperation}

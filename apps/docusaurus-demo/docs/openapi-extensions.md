@@ -41,6 +41,23 @@ paths:
                 customerId: $response.body#/id
 ```
 
+Callbacks describe requests the API may send after the operation. Speccy includes each callback operation and its runtime expression in the workflow band, then renders the full callback contract below the operation:
+
+```yaml
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      callbacks:
+        paymentStatus:
+          '{$request.body#/callbackUrl}':
+            post:
+              summary: Report payment status
+              responses:
+                '204':
+                  description: Status received
+```
+
 OpenAPI has no equivalent reverse relationship for operations that must happen first. Use `x-speccy-prerequisites` with an array of operation IDs (or objects with `operationId`, `operationRef`, and an optional `description`):
 
 ```yaml
@@ -54,7 +71,7 @@ paths:
         - verifyCustomer
 ```
 
-Speccy shows prerequisites and response links together in a compact workflow band on the operation page. These fields document workflow relationships; they do not make the calls or enforce server-side state.
+Speccy shows prerequisites, response links, and callbacks together in a compact workflow band on the operation page. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
 
 ## Tag groups
 
