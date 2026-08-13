@@ -97,6 +97,13 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         operationId: 'createBook',
         summary: 'Add a book',
         description: 'Adds a new edition to the catalog.',
+        'x-speccy-prerequisites': [
+          {
+            operationId: 'listBooks',
+            description:
+              'Search the catalog first to avoid adding a duplicate edition.',
+          },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -120,6 +127,15 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Book' },
+              },
+            },
+            links: {
+              getCreatedBook: {
+                operationId: 'getBook',
+                description: 'Retrieve the book that was just added.',
+                parameters: {
+                  bookId: '$response.body#/id',
+                },
               },
             },
           },

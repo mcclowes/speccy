@@ -12,4 +12,18 @@ describe('sample spec', () => {
       'Reading lists',
     ]);
   });
+
+  it('demonstrates prerequisite and response-link workflows', () => {
+    const createBook = SAMPLE_SPEC.paths?.['/books']?.post;
+
+    expect(createBook?.['x-speccy-prerequisites']).toEqual([
+      expect.objectContaining({ operationId: 'listBooks' }),
+    ]);
+    expect(createBook?.responses?.['201']?.links?.getCreatedBook).toEqual(
+      expect.objectContaining({
+        operationId: 'getBook',
+        parameters: { bookId: '$response.body#/id' },
+      }),
+    );
+  });
 });
