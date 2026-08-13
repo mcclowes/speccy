@@ -77,4 +77,71 @@ describe('operation references', () => {
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
     expect(screen.getByText('true')).toBeInTheDocument();
   });
+
+  it('derives request parameters, headers, body, and response from the spec', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        spec={{
+          openapi: '3.1.0',
+          paths: {
+            [operation.path]: {
+              post: {
+                parameters: [
+                  { name: 'corporateId', in: 'path', example: 'corp-1' },
+                  { name: 'expand', in: 'query', schema: { default: true } },
+                  { name: 'X-Tenant', in: 'header', example: 'tenant-1' },
+                ],
+                requestBody: {
+                  content: {
+                    'application/json': { example: { name: 'Custom Ltd' } },
+                  },
+                },
+                responses: {
+                  '201': {
+                    content: {
+                      'application/json': { example: { id: 'corp-1' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('"pathParameters"')).toBeInTheDocument();
+    expect(screen.getByText('"headers"')).toBeInTheDocument();
+    expect(screen.getByText('"Custom Ltd"')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(screen.getByText('"corp-1"')).toBeInTheDocument();
+  });
+
+  it('prefers explicit examples and omits code when none are available', () => {
+    const { rerender } = render(
+      <OperationPreview
+        {...operation}
+        spec={{
+          paths: {
+            [operation.path]: {
+              post: {
+                requestBody: {
+                  content: { 'application/json': { example: { old: true } } },
+                },
+              },
+            },
+          },
+        }}
+        requestExample={'{"override":true}'}
+      />,
+    );
+    expect(screen.getByText('"override"')).toBeInTheDocument();
+    expect(screen.queryByText('"old"')).not.toBeInTheDocument();
+
+    rerender(<OperationPreview {...operation} />);
+    expect(
+      screen.queryByRole('button', { name: /copy/i }),
+    ).not.toBeInTheDocument();
+  });
 });

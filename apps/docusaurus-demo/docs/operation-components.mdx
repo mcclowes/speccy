@@ -93,7 +93,7 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 
 ## Operation preview
 
-`OperationPreview` puts a request example, and optionally a response example, beside the operation link. Readers can switch between the examples and copy either one.
+`OperationPreview` puts a request example, and optionally a response example, beside the operation link. Readers can switch between the examples and copy either one. Pass the OpenAPI document through `spec` to derive examples from the matching method and path. Explicit `requestExample` and `responseExample` values override anything derived from the document.
 
 <OperationPreview
   method="post"
@@ -104,18 +104,22 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 />
 
 ```tsx
+import spec from './openapi.json';
+
 <OperationPreview
   method="post"
   path="/orchards"
   href="/api/createorchard"
-  requestExample={'{\n  "name": "Nightingale Farm",\n  "region": "kent"\n}'}
-  responseExample={'{\n  "id": "orch_01J7",\n  "name": "Nightingale Farm"\n}'}
-/>
+  spec={spec}
+  requestExample={'{\n  "name": "My orchard"\n}'}
+/>;
 ```
+
+When deriving a request, the preview uses the first declared media type and includes example-based path parameters, query parameters, headers, and request body. It uses the first successful response, falling back to the first declared response. OpenAPI `example`, named `examples`, schema examples, defaults, enums, and generated schema values are considered in that order. If neither an explicit value nor a value derived from `spec` exists, that side of the preview is omitted.
 
 ## Props and navigation
 
-Every component requires `method`, `path`, and `href`. `OperationCard` also requires `summary`, while `OperationPreview` requires `requestExample`. Their other content is optional.
+Every component requires `method`, `path`, and `href`. `OperationCard` also requires `summary`. The other content is optional.
 
 The strip, card, and preview include bottom spacing so following prose and code blocks do not sit flush against them. Override that spacing through `className` when a parent layout controls the gap.
 
