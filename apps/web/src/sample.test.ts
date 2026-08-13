@@ -13,7 +13,7 @@ describe('sample spec', () => {
     ]);
   });
 
-  it('demonstrates prerequisite and response-link workflows', () => {
+  it('demonstrates prerequisite, response-link, and callback workflows', () => {
     const createBook = SAMPLE_SPEC.paths?.['/books']?.post;
 
     expect(createBook?.['x-speccy-prerequisites']).toEqual([
@@ -25,6 +25,16 @@ describe('sample spec', () => {
         parameters: { bookId: '$response.body#/id' },
       }),
     );
+    expect(
+      createBook?.callbacks?.catalogIndexing?.[
+        '{$request.body#/statusCallbackUrl}'
+      ]?.post,
+    ).toEqual(
+      expect.objectContaining({
+        summary: 'Report catalog indexing result',
+        security: [{ callbackSignature: [] }],
+      }),
+    );
   });
 
   it('demonstrates request availability and authorization', () => {
@@ -32,6 +42,13 @@ describe('sample spec', () => {
     expect(SAMPLE_SPEC.security).toEqual([{ apiKey: [] }]);
     expect(SAMPLE_SPEC.components?.securitySchemes?.apiKey).toEqual(
       expect.objectContaining({ type: 'apiKey', in: 'header' }),
+    );
+    expect(SAMPLE_SPEC.components?.securitySchemes?.callbackSignature).toEqual(
+      expect.objectContaining({
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-Luma-Signature',
+      }),
     );
   });
 });

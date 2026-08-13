@@ -147,6 +147,8 @@ Use a callback when the API initiates a later HTTP request to a caller-provided 
 
 The runtime expression is part of the contract. Make sure it points to a value the original request supplies, and document callback authentication and retry behavior in the callback operation's description.
 
+The built-in Luma Library API demonstrates this pattern on `createBook`: callers can supply a status callback URL, and Luma reports whether catalog indexing succeeded using a signed callback request.
+
 ## Use all three to describe the full path
 
 A payment workflow might read like this:

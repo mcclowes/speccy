@@ -120,6 +120,45 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
                   author: { type: 'string' },
                   isbn: { type: 'string' },
                   publishedAt: { type: 'string', format: 'date' },
+                  statusCallbackUrl: {
+                    type: 'string',
+                    format: 'uri',
+                    description:
+                      'Receives the result when catalog indexing finishes.',
+                  },
+                },
+              },
+            },
+          },
+        },
+        callbacks: {
+          catalogIndexing: {
+            '{$request.body#/statusCallbackUrl}': {
+              post: {
+                summary: 'Report catalog indexing result',
+                description:
+                  'Reports whether the new edition was added to the search index.',
+                security: [{ callbackSignature: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        required: ['bookId', 'status'],
+                        properties: {
+                          bookId: { type: 'string', format: 'uuid' },
+                          status: {
+                            type: 'string',
+                            enum: ['indexed', 'rejected'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                responses: {
+                  '204': { description: 'The indexing result was received.' },
                 },
               },
             },
@@ -248,6 +287,13 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
         in: 'header',
         name: 'X-API-Key',
         description: 'Your Luma API key.',
+      },
+      callbackSignature: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-Luma-Signature',
+        description:
+          'An HMAC signature used to verify that Luma sent the callback.',
       },
     },
     schemas: {
