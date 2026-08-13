@@ -23,6 +23,7 @@ import {
   type OpenAPIDocument,
   type SpeccyRoute,
 } from 'speccy-renderer';
+import { GitHubRepoCard, NpmPackageCard } from '../components/ProjectCards';
 import styles from './index.module.css';
 
 function scoped(className: string) {
@@ -460,6 +461,26 @@ export default function Home() {
               text="Open, paste, or fetch a spec and see the finished reference immediately."
               href={studioUrl ?? '/api'}
             />
+          </div>
+        </section>
+
+        <section className={scoped('home-section home-project-health')}>
+          <div className={scoped('home-project-health-heading')}>
+            <div>
+              <span className={scoped('home-kicker')}>
+                <i />
+                Project health
+              </span>
+              <h2>Built in public. Published on npm.</h2>
+            </div>
+            <p>
+              Follow the source, inspect each release, or install the renderer
+              directly into your React app.
+            </p>
+          </div>
+          <div className={scoped('home-project-card-grid')}>
+            <GitHubRepoCard repo="mcclowes/speccy" />
+            <NpmPackageCard packageName="speccy-renderer" />
           </div>
         </section>
 

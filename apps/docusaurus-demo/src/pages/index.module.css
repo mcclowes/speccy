@@ -321,11 +321,38 @@
 }
 .home-intro h2,
 .home-ways h2,
+.home-project-health h2,
 .home-cta h2 {
   margin: 22px 0 0;
   font-size: clamp(2.6rem, 5vw, 5rem);
   line-height: 1;
   letter-spacing: -0.06em;
+}
+.home-project-health {
+  padding-top: 20px;
+}
+.home-project-health-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: clamp(50px, 9vw, 140px);
+  align-items: end;
+  border-top: 1px solid var(--site-line);
+  padding-top: clamp(70px, 8vw, 110px);
+}
+.home-project-health-heading h2 {
+  max-width: 750px;
+}
+.home-project-health-heading > p {
+  margin: 0 0 7px;
+  color: var(--site-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+.home-project-card-grid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 .home-intro p {
   margin: 0;
@@ -699,6 +726,8 @@
   }
   .home-intro,
   .home-renderer-heading,
+  .home-project-health-heading,
+  .home-project-card-grid,
   .home-way-grid {
     grid-template-columns: 1fr;
   }
