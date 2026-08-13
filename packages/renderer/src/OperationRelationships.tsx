@@ -1,6 +1,6 @@
 /**
  * ---
- * purpose: Presents prerequisites, response links, and callbacks as compact operation workflow context.
+ * purpose: Presents prerequisites, response links, callbacks, and webhook relationships as compact workflow context.
  * related:
  *   - ./Speccy.tsx - Places workflow context on operation pages and owns navigation.
  *   - ../../core/src/types.ts - Defines the x-speccy-prerequisites extension shape.
@@ -51,11 +51,15 @@ function operationRefTarget(
     .replace(/^\//, '')
     .split('/')
     .map((segment) => segment.replace(/~1/g, '/').replace(/~0/g, '~'));
-  if (segments.length !== 3 || segments[0] !== 'paths') return undefined;
+  if (
+    segments.length !== 3 ||
+    (segments[0] !== 'paths' && segments[0] !== 'webhooks')
+  )
+    return undefined;
 
   return operations.find(
     (operation) =>
-      operation.source === 'path' &&
+      operation.source === (segments[0] === 'paths' ? 'path' : 'webhook') &&
       operation.path === segments[1] &&
       operation.method === segments[2]?.toLowerCase(),
   );
@@ -67,7 +71,9 @@ function referenceTarget(
 ): OperationModel | undefined {
   if (typeof reference === 'string') {
     return operations.find(
-      (operation) => operation.operation.operationId === reference,
+      (operation) =>
+        operation.operation.operationId === reference ||
+        (operation.source === 'webhook' && operation.path === reference),
     );
   }
   if (reference.operationId) {
@@ -182,11 +188,43 @@ export function OperationRelationships({
         );
       }),
   );
+  const emittedWebhooks = (item.operation['x-speccy-webhooks'] ?? []).map(
+    (reference, index): Relationship => ({
+      key: `emitted-webhook-${index}`,
+      label: referenceLabel(reference),
+      description:
+        typeof reference === 'string' ? undefined : reference.description,
+      target: referenceTarget(reference, operations),
+    }),
+  );
+  const webhookTriggers =
+    item.source === 'webhook'
+      ? operations
+          .filter((operation) => operation.source === 'path')
+          .flatMap((operation) =>
+            (operation.operation['x-speccy-webhooks'] ?? [])
+              .filter(
+                (reference) =>
+                  referenceTarget(reference, operations)?.id === item.id,
+              )
+              .map((reference, index): Relationship => ({
+                key: `webhook-trigger-${operation.id}-${index}`,
+                label: operationLabel(operation),
+                description:
+                  typeof reference === 'string'
+                    ? undefined
+                    : reference.description,
+                target: operation,
+              })),
+          )
+      : [];
 
   if (
     prerequisites.length === 0 &&
     successors.length === 0 &&
-    callbacks.length === 0
+    callbacks.length === 0 &&
+    emittedWebhooks.length === 0 &&
+    webhookTriggers.length === 0
   )
     return null;
 
@@ -229,6 +267,36 @@ export function OperationRelationships({
             <h3>Callbacks from this operation</h3>
             <div className={styles.cards}>
               {callbacks.map((relationship) => (
+                <RelationshipCard
+                  relationship={relationship}
+                  hrefForOperation={hrefForOperation}
+                  onNavigate={onNavigate}
+                  key={relationship.key}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {emittedWebhooks.length > 0 && (
+          <div className={styles.group}>
+            <h3>Events emitted</h3>
+            <div className={styles.cards}>
+              {emittedWebhooks.map((relationship) => (
+                <RelationshipCard
+                  relationship={relationship}
+                  hrefForOperation={hrefForOperation}
+                  onNavigate={onNavigate}
+                  key={relationship.key}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {webhookTriggers.length > 0 && (
+          <div className={styles.group}>
+            <h3>Triggered by operations</h3>
+            <div className={styles.cards}>
+              {webhookTriggers.map((relationship) => (
                 <RelationshipCard
                   relationship={relationship}
                   hrefForOperation={hrefForOperation}

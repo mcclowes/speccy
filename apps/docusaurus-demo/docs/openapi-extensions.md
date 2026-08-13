@@ -73,6 +73,26 @@ paths:
 
 Speccy shows prerequisites, response links, and callbacks together in a compact workflow band on the operation page. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
 
+To connect a top-level webhook to the operations that may emit it, add `x-speccy-webhooks` to each triggering operation. Entries accept the same string, `operationId`, or `operationRef` forms as prerequisites:
+
+```yaml
+paths:
+  /books:
+    post:
+      operationId: createBook
+      x-speccy-webhooks:
+        - operationId: bookIndexed
+          description: Emitted after catalog indexing finishes.
+
+webhooks:
+  book.indexed:
+    post:
+      operationId: bookIndexed
+      summary: Book indexed
+```
+
+Speccy lists `Book indexed` under **Events emitted** on `createBook`. The webhook's own workflow lists `Create book` under **Triggered by operations**. The reverse relationship is derived from `x-speccy-webhooks`, so it cannot drift independently.
+
 ## Tag groups
 
 Use Redocly’s `x-tagGroups` extension to place related tags beneath a shared sidebar heading:

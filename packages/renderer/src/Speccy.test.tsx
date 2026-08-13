@@ -186,6 +186,12 @@ describe('Speccy navigation', () => {
                 },
               },
             },
+            'x-speccy-webhooks': [
+              {
+                operationRef: '#/webhooks/book.indexed/post',
+                description: 'Emitted after catalog indexing finishes.',
+              },
+            ],
             responses: {
               '201': {
                 description: 'Created',
@@ -207,9 +213,18 @@ describe('Speccy navigation', () => {
           },
         },
       },
+      webhooks: {
+        'book.indexed': {
+          post: {
+            operationId: 'bookIndexed',
+            summary: 'Book indexed',
+            responses: { '204': { description: 'Received' } },
+          },
+        },
+      },
     };
 
-    render(
+    const { rerender } = render(
       <Speccy
         spec={workflowSpec}
         route={{ page: 'operation', operationId: 'createpayment' }}
@@ -247,6 +262,19 @@ describe('Speccy navigation', () => {
     expect(
       within(callbackGroup).getByText('Reports the final payment status.'),
     ).toBeVisible();
+    const events = within(workflow)
+      .getByRole('heading', { name: 'Events emitted' })
+      .closest<HTMLElement>('div')!;
+    const emittedWebhook = within(events).getByRole('link', {
+      name: /Book indexed/,
+    });
+    expect(emittedWebhook).toHaveAttribute(
+      'href',
+      '/operations/webhook-bookindexed',
+    );
+    expect(
+      within(events).getByText('Emitted after catalog indexing finishes.'),
+    ).toBeVisible();
     expect(within(workflow).queryByText('/customers')).not.toBeInTheDocument();
     expect(
       within(workflow).queryByText('/payments/{paymentId}'),
@@ -266,6 +294,29 @@ describe('Speccy navigation', () => {
       name: /Get a payment/,
     });
     expect(successor).toHaveAttribute('href', '/operations/getpayment');
+
+    rerender(
+      <Speccy
+        spec={workflowSpec}
+        route={{ page: 'operation', operationId: 'webhook-bookindexed' }}
+        hrefForRoute={(route) =>
+          route.page === 'operation' ? `/operations/${route.operationId}` : '/'
+        }
+        onNavigate={onNavigate}
+      />,
+    );
+
+    const webhookWorkflow = screen
+      .getByRole('heading', { name: 'Workflow' })
+      .closest<HTMLElement>('section')!;
+    expect(
+      within(webhookWorkflow).getByRole('heading', {
+        name: 'Triggered by operations',
+      }),
+    ).toBeVisible();
+    expect(
+      within(webhookWorkflow).getByRole('link', { name: /Create a payment/ }),
+    ).toHaveAttribute('href', '/operations/createpayment');
   });
 
   it('labels deprecated operations in the sidebar and operation header', () => {

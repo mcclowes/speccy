@@ -147,7 +147,27 @@ Use a callback when the API initiates a later HTTP request to a caller-provided 
 
 The runtime expression is part of the contract. Make sure it points to a value the original request supplies, and document callback authentication and retry behavior in the callback operation's description.
 
-The built-in Luma Library API demonstrates this pattern on `createBook`: callers can supply a status callback URL, and Luma reports whether catalog indexing succeeded using a signed callback request.
+The built-in Luma Library API demonstrates this pattern on `createBook`: callers can supply a status callback URL, and Luma reports whether catalog indexing succeeded using a signed callback request. It also defines a top-level `book.indexed` webhook for subscribers that register once and receive catalog events across many requests.
+
+Use `x-speccy-webhooks` when an operation emits a top-level webhook and readers need to move between them:
+
+```yaml
+paths:
+  /books:
+    post:
+      operationId: createBook
+      x-speccy-webhooks:
+        - operationId: bookIndexed
+          description: Emitted after catalog indexing finishes.
+
+webhooks:
+  book.indexed:
+    post:
+      operationId: bookIndexed
+      summary: Book indexed
+```
+
+Speccy shows the webhook under **Events emitted** on the triggering operation. On the webhook page, it derives the reverse **Triggered by operations** relationship from the same extension.
 
 ## Use all three to describe the full path
 
