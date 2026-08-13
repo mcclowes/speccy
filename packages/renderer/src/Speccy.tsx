@@ -336,12 +336,9 @@ function EndpointPage({
         onNavigate={onNavigateOperation}
       />
       {!isWebhook && (
-        <>
-          <div className="sp-request-heading">
-            <h2>Request</h2>
-          </div>
-          <EndpointServers item={item} document={document} />
-        </>
+        <div className="sp-request-heading">
+          <h2>Request</h2>
+        </div>
       )}
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
@@ -353,6 +350,7 @@ function EndpointPage({
               security={requirements}
               securitySchemes={document.components?.securitySchemes}
               parameterPrototype={parameterPrototype}
+              availability={<EndpointServers item={item} document={document} />}
             />
           )}
           {isWebhook && item.operation.requestBody && (

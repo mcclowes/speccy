@@ -101,6 +101,7 @@ describe('Speccy navigation', () => {
     );
 
     let servers = screen.getByLabelText('Endpoint availability');
+    expect(servers.closest('.sp-endpoint-request-details')).not.toBeNull();
     expect(servers).toHaveTextContent('Sandbox');
     expect(servers).toHaveTextContent('Production');
     const sandbox = screen.getByLabelText(

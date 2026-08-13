@@ -778,6 +778,7 @@ export function EndpointRequestDetails({
   security,
   securitySchemes,
   parameterPrototype,
+  availability,
 }: {
   path: string;
   parameters: Parameter[];
@@ -785,6 +786,7 @@ export function EndpointRequestDetails({
   security?: SecurityRequirement[];
   securitySchemes?: Record<string, SecurityScheme>;
   parameterPrototype?: boolean;
+  availability?: ReactNode;
 }) {
   const pathParameters = parameters.filter(
     (parameter) => parameter.in === 'path',
@@ -842,11 +844,14 @@ export function EndpointRequestDetails({
   return (
     <div className="sp-endpoint-request-grid">
       <div className="sp-endpoint-request-details">
-        <div className="sp-endpoint-section sp-request-intro">
-          <SecurityRequirements
-            requirements={security}
-            schemes={securitySchemes}
-          />
+        <div className="sp-request-intro">
+          <div className="sp-request-context">
+            {availability}
+            <SecurityRequirements
+              requirements={security}
+              schemes={securitySchemes}
+            />
+          </div>
           {parameters.length === 0 && !body && (
             <div className="sp-request-empty">
               <strong>No request parameters</strong>
