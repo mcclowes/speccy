@@ -664,11 +664,11 @@ export function SpecDiff({
         {groups.size === 0 && (
           <p className={scoped('sp-diff-empty')}>No matching changes.</p>
         )}
-        {[...groups].map(([group, operations]) => (
+        {Array.from(groups.entries()).map(([group, operations]) => (
           <section className={scoped('sp-diff-group')} key={group}>
             <GroupHeading>{group}</GroupHeading>
             <div className={scoped('sp-diff-operation-list')}>
-              {[...operations].map(([operation, changes]) => (
+              {Array.from(operations.entries()).map(([operation, changes]) => (
                 <OperationChanges
                   key={operation}
                   changes={changes}
