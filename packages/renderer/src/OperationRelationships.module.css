@@ -75,13 +75,6 @@ a.card:hover {
   gap: 6px;
 }
 
-.address :global(.sp-api-path) {
-  overflow: hidden;
-  font-size: 0.6875rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .context,
 .description {
   color: var(--sp-muted);

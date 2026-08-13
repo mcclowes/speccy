@@ -220,6 +220,10 @@ describe('Speccy navigation', () => {
       screen.getAllByText('Read the newly created payment.')[0],
     ).toBeVisible();
     expect(within(workflow).getByText('After a 201 response')).toBeVisible();
+    expect(within(workflow).queryByText('/customers')).not.toBeInTheDocument();
+    expect(
+      within(workflow).queryByText('/payments/{paymentId}'),
+    ).not.toBeInTheDocument();
 
     const prerequisite = within(workflow).getByRole('link', {
       name: /Create a customer/,

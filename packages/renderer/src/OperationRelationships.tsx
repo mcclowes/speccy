@@ -13,7 +13,7 @@ import type {
   OperationModel,
   OperationReference,
 } from 'speccy-core';
-import { ApiPath, MethodBadge } from './DesignSystem';
+import { MethodBadge } from './DesignSystem';
 import styles from './OperationRelationships.module.css';
 
 interface Relationship {
@@ -102,7 +102,6 @@ function RelationshipCard({
       {relationship.target && (
         <span className={styles.address}>
           <MethodBadge method={relationship.target.method} compact />
-          <ApiPath value={relationship.target.path} />
         </span>
       )}
       {relationship.context && (
