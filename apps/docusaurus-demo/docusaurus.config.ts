@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const isVercel = process.env.VERCEL === '1';
 const vercelHost =
   process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
-const studioUrl = vercelHost ? `https://${vercelHost}` : undefined;
+const studioUrl = 'https://app.speccy.report';
 const siteDir = fileURLToPath(new URL('.', import.meta.url));
 const glossaryRoute = isVercel ? '/glossary' : '/speccy/glossary';
 const privacyRoute = isVercel ? '/docs/privacy' : '/speccy/docs/privacy';

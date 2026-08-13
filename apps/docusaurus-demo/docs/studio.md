@@ -7,6 +7,8 @@ description: Open local, remote, and curated public OpenAPI documents in the web
 
 Speccy Studio is a browser-based workspace for reading and reviewing OpenAPI documents. Open a YAML or JSON file, load a document by URL, or return to a recent reference stored on your device.
 
+[Open Speccy Studio](https://app.speccy.report)
+
 ## Explore public APIs
 
 The home screen includes a small catalog of complex public APIs, including Stripe, GitHub, DigitalOcean, and Cloudflare. Select one to fetch its public OpenAPI document and open it in the same reference viewer used for your own specifications.
