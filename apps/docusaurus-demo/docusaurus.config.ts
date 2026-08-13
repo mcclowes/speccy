@@ -154,7 +154,6 @@ const config: Config = {
       },
       items: [
         { to: '/docs/getting-started', label: 'Docs', position: 'right' },
-        { to: '/glossary', label: 'Glossary', position: 'right' },
         { to: '/updates', label: 'Updates', position: 'right' },
         { to: '/api', label: 'Live example', position: 'right' },
         ...(studioUrl
