@@ -20,25 +20,25 @@ export default function Home() {
 
   return (
     <Layout
-      title="OpenAPI reference docs with room to breathe"
-      description="Speccy turns an OpenAPI document into clean, searchable reference documentation for React and Docusaurus."
+      title="Build, review, and publish OpenAPI"
+      description="Speccy gives your OpenAPI contract one place to explore, review, test, and publish."
     >
       <main>
         <section className={scoped('home-hero')}>
           <div className={scoped('home-hero-copy')}>
             <span className={scoped('home-kicker')}>
               <i />
-              OpenAPI, clearly presented
+              One contract, every surface
             </span>
             <h1>
-              API docs with
+              Build, review,
               <br />
-              <em>room to breathe.</em>
+              and <em>publish.</em>
             </h1>
             <p>
-              Speccy turns an OpenAPI document into a calm, searchable
-              reference. Drop it into React, publish it with Docusaurus, or use
-              the standalone studio.
+              Speccy turns an OpenAPI document into a reference people can use,
+              a workspace for exploring it, and checks that catch problems
+              before they ship.
             </p>
             <div className={scoped('home-actions')}>
               <Link
@@ -68,7 +68,7 @@ export default function Home() {
               <code>{installCommand}</code>
             </div>
           </div>
-          <ReferencePreview />
+          <ProductPreview />
         </section>
 
         <section className={scoped('home-section home-intro')}>
@@ -134,9 +134,9 @@ export default function Home() {
         <section className={scoped('home-cta')}>
           <span className={scoped('home-kicker')}>
             <i />
-            Your API, less noisy
+            One source of truth
           </span>
-          <h2>Give the contract some air.</h2>
+          <h2>Take your API from spec to shipped.</h2>
           <div className={scoped('home-actions')}>
             <Link
               className={scoped('home-button home-button-primary')}
@@ -199,57 +199,93 @@ function Way({
   );
 }
 
-function ReferencePreview() {
+function ProductPreview() {
   return (
     <div
       className={scoped('preview-shell')}
-      aria-label="Speccy API reference preview"
+      aria-label="An OpenAPI contract connected to Speccy’s reference, Studio, and CI tools"
     >
-      <aside className={scoped('preview-sidebar')}>
+      <div className={scoped('preview-toolbar')}>
         <div className={scoped('preview-brand')}>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" />
-              <circle cx="6.5" cy="13" r="3.5" />
-              <circle cx="17.5" cy="13" r="3.5" />
-            </svg>
-          </span>
-          Speccy Books
+          <span>S</span>
+          Speccy
         </div>
-        <small>Resources</small>
-        <div className={scoped('preview-tag is-active')}>
-          <span>▱</span>Books <i>⌄</i>
-        </div>
-        <div className={scoped('preview-link is-active')}>
-          List books <b>GET</b>
-        </div>
-        <div className={scoped('preview-link')}>
-          Add a book <b>POST</b>
-        </div>
-        <div className={scoped('preview-tag')}>
-          <span>≡</span>Reading lists <i>›</i>
-        </div>
-      </aside>
-      <div className={scoped('preview-content')}>
-        <span className={scoped('preview-eyebrow')}>Books</span>
-        <h2>List books</h2>
-        <div className={scoped('preview-path')}>
-          <b>GET</b>
-          <code>/books</code>
-        </div>
-        <p>Returns the books currently available in the catalog.</p>
-        <h3>Parameters</h3>
-        <div className={scoped('preview-parameter')}>
-          <code>limit</code>
-          <span>integer</span>
-          <small>Maximum books to return</small>
-        </div>
-        <div className={scoped('preview-response')}>
-          <span>Responses</span>
-          <b>200</b>
+        <div className={scoped('preview-window-controls')}>
+          <i />
+          <i />
           <i />
         </div>
       </div>
+      <div className={scoped('preview-workspace')}>
+        <div className={scoped('preview-source')}>
+          <span className={scoped('preview-label')}>Source</span>
+          <div className={scoped('preview-source-heading')}>
+            <i>YML</i>
+            <div>
+              <strong>openapi.yaml</strong>
+              <small>OpenAPI 3.1</small>
+            </div>
+            <b>✓</b>
+          </div>
+          <code>
+            <span>openapi:</span> 3.1.0
+            <br />
+            <span>info:</span>
+            <br />
+            &nbsp;&nbsp;title: Orchard API
+            <br />
+            <span>paths:</span>
+            <br />
+            &nbsp;&nbsp;/orchards:
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;get: …
+          </code>
+        </div>
+        <div className={scoped('preview-connector')} aria-hidden="true">
+          <span />
+          <i />
+          <span />
+        </div>
+        <div className={scoped('preview-surfaces')}>
+          <PreviewSurface
+            name="Reference"
+            detail="Searchable docs and live requests"
+            accent="GET /orchards"
+          />
+          <PreviewSurface
+            name="Studio"
+            detail="Explore and review any spec"
+            accent="12 health checks"
+          />
+          <PreviewSurface
+            name="CI review"
+            detail="Catch breaking changes in pull requests"
+            accent="Ready to merge"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewSurface({
+  name,
+  detail,
+  accent,
+}: {
+  name: string;
+  detail: string;
+  accent: string;
+}) {
+  return (
+    <div className={scoped('preview-surface')}>
+      <i>✓</i>
+      <div>
+        <strong>{name}</strong>
+        <p>{detail}</p>
+        <span>{accent}</span>
+      </div>
+      <b>→</b>
     </div>
   );
 }
