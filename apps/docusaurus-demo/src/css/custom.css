@@ -41,22 +41,6 @@ body {
 .navbar__brand {
   letter-spacing: -0.03em;
 }
-.navbar__logo {
-  display: none;
-}
-.navbar__title::before {
-  content: 'S';
-  width: 28px;
-  height: 28px;
-  margin-right: 10px;
-  display: inline-grid;
-  color: white;
-  border-radius: 8px;
-  background: var(--ifm-color-primary);
-  font-size: 0.8125rem;
-  place-items: center;
-  vertical-align: middle;
-}
 .navbar__item {
   font-size: 0.8125rem;
   font-weight: 600;

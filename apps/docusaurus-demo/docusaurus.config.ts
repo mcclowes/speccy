@@ -148,6 +148,10 @@ const config: Config = {
   themeConfig: {
     navbar: {
       title: 'Speccy',
+      logo: {
+        alt: 'Speccy logo',
+        src: 'favicon.svg',
+      },
       items: [
         { to: '/docs/getting-started', label: 'Docs', position: 'right' },
         { to: '/glossary', label: 'Glossary', position: 'right' },
