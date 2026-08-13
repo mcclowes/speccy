@@ -117,4 +117,6 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 
 Every component requires `method`, `path`, and `href`. `OperationCard` also requires `summary`, while `OperationPreview` requires `requestExample`. Their other content is optional.
 
+The strip, card, and preview include bottom spacing so following prose and code blocks do not sit flush against them. Override that spacing through `className` when a parent layout controls the gap.
+
 The components render ordinary links. Point `href` at the operation URL generated from its slugified `operationId`, and use `onClick` when your host needs to intercept navigation. `className` lets you add layout styles without replacing the Speccy treatment.
