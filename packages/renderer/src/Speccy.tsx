@@ -426,6 +426,7 @@ function EndpointServers({
   const rootServers = (document.servers ?? []).filter(
     (server): server is ServerObject & { url: string } => Boolean(server.url),
   );
+  if (scopedServers === undefined && rootServers.length <= 1) return null;
   const rootUrls = new Set(
     rootServers.map((server) => expandServerUrl(server.url, server.variables)),
   );

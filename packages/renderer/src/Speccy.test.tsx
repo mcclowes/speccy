@@ -30,6 +30,33 @@ const spec = {
 };
 
 describe('Speccy navigation', () => {
+  it('hides inherited availability when the API has only one server', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Single server API' },
+          servers: [
+            { description: 'Production', url: 'https://api.example.com' },
+          ],
+          paths: {
+            '/companies': {
+              get: {
+                operationId: 'list-companies',
+                summary: 'List companies',
+              },
+            },
+          },
+        }}
+        route={{ page: 'operation', operationId: 'list-companies' }}
+      />,
+    );
+
+    expect(
+      screen.queryByLabelText('Endpoint availability'),
+    ).not.toBeInTheDocument();
+  });
+
   it('shows effective servers using operation, path, then document precedence', () => {
     const serverSpec = {
       openapi: '3.1.0',
