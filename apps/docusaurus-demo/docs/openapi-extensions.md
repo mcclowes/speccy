@@ -7,6 +7,21 @@ description: Organize and enrich a Speccy reference with vendor extensions.
 
 Speccy works with standard OpenAPI fields first. A small set of `x-` extensions handles presentation details that OpenAPI doesn’t model.
 
+## Operation lifecycle
+
+Use `x-speccy-lifecycle` to show an operation's release stage in its heading and in navigation. `new`, `coming-soon`, and `beta` have distinct styles; other non-empty values use a neutral badge.
+
+```yaml
+paths:
+  /exports:
+    post:
+      summary: Create an export
+      x-speccy-lifecycle: new
+      x-speccy-lifecycle-since: 2026-08-13
+```
+
+The optional `x-speccy-lifecycle-since` date lets change-aware linting suggest removing `new` after the age configured in `.speccyrc`. See [Review APIs in CI](./ci-review.md#mark-new-operations).
+
 ## Operation workflows
 
 OpenAPI’s standard [Link Object](https://spec.openapis.org/oas/v3.1.2.html#link-object) describes an operation that a client may call after receiving a particular response. Speccy presents response links as possible next operations:

@@ -40,6 +40,8 @@ export function ApiReference({ spec }) {
 
 `basePath` should match the route where the reference is mounted. Speccy uses it to create stable links for endpoints, tags, and reusable components.
 
+Use the [GitHub Action](./ci-review.md) to review OpenAPI changes and enforce repository rules in pull requests.
+
 ## Docusaurus
 
 Install the plugin:
