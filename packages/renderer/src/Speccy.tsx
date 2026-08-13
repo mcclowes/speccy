@@ -119,6 +119,32 @@ function OperationBadge({
   );
 }
 
+function operationLifecycle(item: OperationModel): string | undefined {
+  const lifecycle = item.operation['x-speccy-lifecycle'];
+  return typeof lifecycle === 'string' && lifecycle.trim()
+    ? lifecycle.trim()
+    : undefined;
+}
+
+function LifecycleBadge({ item }: { item: OperationModel }) {
+  const lifecycle = operationLifecycle(item);
+  if (!lifecycle) return null;
+
+  const normalized = lifecycle.toLocaleLowerCase().replace(/[\s_]+/g, '-');
+  const label = normalized
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word[0]?.toLocaleUpperCase() + word.slice(1))
+    .join(' ');
+  const variant = ['new', 'coming-soon', 'beta'].includes(normalized)
+    ? normalized
+    : 'custom';
+
+  return (
+    <span className={`sp-lifecycle sp-lifecycle-${variant}`}>{label}</span>
+  );
+}
+
 function ParameterList({
   parameters,
 }: {
@@ -262,6 +288,7 @@ function EndpointPage({
             className={`sp-endpoint-title${item.operation.deprecated ? ' is-deprecated' : ''}`}
           >
             <h1>{operationTitle(item)}</h1>
+            <LifecycleBadge item={item} />
           </div>
           <div className="sp-endpoint-address">
             {item.operation.deprecated && (
@@ -399,9 +426,12 @@ function OperationCard({
         <OperationBadge item={item} />
         <ApiPath value={item.path} />
         <span className="sp-operation-name">{operationTitle(item)}</span>
-        {item.operation.deprecated && (
-          <span className="sp-deprecated">deprecated</span>
-        )}
+        <span className="sp-operation-metadata">
+          <LifecycleBadge item={item} />
+          {item.operation.deprecated && (
+            <span className="sp-deprecated">deprecated</span>
+          )}
+        </span>
         <DisclosureChevron />
       </button>
       {open && (
@@ -581,6 +611,7 @@ function NavigationGroup({
         {item.operation.summary ?? item.path}
       </span>
       <span className="sp-nav-operation-meta">
+        <LifecycleBadge item={item} />
         {item.operation.deprecated && (
           <span className="sp-deprecated">deprecated</span>
         )}

@@ -905,6 +905,56 @@ related:
   font-weight: 700;
   letter-spacing: 0.05em;
 }
+.sp-lifecycle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  color: var(--sp-lifecycle-text, var(--sp-muted));
+  background: var(--sp-lifecycle-surface, var(--sp-surface-soft));
+  border: 1px solid
+    var(--sp-lifecycle-line, color-mix(in srgb, currentColor 22%, transparent));
+  border-radius: 999px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sp-lifecycle-new {
+  --sp-lifecycle-text: var(--sp-success-text);
+  --sp-lifecycle-surface: color-mix(
+    in srgb,
+    var(--sp-success) 11%,
+    var(--sp-surface)
+  );
+  --sp-lifecycle-line: color-mix(in srgb, var(--sp-success) 28%, transparent);
+}
+.sp-lifecycle-coming-soon {
+  --sp-lifecycle-text: var(--sp-accent);
+  --sp-lifecycle-surface: color-mix(
+    in srgb,
+    var(--sp-accent) 9%,
+    var(--sp-surface)
+  );
+  --sp-lifecycle-line: color-mix(in srgb, var(--sp-accent) 25%, transparent);
+}
+.sp-lifecycle-beta {
+  --sp-lifecycle-text: var(--sp-warning);
+  --sp-lifecycle-surface: color-mix(
+    in srgb,
+    var(--sp-warning) 10%,
+    var(--sp-surface)
+  );
+  --sp-lifecycle-line: color-mix(in srgb, var(--sp-warning) 28%, transparent);
+}
+.sp-nav-operation .sp-lifecycle {
+  min-height: 17px;
+  padding: 2px 5px;
+  font-size: 0.5rem;
+}
 .sp-endpoint-header > .sp-markdown {
   max-width: 760px;
   margin-top: 20px;
@@ -1704,6 +1754,11 @@ related:
   color: var(--sp-muted);
   font-size: 0.75rem;
 }
+.sp-operation-metadata {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .sp-operation-summary > .sp-disclosure-chevron {
   justify-self: end;
 }
@@ -2499,7 +2554,7 @@ related:
     grid-column: 3;
     grid-row: 1 / 3;
   }
-  .sp-operation-summary > .sp-deprecated {
+  .sp-operation-metadata {
     display: none;
   }
   .sp-operation-main {

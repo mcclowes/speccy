@@ -76,6 +76,16 @@ paths:
       summary: Read the audit log
 ```
 
+Add `x-speccy-lifecycle` to an operation to show its release stage in the endpoint header and navigation. `new`, `coming-soon`, and `beta` have distinct styles. Other non-empty values are humanized and shown with a neutral style, so you can use your own lifecycle vocabulary.
+
+```yaml
+paths:
+  /companies/export:
+    post:
+      summary: Export companies
+      x-speccy-lifecycle: coming-soon
+```
+
 ## Show API health guidance
 
 Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design including webhook envelopes, and change safety.

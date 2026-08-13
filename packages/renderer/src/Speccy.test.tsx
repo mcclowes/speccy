@@ -154,6 +154,50 @@ describe('Speccy navigation', () => {
     expect(address).toHaveTextContent('deprecatedGET/companies');
   });
 
+  it('presents known and custom operation lifecycle metadata', () => {
+    const lifecycleSpec = {
+      ...spec,
+      paths: {
+        '/companies': {
+          get: {
+            tags: ['Companies'],
+            summary: 'List companies',
+            'x-speccy-lifecycle': 'coming-soon',
+          },
+        },
+        '/companies/export': {
+          post: {
+            tags: ['Companies'],
+            summary: 'Export companies',
+            'x-speccy-lifecycle': 'early_access',
+          },
+        },
+      },
+    };
+
+    render(
+      <Speccy
+        spec={lifecycleSpec}
+        route={{ page: 'operation', operationId: 'get-companies' }}
+      />,
+    );
+
+    const navigation = within(
+      screen.getByRole('navigation', { name: 'API reference' }),
+    );
+    expect(navigation.getByText('Coming Soon')).toHaveClass(
+      'sp-lifecycle-coming-soon',
+    );
+    expect(navigation.getByText('Early Access')).toHaveClass(
+      'sp-lifecycle-custom',
+    );
+
+    const heading = screen.getByRole('heading', { name: 'List companies' });
+    expect(
+      heading.closest('.sp-endpoint-title')?.querySelector('.sp-lifecycle'),
+    ).toHaveTextContent('Coming Soon');
+  });
+
   it('shows the API version by default and allows it to be hidden', () => {
     const versionedSpec = {
       ...spec,

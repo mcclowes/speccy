@@ -96,6 +96,7 @@ export interface Operation extends SpecificationExtensions {
   tags?: string[];
   'x-tagSubgroup'?: string;
   'x-speccy-prerequisites'?: OperationReference[];
+  'x-speccy-lifecycle'?: OperationLifecycle | (string & {});
   summary?: string;
   description?: string;
   operationId?: string;
@@ -110,6 +111,8 @@ export interface Operation extends SpecificationExtensions {
   consumes?: string[];
   produces?: string[];
 }
+
+export type OperationLifecycle = 'new' | 'coming-soon' | 'beta';
 
 export type OperationReference =
   | string
