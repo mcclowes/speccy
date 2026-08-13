@@ -37,6 +37,8 @@ export default {
 
 The document is loaded during the Docusaurus build. A missing file or a document that doesn't parse fails the build, so a broken reference never ships.
 
+During `docusaurus start`, the plugin also runs Spectral and includes its findings in developer hints. Production builds leave those development-only findings out.
+
 Use `specUrl` in place of `spec` to fetch a remote document at build time:
 
 ```ts
