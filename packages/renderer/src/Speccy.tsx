@@ -299,7 +299,6 @@ function EndpointPage({
             <ApiPath value={item.path} wrap />
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
-          <EndpointServers servers={servers} />
           <Markdown>{item.operation.description}</Markdown>
           {item.operation.externalDocs?.url && (
             <a href={item.operation.externalDocs.url}>
@@ -337,9 +336,12 @@ function EndpointPage({
         onNavigate={onNavigateOperation}
       />
       {!isWebhook && (
-        <div className="sp-request-heading">
-          <h2>Request</h2>
-        </div>
+        <>
+          <div className="sp-request-heading">
+            <h2>Request</h2>
+          </div>
+          <EndpointServers item={item} document={document} />
+        </>
       )}
       <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
         <div className="sp-endpoint-main">
@@ -407,21 +409,65 @@ function effectiveServers(
   );
 }
 
-function EndpointServers({ servers }: { servers: ServerObject[] }) {
-  const visibleServers = servers.filter((server) => server.url);
-  if (!visibleServers.length) return null;
+function EndpointServers({
+  item,
+  document,
+}: {
+  item: OperationModel;
+  document: OpenAPIDocument;
+}) {
+  const scopedServers = item.operation.servers ?? item.pathItem.servers;
+  const effective = effectiveServers(item, document).filter(
+    (server): server is ServerObject & { url: string } => Boolean(server.url),
+  );
+  const effectiveUrls = new Set(
+    effective.map((server) => expandServerUrl(server.url, server.variables)),
+  );
+  const rootServers = (document.servers ?? []).filter(
+    (server): server is ServerObject & { url: string } => Boolean(server.url),
+  );
+  const rootUrls = new Set(
+    rootServers.map((server) => expandServerUrl(server.url, server.variables)),
+  );
+  const displayedServers = [
+    ...rootServers.map((server) => ({
+      server,
+      available:
+        scopedServers === undefined ||
+        effectiveUrls.has(expandServerUrl(server.url, server.variables)),
+    })),
+    ...effective
+      .filter(
+        (server) =>
+          !rootUrls.has(expandServerUrl(server.url, server.variables)),
+      )
+      .map((server) => ({ server, available: true })),
+  ];
+  if (!displayedServers.length) return null;
 
   return (
-    <div className="sp-endpoint-servers" aria-label="Available servers">
-      {visibleServers.map((server, index) => {
-        const url = expandServerUrl(server.url!, server.variables);
-        return (
-          <span className="sp-endpoint-server" key={`${server.url}-${index}`}>
-            {server.description && <span>{server.description}</span>}
-            <code title={url}>{url}</code>
-          </span>
-        );
-      })}
+    <div className="sp-endpoint-servers" aria-label="Endpoint availability">
+      <span className="sp-endpoint-servers-label">Available on</span>
+      <div className="sp-endpoint-server-list">
+        {displayedServers.map(({ server, available }, index) => {
+          const url = expandServerUrl(server.url, server.variables);
+          const name = server.description ?? url;
+          const availabilityLabel = available
+            ? `${name}: available`
+            : `${name}: unavailable for this endpoint`;
+          return (
+            <span
+              className={`sp-endpoint-server${available ? '' : ' is-unavailable'}`}
+              key={`${server.url}-${index}`}
+              aria-label={availabilityLabel}
+              title={available ? url : 'Unavailable for this endpoint'}
+            >
+              {server.description && <span>{server.description}</span>}
+              <code>{url}</code>
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

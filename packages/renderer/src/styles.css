@@ -984,12 +984,24 @@ related:
   flex: none;
 }
 .sp-endpoint-servers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 10px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: -8px 0 22px;
   color: var(--sp-muted);
   font-size: 0.625rem;
+}
+.sp-endpoint-servers-label {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sp-endpoint-server-list {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px 14px;
 }
 .sp-endpoint-server {
   display: inline-flex;
@@ -1010,6 +1022,10 @@ related:
   font-size: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.sp-endpoint-server.is-unavailable {
+  opacity: 0.48;
+  text-decoration: line-through;
 }
 .sp-path-parameter {
   color: var(--sp-accent);

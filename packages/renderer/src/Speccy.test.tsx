@@ -73,9 +73,12 @@ describe('Speccy navigation', () => {
       />,
     );
 
-    let servers = screen.getByLabelText('Available servers');
+    let servers = screen.getByLabelText('Endpoint availability');
     expect(servers).toHaveTextContent('Sandboxhttps://sandbox.example.com');
     expect(servers).toHaveTextContent('Productionhttps://api.example.com');
+    expect(screen.getByLabelText('Sandbox: available')).not.toHaveClass(
+      'is-unavailable',
+    );
 
     rerender(
       <Speccy
@@ -83,9 +86,18 @@ describe('Speccy navigation', () => {
         route={{ page: 'operation', operationId: 'path-override' }}
       />,
     );
-    servers = screen.getByLabelText('Available servers');
+    servers = screen.getByLabelText('Endpoint availability');
     expect(servers).toHaveTextContent('Path serverhttps://path.example.com');
-    expect(servers).not.toHaveTextContent('sandbox.example.com');
+    expect(servers).toHaveTextContent('sandbox.example.com');
+    expect(
+      screen.getByLabelText('Sandbox: unavailable for this endpoint'),
+    ).toHaveClass('is-unavailable');
+    expect(
+      screen.getByLabelText('Production: unavailable for this endpoint'),
+    ).toHaveClass('is-unavailable');
+    expect(screen.getByLabelText('Path server: available')).not.toHaveClass(
+      'is-unavailable',
+    );
 
     rerender(
       <Speccy
@@ -93,9 +105,12 @@ describe('Speccy navigation', () => {
         route={{ page: 'operation', operationId: 'operation-override' }}
       />,
     );
-    servers = screen.getByLabelText('Available servers');
+    servers = screen.getByLabelText('Endpoint availability');
     expect(servers).toHaveTextContent('Operation serverhttps://eu.example.com');
     expect(servers).not.toHaveTextContent('path.example.com');
+    expect(
+      screen.getByLabelText('Operation server: available'),
+    ).not.toHaveClass('is-unavailable');
   });
 
   it('links prerequisites and response successors from the operation workflow', () => {
