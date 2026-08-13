@@ -1,5 +1,20 @@
 # speccy-renderer
 
+## 0.9.0
+
+### Minor Changes
+
+- [`875ff11`](https://github.com/mcclowes/speccy/commit/875ff116f1e3f2757b37b3afd16e0d6a2d2ca22e) Thanks [@mcclowes](https://github.com/mcclowes)! - Let operation previews derive layered path, query, header, body, and response examples from an OpenAPI document, with structured request overrides.
+
+### Patch Changes
+
+- [`7f8d7d7`](https://github.com/mcclowes/speccy/commit/7f8d7d7f046d913cc6ad7b899223adeec2b71d0a) Thanks [@mcclowes](https://github.com/mcclowes)! - Group API overview metadata into a compact, labeled panel.
+
+- [`a532322`](https://github.com/mcclowes/speccy/commit/a5323224a460d744109154416604dcf4ad725437) Thanks [@mcclowes](https://github.com/mcclowes)! - Show explicit progress while API health checks index a document.
+
+- Updated dependencies [[`498f690`](https://github.com/mcclowes/speccy/commit/498f690824da9e6ed50e231db52bdbb2d747c2a7)]:
+  - speccy-core@0.9.0
+
 ## 0.8.0
 
 ### Minor Changes

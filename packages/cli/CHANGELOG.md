@@ -1,5 +1,12 @@
 # speccy-cli
 
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [[`498f690`](https://github.com/mcclowes/speccy/commit/498f690824da9e6ed50e231db52bdbb2d747c2a7)]:
+  - speccy-core@0.9.0
+
 ## 0.8.0
 
 ### Minor Changes

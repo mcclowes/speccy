@@ -1,5 +1,11 @@
 # speccy-core
 
+## 0.9.0
+
+### Patch Changes
+
+- [`498f690`](https://github.com/mcclowes/speccy/commit/498f690824da9e6ed50e231db52bdbb2d747c2a7) Thanks [@mcclowes](https://github.com/mcclowes)! - Keep entry-document local references compact while resolving external OpenAPI documents.
+
 ## 0.8.0
 
 ### Minor Changes
