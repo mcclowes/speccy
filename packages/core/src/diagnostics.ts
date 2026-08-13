@@ -8,6 +8,10 @@
  */
 
 import { diffSpecs } from './diffSpecs';
+import {
+  applyDiagnosticPolicy,
+  type DiagnosticPolicy,
+} from './diagnosticPolicy';
 import { operationsInDeclarationOrder, resolveRefs } from './model';
 import type {
   HttpMethod,
@@ -400,7 +404,17 @@ function changeSafetyDiagnostics(
 function newOperationLifecycleDiagnostics(
   previous: OpenAPIDocument,
   current: OpenAPIDocument,
+  policy: DiagnosticPolicy,
 ): ApiDiagnostic[] {
+  const setting = policy.rules?.['new-operation-lifecycle'];
+  if (setting === false) return [];
+  const ruleOptions =
+    setting && typeof setting === 'object' ? setting : undefined;
+  const allowedStages = ruleOptions?.allowedStages ?? [
+    'new',
+    'coming-soon',
+    'beta',
+  ];
   return diffSpecs(previous, current).changes.flatMap((change) => {
     if (!change.id.startsWith('operation-added:')) return [];
     if (!change.method || !change.path) return [];
@@ -408,7 +422,8 @@ function newOperationLifecycleDiagnostics(
     const lifecycle = operation?.['x-speccy-lifecycle'];
     if (
       !operation ||
-      (typeof lifecycle === 'string' && lifecycle.trim().length > 0)
+      (typeof lifecycle === 'string' &&
+        allowedStages.includes(lifecycle.trim().toLocaleLowerCase()))
     )
       return [];
 
@@ -423,13 +438,50 @@ function newOperationLifecycleDiagnostics(
         rationale:
           'A temporary badge helps existing consumers spot newly available capabilities.',
         suggestion:
-          'Add `x-speccy-lifecycle: new`, then remove it after 30 days.',
+          'Add `x-speccy-lifecycle: new` and `x-speccy-lifecycle-since: YYYY-MM-DD`.',
         path: [...change.location, 'x-speccy-lifecycle'],
         operationId: change.operationId,
         tag: change.tag,
       },
     ];
   });
+}
+
+function expiredLifecycleDiagnostics(
+  document: OpenAPIDocument,
+  policy: DiagnosticPolicy,
+  now: Date,
+): ApiDiagnostic[] {
+  const setting = policy.rules?.['new-operation-lifecycle'];
+  if (setting === false) return [];
+  const ruleOptions =
+    setting && typeof setting === 'object' ? setting : undefined;
+  const maxAgeDays = ruleOptions?.maxAgeDays ?? 30;
+  const diagnostics: ApiDiagnostic[] = [];
+  for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
+    for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
+      if (operation['x-speccy-lifecycle'] !== 'new') continue;
+      const since = operation['x-speccy-lifecycle-since'];
+      if (!since) continue;
+      const sinceTime = Date.parse(`${since}T00:00:00Z`);
+      if (!Number.isFinite(sinceTime)) continue;
+      const ageDays = Math.floor((now.getTime() - sinceTime) / 86_400_000);
+      if (ageDays <= maxAgeDays) continue;
+      diagnostics.push({
+        id: `speccy:new-operation-lifecycle-expired:${path}:${method}`,
+        ruleId: 'new-operation-lifecycle-expired',
+        source: 'speccy',
+        severity: 'suggestion',
+        category: 'change-safety',
+        message: `${method.toUpperCase()} ${path} has been marked new for ${ageDays} days.`,
+        suggestion: 'Remove its lifecycle metadata.',
+        path: ['paths', path, method, 'x-speccy-lifecycle'],
+        operationId: operation.operationId,
+        tag: operation.tags?.[0],
+      });
+    }
+  }
+  return diagnostics;
 }
 
 export function adaptSpectralDiagnostics(
@@ -460,6 +512,8 @@ export function analyzeOpenApi(
     previousDocument?: OpenAPIDocument;
     spectral?: SpectralDiagnosticInput[];
     disabledRules?: Iterable<string>;
+    policy?: DiagnosticPolicy;
+    now?: Date;
   } = {},
 ): ApiDiagnostic[] {
   const resolvedDocument = resolveRefs(document);
@@ -1107,12 +1161,24 @@ export function analyzeOpenApi(
   if (options.previousDocument) {
     diagnostics.push(
       ...changeSafetyDiagnostics(options.previousDocument, document),
-      ...newOperationLifecycleDiagnostics(options.previousDocument, document),
+      ...newOperationLifecycleDiagnostics(
+        options.previousDocument,
+        document,
+        options.policy ?? {},
+      ),
     );
   }
+  diagnostics.push(
+    ...expiredLifecycleDiagnostics(
+      document,
+      options.policy ?? {},
+      options.now ?? new Date(),
+    ),
+  );
   diagnostics.push(...adaptSpectralDiagnostics(options.spectral ?? []));
   const disabledRules = new Set(options.disabledRules ?? []);
-  return diagnostics.filter(
-    (diagnostic) => !disabledRules.has(diagnostic.ruleId),
+  return applyDiagnosticPolicy(
+    diagnostics.filter((diagnostic) => !disabledRules.has(diagnostic.ruleId)),
+    options.policy,
   );
 }

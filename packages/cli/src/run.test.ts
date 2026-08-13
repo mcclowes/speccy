@@ -202,7 +202,27 @@ describe('run', () => {
     });
 
     await expect(run(['lint', 'openapi.yaml'], h)).resolves.toBe(2);
-    expect(h.err.join('')).toContain('must be true or false');
+    expect(h.err.join('')).toContain('must be true, false, a severity');
+  });
+
+  it('rejects unknown and protected rule configuration', async () => {
+    const unknown = harness({
+      'openapi.yaml': BASE,
+      '.speccyrc': JSON.stringify({ rules: { 'typo-rule': false } }),
+    });
+    await expect(run(['lint', 'openapi.yaml'], unknown)).resolves.toBe(2);
+    expect(unknown.err.join('')).toContain('unknown rule "typo-rule"');
+
+    const protectedRule = harness({
+      'openapi.yaml': BASE,
+      '.speccyrc': JSON.stringify({
+        rules: { 'operation-id-unique': false },
+      }),
+    });
+    await expect(run(['lint', 'openapi.yaml'], protectedRule)).resolves.toBe(2);
+    expect(protectedRule.err.join('')).toContain(
+      'cannot disable protected rule "operation-id-unique"',
+    );
   });
 
   it('writes markdown ready to post as a comment', async () => {

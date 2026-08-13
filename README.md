@@ -162,15 +162,21 @@ steps:
         Multi=reference/multi.yml
 ```
 
-Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, diffs each document, lints each revision against its base for API health and change-safety findings, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. New operations receive a suggestion to add `x-speccy-lifecycle: new` and remove it after 30 days. Disable that suggestion with an optional `.speccyrc` file:
+Each document is compared with the same path on the pull request's base branch. The Action runs the published `speccy-cli`, diffs each document, lints each revision against its base for API health and change-safety findings, writes the combined report to the workflow summary, updates its existing pull request comment, and fails on breaking changes. New operations receive a suggestion to add `x-speccy-lifecycle: new`. Add `x-speccy-lifecycle-since: YYYY-MM-DD` and Speccy will suggest removing the badge after 30 days. Configure that policy with an optional `.speccyrc` file:
 
 ```json
 {
   "rules": {
-    "new-operation-lifecycle": false
+    "new-operation-lifecycle": {
+      "maxAgeDays": 45
+    },
+    "request-example": false,
+    "response-example": "warning"
   }
 }
 ```
+
+Rules accept booleans, severity overrides, and supported rule options. Scoped `ignore` entries can exclude rules for API path globs. See the [CLI configuration reference](packages/cli/README.md#repository-configuration) for the complete shape.
 
 The Action only runs on `pull_request` events, and the repository remains responsible for generating any spec files before this step. The `version`, `fail-on`, `health-fail-on`, `comment`, and `github-token` inputs adjust the defaults; see [action.yml](action.yml).
 

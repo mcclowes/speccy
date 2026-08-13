@@ -51,17 +51,39 @@ npx redocly bundle openapi.yaml --output openapi.bundled.yaml
 
 ## Repository configuration
 
-Add an optional `.speccyrc` JSON file at the repository root to configure rules. Rules are enabled by default. Set one to `false` to disable it:
+Add an optional `.speccyrc` JSON file at the repository root to configure rules. `speccy:recommended` is the default preset. A rule accepts `true`, `false`, a severity, or an options object:
 
 ```json
 {
+  "extends": ["speccy:recommended"],
   "rules": {
-    "new-operation-lifecycle": false
-  }
+    "new-operation-lifecycle": {
+      "severity": "suggestion",
+      "maxAgeDays": 30,
+      "allowedStages": ["new", "coming-soon", "beta", "early-access"]
+    },
+    "request-example": false,
+    "response-example": "warning"
+  },
+  "ignore": [
+    {
+      "rules": ["operation-security", "request-example"],
+      "paths": ["/public/**"]
+    }
+  ]
 }
 ```
 
-When linting with `--against`, `new-operation-lifecycle` suggests adding `x-speccy-lifecycle: new` to newly added operations. The GitHub Action uses change-aware linting, so it follows the same configuration.
+Scoped ignores use `*` within one path segment and `**` across segments. Unknown rules, properties, severities, and options are rejected, so a typo cannot silently weaken review. Contract-correctness rules such as `operation-id-unique` and `path-parameter-declared` cannot be disabled or ignored.
+
+When linting with `--against`, `new-operation-lifecycle` suggests adding lifecycle metadata to newly added operations. Add a date to receive a removal suggestion after `maxAgeDays`:
+
+```yaml
+x-speccy-lifecycle: new
+x-speccy-lifecycle-since: 2026-08-13
+```
+
+The GitHub Action uses change-aware linting, so it follows the same configuration.
 
 ## Exit codes
 

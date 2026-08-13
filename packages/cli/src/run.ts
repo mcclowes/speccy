@@ -141,9 +141,7 @@ export async function run(
         previousDocument: previousSource
           ? parseSpec(previousSource)
           : undefined,
-        disabledRules: Object.entries(config.rules).flatMap(
-          ([rule, enabled]) => (enabled ? [] : [rule]),
-        ),
+        policy: config,
       });
       write(formatLint(diagnostics, format, options));
       return lintExitCode(diagnostics, threshold);

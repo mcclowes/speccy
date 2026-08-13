@@ -1,5 +1,17 @@
 export { adaptSpectralDiagnostics, analyzeOpenApi } from './diagnostics';
 export { diffSpecs } from './diffSpecs';
+export {
+  applyDiagnosticPolicy,
+  PROTECTED_RULE_IDS,
+  SPECCY_RULE_IDS,
+} from './diagnosticPolicy';
+export type {
+  DiagnosticIgnore,
+  DiagnosticPolicy,
+  DiagnosticRuleOptions,
+  DiagnosticRuleSetting,
+  SpeccyRuleId,
+} from './diagnosticPolicy';
 export type { DiffSpecsOptions } from './diffSpecs';
 export { adaptOasdiffChangelog } from './oasdiff';
 export { bundleFragmentedSpec } from './fragmentedSpec';

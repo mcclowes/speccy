@@ -3,4 +3,4 @@
 'speccy-cli': minor
 ---
 
-Suggest lifecycle metadata for new operations and support disabling rules through `.speccyrc`.
+Suggest dated lifecycle metadata for new operations and support presets, severity overrides, rule options, and scoped ignores through `.speccyrc`.

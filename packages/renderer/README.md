@@ -86,6 +86,8 @@ paths:
       x-speccy-lifecycle: coming-soon
 ```
 
+For `new` operations, add `x-speccy-lifecycle-since: YYYY-MM-DD` so change-aware linting can suggest removing the badge after the repository's configured age.
+
 ## Show API health guidance
 
 Set `showDeveloperHints` in an internal or authoring view. Speccy adds contextual guidance and an API health drawer covering OAS correctness, documentation, operations, resource design, errors, authentication, pagination, data modeling, lifecycle design including webhook envelopes, and change safety.
