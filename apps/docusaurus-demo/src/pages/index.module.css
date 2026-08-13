@@ -471,7 +471,10 @@
   height: 660px;
 }
 .home-renderer-speccy {
-  height: 100%;
+  width: 125%;
+  height: 125%;
+  transform: scale(0.8);
+  transform-origin: top left;
   --sp-accent: var(--ifm-color-primary);
 }
 .home-components-demo {
@@ -510,10 +513,18 @@
 }
 .home-diff-frame {
   max-height: 690px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.home-diff-frame::-webkit-scrollbar {
+  display: none;
 }
 .home-diff {
-  min-height: 690px;
+  width: 125%;
+  min-height: 862.5px;
+  transform: scale(0.8);
+  transform-origin: top left;
 }
 .home-code-demo {
   color: #ece9f5;
