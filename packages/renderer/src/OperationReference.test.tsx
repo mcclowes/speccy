@@ -60,6 +60,15 @@ describe('operation references', () => {
       />,
     );
 
+    expect(screen.getByText('Path')).toBeInTheDocument();
+    expect(screen.getByText('/corporates/{corporateId}')).toBeInTheDocument();
+    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy path' })).toHaveClass(
+      'sp-copy-compact',
+    );
+    expect(screen.getByRole('button', { name: 'Copy body' })).toHaveClass(
+      'sp-copy-compact',
+    );
     expect(screen.getByText('"Example"')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
     expect(screen.getByText('"corporate-1"')).toBeInTheDocument();
@@ -111,14 +120,54 @@ describe('operation references', () => {
       />,
     );
 
-    expect(screen.getByText('"pathParameters"')).toBeInTheDocument();
-    expect(screen.getByText('"headers"')).toBeInTheDocument();
+    expect(screen.getByText('/corporates/corp-1')).toBeInTheDocument();
+    expect(screen.getByText('Query parameters')).toBeInTheDocument();
+    expect(screen.getByText('Headers')).toBeInTheDocument();
+    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(screen.queryByText('"pathParameters"')).not.toBeInTheDocument();
     expect(screen.getByText('"Custom Ltd"')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
     expect(screen.getByText('"corp-1"')).toBeInTheDocument();
   });
 
-  it('prefers explicit examples and omits code when none are available', () => {
+  it('merges structured request overrides over derived values', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        spec={{
+          paths: {
+            [operation.path]: {
+              post: {
+                parameters: [
+                  { name: 'corporateId', in: 'path', example: 'derived-id' },
+                  { name: 'expand', in: 'query', example: 'owners' },
+                  { name: 'X-Tenant', in: 'header', example: 'tenant-1' },
+                ],
+                requestBody: {
+                  content: { 'application/json': { example: { old: true } } },
+                },
+              },
+            },
+          },
+        }}
+        requestValues={{
+          path: { corporateId: 'custom-id' },
+          query: { page: 2 },
+          headers: { 'X-Tenant': 'tenant-2' },
+          body: { name: 'Custom Ltd' },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('/corporates/custom-id')).toBeInTheDocument();
+    expect(screen.getByText('"expand"')).toBeInTheDocument();
+    expect(screen.getByText('"page"')).toBeInTheDocument();
+    expect(screen.getByText('"tenant-2"')).toBeInTheDocument();
+    expect(screen.getByText('"Custom Ltd"')).toBeInTheDocument();
+    expect(screen.queryByText('"old"')).not.toBeInTheDocument();
+  });
+
+  it('uses requestExample as a body override and always renders the path', () => {
     const { rerender } = render(
       <OperationPreview
         {...operation}
@@ -140,8 +189,8 @@ describe('operation references', () => {
     expect(screen.queryByText('"old"')).not.toBeInTheDocument();
 
     rerender(<OperationPreview {...operation} />);
-    expect(
-      screen.queryByRole('button', { name: /copy/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText('Path')).toBeInTheDocument();
+    expect(screen.getByText(operation.path)).toBeInTheDocument();
+    expect(screen.queryByText('Body')).not.toBeInTheDocument();
   });
 });

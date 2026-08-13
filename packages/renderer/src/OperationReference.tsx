@@ -9,18 +9,17 @@
  */
 
 import { useState, type MouseEventHandler } from 'react';
-import {
-  parseSpec,
-  resolveRefs,
-  type MediaType,
-  type OpenAPIDocument,
-  type Operation,
-  type Parameter,
-  type Schema,
-} from 'speccy-core';
-import { CodeBlock } from './CodeBlock';
+import type { OpenAPIDocument } from 'speccy-core';
+import { CodeBlock, CodeLines, CollapsibleJson, CopyButton } from './CodeBlock';
 import { ApiPath, MethodBadge } from './DesignSystem';
+import {
+  deriveOperationPreviewData,
+  mergeOperationPreviewRequestValues,
+  type OperationPreviewRequestValues,
+} from './operationPreviewData';
 import styles from './OperationReference.module.css';
+
+export type { OperationPreviewRequestValues } from './operationPreviewData';
 
 export interface OperationReferenceProps {
   method: string;
@@ -126,59 +125,12 @@ export function OperationCard({
 export interface OperationPreviewProps extends OperationReferenceProps {
   /** OpenAPI document used to derive examples when explicit examples are omitted. */
   spec?: OpenAPIDocument | string;
-  /** Overrides the request example derived from `spec`. */
+  /** Overrides derived path, query, header, or body values by section. */
+  requestValues?: OperationPreviewRequestValues;
+  /** Overrides the request body derived from `spec`. */
   requestExample?: string;
   /** Overrides the response example derived from `spec`. */
   responseExample?: string;
-}
-
-function schemaExample(schema: Schema | undefined): unknown {
-  if (schema === undefined) return undefined;
-  if (typeof schema === 'boolean') return schema ? {} : undefined;
-  if (schema.example !== undefined) return schema.example;
-  if (schema.default !== undefined) return schema.default;
-  if (schema.enum?.length) return schema.enum[0];
-  if (schema.oneOf?.[0]) return schemaExample(schema.oneOf[0]);
-  if (schema.anyOf?.[0]) return schemaExample(schema.anyOf[0]);
-  if (schema.allOf?.length) {
-    return Object.assign(
-      {},
-      ...schema.allOf
-        .map(schemaExample)
-        .filter((value) => value && typeof value === 'object'),
-    );
-  }
-  if (schema.type === 'array' || schema.items)
-    return schema.items ? [schemaExample(schema.items)] : [];
-  if (schema.type === 'object' || schema.properties)
-    return Object.fromEntries(
-      Object.entries(schema.properties ?? {})
-        .filter(([, property]) => {
-          const value = typeof property === 'boolean' ? undefined : property;
-          return !value?.readOnly;
-        })
-        .map(([name, property]) => [name, schemaExample(property)]),
-    );
-  if (schema.type === 'integer' || schema.type === 'number') return 0;
-  if (schema.type === 'boolean') return true;
-  if (schema.format === 'date-time') return '2024-01-01T00:00:00Z';
-  if (schema.format === 'date') return '2024-01-01';
-  if (schema.format === 'uuid') return '00000000-0000-4000-8000-000000000000';
-  return 'string';
-}
-
-function mediaExample(media: MediaType | undefined): unknown {
-  if (!media) return undefined;
-  if (media.example !== undefined) return media.example;
-  for (const example of Object.values(media.examples ?? {})) {
-    if (example.value !== undefined) return example.value;
-    if (example.externalValue !== undefined) return example.externalValue;
-  }
-  return schemaExample(media.schema);
-}
-
-function parameterExample(parameter: Parameter): unknown {
-  return parameter.example ?? schemaExample(parameter.schema);
 }
 
 function formatExample(value: unknown): string | undefined {
@@ -186,57 +138,95 @@ function formatExample(value: unknown): string | undefined {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
 }
 
-function derivedExamples(
-  spec: OpenAPIDocument | string | undefined,
-  method: string,
-  path: string,
-): { request?: string; response?: string } {
-  if (!spec) return {};
-  const document = resolveRefs(parseSpec(spec));
-  const pathItem = document.paths?.[path];
-  const operation = pathItem?.[
-    method.toLowerCase() as keyof typeof pathItem
-  ] as Operation | undefined;
-  if (!operation || typeof operation !== 'object') return {};
+function requestPath(path: string, values: Record<string, unknown>): string {
+  return Object.entries(values).reduce(
+    (result, [name, value]) =>
+      result.replace(`{${name}}`, encodeURIComponent(String(value))),
+    path,
+  );
+}
 
-  const parameters = [
-    ...(pathItem?.parameters ?? []),
-    ...(operation.parameters ?? []),
+function hasValues(values: Record<string, unknown> | undefined): boolean {
+  return Boolean(values && Object.keys(values).length);
+}
+
+function RequestPreviewSection({
+  label,
+  value,
+  rawValue,
+}: {
+  label: string;
+  value: string;
+  rawValue?: unknown;
+}) {
+  return (
+    <section className={styles.requestSection}>
+      <header>
+        <span>{label}</span>
+        <CopyButton
+          value={value}
+          label={`Copy ${label.toLowerCase()}`}
+          compact
+        />
+      </header>
+      <pre>
+        <code>
+          {rawValue !== undefined && typeof rawValue !== 'string' ? (
+            <CollapsibleJson value={rawValue} />
+          ) : (
+            <CodeLines value={value} />
+          )}
+        </code>
+      </pre>
+    </section>
+  );
+}
+
+function RequestPreview({
+  path,
+  values,
+}: {
+  path: string;
+  values: OperationPreviewRequestValues;
+}) {
+  const sections = [
+    { label: 'Path', value: requestPath(path, values.path ?? {}) },
+    ...(hasValues(values.query)
+      ? [
+          {
+            label: 'Query parameters',
+            value: formatExample(values.query)!,
+            rawValue: values.query,
+          },
+        ]
+      : []),
+    ...(hasValues(values.headers)
+      ? [
+          {
+            label: 'Headers',
+            value: formatExample(values.headers)!,
+            rawValue: values.headers,
+          },
+        ]
+      : []),
+    ...('body' in values
+      ? [
+          {
+            label: 'Body',
+            value: formatExample(values.body)!,
+            rawValue: values.body,
+          },
+        ]
+      : []),
   ];
-  const requestParts: Record<string, unknown> = {};
-  for (const location of ['path', 'query', 'header'] as const) {
-    const values = Object.fromEntries(
-      parameters
-        .filter((parameter) => parameter.in === location)
-        .map((parameter) => [
-          parameter.name ?? 'unnamed',
-          parameterExample(parameter),
-        ]),
-    );
-    if (Object.keys(values).length)
-      requestParts[
-        location === 'header' ? 'headers' : `${location}Parameters`
-      ] = values;
-  }
-  const requestMedia = Object.values(operation.requestBody?.content ?? {})[0];
-  const body = mediaExample(requestMedia);
-  if (body !== undefined) requestParts.body = body;
-  const requestValue =
-    Object.keys(requestParts).length === 1 && 'body' in requestParts
-      ? requestParts.body
-      : Object.keys(requestParts).length
-        ? requestParts
-        : undefined;
 
-  const response =
-    Object.entries(operation.responses ?? {}).find(([code]) =>
-      code.startsWith('2'),
-    )?.[1] ?? Object.values(operation.responses ?? {})[0];
-  const responseMedia = Object.values(response?.content ?? {})[0];
-  return {
-    request: formatExample(requestValue),
-    response: formatExample(mediaExample(responseMedia)),
-  };
+  return (
+    <div className={styles.requestSections}>
+      {sections.map((section) => (
+        <RequestPreviewSection {...section} key={section.label} />
+      ))}
+    </div>
+  );
 }
 
 export function OperationPreview({
@@ -244,23 +234,27 @@ export function OperationPreview({
   path,
   href,
   spec,
+  requestValues,
   requestExample,
   responseExample,
   className,
   onClick,
 }: OperationPreviewProps) {
   const [tab, setTab] = useState<'request' | 'response'>('request');
-  const derived = derivedExamples(spec, method, path);
-  const request = requestExample ?? derived.request;
-  const response = responseExample ?? derived.response;
-  const hasRequest = request !== undefined;
+  const derived = deriveOperationPreviewData(spec, method, path);
+  const request = mergeOperationPreviewRequestValues(
+    derived.request,
+    requestValues,
+  );
+  if (requestExample !== undefined) request.body = requestExample;
+  const response = responseExample ?? formatExample(derived.response);
+  const hasRequest = true;
   const hasResponse = response !== undefined;
   const tabs = [
     ...(hasRequest ? (['request'] as const) : []),
     ...(hasResponse ? (['response'] as const) : []),
   ];
   const activeTab = tab === 'response' && hasResponse ? 'response' : tabs[0];
-  const value = activeTab === 'response' ? response : request;
 
   return (
     <section className={referenceClassName(styles.operationPreview, className)}>
@@ -285,19 +279,26 @@ export function OperationPreview({
           ))}
         </div>
       )}
-      {value !== undefined && (
+      {activeTab === 'request' ? (
+        <div
+          className={styles.previewCode}
+          role={tabs.length > 1 ? 'tabpanel' : undefined}
+        >
+          <RequestPreview path={path} values={request} />
+        </div>
+      ) : response !== undefined ? (
         <div
           className={styles.previewCode}
           role={tabs.length > 1 ? 'tabpanel' : undefined}
         >
           <CodeBlock
-            value={value}
+            value={response}
             copyPlacement="body"
-            copyLabel={`Copy ${activeTab}`}
-            truncateLabel={activeTab}
+            copyLabel="Copy response"
+            truncateLabel="response"
           />
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

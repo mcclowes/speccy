@@ -7,5 +7,6 @@ export {
 export type {
   DescribedOperationReferenceProps,
   OperationPreviewProps,
+  OperationPreviewRequestValues,
   OperationReferenceProps,
 } from './OperationReference';

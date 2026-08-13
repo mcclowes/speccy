@@ -93,7 +93,7 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 
 ## Operation preview
 
-`OperationPreview` puts request and response examples beside an operation link. If both are available, readers can switch between them and copy either one. If only one is available, the preview shows it without tabs.
+`OperationPreview` puts a layered request and optional response beside an operation link. The request always shows its path, then adds query parameters, headers, and a body when they exist. Readers can copy each request section separately. When a response is available, readers can switch between request and response tabs.
 
 <OperationPreview
   method="post"
@@ -118,13 +118,13 @@ import spec from './openapi.json';
 />;
 ```
 
-The derived request uses the first declared media type. It includes path parameters, query parameters, headers, and the request body when the operation defines them. A body without parameters is shown directly. When parameters or headers are present, the preview groups the values under `pathParameters`, `queryParameters`, `headers`, and `body`.
+The derived request uses the first declared media type. Path parameter values are substituted into the displayed path. Query parameters, headers, and the body appear as separate sections only when the operation defines them.
 
 The derived response uses the first `2xx` response, or the first declared response if the operation has no successful response. For request and response bodies, Speccy checks media-type `example`, named `examples`, schema examples, defaults, and enums before generating a value from the schema.
 
 ### Override a derived example
 
-Use `requestExample` or `responseExample` when a guide needs values that differ from the reusable examples in the API description. Each explicit value overrides only its side, so you can customize the request while keeping the derived response.
+Use `requestValues` when a guide needs values that differ from the reusable examples in the API description. Overrides merge with derived values by section, so you can change one path parameter or header without repeating the rest of the request.
 
 ```tsx
 <OperationPreview
@@ -132,15 +132,35 @@ Use `requestExample` or `responseExample` when a guide needs values that differ 
   path="/orchards"
   href="/api/createorchard"
   spec={spec}
-  requestExample={'{\n  "name": "My orchard"\n}'}
+  requestValues={{
+    query: { dryRun: true },
+    headers: { 'X-Tenant-ID': 'tenant_456' },
+    body: { name: 'My orchard' },
+  }}
 />
 ```
 
-The explicit values are strings. Pass formatted JSON, a command, plain text, or any other copy-ready request or response.
+The available request sections are `path`, `query`, `headers`, and `body`:
+
+```tsx
+<OperationPreview
+  method="get"
+  path="/orchards/{orchardId}"
+  href="/api/getorchard"
+  spec={spec}
+  requestValues={{
+    path: { orchardId: 'orch_01J7' },
+    query: { expand: 'growingBlocks' },
+    headers: { 'X-Tenant-ID': 'tenant_456' },
+  }}
+/>
+```
+
+`requestExample` remains available as a shorthand body override for formatted JSON or other copy-ready text. `responseExample` overrides the derived response. These explicit values don't affect the other side of the preview.
 
 ### Configure one or both sides
 
-You don't need a spec when supplying examples directly. Pass both values for a tabbed preview:
+You don't need a spec when supplying values directly. Pass a body and response for a tabbed preview:
 
 ```tsx
 <OperationPreview
@@ -152,31 +172,32 @@ You don't need a spec when supplying examples directly. Pass both values for a t
 />
 ```
 
-Pass only `requestExample` for a request-only preview, or only `responseExample` for a response-only preview:
+For a request without a body, pass structured values alone. The path is always rendered:
 
 ```tsx
 <OperationPreview
   method="delete"
   path="/orchards/{orchardId}"
   href="/api/deleteorchard"
-  responseExample="204 No Content"
+  requestValues={{ path: { orchardId: 'orch_01J7' } }}
 />
 ```
 
-If no explicit value is supplied and `spec` can't derive one, that side is omitted. If neither side has a value, the component still renders the operation identity and its reference link, but no code panel.
+If no spec or request values are supplied, the request preview contains the unresolved path. If neither an explicit nor derived response exists, the response tab is omitted.
 
 ### Preview props
 
-| Prop              | Required | Purpose                                                              |
-| ----------------- | -------- | -------------------------------------------------------------------- |
-| `method`          | Yes      | HTTP method used for the badge and operation lookup.                 |
-| `path`            | Yes      | Exact OpenAPI path used for display and operation lookup.            |
-| `href`            | Yes      | Link to the full operation reference.                                |
-| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive examples. |
-| `requestExample`  | No       | Explicit request string. Overrides a request derived from `spec`.    |
-| `responseExample` | No       | Explicit response string. Overrides a response derived from `spec`.  |
-| `className`       | No       | Adds a class without replacing Speccy's component classes.           |
-| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.   |
+| Prop              | Required | Purpose                                                                                        |
+| ----------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `method`          | Yes      | HTTP method used for the badge and operation lookup.                                           |
+| `path`            | Yes      | Exact OpenAPI path used for display and operation lookup.                                      |
+| `href`            | Yes      | Link to the full operation reference.                                                          |
+| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive request values and a response.      |
+| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec. |
+| `requestExample`  | No       | Formatted request body string. Overrides a body supplied by `spec` or `requestValues`.         |
+| `responseExample` | No       | Explicit response string. Overrides a response derived from `spec`.                            |
+| `className`       | No       | Adds a class without replacing Speccy's component classes.                                     |
+| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                             |
 
 ## Props and navigation
 

@@ -208,6 +208,48 @@
   line-height: 1.65;
 }
 
+.requestSections {
+  overflow: hidden;
+  background: var(--sp-code-bg);
+  border: 1px solid var(--sp-code-border);
+  border-radius: 9px;
+}
+
+.requestSection + .requestSection {
+  border-top: 1px solid var(--sp-code-border);
+}
+
+.requestSection > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 14px;
+  color: var(--sp-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.requestSection > pre {
+  margin: 0;
+  padding: 8px 18px 16px;
+  overflow: auto;
+  color: var(--sp-code-text);
+  background: transparent;
+  border: 0;
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.requestSection > pre code {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
 @media (width <= 620px) {
   .endpointStrip,
   .previewHeader {
