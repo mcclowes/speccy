@@ -8,7 +8,11 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
     description:
       'A small API for finding books, keeping reading lists, and syncing your place across devices.',
   },
-  servers: [{ url: 'https://api.luma.example/v1', description: 'Production' }],
+  servers: [
+    { url: 'https://sandbox.luma.example/v1', description: 'Sandbox' },
+    { url: 'https://api.luma.example/v1', description: 'Production' },
+  ],
+  security: [{ apiKey: [] }],
   tags: [
     {
       name: 'Books',
@@ -238,6 +242,14 @@ export const SAMPLE_SPEC: OpenAPIDocument = {
     },
   },
   components: {
+    securitySchemes: {
+      apiKey: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-API-Key',
+        description: 'Your Luma API key.',
+      },
+    },
     schemas: {
       Book: {
         type: 'object',

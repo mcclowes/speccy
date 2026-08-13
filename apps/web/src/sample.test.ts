@@ -26,4 +26,12 @@ describe('sample spec', () => {
       }),
     );
   });
+
+  it('demonstrates request availability and authorization', () => {
+    expect(SAMPLE_SPEC.servers).toHaveLength(2);
+    expect(SAMPLE_SPEC.security).toEqual([{ apiKey: [] }]);
+    expect(SAMPLE_SPEC.components?.securitySchemes?.apiKey).toEqual(
+      expect.objectContaining({ type: 'apiKey', in: 'header' }),
+    );
+  });
 });
