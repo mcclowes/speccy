@@ -297,6 +297,8 @@ export function DeveloperDiagnostics({
     window.setTimeout(() => setCopied(false), 1200);
   }
   const indexing = indexState?.phase === 'page' || indexState?.phase === 'all';
+  const completedBatches = indexState?.completed ?? 0;
+  const totalBatches = indexState?.total ?? 0;
 
   return (
     <>
@@ -341,14 +343,41 @@ export function DeveloperDiagnostics({
                 <h2>API health</h2>
                 <p>Contract checks and design guidance. No opaque score.</p>
                 {indexState && indexState.phase !== 'complete' && (
-                  <small role="status">
-                    {indexState.phase === 'idle' && 'Ready to check this page'}
-                    {indexState.phase === 'page' && 'Checking this page…'}
-                    {indexState.phase === 'all' &&
-                      `Indexing the rest of the API… ${indexState.completed ?? 0} of ${indexState.total ?? 0}`}
-                    {indexState.phase === 'error' &&
-                      'Some API health checks couldn’t finish'}
-                  </small>
+                  <div
+                    className={scoped(
+                      `sp-diagnostics-index-status ${indexing ? 'is-indexing' : ''}`,
+                    )}
+                    role="status"
+                  >
+                    {indexing && (
+                      <span
+                        className={scoped('sp-diagnostics-index-spinner')}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className={scoped('sp-diagnostics-index-copy')}>
+                      <strong>
+                        {indexing
+                          ? 'Indexing API health'
+                          : indexState.phase === 'error'
+                            ? 'Indexing paused'
+                            : 'Ready to index API health'}
+                      </strong>
+                      <small>
+                        {indexState.phase === 'idle' &&
+                          'Checks start when you open API health.'}
+                        {indexState.phase === 'page' &&
+                          `Checking this page first · ${completedBatches} of ${totalBatches} batches`}
+                        {indexState.phase === 'all' &&
+                          `Checking the full API · ${completedBatches} of ${totalBatches} batches`}
+                        {indexState.phase === 'error' &&
+                          'Some checks couldn’t finish.'}
+                      </small>
+                    </span>
+                    {indexing && totalBatches > 0 && (
+                      <progress value={completedBatches} max={totalBatches} />
+                    )}
+                  </div>
                 )}
               </div>
               <div className={scoped('sp-diagnostics-header-actions')}>
@@ -411,7 +440,11 @@ export function DeveloperDiagnostics({
                   className={scoped(scope === 'all' ? 'is-active' : '')}
                   onClick={() => onScopeChange('all')}
                 >
-                  All API <span>{allVisible.length}</span>
+                  All API
+                  <span>
+                    {allVisible.length}
+                    {indexing && ' so far'}
+                  </span>
                 </button>
               </div>
             )}

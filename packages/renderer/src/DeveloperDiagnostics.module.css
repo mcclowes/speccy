@@ -142,6 +142,68 @@
   color: var(--sp-muted);
   font-size: 0.6875rem;
 }
+.sp-diagnostics-index-status {
+  width: min(320px, 100%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  padding: 9px 10px;
+  color: var(--sp-muted);
+  border: 1px solid var(--sp-line);
+  border-radius: 9px;
+  background: var(--sp-surface-soft);
+}
+.sp-diagnostics-index-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.sp-diagnostics-index-status strong {
+  color: var(--sp-text);
+  font-size: 0.625rem;
+}
+.sp-diagnostics-index-status small {
+  font-size: 0.5625rem;
+}
+.sp-diagnostics-index-spinner {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  border: 2px solid color-mix(in srgb, var(--sp-accent) 22%, transparent);
+  border-top-color: var(--sp-accent);
+  border-radius: 50%;
+  animation: sp-diagnostics-spin 0.8s linear infinite;
+}
+.sp-diagnostics-index-status progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sp-line);
+  appearance: none;
+}
+.sp-diagnostics-index-status progress::-webkit-progress-bar {
+  background: var(--sp-line);
+}
+.sp-diagnostics-index-status progress::-webkit-progress-value {
+  background: var(--sp-accent);
+}
+.sp-diagnostics-index-status progress::-moz-progress-bar {
+  background: var(--sp-accent);
+}
+@keyframes sp-diagnostics-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-diagnostics-index-spinner {
+    animation: none;
+  }
+}
 .sp-diagnostics-header-actions {
   position: relative;
   flex: none;
