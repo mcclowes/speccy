@@ -29,7 +29,7 @@ test('packs global and component styles in the public stylesheet', () => {
   );
   assert.ok(
     css.includes(`.speccy pre {
-  margin: 0;
+  margin: -8px 0 22px;
   padding: 0;
   overflow: visible;`),
   );
