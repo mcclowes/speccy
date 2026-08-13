@@ -34,6 +34,9 @@ html {
 body {
   color: var(--site-ink);
 }
+.cookie-consent-modal {
+  --ifm-heading-color: var(--site-ink);
+}
 .navbar {
   border-bottom: 1px solid var(--site-line);
   box-shadow: none;
