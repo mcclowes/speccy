@@ -1486,57 +1486,73 @@ export function Speccy({
               <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
               <Markdown>{model.document.info?.summary}</Markdown>
               <Markdown>{model.document.info?.description}</Markdown>
-              {model.document.info?.termsOfService && (
-                <p>
-                  <a href={model.document.info.termsOfService}>
-                    Terms of service
-                  </a>
-                </p>
-              )}
-              {model.document.info?.contact && (
-                <p>
-                  Contact:{' '}
-                  {model.document.info.contact.url ? (
-                    <a href={model.document.info.contact.url}>
-                      {model.document.info.contact.name ??
-                        model.document.info.contact.url}
-                    </a>
-                  ) : (
-                    model.document.info.contact.name
+              {(model.document.info?.termsOfService ||
+                model.document.info?.contact ||
+                model.document.info?.license ||
+                model.document.externalDocs?.url) && (
+                <dl className="sp-api-meta" aria-label="API information">
+                  {model.document.info?.termsOfService && (
+                    <div>
+                      <dt>Terms</dt>
+                      <dd>
+                        <a href={model.document.info.termsOfService}>
+                          Terms of service
+                        </a>
+                      </dd>
+                    </div>
                   )}
-                  {model.document.info.contact.email && (
-                    <>
-                      {' '}
-                      <a href={`mailto:${model.document.info.contact.email}`}>
-                        {model.document.info.contact.email}
-                      </a>
-                    </>
+                  {model.document.info?.contact && (
+                    <div>
+                      <dt>Contact</dt>
+                      <dd>
+                        {model.document.info.contact.url ? (
+                          <a href={model.document.info.contact.url}>
+                            {model.document.info.contact.name ??
+                              model.document.info.contact.url}
+                          </a>
+                        ) : (
+                          model.document.info.contact.name
+                        )}
+                        {model.document.info.contact.email && (
+                          <a
+                            href={`mailto:${model.document.info.contact.email}`}
+                          >
+                            {model.document.info.contact.email}
+                          </a>
+                        )}
+                      </dd>
+                    </div>
                   )}
-                </p>
-              )}
-              {model.document.info?.license && (
-                <p>
-                  License:{' '}
-                  {model.document.info.license.url ? (
-                    <a href={model.document.info.license.url}>
-                      {model.document.info.license.identifier ??
-                        model.document.info.license.name}
-                    </a>
-                  ) : (
-                    <span>
-                      {model.document.info.license.identifier ??
-                        model.document.info.license.name}
-                    </span>
+                  {model.document.info?.license && (
+                    <div>
+                      <dt>License</dt>
+                      <dd>
+                        {model.document.info.license.url ? (
+                          <a href={model.document.info.license.url}>
+                            {model.document.info.license.identifier ??
+                              model.document.info.license.name}
+                          </a>
+                        ) : (
+                          <span>
+                            {model.document.info.license.identifier ??
+                              model.document.info.license.name}
+                          </span>
+                        )}
+                      </dd>
+                    </div>
                   )}
-                </p>
-              )}
-              {model.document.externalDocs?.url && (
-                <p>
-                  <a href={model.document.externalDocs.url}>
-                    {model.document.externalDocs.description ??
-                      'External documentation'}
-                  </a>
-                </p>
+                  {model.document.externalDocs?.url && (
+                    <div>
+                      <dt>Documentation</dt>
+                      <dd>
+                        <a href={model.document.externalDocs.url}>
+                          {model.document.externalDocs.description ??
+                            'External documentation'}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
               )}
               <InlineDiagnostics
                 diagnostics={overviewDiagnostics}

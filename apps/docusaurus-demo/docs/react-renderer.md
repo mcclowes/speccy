@@ -77,3 +77,5 @@ Use `logo` for the brand mark in the sidebar header:
 ```
 
 The API title comes from `info.title`. Use the [`x-icon` extension](./openapi-extensions.md#tag-icons) for icons beside individual tags.
+
+The overview groups `info.termsOfService`, `info.contact`, `info.license`, and top-level `externalDocs` into a compact API information panel beneath the description. Omitted fields don't leave empty rows.
