@@ -33,9 +33,106 @@ const showcaseSpec: OpenAPIDocument = {
     version: '1.4.0',
     description: 'Plan harvests and track fruit from tree to store.',
   },
-  tags: [{ name: 'Harvests', description: 'Schedule and monitor picking.' }],
+  tags: [
+    { name: 'Orchards', description: 'Manage growing sites and blocks.' },
+    { name: 'Harvests', description: 'Schedule and monitor picking.' },
+    { name: 'Inventory', description: 'Track packed fruit and availability.' },
+  ],
   paths: {
+    '/orchards': {
+      get: {
+        tags: ['Orchards'],
+        operationId: 'listOrchards',
+        summary: 'List orchards',
+        parameters: [
+          {
+            name: 'region',
+            in: 'query',
+            description: 'Only return orchards in this growing region.',
+            schema: { type: 'string', example: 'pacific-northwest' },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'A page of orchards.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Orchard' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/orchards/{orchardId}': {
+      get: {
+        tags: ['Orchards'],
+        operationId: 'getOrchard',
+        summary: 'Get an orchard',
+        parameters: [
+          {
+            name: 'orchardId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', example: 'orch_01J7' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The orchard and its growing blocks.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Orchard' },
+              },
+            },
+          },
+          '404': { description: 'No orchard has that ID.' },
+        },
+      },
+    },
     '/orchards/{orchardId}/harvests': {
+      get: {
+        tags: ['Harvests'],
+        operationId: 'listHarvests',
+        summary: 'List harvests',
+        parameters: [
+          {
+            name: 'orchardId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', example: 'orch_01J7' },
+          },
+          {
+            name: 'status',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['scheduled', 'in-progress', 'complete'],
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Harvests for the orchard.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Harvest' },
+                },
+              },
+            },
+          },
+        },
+      },
       post: {
         tags: ['Harvests'],
         operationId: 'createHarvest',
@@ -56,11 +153,38 @@ const showcaseSpec: OpenAPIDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['startsAt', 'crop'],
+                required: ['startsAt', 'crop', 'blocks'],
                 properties: {
                   startsAt: { type: 'string', format: 'date-time' },
-                  crop: { type: 'string', example: 'apple' },
-                  crewSize: { type: 'integer', example: 8 },
+                  crop: {
+                    type: 'object',
+                    required: ['variety', 'grade'],
+                    properties: {
+                      variety: { type: 'string', example: 'Honeycrisp' },
+                      grade: {
+                        type: 'string',
+                        enum: ['premium', 'standard', 'processing'],
+                      },
+                    },
+                  },
+                  blocks: {
+                    type: 'array',
+                    minItems: 1,
+                    items: { type: 'string' },
+                    example: ['north-12', 'north-14'],
+                  },
+                  crew: {
+                    type: 'object',
+                    properties: {
+                      size: { type: 'integer', minimum: 1, example: 8 },
+                      supervisorId: { type: 'string', example: 'worker_28A' },
+                    },
+                  },
+                  notes: {
+                    type: 'string',
+                    maxLength: 500,
+                    example: 'Start with the eastern rows after sunrise.',
+                  },
                 },
               },
             },
@@ -71,7 +195,47 @@ const showcaseSpec: OpenAPIDocument = {
             description: 'The harvest was scheduled.',
             content: {
               'application/json': {
-                example: { id: 'harvest_01K4', status: 'scheduled' },
+                schema: { $ref: '#/components/schemas/Harvest' },
+              },
+            },
+          },
+          '409': { description: 'The requested blocks are already scheduled.' },
+          '422': { description: 'The harvest window or crew is invalid.' },
+        },
+      },
+    },
+    '/inventory/lots': {
+      get: {
+        tags: ['Inventory'],
+        operationId: 'listInventoryLots',
+        summary: 'List inventory lots',
+        parameters: [
+          {
+            name: 'availableAfter',
+            in: 'query',
+            schema: { type: 'string', format: 'date' },
+          },
+          {
+            name: 'cursor',
+            in: 'query',
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Packed lots ready for allocation.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/InventoryLot' },
+                    },
+                    nextCursor: { type: ['string', 'null'] },
+                  },
+                },
               },
             },
           },
@@ -79,6 +243,59 @@ const showcaseSpec: OpenAPIDocument = {
       },
     },
   },
+  components: {
+    securitySchemes: {
+      bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+    },
+    schemas: {
+      Orchard: {
+        type: 'object',
+        required: ['id', 'name', 'region'],
+        properties: {
+          id: { type: 'string', example: 'orch_01J7' },
+          name: { type: 'string', example: 'Riverbend Orchard' },
+          region: { type: 'string', example: 'pacific-northwest' },
+          blocks: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', example: 'north-12' },
+                variety: { type: 'string', example: 'Honeycrisp' },
+                hectares: { type: 'number', example: 4.8 },
+              },
+            },
+          },
+        },
+      },
+      Harvest: {
+        type: 'object',
+        required: ['id', 'orchardId', 'status', 'startsAt'],
+        properties: {
+          id: { type: 'string', example: 'harvest_01K4' },
+          orchardId: { type: 'string', example: 'orch_01J7' },
+          status: {
+            type: 'string',
+            enum: ['scheduled', 'in-progress', 'complete'],
+          },
+          startsAt: { type: 'string', format: 'date-time' },
+          estimatedBins: { type: 'integer', example: 140 },
+        },
+      },
+      InventoryLot: {
+        type: 'object',
+        required: ['id', 'variety', 'packedAt', 'availableCases'],
+        properties: {
+          id: { type: 'string', example: 'lot_7Q2' },
+          variety: { type: 'string', example: 'Honeycrisp' },
+          packedAt: { type: 'string', format: 'date-time' },
+          availableCases: { type: 'integer', example: 86 },
+          storageTemperatureCelsius: { type: 'number', example: 1.5 },
+        },
+      },
+    },
+  },
+  security: [{ bearerAuth: [] }],
 };
 
 const showcaseDiff: DiffReport = {
