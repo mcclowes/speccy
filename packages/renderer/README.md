@@ -86,7 +86,7 @@ paths:
       x-speccy-lifecycle: coming-soon
 ```
 
-For `new` operations, add `x-speccy-lifecycle-since: YYYY-MM-DD` so change-aware linting can suggest removing the badge after the repository's configured age.
+For `new` operations, add `x-speccy-lifecycle-since: YYYY-MM-DD` so linting can suggest removing the badge after the repository's configured age.
 
 ## Show API health guidance
 

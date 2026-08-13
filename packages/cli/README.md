@@ -51,7 +51,7 @@ npx redocly bundle openapi.yaml --output openapi.bundled.yaml
 
 ## Repository configuration
 
-Add an optional `.speccyrc` JSON file at the repository root to configure rules. `speccy:recommended` is the default preset. A rule accepts `true`, `false`, a severity, or an options object:
+Add an optional `.speccyrc` JSON file to configure rules. The CLI reads it from the directory it runs in, so run `speccy` from the directory containing `.speccyrc`; the GitHub Action runs at the workspace root and picks up a root-level file. `speccy:recommended` is the default preset. A rule accepts `true`, `false`, a severity, or an options object:
 
 ```json
 {
@@ -76,7 +76,7 @@ Add an optional `.speccyrc` JSON file at the repository root to configure rules.
 
 Scoped ignores use `*` within one path segment and `**` across segments. Unknown rules, properties, severities, and options are rejected, so a typo cannot silently weaken review. Contract-correctness rules such as `operation-id-unique` and `path-parameter-declared` cannot be disabled or ignored.
 
-When linting with `--against`, `new-operation-lifecycle` suggests adding lifecycle metadata to newly added operations. Add a date to receive a removal suggestion after `maxAgeDays`:
+When linting with `--against`, `new-operation-lifecycle` suggests adding lifecycle metadata to newly added operations. Add a date and any lint, with or without `--against`, suggests removing the badge after `maxAgeDays`; that finding reports under the `new-operation-lifecycle-expired` rule ID while reading its `maxAgeDays` from the `new-operation-lifecycle` setting:
 
 ```yaml
 x-speccy-lifecycle: new
