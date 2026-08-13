@@ -1,5 +1,14 @@
 # speccy-spectral
 
+## 0.9.0
+
+### Patch Changes
+
+- [`4cdd763`](https://github.com/mcclowes/speccy/commit/4cdd763fa0e390a110eeab8ff191481b7a9b0052) Thanks [@mcclowes](https://github.com/mcclowes)! - Load the standard OAS ruleset correctly through the CommonJS package export.
+
+- Updated dependencies [[`498f690`](https://github.com/mcclowes/speccy/commit/498f690824da9e6ed50e231db52bdbb2d747c2a7)]:
+  - speccy-core@0.9.0
+
 ## 0.8.0
 
 ### Patch Changes
