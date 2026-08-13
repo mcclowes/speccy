@@ -76,7 +76,12 @@ related:
   background: transparent;
   border: 0;
   border-radius: 0;
-  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
+  font-family: var(
+    --sp-mono-font-family,
+    'DM Mono',
+    ui-monospace,
+    monospace
+  );
   font-size: inherit;
   vertical-align: baseline;
 }
