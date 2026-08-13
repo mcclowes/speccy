@@ -226,16 +226,27 @@ function expandDiscriminatorMappings(node: unknown): unknown {
 function removeInternalNodes(
   node: unknown,
   preserveSchemaRoot = false,
+  caches = {
+    public: new WeakMap<object, unknown>(),
+    schemaRoot: new WeakMap<object, unknown>(),
+  },
 ): unknown {
   if (Array.isArray(node)) {
-    return node
-      .map((item) => removeInternalNodes(item))
+    const cached = caches.public.get(node);
+    if (cached !== undefined) return cached;
+    const filtered = node
+      .map((item) => removeInternalNodes(item, false, caches))
       .filter((item) => item !== undefined);
+    caches.public.set(node, filtered);
+    return filtered;
   }
   if (!node || typeof node !== 'object') return node;
 
   const source = node as Record<string, unknown>;
   if (source['x-internal'] === true && !preserveSchemaRoot) return undefined;
+  const cache = preserveSchemaRoot ? caches.schemaRoot : caches.public;
+  const cached = cache.get(source);
+  if (cached !== undefined) return cached;
 
   const literalValueKeys = new Set([
     'const',
@@ -245,7 +256,7 @@ function removeInternalNodes(
     'value',
   ]);
 
-  return Object.fromEntries(
+  const filtered = Object.fromEntries(
     Object.entries(source)
       .map(
         ([key, value]) =>
@@ -256,7 +267,7 @@ function removeInternalNodes(
               : literalValueKeys.has(key) ||
                   (key.startsWith('x-') && key !== 'x-internal')
                 ? value
-                : removeInternalNodes(value, key === 'schema'),
+                : removeInternalNodes(value, key === 'schema', caches),
           ] as const,
       )
       .filter(
@@ -264,6 +275,8 @@ function removeInternalNodes(
           entry[1] !== undefined,
       ),
   );
+  cache.set(source, filtered);
+  return filtered;
 }
 
 function swaggerSchema(parameter: Parameter) {

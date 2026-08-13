@@ -338,6 +338,63 @@ paths:
     ).toEqual({ 'x-internal': true, status: 'visible' });
   });
 
+  it('preserves shared schema subtrees when resolving repeated references', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/one': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Envelope' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/two': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Envelope' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Envelope: {
+            type: 'object',
+            properties: {
+              data: { $ref: '#/components/schemas/SharedData' },
+            },
+          },
+          SharedData: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+          },
+        },
+      },
+    });
+    const schemas = model.operations.map(
+      (operation) =>
+        operation.operation.responses?.['200']?.content?.['application/json']
+          ?.schema as SchemaObject,
+    );
+
+    expect(schemas[0]?.properties?.data).toBe(schemas[1]?.properties?.data);
+  });
+
   it('rejects documents without an OpenAPI version', () => {
     expect(() => createReferenceModel({ paths: {} })).toThrow(
       'openapi or swagger',
