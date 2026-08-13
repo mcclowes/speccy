@@ -508,6 +508,9 @@
   --sp-code-text: var(--site-ink);
   --sp-code-border: var(--site-line);
   --sp-code-control: var(--sp-surface-soft);
+}
+.home-renderer-card,
+.home-renderer-operation {
   margin-bottom: 0 !important;
 }
 .home-renderer-card {
