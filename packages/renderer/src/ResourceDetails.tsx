@@ -144,18 +144,6 @@ export function ResponseDetails({
         showRootDescription={showRootDescription}
         exampleValue={exampleValue}
       />
-      {response.links && (
-        <div className="sp-detail-list">
-          <strong>Links</strong>
-          {Object.entries(response.links).map(([name, link]) => (
-            <div key={name}>
-              <code>{name}</code>
-              <Markdown>{link.description}</Markdown>
-              <span>{link.operationId ?? link.operationRef}</span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -249,8 +249,11 @@ describe('Speccy navigation', () => {
       within(workflow).getByText('A payment needs an owner.'),
     ).toBeVisible();
     expect(
-      screen.getAllByText('Read the newly created payment.')[0],
+      within(workflow).getByText('Read the newly created payment.'),
     ).toBeVisible();
+    expect(screen.getAllByText('Read the newly created payment.')).toHaveLength(
+      1,
+    );
     expect(within(workflow).getByText('After a 201 response')).toBeVisible();
     const callbackGroup = within(workflow)
       .getByRole('heading', { name: 'Callbacks from this operation' })

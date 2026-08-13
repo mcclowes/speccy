@@ -71,7 +71,7 @@ paths:
         - verifyCustomer
 ```
 
-Speccy shows prerequisites, response links, and callbacks together in a workflow card on the operation page. The card starts collapsed, so readers can open it when they need the wider operation context. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
+Speccy shows prerequisites, response links, and callbacks together in a workflow card on the operation page. Response links appear there rather than being repeated below each response body. The card starts collapsed, so readers can open it when they need the wider operation context. These fields document workflow relationships; they do not make calls, register callback URLs, or enforce server-side state.
 
 To connect a top-level webhook to the operations that may emit it, add `x-speccy-webhooks` to each triggering operation. Entries accept the same string, `operationId`, or `operationRef` forms as prerequisites:
 
