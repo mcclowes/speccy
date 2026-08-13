@@ -21,10 +21,12 @@ vi.mock('speccy-spectral', () => ({ runSpectral }));
 vi.mock('speccy-renderer', async (importOriginal) => ({
   ...(await importOriginal<typeof import('speccy-renderer')>()),
   Speccy: ({
+    spec,
     onNavigate,
     hrefForRoute,
     theme,
   }: {
+    spec: unknown;
     onNavigate?: (route: { page: 'operation'; operationId: string }) => void;
     hrefForRoute?: (route: {
       page: 'operation';
@@ -32,7 +34,7 @@ vi.mock('speccy-renderer', async (importOriginal) => ({
     }) => string;
     theme?: 'light' | 'dark' | 'system';
   }) => {
-    previewRender();
+    previewRender(spec);
     const operation = {
       page: 'operation' as const,
       operationId: 'list-companies',
@@ -96,6 +98,9 @@ describe('web app', () => {
       'https://raw.githubusercontent.com/stripe/openapi/master/latest/openapi.spec3.json',
     );
     expect(window.location.pathname).toMatch(/^\/references\/Stripe-/);
+    expect(previewRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({ info: { title: 'Stripe' } }),
+    );
     await waitFor(() => expect(runSpectral).toHaveBeenCalled());
     expect(runSpectral.mock.calls[0]?.[0]).toMatchObject({ paths: {} });
   });

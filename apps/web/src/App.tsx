@@ -276,9 +276,12 @@ export function App() {
     setUrlOpen(false);
   }
 
-  function displayReference(reference: RecentReference) {
+  function displayReference(
+    reference: RecentReference,
+    renderedSpec: OpenAPIDocument | string = reference.source,
+  ) {
     setSource(reference.source);
-    setSpec(reference.source);
+    setSpec(renderedSpec);
     setFileName(reference.name);
     setSourceUrl(reference.sourceUrl ?? '');
     setActiveId(reference.id);
@@ -292,6 +295,7 @@ export function App() {
     nextSourceUrl?: string | null,
     referenceRoute: SpeccyRoute = { page: 'overview' },
     historyMode: 'push' | 'replace' | false = 'push',
+    renderedSpec?: OpenAPIDocument,
   ) {
     const current = existingId
       ? recentsRef.current.find((item) => item.id === existingId)
@@ -309,7 +313,7 @@ export function App() {
       existingId,
     );
     const { reference, references: updated } = added;
-    displayReference(reference);
+    displayReference(reference, renderedSpec);
     recentsRef.current = updated;
     writeRecentReferences(updated);
     setRecents(updated);
@@ -373,6 +377,7 @@ export function App() {
         nextUrl,
         referenceRoute,
         historyMode,
+        document,
       );
       setUrl(nextUrl);
       storeItem(URL_STORAGE_KEY, nextUrl);

@@ -2,6 +2,30 @@ import { describe, expect, it, vi } from 'vitest';
 import { resolveExternalRefs } from './externalRefs';
 
 describe('resolveExternalRefs', () => {
+  it('preserves local references in the entry document', async () => {
+    const load = vi.fn(
+      async () => `
+openapi: 3.1.1
+info: { title: Local references, version: 1.0.0 }
+paths: {}
+components:
+  schemas:
+    Pet: { type: object }
+    PetList: { type: array, items: { $ref: '#/components/schemas/Pet' } }
+`,
+    );
+
+    const result = await resolveExternalRefs(
+      'https://example.com/openapi.yaml',
+      load,
+    );
+
+    expect(result.components?.schemas?.PetList).toMatchObject({
+      items: { $ref: '#/components/schemas/Pet' },
+    });
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
   it('resolves relative documents, JSON Pointers, anchors, and reference siblings', async () => {
     const load = vi.fn(async (uri: string) => {
       const documents: Record<string, string> = {

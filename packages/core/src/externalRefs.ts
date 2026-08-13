@@ -87,6 +87,11 @@ export async function resolveExternalRefs(
       typeof record.$id === 'string' ? new URL(record.$id, baseUri) : baseUri;
     if (typeof record.$ref === 'string') {
       const absolute = new URL(record.$ref, scopedBase);
+      if (
+        documentUri(absolute) === documentUri(entryUri) &&
+        documentUri(currentDocumentUri) === documentUri(entryUri)
+      )
+        return record;
       const key = absolute.href;
       const siblings = Object.fromEntries(
         Object.entries(record).filter(([name]) => name !== '$ref'),
