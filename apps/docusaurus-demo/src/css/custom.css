@@ -73,7 +73,9 @@ body {
 }
 .theme-doc-markdown table {
   border-radius: 8px;
+  max-width: 100%;
   overflow: hidden;
+  width: fit-content;
 }
 
 .medium-zoom-overlay {
