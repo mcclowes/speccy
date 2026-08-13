@@ -534,6 +534,7 @@ describe('Speccy navigation', () => {
       'src',
       '/icons/test.svg',
     );
+    expect(container.querySelector('.sp-brand-mark')).not.toBeInTheDocument();
     expect(container.querySelector('.sp-brand')).toHaveClass('has-logo');
   });
 

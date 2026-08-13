@@ -229,16 +229,6 @@ related:
   min-height: 72px;
   padding-block: 17px;
 }
-.sp-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: white;
-  border-radius: 10px;
-  background: var(--sp-accent);
-  box-shadow: 0 7px 20px color-mix(in srgb, var(--sp-accent) 26%, transparent);
-}
 .sp-sidebar-search {
   height: 39px;
   display: flex;

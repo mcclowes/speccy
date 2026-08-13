@@ -1258,13 +1258,11 @@ export function Speccy({
   const brandLogo =
     logo ??
     (infoIcon?.url ? (
-      <span className="sp-brand-mark">
-        <img
-          className={styles.brandIcon}
-          src={infoIcon.url}
-          alt={infoIcon.alt ?? ''}
-        />
-      </span>
+      <img
+        className={styles.brandIcon}
+        src={infoIcon.url}
+        alt={infoIcon.alt ?? ''}
+      />
     ) : null);
 
   return (

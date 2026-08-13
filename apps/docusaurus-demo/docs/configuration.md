@@ -28,7 +28,7 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 
 Hosts that own routing can also pass `route`, `onNavigate`, and `hrefForRoute` to control navigation instead of letting Speccy write to browser history.
 
-Set `info.x-icon` in the OpenAPI document to show a brand mark beside the API title in the sidebar header, so it appears only when `showSidebar` is on. An explicit `logo` component prop takes precedence.
+Set `info.x-icon` in the OpenAPI document to show a brand mark beside the API title in the sidebar header, so it appears only when `showSidebar` is on. Speccy displays the image as supplied without adding a background. An explicit `logo` component prop takes precedence.
 
 ```yaml
 info:
