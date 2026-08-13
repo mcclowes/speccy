@@ -46,10 +46,11 @@ export function composeReport(results) {
   return `${lines.join('\n').trim()}\n`;
 }
 
-function runCli(args, version) {
+export function runCli(args, version) {
   const result = spawnSync('npx', ['--yes', `speccy-cli@${version}`, ...args], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1' },
+    maxBuffer: 10 * 1024 * 1024,
   });
   if (result.error) throw result.error;
   if (result.status === 2)
