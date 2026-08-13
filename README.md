@@ -20,9 +20,9 @@ See the [public package decision](docs/decisions/001-public-package-surface.md) 
 ## What’s included
 
 - `apps/macos` - an offline SwiftUI and WebKit Mac app with native Open, Reload, and Print commands
-- `apps/docusaurus-demo` - a production-build integration fixture
+- `apps/docusaurus-demo` - the documentation site, which doubles as a production-build integration fixture
 
-Speccy supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. The web studio and Mac app resolve multi-document references automatically; the React component renders a single document, so bundle external references first. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
+Speccy supports the complete OpenAPI 3.1.1 document vocabulary in YAML or JSON, including JSON Schema 2020-12, multi-document references, request serialization, and every reusable component type. The web studio resolves multi-document references for URL-loaded documents and the Mac app resolves them for documents opened from disk; the React component renders a single document, so bundle external references first. See the [OpenAPI 3.1.1 conformance matrix](docs/openapi-3.1.1-conformance.md) for the tested scope and the precise boundary of that claim.
 
 Speccy also accepts other OpenAPI 3.x descriptions and Swagger 2 documents. Swagger 2 hosts, definitions, security definitions, body and form parameters, and response schemas are normalized automatically.
 
@@ -45,7 +45,7 @@ npm install
 npm run dev
 ```
 
-Vite prints the local URL. Open a `.yaml`, `.yml`, or `.json` document, paste source directly, or load a URL. Use the share button to copy a clean preview link without the studio controls. Remote documents stay linked to their source URL; local and pasted documents are included in the link itself.
+Vite prints the local URL. Open a `.yaml`, `.yml`, or `.json` document, drop one anywhere on the window, or load a URL. Use the share button to copy a clean preview link without the studio controls. Remote documents stay linked to their source URL; local documents are included in the link itself.
 
 ## Build the Mac app
 
@@ -140,9 +140,9 @@ Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not ru
 
 Each spec argument accepts a file path, a git ref, or an http or https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
 
-Speccy's own CI dogfoods this command on pull requests. It builds the CLI from the proposed changes, compares the repository's managed cards example with the base branch, and publishes the Markdown report in the workflow summary.
+Speccy's own CI dogfoods this command on pull requests. It builds the CLI from the proposed changes, compares the repository's managed cards example with the base branch, and publishes the Markdown report in the workflow summary and a persistent pull request comment, with health findings posted on the changed lines.
 
-For several specs and a persistent pull request comment, use the GitHub Action:
+For several specs in one persistent pull request comment, use the GitHub Action:
 
 ```yaml
 on: pull_request
@@ -225,12 +225,13 @@ The screenshot set is small, so it stays in regular Git. Git LFS would add an ex
 ## Project structure
 
 ```text
+.github/              CI and release workflows
 action.yml            GitHub Action definition
 action/               Action implementation wrapping speccy-cli
 apps/
   web/                Standalone Vite studio
   macos/              Native SwiftUI shell and packager
-  docusaurus-demo/    Integration fixture
+  docusaurus-demo/    Documentation site and integration fixture
 packages/
   core/               Headless parser, model, diagnostics, and diff engine
   cli/                speccy lint and speccy diff
