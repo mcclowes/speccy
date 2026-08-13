@@ -45,3 +45,7 @@ For example, a reference mounted with `basePath="/api"` needs `/api/*` rewritten
 The standalone renderer leaves fetching to your application. The Docusaurus plugin fetches `specUrl` during the build, so the result remains a static site.
 
 Prefer a pinned or versioned specification URL in production. If the remote document changes unexpectedly, the next build can change your public reference without a code review.
+
+## Raw Markdown
+
+The Speccy documentation build publishes each guide as raw Markdown alongside the HTML page. Add `/index.md` to a guide URL when an AI tool or another text-only client needs the source content. For example, `/docs/deployment/index.md` returns this page without the site chrome.

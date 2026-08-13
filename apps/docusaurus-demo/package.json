@@ -11,12 +11,13 @@
   "dependencies": {
     "@docusaurus/core": "^3.8.1",
     "@docusaurus/preset-classic": "^3.8.1",
-    "docusaurus-plugin-speccy": "*",
-    "speccy-renderer": "*",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
+    "docusaurus-plugin-speccy": "*",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "speccy-renderer": "*"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.8.1",

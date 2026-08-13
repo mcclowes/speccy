@@ -1,4 +1,5 @@
 import type { Config } from '@docusaurus/types';
+import { fileURLToPath } from 'node:url';
 
 const isVercel = process.env.VERCEL === '1';
 const vercelHost =
@@ -17,6 +18,13 @@ const config: Config = {
   projectName: 'speccy',
   favicon: 'favicon.svg',
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
+  onDuplicateRoutes: 'throw',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+    },
+  },
   customFields: { studioUrl },
   plugins: [
     [
@@ -27,6 +35,14 @@ const config: Config = {
         renderer: { accentColor: '#6d5dfc', theme: 'inherit' },
       },
     ],
+    [
+      fileURLToPath(
+        new URL('./plugins/markdown-export/index.mjs', import.meta.url),
+      ),
+      {
+        docsConfigs: [{ path: 'docs', routeBasePath: '/docs' }],
+      },
+    ],
   ],
   presets: [
     [
@@ -35,6 +51,22 @@ const config: Config = {
         docs: {
           routeBasePath: 'docs',
           sidebarPath: './sidebars.ts',
+        },
+        sitemap: {
+          lastmod: 'date',
+          changefreq: 'weekly',
+          priority: 0.5,
+          ignorePatterns: ['/updates/tags/**'],
+          filename: 'sitemap.xml',
+          createSitemapItems: async (params) => {
+            const { defaultCreateSitemapItems, ...rest } = params;
+            const items = await defaultCreateSitemapItems(rest);
+            return items.filter(
+              (item) =>
+                !item.url.includes('/page/') &&
+                !item.url.includes('/updates/tags'),
+            );
+          },
         },
         blog: {
           routeBasePath: 'updates',
