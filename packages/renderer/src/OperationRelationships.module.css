@@ -1,7 +1,12 @@
 .relationships {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 18px;
-  margin: 0 0 52px;
+  align-items: start;
+  margin: 0 0 28px;
+  padding: 12px 0;
+  border-top: 1px solid var(--sp-line);
+  border-bottom: 1px solid var(--sp-line);
 }
 
 .relationships h2,
@@ -10,44 +15,48 @@
 }
 
 .relationships h2 {
-  font-size: 1.25rem;
-  letter-spacing: -0.025em;
-}
-
-.groups {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.group {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-}
-
-.group h3 {
-  color: var(--sp-muted);
+  padding-top: 2px;
   font-size: 0.6875rem;
   letter-spacing: 0.075em;
   text-transform: uppercase;
 }
 
+.groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.group {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+}
+
+.group h3 {
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
 .cards {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .card,
 .card:visited {
   min-width: 0;
-  display: grid;
-  gap: 7px;
-  padding: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 10px;
+  padding: 7px 9px;
   color: var(--sp-text);
   background: var(--sp-surface);
   border: 1px solid var(--sp-line);
-  border-radius: 10px;
+  border-radius: 7px;
   text-decoration: none;
 }
 
@@ -56,7 +65,7 @@ a.card:hover {
 }
 
 .cardTitle {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -64,12 +73,12 @@ a.card:hover {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .address :global(.sp-api-path) {
   overflow: hidden;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -77,8 +86,8 @@ a.card:hover {
 .context,
 .description {
   color: var(--sp-muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
+  font-size: 0.6875rem;
+  line-height: 1.35;
 }
 
 .context {
@@ -86,7 +95,13 @@ a.card:hover {
 }
 
 @media (max-width: 700px) {
+  .relationships {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
   .groups {
     grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
   }
 }

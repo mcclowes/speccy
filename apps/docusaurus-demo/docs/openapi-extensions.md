@@ -54,7 +54,7 @@ paths:
         - verifyCustomer
 ```
 
-Speccy shows prerequisites and response links together on the operation page. These fields document workflow relationships; they do not make the calls or enforce server-side state.
+Speccy shows prerequisites and response links together in a compact workflow band on the operation page. These fields document workflow relationships; they do not make the calls or enforce server-side state.
 
 ## Tag groups
 
