@@ -1,6 +1,9 @@
 ---
 title: Document workflows with links, prerequisites, and callbacks
 description: Show readers what comes before an operation, what can follow its response, and which requests the API may send back.
+slug: links-and-prerequisites
+authors: [speccy]
+tags: [OpenAPI, workflows]
 ---
 
 # Document workflows with links, prerequisites, and callbacks
@@ -14,6 +17,8 @@ Speccy combines three complementary forms of operation relationship:
 - OpenAPI callbacks describe requests the API may later send to the caller.
 
 Together they give an operation a useful sense of place: what gets you here, where can you go next, and what might come back to you?
+
+<!-- truncate -->
 
 ## Use links for response-driven next steps
 
@@ -203,4 +208,4 @@ Use tags and subgroups for broad organization. Use links, prerequisites, and cal
 
 Make sure every referenced `operationId` exists and is unique. Then open the operation page and verify that the workflow reads in the right direction, descriptions add useful context, response parameter expressions point to fields the response actually returns, and callback expressions point to values the original request supplies.
 
-See [OpenAPI extensions](../openapi-extensions.md#operation-workflows) for the compact extension reference.
+See [OpenAPI extensions](/docs/openapi-extensions#operation-workflows) for the compact extension reference.

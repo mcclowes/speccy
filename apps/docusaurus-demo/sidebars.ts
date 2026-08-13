@@ -13,11 +13,6 @@ const sidebars: SidebarsConfig = {
       label: 'Customize',
       items: ['configuration', 'openapi-extensions'],
     },
-    {
-      type: 'category',
-      label: 'Updates',
-      items: ['updates/index', 'updates/links-and-prerequisites'],
-    },
     'deployment',
   ],
 };

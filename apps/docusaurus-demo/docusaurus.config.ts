@@ -36,7 +36,20 @@ const config: Config = {
           routeBasePath: 'docs',
           sidebarPath: './sidebars.ts',
         },
-        blog: false,
+        blog: {
+          routeBasePath: 'updates',
+          blogTitle: 'Speccy updates',
+          blogDescription:
+            'Release notes, migration guidance, design notes, and practical API documentation tips.',
+          showReadingTime: true,
+          postsPerPage: 10,
+          feedOptions: {
+            type: ['rss', 'atom'],
+            title: 'Speccy updates',
+            description:
+              'Release notes, migration guidance, design notes, and practical API documentation tips.',
+          },
+        },
         theme: { customCss: './src/css/custom.css' },
       },
     ],
@@ -46,6 +59,7 @@ const config: Config = {
       title: 'Speccy',
       items: [
         { to: '/docs/getting-started', label: 'Docs', position: 'right' },
+        { to: '/updates', label: 'Updates', position: 'right' },
         { to: '/api', label: 'Live example', position: 'right' },
         ...(studioUrl
           ? [{ href: studioUrl, label: 'Studio', position: 'right' as const }]
@@ -67,6 +81,7 @@ const config: Config = {
             { label: 'Get started', to: '/docs/getting-started' },
             { label: 'React renderer', to: '/docs/react-renderer' },
             { label: 'Docusaurus', to: '/docs/docusaurus' },
+            { label: 'Updates', to: '/updates' },
           ],
         },
         {
