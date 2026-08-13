@@ -98,6 +98,27 @@ describe('developer diagnostics layout', () => {
     expect(actions).not.toHaveTextContent('•••');
   });
 
+  it('shows quiet indexing progress on the trigger and in the drawer', () => {
+    render(
+      <DeveloperDiagnostics
+        diagnostics={findings}
+        storageScope="test"
+        open
+        onOpenChange={() => undefined}
+        scope="all"
+        onScopeChange={() => undefined}
+        indexState={{ phase: 'all', completed: 3, total: 12 }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /API health: indexing/ }),
+    ).toHaveTextContent('…');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Indexing the rest of the API… 3 of 12',
+    );
+  });
+
   it('formats every finding for copying and CSV export', () => {
     expect(diagnosticsAsText(findings)).toContain(
       '0 issues, 1 warning, 0 suggestions',

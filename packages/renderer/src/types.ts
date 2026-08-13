@@ -15,6 +15,12 @@ export type SpeccyRoute =
   | { page: 'tag'; tag: string }
   | { page: 'reference'; section: string };
 
+export interface DiagnosticsIndexState {
+  phase: 'idle' | 'page' | 'all' | 'complete' | 'error';
+  completed?: number;
+  total?: number;
+}
+
 export interface SpeccyProps {
   spec: OpenAPIDocument | string;
   className?: string;
@@ -47,6 +53,10 @@ export interface SpeccyProps {
   previousSpec?: OpenAPIDocument | string;
   /** Spectral results to present alongside Speccy's built-in guidance. */
   spectralDiagnostics?: SpectralDiagnosticInput[];
+  /** Reports lazy API health indexing progress supplied by the host. */
+  diagnosticsIndexState?: DiagnosticsIndexState;
+  /** Starts host-provided diagnostics for the page the reader is viewing. */
+  onRequestDiagnostics?: (route: SpeccyRoute) => void;
   /** Separates required parameters from optional parameters added on demand. Defaults to true. */
   parameterPrototype?: boolean;
   /** Shows the interactive request builder and allows API requests to be sent. Defaults to true. */

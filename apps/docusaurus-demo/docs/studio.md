@@ -13,7 +13,7 @@ Speccy Studio is a browser-based workspace for reading and reviewing OpenAPI doc
 
 The home screen includes a small catalog of complex public APIs, including Stripe, GitHub, DigitalOcean, and Cloudflare. Select one to fetch its public OpenAPI document and open it in the same reference viewer used for your own specifications.
 
-Large catalog specifications are processed in the browser. The studio keeps shared schema data in memory once, so highly connected documents such as Stripe remain responsive while they load.
+Large catalog specifications are processed in the browser. The studio keeps shared schema data in memory once, so highly connected documents such as Stripe remain responsive while they load. API health checks start in the background after the reference renders, prioritize the page you are viewing, and then index the rest of the document in bounded batches. The API health control shows quiet progress while that work continues.
 
 Catalog documents come from repositories maintained by each API provider. They can be large and may take a moment to parse. Speccy fetches the current document when you open a card, then keeps it in your recent references on that device.
 

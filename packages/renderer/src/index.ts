@@ -33,7 +33,7 @@ export {
   resolveExternalRefs,
   resolveRefs,
 } from 'speccy-core';
-export type { SpeccyProps, SpeccyRoute } from './types';
+export type { DiagnosticsIndexState, SpeccyProps, SpeccyRoute } from './types';
 export type { SpecDiffProps } from './SpecDiff';
 export type {
   ApiChange,

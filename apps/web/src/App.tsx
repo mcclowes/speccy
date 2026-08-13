@@ -16,18 +16,16 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   Speccy,
   ThemeToggle,
+  type DiagnosticsIndexState,
   type OpenAPIDocument,
   type SpeccyRoute,
   type SpectralDiagnosticInput,
   type Theme,
 } from 'speccy-renderer';
-import {
-  bundleFragmentedSpec,
-  parseSpec,
-  resolveExternalRefs,
-} from 'speccy-core';
+import { bundleFragmentedSpec, resolveExternalRefs } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
 import { API_CATALOG } from './apiCatalog';
+import { createApiHealthJobs } from './apiHealthIndex';
 import { parseInitialLocation, previewHref } from './previewUrls';
 import {
   addRecentReference,
@@ -160,30 +158,12 @@ export function App() {
   const [spectralDiagnostics, setSpectralDiagnostics] = useState<
     SpectralDiagnosticInput[]
   >([]);
+  const [diagnosticsIndexState, setDiagnosticsIndexState] =
+    useState<DiagnosticsIndexState>({ phase: 'idle' });
   const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
   const restoredInitialRoute = useRef(false);
-
-  useEffect(() => {
-    let active = true;
-    if (location.preview || !fileName) {
-      setSpectralDiagnostics([]);
-      return () => {
-        active = false;
-      };
-    }
-    void import('speccy-spectral')
-      .then(({ runSpectral }) => runSpectral(parseSpec(spec)))
-      .then((findings) => {
-        if (active) setSpectralDiagnostics(findings);
-      })
-      .catch(() => {
-        if (active) setSpectralDiagnostics([]);
-      });
-    return () => {
-      active = false;
-    };
-  }, [spec, fileName, location.preview]);
+  const diagnosticsRun = useRef(0);
 
   useEffect(() => {
     if (location.preview) {
@@ -411,6 +391,67 @@ export function App() {
     (route.referenceId === activeId || location.preview)
       ? route.referenceRoute
       : ({ page: 'overview' } satisfies SpeccyRoute);
+  const referenceRouteRef = useRef(referenceRoute);
+  referenceRouteRef.current = referenceRoute;
+
+  useEffect(() => {
+    const run = ++diagnosticsRun.current;
+    setSpectralDiagnostics([]);
+    setDiagnosticsIndexState({ phase: 'idle' });
+    if (location.preview || !fileName) return;
+
+    const start = async () => {
+      try {
+        const jobs = createApiHealthJobs(spec, referenceRouteRef.current);
+        const pageJobs = jobs.filter((job) => job.currentPage).length;
+        const { runSpectral } = await import('speccy-spectral');
+        const findings = new Map<string, SpectralDiagnosticInput>();
+        setDiagnosticsIndexState({
+          phase: 'page',
+          completed: 0,
+          total: jobs.length,
+        });
+        for (const [index, job] of jobs.entries()) {
+          if (run !== diagnosticsRun.current) return;
+          const next = (await runSpectral(job.document())).filter(job.accepts);
+          for (const finding of next) {
+            const key = `${finding.code}:${finding.path?.join('.') ?? ''}:${finding.message}`;
+            findings.set(key, finding);
+          }
+          if (run !== diagnosticsRun.current) return;
+          setSpectralDiagnostics([...findings.values()]);
+          setDiagnosticsIndexState({
+            phase: index + 1 < pageJobs ? 'page' : 'all',
+            completed: index + 1,
+            total: jobs.length,
+          });
+          await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+        }
+        if (run === diagnosticsRun.current)
+          setDiagnosticsIndexState({
+            phase: 'complete',
+            completed: jobs.length,
+            total: jobs.length,
+          });
+      } catch {
+        if (run === diagnosticsRun.current)
+          setDiagnosticsIndexState({ phase: 'error' });
+      }
+    };
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    const handle = idleWindow.requestIdleCallback
+      ? idleWindow.requestIdleCallback(() => void start())
+      : window.setTimeout(() => void start(), 100);
+    return () => {
+      diagnosticsRun.current += 1;
+      if (idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(handle);
+      else window.clearTimeout(handle);
+    };
+  }, [spec, fileName, location.preview]);
 
   function rendererHref(nextRoute: SpeccyRoute) {
     if (!location.preview)
@@ -625,6 +666,7 @@ export function App() {
               showThemeToggle={false}
               showDeveloperHints
               spectralDiagnostics={spectralDiagnostics}
+              diagnosticsIndexState={diagnosticsIndexState}
               route={referenceRoute}
               onNavigate={navigateRenderer}
               hrefForRoute={rendererHref}

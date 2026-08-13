@@ -963,6 +963,8 @@ export function Speccy({
   showDeveloperHints = false,
   previousSpec,
   spectralDiagnostics,
+  diagnosticsIndexState,
+  onRequestDiagnostics,
   parameterPrototype = true,
   tryIt = true,
   openApiUrl,
@@ -982,7 +984,12 @@ export function Speccy({
     }
   }, [spec]);
   const diagnostics = useMemo(() => {
-    if (!showDeveloperHints || !result.document) return [];
+    if (
+      !showDeveloperHints ||
+      !result.document ||
+      diagnosticsIndexState?.phase === 'idle'
+    )
+      return [];
     let previousDocument: OpenAPIDocument | undefined;
     try {
       previousDocument = previousSpec ? parseSpec(previousSpec) : undefined;
@@ -993,7 +1000,13 @@ export function Speccy({
       previousDocument,
       spectral: spectralDiagnostics,
     });
-  }, [showDeveloperHints, result.document, previousSpec, spectralDiagnostics]);
+  }, [
+    showDeveloperHints,
+    result.document,
+    previousSpec,
+    spectralDiagnostics,
+    diagnosticsIndexState?.phase,
+  ]);
   const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
@@ -1106,6 +1119,19 @@ export function Speccy({
   const overviewDiagnostics = diagnostics.filter(
     (diagnostic) => !diagnostic.operationId && !diagnostic.tag,
   );
+  const currentPageDiagnostics = activeOperation
+    ? diagnostics.filter(
+        (diagnostic) => diagnostic.operationId === activeOperation.id,
+      )
+    : activeTag
+      ? diagnostics.filter((diagnostic) => diagnostic.tag === activeTag.name)
+      : activeReference
+        ? diagnostics.filter(
+            (diagnostic) =>
+              diagnostic.path[0] === 'components' &&
+              diagnostic.path[1] === activeReference,
+          )
+        : undefined;
   const normalizedFilter = filterQuery.trim().toLowerCase();
   const matchesFilter = (item: OperationModel) =>
     !normalizedFilter ||
@@ -1664,13 +1690,7 @@ export function Speccy({
       {showDeveloperHints && (
         <DeveloperDiagnostics
           diagnostics={diagnostics}
-          currentPageDiagnostics={
-            activeOperation
-              ? diagnostics.filter(
-                  (diagnostic) => diagnostic.operationId === activeOperation.id,
-                )
-              : undefined
-          }
+          currentPageDiagnostics={currentPageDiagnostics}
           storageScope={storageScope}
           open={diagnosticsOpen}
           onOpenChange={setDiagnosticsOpen}
@@ -1679,6 +1699,18 @@ export function Speccy({
           routeForDiagnostic={routeForDiagnostic}
           hrefForRoute={hrefForRoute}
           onNavigate={navigateDiagnostic}
+          indexState={diagnosticsIndexState}
+          onRequestDiagnostics={() =>
+            onRequestDiagnostics?.(
+              activeOperation
+                ? { page: 'operation', operationId: activeOperation.id }
+                : activeTag
+                  ? { page: 'tag', tag: tagSlug(activeTag) }
+                  : activeReference
+                    ? { page: 'reference', section: activeReference }
+                    : { page: 'overview' },
+            )
+          }
         />
       )}
     </div>

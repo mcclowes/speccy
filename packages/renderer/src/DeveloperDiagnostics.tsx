@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react';
 import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
+import type { DiagnosticsIndexState } from './types';
 import { useLocalState } from './useLocalState';
 import styles from './DeveloperDiagnostics.module.css';
 
@@ -238,6 +239,8 @@ export function DeveloperDiagnostics({
   routeForDiagnostic,
   hrefForRoute,
   onNavigate,
+  indexState,
+  onRequestDiagnostics,
 }: {
   diagnostics: ApiDiagnostic[];
   currentPageDiagnostics?: ApiDiagnostic[];
@@ -246,6 +249,8 @@ export function DeveloperDiagnostics({
   scope: 'page' | 'all';
   onScopeChange: (scope: 'page' | 'all') => void;
   storageScope: string;
+  indexState?: DiagnosticsIndexState;
+  onRequestDiagnostics?: () => void;
 } & DiagnosticNavigationProps) {
   const [filter, setFilter] = useState<'all' | DiagnosticSeverity>('all');
   const [query, setQuery] = useState('');
@@ -291,6 +296,7 @@ export function DeveloperDiagnostics({
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
   }
+  const indexing = indexState?.phase === 'page' || indexState?.phase === 'all';
 
   return (
     <>
@@ -300,14 +306,19 @@ export function DeveloperDiagnostics({
           `sp-diagnostics-trigger ${allVisible.some((diagnostic) => diagnostic.severity === 'issue') ? 'has-issues' : ''}`,
         )}
         onClick={() => {
+          onRequestDiagnostics?.();
           onScopeChange(currentPageDiagnostics ? 'page' : 'all');
           onOpenChange(true);
         }}
-        aria-label={`API health: ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`}
+        aria-label={
+          indexing
+            ? `API health: indexing, ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'} so far`
+            : `API health: ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`
+        }
       >
         <span aria-hidden="true">!</span>
         <strong>API health</strong>
-        <small>{allVisible.length}</small>
+        <small>{indexing ? '…' : allVisible.length}</small>
       </button>
       {open && (
         <div
@@ -329,6 +340,16 @@ export function DeveloperDiagnostics({
                 <span className="sp-eyebrow">Developer view</span>
                 <h2>API health</h2>
                 <p>Contract checks and design guidance. No opaque score.</p>
+                {indexState && indexState.phase !== 'complete' && (
+                  <small role="status">
+                    {indexState.phase === 'idle' && 'Ready to check this page'}
+                    {indexState.phase === 'page' && 'Checking this page…'}
+                    {indexState.phase === 'all' &&
+                      `Indexing the rest of the API… ${indexState.completed ?? 0} of ${indexState.total ?? 0}`}
+                    {indexState.phase === 'error' &&
+                      'Some API health checks couldn’t finish'}
+                  </small>
+                )}
               </div>
               <div className={scoped('sp-diagnostics-header-actions')}>
                 <details className={scoped('sp-diagnostics-menu')}>

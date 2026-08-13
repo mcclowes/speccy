@@ -11,7 +11,12 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
-const { previewRender } = vi.hoisted(() => ({ previewRender: vi.fn() }));
+const { previewRender, runSpectral } = vi.hoisted(() => ({
+  previewRender: vi.fn(),
+  runSpectral: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock('speccy-spectral', () => ({ runSpectral }));
 
 vi.mock('speccy-renderer', async (importOriginal) => ({
   ...(await importOriginal<typeof import('speccy-renderer')>()),
@@ -60,6 +65,7 @@ describe('web app', () => {
 
   beforeEach(() => {
     previewRender.mockClear();
+    runSpectral.mockClear();
     window.localStorage.clear();
     window.history.replaceState({}, '', '/');
   });
@@ -90,6 +96,8 @@ describe('web app', () => {
       'https://raw.githubusercontent.com/stripe/openapi/master/latest/openapi.spec3.json',
     );
     expect(window.location.pathname).toMatch(/^\/references\/Stripe-/);
+    await waitFor(() => expect(runSpectral).toHaveBeenCalled());
+    expect(runSpectral.mock.calls[0]?.[0]).toMatchObject({ paths: {} });
   });
 
   it('shows catalog loading errors on the home screen', async () => {
@@ -235,11 +243,11 @@ describe('web app', () => {
   });
 
   it('adds import times when same-name references have different contents', async () => {
+    render(<App />);
+    await waitFor(() => expect(window.speccyLoadSpec).toBeTypeOf('function'));
     vi.spyOn(Date, 'now')
       .mockReturnValueOnce(new Date('2026-08-07T09:15:00Z').getTime())
       .mockReturnValueOnce(new Date('2026-08-07T10:45:00Z').getTime());
-    render(<App />);
-    await waitFor(() => expect(window.speccyLoadSpec).toBeTypeOf('function'));
 
     act(() => {
       window.speccyLoadSpec?.('{"openapi":"3.0.0"}', 'Catalog API');
