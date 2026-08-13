@@ -34,7 +34,7 @@ Changesets owns package versions and changelogs. All public Speccy packages are 
 - [ ] Confirm each expected version appears on npm and carries provenance. Trusted publishing generates the attestation automatically, and the npm package page should link it to this repository and workflow run.
 - [ ] Confirm the install surface with `npm view <package>@<version>` for `speccy-core`, `speccy-spectral`, `speccy-cli`, `speccy-renderer`, `docusaurus-plugin-speccy`, and `create-speccy-reference` as applicable.
 - [ ] Confirm Changesets created a GitHub release and immutable package tag for every published package.
-- [ ] Confirm the mutable `v1` tag points at the release commit: `git rev-parse v1` must match the commit that published the packages.
+- [ ] Confirm the mutable `v1` tag points at the release commit: `git ls-remote origin refs/tags/v1` must match the commit that published the packages. Don't trust a local `git rev-parse v1`; a plain fetch doesn't update a force-moved tag.
 - [ ] Run the Action from a separate consumer repository with `uses: mcclowes/speccy@v1` before announcing the release.
 - [ ] Check the release workflow summary and npm package contents for secrets or unexpected files.
 

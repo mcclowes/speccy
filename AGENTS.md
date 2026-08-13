@@ -2,7 +2,7 @@
 
 ## Project identity
 
-- `speccy.report` is the registered domain for Speccy. Do not assume DNS or production hosting is configured until the repository documents that deployment.
+- `speccy.report` is the registered domain for Speccy. The documentation site and studio deploy to Vercel (`apps/docusaurus-demo/docusaurus.config.ts` branches on the `VERCEL` environment variable), but nothing in the repository maps `speccy.report` to that deployment, so do not assume DNS points at it.
 
 ## Public documentation
 
