@@ -3,16 +3,15 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   docs: [
     'getting-started',
-    'studio',
+    {
+      type: 'category',
+      label: 'Workflows',
+      items: ['studio', 'test-api-requests', 'api-health', 'ci-review'],
+    },
     {
       type: 'category',
       label: 'Integrations',
-      items: [
-        'react-renderer',
-        'operation-components',
-        'docusaurus',
-        'ci-review',
-      ],
+      items: ['react-renderer', 'operation-components', 'docusaurus'],
     },
     {
       type: 'category',

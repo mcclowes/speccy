@@ -124,7 +124,7 @@ export default function Home() {
 
   return (
     <Layout
-      title="Build, review, and publish OpenAPI"
+      title="Explore, review, and publish OpenAPI"
       description="Speccy gives your OpenAPI contract one place to explore, review, test, and publish."
     >
       <main>
@@ -135,7 +135,7 @@ export default function Home() {
               One contract, every surface
             </span>
             <h1>
-              Build, review,
+              Explore, review,
               <br />
               and <em>publish.</em>
             </h1>

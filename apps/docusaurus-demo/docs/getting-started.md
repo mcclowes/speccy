@@ -106,6 +106,9 @@ Add tags to group operations and give each operation an `operationId`. Speccy ca
 
 ## Next steps
 
+- Use [Speccy Studio](./studio.md) to explore a local, remote, or public OpenAPI document.
+- See [Test API requests](./test-api-requests.md) to configure servers, authorization, and browser requests.
+- Read [Review API health](./api-health.md) to use the same checks in the renderer, Studio, CLI, and GitHub Action.
 - Use [the React renderer](./react-renderer.md) for component options and routing behavior.
 - Use [the Docusaurus plugin](./docusaurus.md) for generated routes and MDX embeds.
 - See [OpenAPI extensions](./openapi-extensions.md) for tag groups, longer introductions, and icons.

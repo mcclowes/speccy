@@ -7,6 +7,8 @@ description: Check OpenAPI changes in pull requests and configure Speccy's repos
 
 Speccy's GitHub Action compares OpenAPI documents with the pull request's base branch, checks the current documents for API health problems, and publishes one persistent review comment.
 
+See [Review API health](./api-health.md) for the rule categories and how the same findings appear in the renderer and Studio.
+
 ## Add the GitHub Action
 
 Check out the full Git history so Speccy can read the base branch:

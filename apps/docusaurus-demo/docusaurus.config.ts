@@ -20,7 +20,7 @@ const glossaryRemarkPlugin = getRemarkPlugin(
 
 const config: Config = {
   title: 'Speccy',
-  tagline: 'OpenAPI reference docs with room to breathe.',
+  tagline: 'Explore, review, and publish OpenAPI.',
   url:
     isVercel && vercelHost
       ? `https://${vercelHost}`

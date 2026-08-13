@@ -67,6 +67,8 @@ Registering the plugin in `plugins` also loads the renderer stylesheet. If you e
 
 Set `renderer.tryIt` to `false` for a generated route, or pass `tryIt={false}` to `OpenAPI`, to publish static request documentation without allowing live API requests.
 
+See [Test API requests](./test-api-requests.md) before enabling browser requests on a public reference. [Review API health](./api-health.md) explains the development-only guidance and Spectral findings added by the plugin.
+
 ### Link a guide to an operation
 
 The client package includes several endpoint treatments for guide pages:

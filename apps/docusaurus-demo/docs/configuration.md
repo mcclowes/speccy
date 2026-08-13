@@ -7,6 +7,8 @@ description: Configure Speccy's appearance, navigation, and error handling.
 
 Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI` component. Generated Docusaurus routes accept them beneath `renderer`.
 
+[Test API requests](./test-api-requests.md) explains `tryIt` and `parameterPrototype`. [Review API health](./api-health.md) covers `showDeveloperHints`, `previousSpec`, and `spectralDiagnostics`.
+
 | Option                       | Type                                    | Default   | Purpose                                                         |
 | ---------------------------- | --------------------------------------- | --------- | --------------------------------------------------------------- |
 | `spec`                       | object or string                        | required  | Parsed OpenAPI data, YAML, or JSON                              |
