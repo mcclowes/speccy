@@ -1,10 +1,10 @@
 .relationships {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   align-items: start;
   margin: 28px 0 0;
-  padding: 12px 0;
+  padding: 10px 0 0;
   border-top: 1px solid var(--sp-line);
 }
 
@@ -14,34 +14,37 @@
 }
 
 .relationships h2 {
-  padding-top: 2px;
-  font-size: 0.6875rem;
-  letter-spacing: 0.075em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .groups {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
+  gap: 6px;
 }
 
 .group {
-  display: grid;
+  display: flex;
+  min-width: 0;
   align-content: start;
-  gap: 5px;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .group h3 {
+  width: 42px;
+  flex: none;
   color: var(--sp-muted);
   font-size: 0.625rem;
-  letter-spacing: 0.065em;
-  text-transform: uppercase;
+  font-weight: 650;
 }
 
 .cards {
+  min-width: 0;
+  flex: 1;
   display: grid;
-  gap: 4px;
+  gap: 2px;
 }
 
 .card,
@@ -50,21 +53,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 3px 10px;
-  padding: 7px 9px;
+  gap: 2px 8px;
+  padding: 2px 0;
   color: var(--sp-text);
-  background: var(--sp-surface);
-  border: 1px solid var(--sp-line);
-  border-radius: 7px;
   text-decoration: none;
 }
 
 a.card:hover {
-  border-color: color-mix(in srgb, var(--sp-accent) 40%, var(--sp-line));
+  color: var(--sp-accent);
 }
 
 .cardTitle {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
 }
 
@@ -86,14 +86,28 @@ a.card:hover {
 .description {
   color: var(--sp-muted);
   font-size: 0.6875rem;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .context {
   font-weight: 650;
 }
 
+.description::before {
+  content: '·';
+  margin-right: 8px;
+}
+
 @media (max-width: 700px) {
+  .group {
+    display: grid;
+    gap: 2px;
+  }
+
+  .group h3 {
+    width: auto;
+  }
+
   .groups {
     gap: 8px;
   }

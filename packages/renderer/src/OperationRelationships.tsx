@@ -171,7 +171,7 @@ export function OperationRelationships({
       <div className={styles.groups}>
         {prerequisites.length > 0 && (
           <div className={styles.group}>
-            <h3>Before this operation</h3>
+            <h3>Before</h3>
             <div className={styles.cards}>
               {prerequisites.map((relationship) => (
                 <RelationshipCard
@@ -186,7 +186,7 @@ export function OperationRelationships({
         )}
         {successors.length > 0 && (
           <div className={styles.group}>
-            <h3>Possible next operations</h3>
+            <h3>Next</h3>
             <div className={styles.cards}>
               {successors.map((relationship) => (
                 <RelationshipCard
