@@ -14,6 +14,7 @@ const sidebars: SidebarsConfig = {
       items: ['configuration', 'openapi-extensions'],
     },
     'deployment',
+    'privacy',
   ],
 };
 

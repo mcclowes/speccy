@@ -1,0 +1,56 @@
+{
+  "title": "Glossary",
+  "description": "Terms used across Speccy and OpenAPI documentation.",
+  "terms": [
+    {
+      "term": "API",
+      "abbreviation": "Application Programming Interface",
+      "definition": "A contract that lets software systems communicate through defined operations and data formats.",
+      "autoLink": false,
+      "relatedTerms": ["API reference", "OpenAPI"]
+    },
+    {
+      "term": "API reference",
+      "definition": "Documentation organized around an API's operations, inputs, responses, schemas, and reusable components.",
+      "relatedTerms": ["API", "OpenAPI"]
+    },
+    {
+      "term": "Breaking change",
+      "definition": "A change to an API contract that can make an existing client integration stop working or behave differently.",
+      "relatedTerms": ["OpenAPI", "Spectral"]
+    },
+    {
+      "term": "JSON Schema",
+      "definition": "A vocabulary for describing and validating JSON data. OpenAPI 3.1 aligns its Schema Object with JSON Schema 2020-12.",
+      "relatedTerms": ["OpenAPI", "Schema"]
+    },
+    {
+      "term": "OpenAPI",
+      "definition": "A machine-readable standard for describing HTTP APIs, including their operations, parameters, request bodies, responses, and schemas.",
+      "aliases": ["OpenAPI Specification"],
+      "relatedTerms": ["API reference", "JSON Schema", "Swagger"]
+    },
+    {
+      "term": "Operation",
+      "definition": "One HTTP method on an API path, such as GET /books. An operation defines its parameters, request body, responses, and metadata.",
+      "autoLink": false,
+      "relatedTerms": ["OpenAPI", "Schema"]
+    },
+    {
+      "term": "Schema",
+      "definition": "A description of the structure, types, and validation rules for data used by an API.",
+      "autoLink": false,
+      "relatedTerms": ["JSON Schema", "OpenAPI"]
+    },
+    {
+      "term": "Spectral",
+      "definition": "An open source linter for JSON and YAML documents. Speccy uses Spectral rules to report OpenAPI quality and consistency problems.",
+      "relatedTerms": ["Breaking change", "OpenAPI"]
+    },
+    {
+      "term": "Swagger",
+      "definition": "The former name of the OpenAPI Specification. Swagger 2.0 documents are still common and are supported by Speccy.",
+      "relatedTerms": ["OpenAPI"]
+    }
+  ]
+}
