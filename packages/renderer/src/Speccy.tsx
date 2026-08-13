@@ -451,19 +451,21 @@ function EndpointServers({
       <div className="sp-endpoint-server-list">
         {displayedServers.map(({ server, available }, index) => {
           const url = expandServerUrl(server.url, server.variables);
-          const name = server.description ?? url;
+          const name = server.description ?? 'Base URL';
           const availabilityLabel = available
-            ? `${name}: available`
+            ? `${name}: available at ${url}`
             : `${name}: unavailable for this endpoint`;
           return (
             <span
               className={`sp-endpoint-server${available ? '' : ' is-unavailable'}`}
               key={`${server.url}-${index}`}
               aria-label={availabilityLabel}
-              title={available ? url : 'Unavailable for this endpoint'}
+              data-tooltip={available ? url : undefined}
+              tabIndex={available ? 0 : undefined}
+              title={available ? undefined : 'Unavailable for this endpoint'}
             >
-              {server.description && <span>{server.description}</span>}
-              <code>{url}</code>
+              <span>{name}</span>
+              {!available && <code>{url}</code>}
             </span>
           );
         })}

@@ -74,11 +74,18 @@ describe('Speccy navigation', () => {
     );
 
     let servers = screen.getByLabelText('Endpoint availability');
-    expect(servers).toHaveTextContent('Sandboxhttps://sandbox.example.com');
-    expect(servers).toHaveTextContent('Productionhttps://api.example.com');
-    expect(screen.getByLabelText('Sandbox: available')).not.toHaveClass(
-      'is-unavailable',
+    expect(servers).toHaveTextContent('Sandbox');
+    expect(servers).toHaveTextContent('Production');
+    const sandbox = screen.getByLabelText(
+      'Sandbox: available at https://sandbox.example.com',
     );
+    expect(sandbox).not.toHaveClass('is-unavailable');
+    expect(sandbox).toHaveAttribute(
+      'data-tooltip',
+      'https://sandbox.example.com',
+    );
+    expect(sandbox).toHaveAttribute('tabindex', '0');
+    expect(servers).not.toHaveTextContent('Sandboxhttps://sandbox.example.com');
 
     rerender(
       <Speccy
@@ -87,7 +94,7 @@ describe('Speccy navigation', () => {
       />,
     );
     servers = screen.getByLabelText('Endpoint availability');
-    expect(servers).toHaveTextContent('Path serverhttps://path.example.com');
+    expect(servers).toHaveTextContent('Path server');
     expect(servers).toHaveTextContent('sandbox.example.com');
     expect(
       screen.getByLabelText('Sandbox: unavailable for this endpoint'),
@@ -95,9 +102,11 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByLabelText('Production: unavailable for this endpoint'),
     ).toHaveClass('is-unavailable');
-    expect(screen.getByLabelText('Path server: available')).not.toHaveClass(
-      'is-unavailable',
-    );
+    expect(
+      screen.getByLabelText(
+        'Path server: available at https://path.example.com',
+      ),
+    ).not.toHaveClass('is-unavailable');
 
     rerender(
       <Speccy
@@ -106,10 +115,12 @@ describe('Speccy navigation', () => {
       />,
     );
     servers = screen.getByLabelText('Endpoint availability');
-    expect(servers).toHaveTextContent('Operation serverhttps://eu.example.com');
+    expect(servers).toHaveTextContent('Operation server');
     expect(servers).not.toHaveTextContent('path.example.com');
     expect(
-      screen.getByLabelText('Operation server: available'),
+      screen.getByLabelText(
+        'Operation server: available at https://eu.example.com',
+      ),
     ).not.toHaveClass('is-unavailable');
   });
 
