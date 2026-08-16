@@ -42,17 +42,6 @@ describe('RequestSample', () => {
     expect(generateRequestSample('curl', request)).toContain(
       'curl --request POST',
     );
-    expect(generateRequestSample('posting', request))
-      .toBe(`name: POST /companies
-method: POST
-url: https://api.example.com/companies
-body:
-  content: '{"name":"Acme"}'
-headers:
-  - name: Authorization
-    value: Bearer token
-  - name: Content-Type
-    value: application/json`);
     expect(generateRequestSample('javascript', request)).toContain(
       'await fetch',
     );

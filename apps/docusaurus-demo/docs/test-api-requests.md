@@ -45,8 +45,6 @@ For operations with a request body, Speccy selects the first declared media type
 
 The request sample updates as values change. Use its language selector to switch between generated formats, or copy the current sample to run elsewhere.
 
-Choose **Posting** to copy the configured request as a native `.posting.yaml` file. See [Use Speccy with Posting](./posting.md) for single requests, whole-spec imports, and environment variables.
-
 Select **Send request** to call the API. Speccy shows the status and response body returned by the server. The call happens in the reader's browser; Speccy doesn't proxy it through a hosted service.
 
 ## Test a webhook
