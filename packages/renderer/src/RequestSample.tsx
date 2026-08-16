@@ -12,9 +12,18 @@ import { CodeBlock, CopyButton } from './CodeBlock';
 import { useLocalState } from './useLocalState';
 import { DisclosureChevron, DisclosureContent } from './DesignSystem';
 import styles from './RequestSample.module.css';
+import { stringify } from 'yaml';
 
 export type RequestSampleLanguage =
-  'curl' | 'javascript' | 'node' | 'python' | 'java' | 'csharp' | 'php' | 'go';
+  | 'curl'
+  | 'posting'
+  | 'javascript'
+  | 'node'
+  | 'python'
+  | 'java'
+  | 'csharp'
+  | 'php'
+  | 'go';
 
 export interface RequestSampleValue {
   method: string;
@@ -25,6 +34,7 @@ export interface RequestSampleValue {
 
 const LANGUAGES: { value: RequestSampleLanguage; label: string }[] = [
   { value: 'curl', label: 'cURL' },
+  { value: 'posting', label: 'Posting' },
   { value: 'javascript', label: 'Browser JavaScript' },
   { value: 'node', label: 'Node.js' },
   { value: 'python', label: 'Python' },
@@ -46,6 +56,15 @@ function LanguageIcon({
           fill="currentColor"
           d="M22.23 4.702a.967.967 0 1 1 0-1.934.967.967 0 0 1 0 1.934m-9.608 16.531a.967.967 0 1 1 0-1.934.967.967 0 0 1 0 1.934M22.23 1.964a1.771 1.771 0 0 0-1.652 2.36l-8.309 14.241a1.737 1.737 0 0 0-1.418 1.7 1.771 1.771 0 1 0 3.43-.553l8.351-14.288a1.74 1.74 0 0 0 1.369-1.69c0-.977-.793-1.77-1.771-1.77m-7.247 2.738a.967.967 0 1 1 0-1.934.967.967 0 0 1 0 1.934M5.374 21.233a.967.967 0 1 1 0-1.934.967.967 0 0 1 0 1.934M14.983 1.964a1.771 1.771 0 0 0-1.652 2.36L5.022 18.565a1.738 1.738 0 0 0-1.419 1.7 1.771 1.771 0 1 0 3.431-.553l8.351-14.288a1.74 1.74 0 0 0 1.369-1.69c0-.977-.793-1.77-1.771-1.77M1.749 7.663a.967.967 0 1 1 0 1.934.967.967 0 0 1 0-1.934m0-.78a1.748 1.748 0 1 0 0 3.496 1.748 1.748 0 0 0 0-3.496m0 6.969a.967.967 0 1 1 0 1.934.967.967 0 0 1 0-1.934m0-.78a1.748 1.748 0 1 0 0 3.496 1.748 1.748 0 0 0 0-3.496"
         />
+      </svg>
+    );
+  if (language === 'posting')
+    return (
+      <svg viewBox="0 0 28 28" aria-hidden="true">
+        <rect width="28" height="28" rx="5" fill="#5d5fef" />
+        <text x="14" y="20" textAnchor="middle" fill="#fff">
+          P
+        </text>
       </svg>
     );
   if (language === 'javascript')
@@ -152,6 +171,26 @@ export function generateRequestSample(
     if (request.body)
       lines.push(`  --data '${request.body.replaceAll("'", "'\\''")}'`);
     return lines.join(' \\\n');
+  }
+  if (language === 'posting') {
+    const pathname = (() => {
+      try {
+        return new URL(request.url).pathname;
+      } catch {
+        return request.url;
+      }
+    })();
+    return stringify({
+      name: `${request.method} ${pathname}`,
+      method: request.method,
+      url: request.url,
+      ...(request.body ? { body: { content: request.body } } : {}),
+      ...(headers.length
+        ? {
+            headers: headers.map(([name, value]) => ({ name, value })),
+          }
+        : {}),
+    }).trimEnd();
   }
   if (language === 'javascript')
     return `const response = await fetch(${quote(request.url)}, ${JSON.stringify(options, null, 2)});\nconst data = await response.json();`;

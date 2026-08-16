@@ -11,7 +11,12 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['react-renderer', 'operation-components', 'docusaurus'],
+      items: [
+        'react-renderer',
+        'operation-components',
+        'docusaurus',
+        'posting',
+      ],
     },
     {
       type: 'category',
