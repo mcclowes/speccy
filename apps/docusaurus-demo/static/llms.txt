@@ -1,0 +1,25 @@
+# Speccy
+
+> Speccy renders, reviews, and publishes OpenAPI documents. It includes a React renderer, a Docusaurus plugin, a CLI, a GitHub Action, and a browser-based studio.
+
+## Documentation
+
+- [Get started](./docs/getting-started/index.md): Choose a Speccy package and render your first API reference.
+- [React renderer](./docs/react-renderer/index.md): Render a complete API reference in a React application.
+- [Docusaurus](./docs/docusaurus/index.md): Generate or embed an API reference in Docusaurus.
+- [Configuration](./docs/configuration/index.md): Configure appearance, navigation, requests, and error handling.
+- [OpenAPI extensions](./docs/openapi-extensions/index.md): Add Speccy-specific presentation and lifecycle metadata.
+- [Operation components](./docs/operation-components/index.md): Link guides and tutorials to API operations.
+- [Test API requests](./docs/test-api-requests/index.md): Configure interactive requests from a reference.
+- [Review API health](./docs/api-health/index.md): Find correctness, design, and change-safety problems.
+- [Review APIs in CI](./docs/ci-review/index.md): Run Speccy reviews in GitHub Actions.
+- [Deployment](./docs/deployment/index.md): Publish a static Speccy reference.
+- [Speccy Studio](./docs/studio/index.md): Open and review API documents in the browser.
+
+## Reference
+
+- [Example API reference](./api): Explore a live Speccy-rendered OpenAPI document.
+- [Example OpenAPI document](./openapi.yaml): Read the source document for the live reference.
+- [Glossary](./glossary): Look up OpenAPI and Speccy terminology.
+- [Updates](./updates): Read release notes, migration guidance, and design notes.
+- [GitHub repository](https://github.com/mcclowes/speccy): Browse source code, packages, and issue tracking.

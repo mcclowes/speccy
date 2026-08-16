@@ -40,6 +40,7 @@ const config: Config = {
   customFields: { studioUrl },
   plugins: [
     'docusaurus-plugin-image-zoom',
+    fileURLToPath(new URL('./plugins/robots/index.mjs', import.meta.url)),
     [
       'docusaurus-plugin-speccy',
       {
