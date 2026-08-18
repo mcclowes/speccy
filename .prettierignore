@@ -7,3 +7,4 @@
 apps/macos/Speccy.app/**
 apps/macos/Sources/SpeccyMac/Resources/Web/**
 package-lock.json
+.saggar/**
