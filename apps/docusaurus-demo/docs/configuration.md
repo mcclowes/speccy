@@ -18,6 +18,7 @@ Pass these options to the React `Speccy` component or to the Docusaurus `OpenAPI
 | `showSidebar`                | boolean                                 | `true`    | Show the navigation and filter sidebar                          |
 | `showApiVersion`             | boolean                                 | `true`    | Show the API version in the overview heading                    |
 | `singleExpandedSidebarGroup` | boolean                                 | `false`   | Close the previous sidebar group when another group opens       |
+| `wrapSidebarLabels`          | boolean                                 | `false`   | Wrap long sidebar endpoint labels onto a second line            |
 | `showThemeToggle`            | boolean                                 | `true`    | Show the persistent light/dark theme control                    |
 | `tryIt`                      | boolean                                 | `true`    | Show endpoint request builders and webhook testers              |
 | `parameterPrototype`         | boolean                                 | `true`    | Separate required parameters from optional ones added on demand |

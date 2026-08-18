@@ -534,6 +534,15 @@ related:
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.sp-nav-wrapped-labels .sp-nav-operation-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
 .sp-nav-operation-meta {
   display: flex;
   align-items: center;

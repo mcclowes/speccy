@@ -967,6 +967,7 @@ export function Speccy({
   showSidebar = true,
   showApiVersion = true,
   singleExpandedSidebarGroup = false,
+  wrapSidebarLabels = false,
   showThemeToggle = true,
   theme = 'system',
   accentColor = '#6d5dfc',
@@ -1311,7 +1312,7 @@ export function Speccy({
   return (
     <div
       ref={rootRef}
-      className={`speccy sp-theme-${activeTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${className}`}
+      className={`speccy sp-theme-${activeTheme} ${showSidebar ? 'sp-with-sidebar' : ''} ${wrapSidebarLabels ? 'sp-nav-wrapped-labels' : ''} ${className}`}
       style={style}
     >
       {themeControlVisible && (

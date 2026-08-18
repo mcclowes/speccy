@@ -2569,6 +2569,19 @@ describe('Speccy navigation', () => {
     expect(connections).toHaveAttribute('aria-expanded', 'true');
   });
 
+  it('wraps long sidebar endpoint labels when configured', () => {
+    const { container, rerender } = render(<Speccy spec={spec} />);
+    const root = container.querySelector('.speccy');
+
+    expect(root).not.toHaveClass('sp-nav-wrapped-labels');
+
+    rerender(<Speccy spec={spec} wrapSidebarLabels />);
+
+    expect(container.querySelector('.speccy')).toHaveClass(
+      'sp-nav-wrapped-labels',
+    );
+  });
+
   it('allows the active endpoint group to be collapsed', () => {
     window.history.replaceState({}, '', '/api/get-companies');
     render(<Speccy spec={spec} basePath="/api" />);

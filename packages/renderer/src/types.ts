@@ -30,6 +30,8 @@ export interface SpeccyProps {
   showApiVersion?: boolean;
   /** Closes the previously expanded sidebar group when another is opened. */
   singleExpandedSidebarGroup?: boolean;
+  /** Wraps long sidebar endpoint labels onto a second line instead of truncating them on one. */
+  wrapSidebarLabels?: boolean;
   /** Shows the renderer's persistent light/dark theme control. */
   showThemeToggle?: boolean;
   /** Uses Speccy's theme, the operating-system preference, or the host page's theme. */
