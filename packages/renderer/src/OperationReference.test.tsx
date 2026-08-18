@@ -6,6 +6,7 @@ import {
   OperationCard,
   OperationLink,
   OperationPreview,
+  OperationReferenceProvider,
 } from './OperationReference';
 
 const operation = {
@@ -192,5 +193,168 @@ describe('operation references', () => {
     expect(screen.getByText('Path')).toBeInTheDocument();
     expect(screen.getByText(operation.path)).toBeInTheDocument();
     expect(screen.queryByText('Body')).not.toBeInTheDocument();
+  });
+});
+
+describe('operation references resolved from an OpenAPI document', () => {
+  const spec = {
+    openapi: '3.1.0',
+    paths: {
+      '/corporates': {
+        post: {
+          operationId: 'corporateCreate',
+          requestBody: {
+            content: {
+              'application/json': { example: { name: 'Custom Ltd' } },
+            },
+          },
+          responses: {
+            '200': {
+              content: { 'application/json': { example: { id: 'corp-1' } } },
+            },
+          },
+        },
+      },
+      '/managed_cards#prepaid': {
+        post: { operationId: 'prepaidManagedCardCreate', responses: {} },
+      },
+      '/managed_cards#debit': {
+        post: { operationId: 'debitManagedCardCreate', responses: {} },
+      },
+      '/stepup/challenges/otp/{channel}': {
+        post: { operationId: 'stepupSCAChallenge', responses: {} },
+      },
+    },
+    webhooks: {
+      '/managed_cards/authorisation_request': {
+        post: { operationId: 'authorisationForwarding', responses: {} },
+      },
+    },
+  };
+
+  it('derives href from the operation id when spec is passed directly', () => {
+    render(<OperationLink method="post" path="/corporates" spec={spec} />);
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      '/api/corporatecreate',
+    );
+  });
+
+  it('honours basePath and keeps an explicit href', () => {
+    const { rerender } = render(
+      <EndpointStrip
+        method="post"
+        path="/corporates"
+        spec={spec}
+        basePath="/reference"
+      />,
+    );
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      '/reference/corporatecreate',
+    );
+
+    rerender(
+      <EndpointStrip
+        method="post"
+        path="/corporates"
+        spec={spec}
+        href="/custom"
+      />,
+    );
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/custom');
+  });
+
+  it('resolves through an enclosing provider and derives examples', () => {
+    render(
+      <OperationReferenceProvider spec={spec}>
+        <OperationPreview method="post" path="/corporates" />
+      </OperationReferenceProvider>,
+    );
+
+    expect(
+      screen.getByRole('link', { name: /Open API reference/ }),
+    ).toHaveAttribute('href', '/api/corporatecreate');
+    expect(screen.getByText('"Custom Ltd"')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(screen.getByText('"corp-1"')).toBeInTheDocument();
+  });
+
+  it('picks a variant with a #fragment and displays the plain path', () => {
+    render(
+      <OperationReferenceProvider spec={spec}>
+        <OperationLink method="post" path="/managed_cards#debit" />
+      </OperationReferenceProvider>,
+    );
+
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/api/debitmanagedcardcreate');
+    expect(link).toHaveTextContent('/managed_cards');
+    expect(link).not.toHaveTextContent('#debit');
+  });
+
+  it('matches by operationId and keeps the given display path', () => {
+    render(
+      <OperationReferenceProvider spec={spec}>
+        <EndpointStrip
+          method="post"
+          path="/stepup/challenges/otp/SMS"
+          operationId="stepupSCAChallenge"
+        />
+        <OperationLink operationId="authorisationForwarding" />
+      </OperationReferenceProvider>,
+    );
+
+    const [strip, webhook] = screen.getAllByRole('link');
+    expect(strip).toHaveAttribute('href', '/api/stepupscachallenge');
+    expect(strip).toHaveTextContent('/stepup/challenges/otp/SMS');
+    expect(webhook).toHaveAttribute(
+      'href',
+      '/api/webhook-authorisationforwarding',
+    );
+    expect(webhook).toHaveTextContent('/managed_cards/authorisation_request');
+  });
+
+  it('searches named sources in order and selects one with the api prop', () => {
+    const backoffice = {
+      openapi: '3.1.0',
+      paths: {
+        '/access_token': { post: { operationId: 'requestAccessToken' } },
+      },
+    };
+    render(
+      <OperationReferenceProvider
+        apis={[
+          { name: 'multi', spec, basePath: '/api' },
+          { name: 'backoffice', spec: backoffice, basePath: '/api/backoffice' },
+        ]}
+      >
+        <OperationLink method="post" path="/access_token" />
+        <OperationLink method="post" path="/access_token" api="backoffice" />
+      </OperationReferenceProvider>,
+    );
+
+    const [searched, named] = screen.getAllByRole('link');
+    expect(searched).toHaveAttribute(
+      'href',
+      '/api/backoffice/requestaccesstoken',
+    );
+    expect(named).toHaveAttribute('href', '/api/backoffice/requestaccesstoken');
+  });
+
+  it('formats object examples as JSON', () => {
+    render(
+      <OperationPreview
+        method="post"
+        path="/corporates"
+        href="/api/corporatecreate"
+        requestExample={{ name: 'Object Ltd' }}
+        responseExample={{ id: 'corp-2' }}
+      />,
+    );
+
+    expect(screen.getByText('"Object Ltd"')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(screen.getByText('"corp-2"')).toBeInTheDocument();
   });
 });

@@ -105,17 +105,12 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 
 ### Derive examples from an OpenAPI document
 
-Pass the OpenAPI document through `spec` to find the operation by its exact `method` and `path`. `spec` accepts a parsed OpenAPI object or a JSON or YAML string.
+Pass the OpenAPI document through `spec` to find the operation by its `method` and `path`. `spec` accepts a parsed OpenAPI object or a JSON or YAML string. When `spec` is present, `href` is derived from the operation as well (see [Resolve operations from your OpenAPI document](#resolve-operations-from-your-openapi-document)).
 
 ```tsx
 import spec from './openapi.json';
 
-<OperationPreview
-  method="post"
-  path="/orchards"
-  href="/api/createorchard"
-  spec={spec}
-/>;
+<OperationPreview method="post" path="/orchards" spec={spec} />;
 ```
 
 The derived request uses the first declared media type. Path parameter values are substituted into the displayed path. Query parameters, headers, and the body appear as separate sections only when the operation defines them.
@@ -156,7 +151,7 @@ The available request sections are `path`, `query`, `headers`, and `body`:
 />
 ```
 
-`requestExample` remains available as a shorthand body override for formatted JSON or other copy-ready text. `responseExample` overrides the derived response. These explicit values don't affect the other side of the preview.
+`requestExample` remains available as a shorthand body override. `responseExample` overrides the derived response. Both accept a formatted string or a plain object, which is printed as indented JSON. These explicit values don't affect the other side of the preview.
 
 ### Configure one or both sides
 
@@ -187,22 +182,79 @@ If no spec or request values are supplied, the request preview contains the unre
 
 ### Preview props
 
-| Prop              | Required | Purpose                                                                                        |
-| ----------------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `method`          | Yes      | HTTP method used for the badge and operation lookup.                                           |
-| `path`            | Yes      | Exact OpenAPI path used for display and operation lookup.                                      |
-| `href`            | Yes      | Link to the full operation reference.                                                          |
-| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive request values and a response.      |
-| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec. |
-| `requestExample`  | No       | Formatted request body string. Overrides a body supplied by `spec` or `requestValues`.         |
-| `responseExample` | No       | Explicit response string. Overrides a response derived from `spec`.                            |
-| `className`       | No       | Adds a class without replacing Speccy's component classes.                                     |
-| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                             |
+| Prop              | Required | Purpose                                                                                                        |
+| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `method`          | Yes\*    | HTTP method used for the badge and operation lookup.                                                           |
+| `path`            | Yes\*    | OpenAPI path used for display and operation lookup. May end in a `#variant` fragment to pick between variants. |
+| `operationId`     | No       | Looks the operation up by id instead of by method and path. `method` and `path` become optional.               |
+| `href`            | No       | Link to the full operation reference. Derived from the operation when a spec is available.                     |
+| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive `href`, request values, and a response.             |
+| `basePath`        | No       | Route where the reference for `spec` is mounted. Defaults to `/api`.                                           |
+| `api`             | No       | Name of the provider source to look the operation up in.                                                       |
+| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec.                 |
+| `requestExample`  | No       | Request body string or object. Overrides a body supplied by `spec` or `requestValues`.                         |
+| `responseExample` | No       | Explicit response string or object. Overrides a response derived from `spec`.                                  |
+| `className`       | No       | Adds a class without replacing Speccy's component classes.                                                     |
+| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                                             |
+
+\* Either `method` and `path`, or `operationId`, must be given.
+
+## Resolve operations from your OpenAPI document
+
+Every component can derive `href` from the operation's `operationId`, and `OperationPreview` can derive its examples, once it can see the OpenAPI document. Pass `spec` (and `basePath` when the reference is not mounted at `/api`) to a single component, or wrap a page or your whole app in `OperationReferenceProvider` so no usage repeats the document:
+
+```tsx
+import { OperationReferenceProvider } from 'speccy-renderer/docs';
+import spec from './openapi.json';
+
+<OperationReferenceProvider spec={spec} basePath="/api">
+  <p>
+    Call <OperationLink method="post" path="/orchards" /> to register an
+    orchard.
+  </p>
+  <OperationPreview method="get" path="/orchards/{orchardId}" />
+</OperationReferenceProvider>;
+```
+
+In Docusaurus, put the provider in `src/theme/Root.tsx` so every MDX page can use the components with only `method` and `path`. Import `OperationReferenceProvider` from `docusaurus-plugin-speccy/client`.
+
+Links use the operation route that the Docusaurus plugin and `Speccy` generate: the slugified `operationId` beneath `basePath`. Pass `operationSegment` on a source when your reference nests operations under an extra segment such as `/operations`.
+
+### Several APIs
+
+Give the provider a list of sources when your site documents more than one API. Components search the sources in order and use the first operation that matches. Name the sources and pass `api` when two APIs share a path:
+
+```tsx
+<OperationReferenceProvider
+  apis={[
+    { name: 'multi', spec: multi, basePath: '/api' },
+    { name: 'backoffice', spec: backoffice, basePath: '/api/backoffice' },
+  ]}
+>
+  <EndpointStrip method="post" path="/access_token" api="backoffice" />
+</OperationReferenceProvider>
+```
+
+### Path variants and operation ids
+
+Some documents declare several operations for the same method and path with a `#variant` suffix, such as `/managed_cards#prepaid` and `/managed_cards#debit`. Pass the full key as `path` to pick one; the fragment never appears in the rendered path.
+
+When the displayed path should differ from the OpenAPI path - a concrete value instead of a placeholder, or a shorter form - look the operation up by `operationId` and keep `path` for display:
+
+```tsx
+<OperationPreview
+  method="post"
+  path="/orchards/{orchardId}/harvests/2024"
+  operationId="createHarvest"
+/>
+```
+
+`operationId` also finds webhooks, so `<OperationLink operationId="fruitShipped" />` links to a webhook page and shows its declared path.
 
 ## Props and navigation
 
-Every component requires `method`, `path`, and `href`. `OperationCard` also requires `summary`. The other content is optional.
+Every component needs `method` and `path`, or an `operationId`. `href` is required only when no OpenAPI document is available to derive it from. `OperationCard` also requires `summary`. The other content is optional.
 
 The strip, card, and preview include bottom spacing so following prose and code blocks do not sit flush against them. Override that spacing through `className` when a parent layout controls the gap.
 
-The components render ordinary links. Point `href` at the operation URL generated from its slugified `operationId`, and use `onClick` when your host needs to intercept navigation. `className` lets you add layout styles without replacing the Speccy treatment.
+The components render ordinary links. When you set `href` yourself, point it at the operation URL generated from its slugified `operationId`, and use `onClick` when your host needs to intercept navigation. `className` lets you add layout styles without replacing the Speccy treatment.
