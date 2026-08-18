@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import {
   composeReport,
+  fitReport,
   parseSpecs,
   reportMarker,
   review,
@@ -107,4 +108,36 @@ test('lints each revision against its base document', async () => {
     else process.env.SPECCY_TEST_CAPTURE = originalCapture;
     await rm(directory, { force: true, recursive: true });
   }
+});
+
+test('leaves reports within the limit untouched', () => {
+  const report = composeReport([
+    { name: 'Admin', diff: 'No changes.\n', health: 'Healthy.\n' },
+  ]);
+  assert.equal(fitReport(report, 1000, 'https://example.test/run'), report);
+});
+
+test('truncates oversized reports on a line boundary with a link to the run', () => {
+  const rows = Array.from({ length: 200 }, (_, i) => `| row ${i} | ✓ |`).join(
+    '\n',
+  );
+  const report = composeReport([{ name: 'Admin', diff: rows, health: 'ok' }]);
+  const fitted = fitReport(report, 2000, 'https://example.test/run');
+  assert.ok(Buffer.byteLength(fitted) <= 2000);
+  assert.ok(fitted.startsWith(reportMarker));
+  assert.match(fitted, /\| row \d+ \| ✓ \|\n\n_Report truncated/);
+  assert.match(fitted, /\[full report\]\(https:\/\/example\.test\/run\)/);
+});
+
+test('closes details blocks cut open by truncation', () => {
+  const body = ['<details>', '<summary>More</summary>', '']
+    .concat(Array.from({ length: 200 }, (_, i) => `line ${i}`))
+    .concat(['', '</details>'])
+    .join('\n');
+  const report = composeReport([{ name: 'Admin', diff: body, health: 'ok' }]);
+  const fitted = fitReport(report, 1000);
+  assert.ok(Buffer.byteLength(fitted) <= 1000);
+  assert.equal(fitted.match(/<details>/g).length, 1);
+  assert.equal(fitted.match(/<\/details>/g).length, 1);
+  assert.match(fitted, /<\/details>\n\n_Report truncated\._\n$/);
 });

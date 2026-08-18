@@ -11,6 +11,8 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 
 export const reportMarker = '<!-- speccy-report -->';
+export const commentLimit = 65536;
+export const summaryLimit = 1024 * 1024;
 
 export function parseSpecs(value) {
   const specs = value
@@ -53,6 +55,27 @@ export function composeReport(results) {
     );
   }
   return `${lines.join('\n').trim()}\n`;
+}
+
+/** Cuts a report to `limit` bytes on a line boundary, closing any open <details>. */
+export function fitReport(report, limit, runUrl) {
+  if (Buffer.byteLength(report) <= limit) return report;
+  const link = runUrl ? ` — see the [full report](${runUrl})` : '';
+  const note = `\n\n_Report truncated${link}._\n`;
+  const closers = (cut) => {
+    const open =
+      (cut.match(/<details>/g) ?? []).length -
+      (cut.match(/<\/details>/g) ?? []).length;
+    return open > 0 ? `\n\n${Array(open).fill('</details>').join('\n')}` : '';
+  };
+  let cut = report.slice(0, limit);
+  for (;;) {
+    cut = cut.slice(0, Math.max(cut.lastIndexOf('\n'), 0)).trimEnd();
+    const tail = `${closers(cut)}${note}`;
+    if (Buffer.byteLength(cut) + Buffer.byteLength(tail) <= limit)
+      return `${cut}${tail}`;
+    if (!cut) return note.trimStart().slice(0, limit);
+  }
 }
 
 export function runCli(args, version) {
@@ -162,14 +185,18 @@ async function main() {
     failOn: process.env.SPECCY_FAIL_ON ?? 'breaking',
     healthFailOn: process.env.SPECCY_HEALTH_FAIL_ON ?? 'never',
   });
-  fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, result.report);
+  const runUrl = `${process.env.GITHUB_SERVER_URL ?? 'https://github.com'}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+  fs.appendFileSync(
+    process.env.GITHUB_STEP_SUMMARY,
+    fitReport(result.report, summaryLimit),
+  );
   if (process.env.SPECCY_COMMENT !== 'false') {
     if (!process.env.GH_TOKEN)
       throw new Error('github-token is required when comment is true.');
     await publishComment(
       process.env.GITHUB_REPOSITORY,
       event.pull_request.number,
-      result.report,
+      fitReport(result.report, commentLimit, runUrl),
     );
   }
   process.exitCode = result.exitCode;
