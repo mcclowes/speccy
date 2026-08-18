@@ -1,5 +1,15 @@
 # docusaurus-plugin-speccy
 
+## 0.10.1
+
+### Patch Changes
+
+- [#51](https://github.com/mcclowes/speccy/pull/51) [`59e8d04`](https://github.com/mcclowes/speccy/commit/59e8d04cf775477f4a60d4ea752320b4ed1ca5d9) Thanks [@mcclowes](https://github.com/mcclowes)! - Let the operation documentation components resolve themselves from an OpenAPI document. `href` is now optional on `OperationLink`, `EndpointStrip`, `OperationCard`, and `OperationPreview`: pass `spec` (and `basePath`) to one component, or wrap pages in the new `OperationReferenceProvider`, and each component derives its link from the operation's `operationId` while `OperationPreview` derives its examples. Paths accept OpenAPI `#variant` fragments, `operationId` looks operations and webhooks up directly while keeping a custom display path, `api` selects one of several named sources, and `requestExample`/`responseExample` accept plain objects.
+
+- Updated dependencies [[`59e8d04`](https://github.com/mcclowes/speccy/commit/59e8d04cf775477f4a60d4ea752320b4ed1ca5d9)]:
+  - speccy-renderer@0.10.1
+  - speccy-spectral@0.10.1
+
 ## 0.10.0
 
 ### Patch Changes
