@@ -1,5 +1,14 @@
 # speccy-cli
 
+## 0.10.0
+
+### Patch Changes
+
+- [`25e7ae0`](https://github.com/mcclowes/speccy/commit/25e7ae0294f75e0508eaa474a5c9d1166d39d30d) Thanks [@mcclowes](https://github.com/mcclowes)! - Lint request bodies and responses after resolving `$ref`s, so operations that reuse `#/components/requestBodies` and `#/components/responses` no longer report false `request-media-type`, `response-description`, `success-response-schema`, and `structured-error-response` findings. Inline schemas inside those shared components are inspected once at their component path instead of once per operation. `timestamp-format` no longer flags strings whose `pattern` only allows digits, such as epoch-millisecond timestamps. `error-correlation-id` accepts a request or trace identifier carried in a response header such as `X-Request-Id` or `request-ref`, not only in the body.
+
+- Updated dependencies [[`25e7ae0`](https://github.com/mcclowes/speccy/commit/25e7ae0294f75e0508eaa474a5c9d1166d39d30d)]:
+  - speccy-core@0.10.0
+
 ## 0.9.0
 
 ### Patch Changes

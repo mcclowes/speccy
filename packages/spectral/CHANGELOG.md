@@ -1,5 +1,12 @@
 # speccy-spectral
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [[`25e7ae0`](https://github.com/mcclowes/speccy/commit/25e7ae0294f75e0508eaa474a5c9d1166d39d30d)]:
+  - speccy-core@0.10.0
+
 ## 0.9.0
 
 ### Patch Changes

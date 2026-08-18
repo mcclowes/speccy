@@ -1,5 +1,16 @@
 # speccy-renderer
 
+## 0.10.0
+
+### Minor Changes
+
+- [`702ace8`](https://github.com/mcclowes/speccy/commit/702ace8c74fe547e358bfabf60ad723154621064) Thanks [@mcclowes](https://github.com/mcclowes)! - Add a `wrapSidebarLabels` option that wraps long sidebar endpoint labels onto a second line instead of truncating them on one, so summaries that share a long prefix stay distinguishable.
+
+### Patch Changes
+
+- Updated dependencies [[`25e7ae0`](https://github.com/mcclowes/speccy/commit/25e7ae0294f75e0508eaa474a5c9d1166d39d30d)]:
+  - speccy-core@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes
