@@ -2,6 +2,7 @@
  * ---
  * purpose: Renders portable links, strips, cards, and example previews that connect prose documentation to API operations.
  * related:
+ *   - ./operationReferenceContext.tsx - Resolves hrefs and operations from OpenAPI documents.
  *   - ./DesignSystem.tsx - Supplies the shared method badge and API path presentation.
  *   - ./CodeBlock.tsx - Presents request and response examples in operation previews.
  *   - ./OperationReference.module.css - Styles the four documentation treatments.
@@ -13,26 +14,47 @@ import type { OpenAPIDocument } from 'speccy-core';
 import { CodeBlock, CodeLines, CollapsibleJson, CopyButton } from './CodeBlock';
 import { ApiPath, MethodBadge } from './DesignSystem';
 import {
-  deriveOperationPreviewData,
+  deriveOperationPreviewDataFromOperation,
   mergeOperationPreviewRequestValues,
   type OperationPreviewRequestValues,
 } from './operationPreviewData';
+import {
+  useOperationReference,
+  type OperationReferenceLookup,
+} from './operationReferenceContext';
 import styles from './OperationReference.module.css';
 
 export type { OperationPreviewRequestValues } from './operationPreviewData';
+export {
+  OperationReferenceProvider,
+  resolveOperationReference,
+  type OperationReferenceLookup,
+  type OperationReferenceProviderProps,
+  type OperationReferenceSource,
+  type ResolvedOperationReference,
+} from './operationReferenceContext';
 
-export interface OperationReferenceProps {
-  method: string;
-  path: string;
-  href: string;
+interface OperationReferenceBaseProps {
+  /**
+   * Link to the full operation reference. Derived from `spec` or an
+   * enclosing `OperationReferenceProvider` when omitted.
+   */
+  href?: string;
+  /** OpenAPI document, or JSON or YAML string, used to derive `href` and examples. */
+  spec?: OpenAPIDocument | string;
+  /** Route where the reference for `spec` is mounted. Defaults to `/api`. */
+  basePath?: string;
   className?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
-export interface DescribedOperationReferenceProps extends OperationReferenceProps {
+export type OperationReferenceProps = OperationReferenceLookup &
+  OperationReferenceBaseProps;
+
+export type DescribedOperationReferenceProps = OperationReferenceProps & {
   summary: string;
   description?: string;
-}
+};
 
 function referenceClassName(style?: string, className?: string): string {
   return `speccy sp-operation-reference ${style} ${className}`.trim();
@@ -56,12 +78,11 @@ function EndpointIdentity({
 }
 
 export function OperationLink({
-  method,
-  path,
-  href,
   className,
   onClick,
+  ...lookup
 }: OperationReferenceProps) {
+  const { method, path, href } = useOperationReference(lookup);
   return (
     <a
       className={referenceClassName(styles.inlineLink, className)}
@@ -75,12 +96,11 @@ export function OperationLink({
 }
 
 export function EndpointStrip({
-  method,
-  path,
-  href,
   className,
   onClick,
+  ...lookup
 }: OperationReferenceProps) {
+  const { method, path, href } = useOperationReference(lookup);
   return (
     <a
       className={referenceClassName(styles.endpointStrip, className)}
@@ -96,14 +116,13 @@ export function EndpointStrip({
 }
 
 export function OperationCard({
-  method,
-  path,
   summary,
   description,
-  href,
   className,
   onClick,
+  ...lookup
 }: DescribedOperationReferenceProps) {
+  const { method, path, href } = useOperationReference(lookup);
   return (
     <a
       className={referenceClassName(styles.referenceCard, className)}
@@ -122,16 +141,14 @@ export function OperationCard({
   );
 }
 
-export interface OperationPreviewProps extends OperationReferenceProps {
-  /** OpenAPI document used to derive examples when explicit examples are omitted. */
-  spec?: OpenAPIDocument | string;
+export type OperationPreviewProps = OperationReferenceProps & {
   /** Overrides derived path, query, header, or body values by section. */
   requestValues?: OperationPreviewRequestValues;
-  /** Overrides the request body derived from `spec`. */
-  requestExample?: string;
-  /** Overrides the response example derived from `spec`. */
-  responseExample?: string;
-}
+  /** Overrides the request body derived from `spec`. Objects are formatted as JSON. */
+  requestExample?: unknown;
+  /** Overrides the response example derived from `spec`. Objects are formatted as JSON. */
+  responseExample?: unknown;
+};
 
 function formatExample(value: unknown): string | undefined {
   if (value === undefined) return undefined;
@@ -230,24 +247,27 @@ function RequestPreview({
 }
 
 export function OperationPreview({
-  method,
-  path,
-  href,
-  spec,
   requestValues,
   requestExample,
   responseExample,
   className,
   onClick,
+  ...lookup
 }: OperationPreviewProps) {
   const [tab, setTab] = useState<'request' | 'response'>('request');
-  const derived = deriveOperationPreviewData(spec, method, path);
+  const { method, path, href, operation } = useOperationReference(lookup);
+  const derived = deriveOperationPreviewDataFromOperation(
+    operation?.pathItem,
+    operation?.operation,
+  );
   const request = mergeOperationPreviewRequestValues(
     derived.request,
     requestValues,
   );
-  if (requestExample !== undefined) request.body = requestExample;
-  const response = responseExample ?? formatExample(derived.response);
+  if (requestExample !== undefined)
+    request.body = formatExample(requestExample);
+  const response =
+    formatExample(responseExample) ?? formatExample(derived.response);
   const hasRequest = true;
   const hasResponse = response !== undefined;
   const tabs = [

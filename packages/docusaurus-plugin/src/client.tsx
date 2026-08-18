@@ -36,9 +36,13 @@ export {
   OperationCard,
   OperationLink,
   OperationPreview,
+  OperationReferenceProvider,
 } from 'speccy-renderer/docs';
 export type {
   DescribedOperationReferenceProps,
   OperationPreviewProps,
+  OperationReferenceLookup,
   OperationReferenceProps,
+  OperationReferenceProviderProps,
+  OperationReferenceSource,
 } from 'speccy-renderer/docs';

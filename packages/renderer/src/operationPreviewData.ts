@@ -14,6 +14,7 @@ import {
   type OpenAPIDocument,
   type Operation,
   type Parameter,
+  type PathItem,
   type Schema,
 } from 'speccy-core';
 
@@ -89,6 +90,14 @@ export function deriveOperationPreviewData(
   const operation = pathItem?.[
     method.toLowerCase() as keyof typeof pathItem
   ] as Operation | undefined;
+  return deriveOperationPreviewDataFromOperation(pathItem, operation);
+}
+
+/** Derives preview data from an already resolved path item and operation. */
+export function deriveOperationPreviewDataFromOperation(
+  pathItem: PathItem | undefined,
+  operation: Operation | undefined,
+): OperationPreviewData {
   if (!operation || typeof operation !== 'object') return { request: {} };
 
   const parameters = [
