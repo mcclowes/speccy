@@ -247,4 +247,185 @@ describe('OpenAPI diagnostics', () => {
       }),
     ]);
   });
+
+  it('resolves referenced request bodies and responses before checking them', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Payments', version: '1' },
+      paths: {
+        '/payments': {
+          post: {
+            operationId: 'createPayment',
+            requestBody: { $ref: '#/components/requestBodies/CreatePayment' },
+            responses: {
+              200: { $ref: '#/components/responses/Payment' },
+              400: { $ref: '#/components/responses/BadRequest' },
+            },
+          },
+        },
+      },
+      components: {
+        requestBodies: {
+          CreatePayment: {
+            description: 'The payment to create.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Payment' },
+                example: { amount: 100 },
+              },
+            },
+          },
+        },
+        responses: {
+          Payment: {
+            description: 'The created payment.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Payment' },
+                example: { amount: 100 },
+              },
+            },
+          },
+          BadRequest: {
+            description: 'The request was invalid.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    code: { type: 'string', description: 'A stable code.' },
+                    requestId: { type: 'string', description: 'Trace ID.' },
+                    detail: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        schemas: {
+          Payment: {
+            type: 'object',
+            properties: {
+              amount: { type: 'integer', description: 'Minor units.' },
+            },
+          },
+        },
+      },
+    };
+
+    const rules = analyzeOpenApi(document).map((diagnostic) => [
+      diagnostic.ruleId,
+      diagnostic.path.join('.'),
+    ]);
+
+    for (const rule of [
+      'request-body-description',
+      'request-media-type',
+      'request-example',
+      'response-description',
+      'success-response-schema',
+      'response-example',
+      'structured-error-response',
+      'machine-readable-error-code',
+      'error-correlation-id',
+    ]) {
+      expect(
+        rules.filter(([ruleId]) => ruleId === rule),
+        rule,
+      ).toEqual([]);
+    }
+    // The inline schema inside the shared response is inspected once, at its component path.
+    expect(rules).toContainEqual([
+      'property-description',
+      'components.responses.BadRequest.content.application/json.schema.properties.detail',
+    ]);
+    expect(
+      rules.filter(
+        ([ruleId, path]) =>
+          ruleId === 'property-description' && path?.startsWith('paths.'),
+      ),
+    ).toEqual([]);
+  });
+
+  it('does not treat digit-only string patterns as unformatted timestamps', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Payments', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Payment: {
+            type: 'object',
+            properties: {
+              scheduledTimestamp: {
+                type: 'string',
+                pattern: '^[0-9]+$',
+                description: 'Epoch milliseconds.',
+              },
+              createdAt: {
+                type: 'string',
+                description: 'When it was created.',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const diagnostics = analyzeOpenApi(document).filter(
+      (diagnostic) => diagnostic.ruleId === 'timestamp-format',
+    );
+
+    expect(diagnostics.map((diagnostic) => diagnostic.path.at(-1))).toEqual([
+      'createdAt',
+    ]);
+  });
+
+  it('accepts a correlation identifier carried in an error response header', () => {
+    const document: OpenAPIDocument = {
+      openapi: '3.1.0',
+      info: { title: 'Payments', version: '1' },
+      paths: {
+        '/payments': {
+          get: {
+            operationId: 'listPayments',
+            responses: {
+              200: { description: 'Payments.' },
+              400: {
+                description: 'Bad request.',
+                headers: { 'request-ref': { schema: { type: 'string' } } },
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: { code: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+              404: {
+                description: 'Not found.',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: { code: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const diagnostics = analyzeOpenApi(document).filter(
+      (diagnostic) => diagnostic.ruleId === 'error-correlation-id',
+    );
+
+    expect(diagnostics.map((diagnostic) => diagnostic.path.at(-1))).toEqual([
+      '404',
+    ]);
+  });
 });

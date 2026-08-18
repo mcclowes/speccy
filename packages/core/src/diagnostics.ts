@@ -15,6 +15,7 @@ import {
 import { operationsInDeclarationOrder, resolveRefs } from './model';
 import type {
   HttpMethod,
+  MediaType,
   OpenAPIDocument,
   Operation,
   Parameter,
@@ -90,6 +91,14 @@ function operationKey(method: HttpMethod, path: string, operation: Operation) {
   );
 }
 
+function isReference(node: unknown): boolean {
+  return (
+    !!node &&
+    typeof node === 'object' &&
+    typeof (node as { $ref?: unknown }).$ref === 'string'
+  );
+}
+
 function responseSchema(response: ResponseObject): Schema | undefined {
   return (
     response.content?.['application/json']?.schema ??
@@ -109,6 +118,9 @@ function schemaSignature(schema?: Schema): string {
     enum: schema.enum,
   });
 }
+
+/** Epoch timestamps modeled as numeric strings, which are not RFC 3339 candidates. */
+const digitOnlyPattern = /^\^?(?:\[0-9\]|\\d)[+*]\$?$/;
 
 function visitSchema(
   schema: Schema | undefined,
@@ -159,7 +171,8 @@ function visitSchema(
       lower.includes('timestamp') ||
       lower.includes('datetime')) &&
     schema.type === 'string' &&
-    !schema.format
+    !schema.format &&
+    !digitOnlyPattern.test(schema.pattern ?? '')
   ) {
     add({
       ruleId: 'timestamp-format',
@@ -294,6 +307,10 @@ function inspectParameter(
   visitSchema(parameter.schema, [...path, 'schema'], add, context);
 }
 
+/** Response headers that carry a request or trace identifier, such as `X-Request-Id` or `request-ref`. */
+const correlationHeader =
+  /^(?:x-)?(?:request|correlation|trace)[-_]?(?:id|ref)$/i;
+
 function inspectErrors(
   responses: Record<string, ResponseObject>,
   basePath: Array<string | number>,
@@ -338,9 +355,13 @@ function inspectErrors(
       const hasCode = ['code', 'type', 'issue', 'errorCode'].some(
         (name) => name in properties,
       );
-      const hasCorrelation = ['correlationId', 'requestId', 'traceId'].some(
-        (name) => name in properties,
-      );
+      const hasCorrelation =
+        ['correlationId', 'requestId', 'traceId'].some(
+          (name) => name in properties,
+        ) ||
+        Object.keys(response.headers ?? {}).some((name) =>
+          correlationHeader.test(name),
+        );
       if (!hasCode)
         add({
           ruleId: 'machine-readable-error-code',
@@ -734,7 +755,12 @@ export function analyzeOpenApi(
           path: [...operationPath, 'parameters'],
           ...context,
         });
-      if (method === 'get' && operation.requestBody)
+      const requestBody =
+        resolvedOperation?.requestBody ?? operation.requestBody;
+      const inlineRequestBody = isReference(operation.requestBody)
+        ? undefined
+        : operation.requestBody;
+      if (method === 'get' && requestBody)
         add({
           ruleId: 'get-request-body',
           severity: 'warning',
@@ -747,8 +773,8 @@ export function analyzeOpenApi(
           path: [...operationPath, 'requestBody'],
           ...context,
         });
-      if (operation.requestBody) {
-        if (!text(operation.requestBody.description))
+      if (requestBody) {
+        if (!text(requestBody.description))
           add({
             ruleId: 'request-body-description',
             severity: 'suggestion',
@@ -759,7 +785,7 @@ export function analyzeOpenApi(
             path: [...operationPath, 'requestBody'],
             ...context,
           });
-        if (!Object.keys(operation.requestBody.content ?? {}).length)
+        if (!Object.keys(requestBody.content ?? {}).length)
           add({
             ruleId: 'request-media-type',
             severity: 'issue',
@@ -770,7 +796,7 @@ export function analyzeOpenApi(
             ...context,
           });
         for (const [mediaType, media] of Object.entries(
-          operation.requestBody.content ?? {},
+          requestBody.content ?? {},
         )) {
           if (
             media.example === undefined &&
@@ -790,14 +816,15 @@ export function analyzeOpenApi(
               ...context,
             });
           visitSchema(
-            media.schema,
+            inlineRequestBody?.content?.[mediaType]?.schema,
             [...operationPath, 'requestBody', 'content', mediaType, 'schema'],
             add,
             context,
           );
         }
       }
-      const responses = operation.responses ?? {};
+      const responses =
+        resolvedOperation?.responses ?? operation.responses ?? {};
       if (!Object.keys(responses).some((code) => successCodes.test(code)))
         add({
           ruleId: 'success-response',
@@ -865,8 +892,11 @@ export function analyzeOpenApi(
               path: [...operationPath, 'responses', code, 'content', mediaType],
               ...context,
             });
+          const inlineResponse = operation.responses?.[code];
           visitSchema(
-            media.schema,
+            isReference(inlineResponse)
+              ? undefined
+              : inlineResponse?.content?.[mediaType]?.schema,
             [
               ...operationPath,
               'responses',
@@ -1102,6 +1132,21 @@ export function analyzeOpenApi(
   ))
     if (typeof schema !== 'boolean')
       visitSchema(schema, ['components', 'schemas', name], add, {});
+  const sharedContent: Array<
+    [string, Record<string, { content?: Record<string, MediaType> }>]
+  > = [
+    ['requestBodies', document.components?.requestBodies ?? {}],
+    ['responses', document.components?.responses ?? {}],
+  ];
+  for (const [kind, components] of sharedContent)
+    for (const [name, component] of Object.entries(components))
+      for (const [mediaType, media] of Object.entries(component.content ?? {}))
+        visitSchema(
+          media.schema,
+          ['components', kind, name, 'content', mediaType, 'schema'],
+          add,
+          {},
+        );
   for (const [eventName, pathItem] of Object.entries(document.webhooks ?? {})) {
     if (
       !/[a-z0-9]+\.(?:created|updated|deleted|failed|completed|authorized|canceled)$/i.test(
@@ -1124,8 +1169,10 @@ export function analyzeOpenApi(
         operationId: operationKey(method, eventName, operation),
         tag: operation.tags?.[0],
       };
-      const bodySchema = Object.values(operation.requestBody?.content ?? {})[0]
-        ?.schema;
+      const webhookBody =
+        resolvedDocument.webhooks?.[eventName]?.[method]?.requestBody ??
+        operation.requestBody;
+      const bodySchema = Object.values(webhookBody?.content ?? {})[0]?.schema;
       const properties =
         typeof bodySchema === 'object' ? (bodySchema.properties ?? {}) : {};
       for (const [ruleId, candidates, label] of [
