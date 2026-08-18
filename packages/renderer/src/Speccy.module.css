@@ -10,10 +10,6 @@
   margin-bottom: 22px;
 }
 
-:global(.sp-request-context .sp-endpoint-servers) {
-  margin: 0;
-}
-
 :global(.sp-request-context:empty) {
   display: none;
 }

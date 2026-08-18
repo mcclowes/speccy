@@ -1121,12 +1121,14 @@ related:
   min-width: 0;
 }
 .sp-request-heading {
+  display: grid;
+  gap: 8px;
   margin-bottom: 22px;
+  padding-bottom: 13px;
   border-bottom: 1px solid var(--sp-line);
 }
 .sp-request-heading h2 {
   margin: 0;
-  padding-bottom: 13px;
   font-size: 1.438rem;
   line-height: 1.2;
   letter-spacing: -0.03em;
