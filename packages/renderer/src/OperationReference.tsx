@@ -11,7 +11,12 @@
 
 import { useState, type MouseEventHandler } from 'react';
 import type { OpenAPIDocument } from 'speccy-core';
-import { CodeBlock, CodeLines, CollapsibleJson, CopyButton } from './CodeBlock';
+import {
+  CodeLines,
+  CollapsibleJson,
+  CopyButton,
+  TruncatedCode,
+} from './CodeBlock';
 import { ApiPath, MethodBadge } from './DesignSystem';
 import {
   deriveOperationPreviewDataFromOperation,
@@ -167,17 +172,15 @@ function hasValues(values: Record<string, unknown> | undefined): boolean {
   return Boolean(values && Object.keys(values).length);
 }
 
-function RequestPreviewSection({
-  label,
-  value,
-  rawValue,
-}: {
+interface PreviewSectionData {
   label: string;
   value: string;
   rawValue?: unknown;
-}) {
+}
+
+function PreviewSection({ label, value, rawValue }: PreviewSectionData) {
   return (
-    <section className={styles.requestSection}>
+    <section className={styles.previewSection}>
       <header>
         <span>{label}</span>
         <CopyButton
@@ -199,14 +202,44 @@ function RequestPreviewSection({
   );
 }
 
-function RequestPreview({
-  path,
-  values,
+/** Combined line budget before a preview panel is clipped; each section header costs a few lines. */
+const PREVIEW_TRUNCATE_LINES = 24;
+const PREVIEW_SECTION_HEADER_LINES = 3;
+
+function PreviewPanel({
+  label,
+  sections,
 }: {
-  path: string;
-  values: OperationPreviewRequestValues;
+  label: string;
+  sections: PreviewSectionData[];
 }) {
-  const sections = [
+  const lines = sections.reduce(
+    (total, section) =>
+      total + PREVIEW_SECTION_HEADER_LINES + section.value.split('\n').length,
+    0,
+  );
+  return (
+    <div className={styles.previewSections}>
+      <TruncatedCode
+        value=""
+        lines={lines}
+        threshold={PREVIEW_TRUNCATE_LINES}
+        label={label}
+        panel
+      >
+        {sections.map((section) => (
+          <PreviewSection {...section} key={section.label} />
+        ))}
+      </TruncatedCode>
+    </div>
+  );
+}
+
+function requestSections(
+  path: string,
+  values: OperationPreviewRequestValues,
+): PreviewSectionData[] {
+  return [
     { label: 'Path', value: requestPath(path, values.path ?? {}) },
     ...(hasValues(values.query)
       ? [
@@ -236,14 +269,6 @@ function RequestPreview({
         ]
       : []),
   ];
-
-  return (
-    <div className={styles.requestSections}>
-      {sections.map((section) => (
-        <RequestPreviewSection {...section} key={section.label} />
-      ))}
-    </div>
-  );
 }
 
 export function OperationPreview({
@@ -264,10 +289,9 @@ export function OperationPreview({
     derived.request,
     requestValues,
   );
-  if (requestExample !== undefined)
-    request.body = formatExample(requestExample);
-  const response =
-    formatExample(responseExample) ?? formatExample(derived.response);
+  if (requestExample !== undefined) request.body = requestExample;
+  const responseValue = responseExample ?? derived.response;
+  const response = formatExample(responseValue);
   const hasRequest = true;
   const hasResponse = response !== undefined;
   const tabs = [
@@ -304,18 +328,23 @@ export function OperationPreview({
           className={styles.previewCode}
           role={tabs.length > 1 ? 'tabpanel' : undefined}
         >
-          <RequestPreview path={path} values={request} />
+          <PreviewPanel
+            key="request"
+            label="request"
+            sections={requestSections(path, request)}
+          />
         </div>
       ) : response !== undefined ? (
         <div
           className={styles.previewCode}
           role={tabs.length > 1 ? 'tabpanel' : undefined}
         >
-          <CodeBlock
-            value={response}
-            copyPlacement="body"
-            copyLabel="Copy response"
-            truncateLabel="response"
+          <PreviewPanel
+            key="response"
+            label="response"
+            sections={[
+              { label: 'Body', value: response, rawValue: responseValue },
+            ]}
           />
         </div>
       ) : null}

@@ -196,30 +196,18 @@
   padding: 16px;
 }
 
-.previewCode :global(.sp-code-block) {
-  overflow: hidden;
-  border: 1px solid var(--sp-code-border);
-  border-radius: 9px;
-}
-
-.previewCode :global(.sp-code-block pre) {
-  padding: 16px 18px;
-  font-size: 0.72rem;
-  line-height: 1.65;
-}
-
-.requestSections {
+.previewSections {
   overflow: hidden;
   background: var(--sp-code-bg);
   border: 1px solid var(--sp-code-border);
   border-radius: 9px;
 }
 
-.requestSection + .requestSection {
+.previewSection + .previewSection {
   border-top: 1px solid var(--sp-code-border);
 }
 
-.requestSection > header {
+.previewSection > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -232,7 +220,7 @@
   text-transform: uppercase;
 }
 
-.requestSection > pre {
+.previewSection > pre {
   margin: 0;
   padding: 8px 18px 16px;
   overflow: auto;
@@ -243,7 +231,7 @@
   line-height: 1.65;
 }
 
-.requestSection > pre code {
+.previewSection > pre code {
   padding: 0;
   color: inherit;
   background: transparent;

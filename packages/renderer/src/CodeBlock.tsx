@@ -264,19 +264,27 @@ const TRUNCATE_LINE_THRESHOLD = 35;
 export function TruncatedCode({
   value,
   label,
+  lines = value.split('\n').length,
+  threshold = TRUNCATE_LINE_THRESHOLD,
+  panel = false,
   children,
 }: {
   value: string;
   label: string;
+  /** Line count used to decide whether to clip; defaults to the lines in `value`. */
+  lines?: number;
+  /** Clip once the content exceeds this many lines. */
+  threshold?: number;
+  /** Clip the whole child panel rather than the `pre` inside it. */
+  panel?: boolean;
   children: ReactNode;
 }) {
   const [expanded, setExpanded] = useState(false);
-  if (value.split('\n').length <= TRUNCATE_LINE_THRESHOLD)
-    return <>{children}</>;
+  if (lines <= threshold) return <>{children}</>;
 
   return (
     <div
-      className={`sp-code-clip ${styles.clip}${expanded ? '' : ` is-truncated ${styles.truncated}`}`}
+      className={`sp-code-clip ${styles.clip}${panel ? ` sp-code-clip-panel ${styles.clipPanel}` : ''}${expanded ? '' : ` is-truncated ${styles.truncated}`}`}
     >
       <div className={`sp-code-clip-window ${styles.clipWindow}`}>
         {children}

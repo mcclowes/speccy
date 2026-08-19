@@ -176,6 +176,11 @@
   max-height: none;
 }
 
+:global(.speccy) .clipPanel.truncated .clipWindow {
+  max-height: 440px;
+  overflow: hidden;
+}
+
 .clip.truncated .clipWindow::after {
   content: '';
   position: absolute;

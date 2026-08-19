@@ -358,3 +358,59 @@ describe('operation references resolved from an OpenAPI document', () => {
     expect(screen.getByText('"corp-2"')).toBeInTheDocument();
   });
 });
+
+describe('operation preview truncation', () => {
+  const bigBody = Object.fromEntries(
+    Array.from({ length: 30 }, (_, i) => [`field${i}`, i]),
+  );
+
+  it('renders the response with the same sectioned, foldable treatment as the request', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        requestExample={{ name: 'Example' }}
+        responseExample={{ id: 'corporate-1', nested: { ok: true } }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy body' })).toHaveClass(
+      'sp-copy-compact',
+    );
+    expect(
+      screen.getAllByRole('button', { name: 'Collapse' }).length,
+    ).toBeGreaterThan(1);
+  });
+
+  it('clips long requests and responses across all sections behind one toggle', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        requestValues={{ headers: { 'x-a': '1' } }}
+        requestExample={bigBody}
+        responseExample={bigBody}
+      />,
+    );
+    const toggle = screen.getByRole('button', { name: 'Show full request' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(
+      screen.getByRole('button', { name: 'Show less' }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(
+      screen.getByRole('button', { name: 'Show full response' }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not clip short previews', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        requestExample={{ a: 1 }}
+        responseExample={{ b: 2 }}
+      />,
+    );
+    expect(screen.queryByText(/Show full/)).not.toBeInTheDocument();
+  });
+});

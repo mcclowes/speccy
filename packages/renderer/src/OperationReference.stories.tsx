@@ -161,6 +161,59 @@ export const Preview: Story = {
   ),
 };
 
+export const LongPreview: Story = {
+  name: 'Long preview',
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <OperationPreview
+        {...createCorporate}
+        requestValues={{
+          headers: { 'idempotency-ref': 'corporate-2026-08-11-001' },
+        }}
+        requestExample={{
+          profileId: '10001',
+          tag: 'customer-123',
+          rootUser: {
+            name: 'Alex',
+            surname: 'Morgan',
+            email: 'alex@example.com',
+            mobile: { countryCode: '+44', number: '7700900123' },
+            companyPosition: 'DIRECTOR',
+            dateOfBirth: { year: 1990, month: 1, day: 1 },
+          },
+          company: {
+            type: 'SOLE_TRADER',
+            businessAddress: {
+              addressLine1: '1 High Street',
+              city: 'London',
+              postCode: 'EC1A 1AA',
+              country: 'GB',
+            },
+            name: 'Acme',
+            registrationNumber: '12345678',
+          },
+        }}
+        responseExample={{
+          id: { type: 'CORPORATE', id: '123456789' },
+          profileId: '10001',
+          tag: 'customer-123',
+          rootUser: {
+            id: { type: 'USER', id: '123456789' },
+            name: 'Alex',
+            surname: 'Morgan',
+            email: 'alex@example.com',
+            mobile: { countryCode: '+44', number: '7700900123' },
+            companyPosition: 'DIRECTOR',
+            active: true,
+          },
+          company: { type: 'SOLE_TRADER', name: 'Acme' },
+          creationTimestamp: 1754550000000,
+        }}
+      />
+    </div>
+  ),
+};
+
 export const DerivedFromSpec: Story = {
   name: 'Derived from spec',
   render: () => (
