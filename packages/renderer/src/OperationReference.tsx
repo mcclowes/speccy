@@ -18,6 +18,7 @@ import {
   TruncatedCode,
 } from './CodeBlock';
 import { ApiPath, MethodBadge } from './DesignSystem';
+import type { Theme } from './ThemeToggle';
 import {
   deriveOperationPreviewDataFromOperation,
   mergeOperationPreviewRequestValues,
@@ -49,6 +50,8 @@ interface OperationReferenceBaseProps {
   spec?: OpenAPIDocument | string;
   /** Route where the reference for `spec` is mounted. Defaults to `/api`. */
   basePath?: string;
+  /** Colour scheme. Defaults to `inherit`, which follows the host page's theme. */
+  theme?: Theme;
   className?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
@@ -61,8 +64,14 @@ export type DescribedOperationReferenceProps = OperationReferenceProps & {
   description?: string;
 };
 
-function referenceClassName(style?: string, className?: string): string {
-  return `speccy sp-operation-reference ${style} ${className}`.trim();
+function referenceClassName(
+  theme: Theme,
+  style?: string,
+  className?: string,
+): string {
+  return `speccy sp-theme-${theme} sp-operation-reference ${style ?? ''} ${className ?? ''}`
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function EndpointIdentity({
@@ -83,6 +92,7 @@ function EndpointIdentity({
 }
 
 export function OperationLink({
+  theme = 'inherit',
   className,
   onClick,
   ...lookup
@@ -90,7 +100,7 @@ export function OperationLink({
   const { method, path, href } = useOperationReference(lookup);
   return (
     <a
-      className={referenceClassName(styles.inlineLink, className)}
+      className={referenceClassName(theme, styles.inlineLink, className)}
       href={href}
       onClick={onClick}
     >
@@ -101,6 +111,7 @@ export function OperationLink({
 }
 
 export function EndpointStrip({
+  theme = 'inherit',
   className,
   onClick,
   ...lookup
@@ -108,7 +119,7 @@ export function EndpointStrip({
   const { method, path, href } = useOperationReference(lookup);
   return (
     <a
-      className={referenceClassName(styles.endpointStrip, className)}
+      className={referenceClassName(theme, styles.endpointStrip, className)}
       href={href}
       onClick={onClick}
     >
@@ -123,6 +134,7 @@ export function EndpointStrip({
 export function OperationCard({
   summary,
   description,
+  theme = 'inherit',
   className,
   onClick,
   ...lookup
@@ -130,7 +142,7 @@ export function OperationCard({
   const { method, path, href } = useOperationReference(lookup);
   return (
     <a
-      className={referenceClassName(styles.referenceCard, className)}
+      className={referenceClassName(theme, styles.referenceCard, className)}
       href={href}
       onClick={onClick}
     >
@@ -275,6 +287,7 @@ export function OperationPreview({
   requestValues,
   requestExample,
   responseExample,
+  theme = 'inherit',
   className,
   onClick,
   ...lookup
@@ -301,7 +314,9 @@ export function OperationPreview({
   const activeTab = tab === 'response' && hasResponse ? 'response' : tabs[0];
 
   return (
-    <section className={referenceClassName(styles.operationPreview, className)}>
+    <section
+      className={referenceClassName(theme, styles.operationPreview, className)}
+    >
       <header className={styles.previewHeader}>
         <EndpointIdentity method={method} path={path} />
         <a href={href} onClick={onClick}>

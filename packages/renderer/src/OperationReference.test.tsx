@@ -32,6 +32,15 @@ describe('operation references', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
+  it('inherits the host theme by default and accepts an explicit theme', () => {
+    const { rerender } = render(<OperationLink {...operation} />);
+    expect(screen.getByRole('link')).toHaveClass('sp-theme-inherit');
+
+    rerender(<OperationLink {...operation} theme="dark" />);
+    expect(screen.getByRole('link')).toHaveClass('sp-theme-dark');
+    expect(screen.getByRole('link')).not.toHaveClass('sp-theme-inherit');
+  });
+
   it('renders endpoint strips and described cards', () => {
     const { rerender } = render(<EndpointStrip {...operation} />);
     expect(screen.getByText('Open reference').closest('a')).toHaveAttribute(

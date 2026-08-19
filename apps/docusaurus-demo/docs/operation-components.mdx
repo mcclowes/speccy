@@ -182,20 +182,21 @@ If no spec or request values are supplied, the request preview contains the unre
 
 ### Preview props
 
-| Prop              | Required | Purpose                                                                                                        |
-| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `method`          | Yes\*    | HTTP method used for the badge and operation lookup.                                                           |
-| `path`            | Yes\*    | OpenAPI path used for display and operation lookup. May end in a `#variant` fragment to pick between variants. |
-| `operationId`     | No       | Looks the operation up by id instead of by method and path. `method` and `path` become optional.               |
-| `href`            | No       | Link to the full operation reference. Derived from the operation when a spec is available.                     |
-| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive `href`, request values, and a response.             |
-| `basePath`        | No       | Route where the reference for `spec` is mounted. Defaults to `/api`.                                           |
-| `api`             | No       | Name of the provider source to look the operation up in.                                                       |
-| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec.                 |
-| `requestExample`  | No       | Request body string or object. Overrides a body supplied by `spec` or `requestValues`.                         |
-| `responseExample` | No       | Explicit response string or object. Overrides a response derived from `spec`.                                  |
-| `className`       | No       | Adds a class without replacing Speccy's component classes.                                                     |
-| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                                             |
+| Prop              | Required | Purpose                                                                                                                     |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `method`          | Yes\*    | HTTP method used for the badge and operation lookup.                                                                        |
+| `path`            | Yes\*    | OpenAPI path used for display and operation lookup. May end in a `#variant` fragment to pick between variants.              |
+| `operationId`     | No       | Looks the operation up by id instead of by method and path. `method` and `path` become optional.                            |
+| `href`            | No       | Link to the full operation reference. Derived from the operation when a spec is available.                                  |
+| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive `href`, request values, and a response.                          |
+| `basePath`        | No       | Route where the reference for `spec` is mounted. Defaults to `/api`.                                                        |
+| `api`             | No       | Name of the provider source to look the operation up in.                                                                    |
+| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec.                              |
+| `requestExample`  | No       | Request body string or object. Overrides a body supplied by `spec` or `requestValues`.                                      |
+| `responseExample` | No       | Explicit response string or object. Overrides a response derived from `spec`.                                               |
+| `theme`           | No       | `inherit` (default), `light`, `dark`, or `system`. `inherit` follows the host page's theme, including Docusaurus dark mode. |
+| `className`       | No       | Adds a class without replacing Speccy's component classes.                                                                  |
+| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                                                          |
 
 \* Either `method` and `path`, or `operationId`, must be given.
 
