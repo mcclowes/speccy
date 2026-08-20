@@ -1,6 +1,6 @@
 {
   "name": "speccy-spectral",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "Optional Spectral linting integration for Speccy.",
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
   "dependencies": {
     "@stoplight/spectral-core": "^1.23.1",
     "@stoplight/spectral-rulesets": "^1.22.7",
-    "speccy-core": "^0.10.2"
+    "speccy-core": "^0.10.3"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

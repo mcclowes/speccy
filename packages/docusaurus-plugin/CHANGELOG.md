@@ -1,5 +1,13 @@
 # docusaurus-plugin-speccy
 
+## 0.10.3
+
+### Patch Changes
+
+- Updated dependencies [[`8513236`](https://github.com/mcclowes/speccy/commit/8513236b3495905afd670701164a199760cf2fbc), [`3838e7b`](https://github.com/mcclowes/speccy/commit/3838e7bce636b1c7dee1a1a3bf239883506e9b60)]:
+  - speccy-renderer@0.10.3
+  - speccy-spectral@0.10.3
+
 ## 0.10.2
 
 ### Patch Changes
