@@ -1,5 +1,12 @@
 # Speccy
 
+[![npm: speccy-cli](https://img.shields.io/npm/v/speccy-cli?label=speccy-cli)](https://www.npmjs.com/package/speccy-cli)
+[![npm: speccy-core](https://img.shields.io/npm/v/speccy-core?label=speccy-core)](https://www.npmjs.com/package/speccy-core)
+[![npm: speccy-renderer](https://img.shields.io/npm/v/speccy-renderer?label=speccy-renderer)](https://www.npmjs.com/package/speccy-renderer)
+[![npm: docusaurus-plugin-speccy](https://img.shields.io/npm/v/docusaurus-plugin-speccy?label=docusaurus-plugin-speccy)](https://www.npmjs.com/package/docusaurus-plugin-speccy)
+[![npm: create-speccy-reference](https://img.shields.io/npm/v/create-speccy-reference?label=create-speccy-reference)](https://www.npmjs.com/package/create-speccy-reference)
+[![npm: speccy-spectral](https://img.shields.io/npm/v/speccy-spectral?label=speccy-spectral)](https://www.npmjs.com/package/speccy-spectral)
+
 Speccy is an OpenAPI renderer for React, the web, macOS, and Docusaurus. It uses one rendering core across every surface, so a spec looks and behaves the same wherever it is published.
 
 The design stays quiet around the content. Color identifies methods, status, required fields, and interactive state rather than decorating every surface.
