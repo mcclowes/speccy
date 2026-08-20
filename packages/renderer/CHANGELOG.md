@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.10.4
+
+### Patch Changes
+
+- [`762a0cc`](https://github.com/mcclowes/speccy/commit/762a0cc118e35b218f4b176e9aea1fc4bdbb1e6b) Thanks [@mcclowes](https://github.com/mcclowes)! - Collapse query parameters and headers in operation previews by default, with per-section disclosure defaults.
+
+- Updated dependencies []:
+  - speccy-core@0.10.4
+
 ## 0.10.3
 
 ### Patch Changes
