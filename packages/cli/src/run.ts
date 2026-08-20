@@ -8,7 +8,12 @@
  */
 
 import { parseArgs } from 'node:util';
-import { analyzeOpenApi, diffSpecs, parseSpec } from 'speccy-core';
+import {
+  analyzeOpenApi,
+  diffSpecs,
+  parseSpec,
+  stripNonMaterialFields,
+} from 'speccy-core';
 import {
   diffExitCode,
   formatDiff,
@@ -53,6 +58,7 @@ Options:
                                     lint: issue, warning, suggestion, never. Defaults to issue.
                                     diff: breaking, warning, compatible, documentation, never. Defaults to breaking.
   --against <spec>                  Adds change-safety findings to a lint.
+  --material                        Ignores descriptions and x- extension fields in a diff.
   --no-color                        Never colorize terminal output.
   --help                            Show this message.
 
@@ -97,6 +103,7 @@ export async function run(
         format: { type: 'string' },
         'fail-on': { type: 'string' },
         against: { type: 'string' },
+        material: { type: 'boolean' },
         color: { type: 'boolean', default: true },
         help: { type: 'boolean', short: 'h' },
       },
@@ -169,9 +176,10 @@ export async function run(
       if (revisionSource === undefined)
         throw new Error(`No spec at ${revisionTarget}.`);
 
+      const normalize = values.material ? stripNonMaterialFields : parseSpec;
       const report = diffSpecs(
-        parseSpec(baseSource),
-        parseSpec(revisionSource),
+        normalize(parseSpec(baseSource)),
+        normalize(parseSpec(revisionSource)),
         {
           base: { source: baseTarget },
           revision: { source: revisionTarget },

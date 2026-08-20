@@ -92,6 +92,22 @@ describe('run', () => {
     await expect(run(['diff', 'base.yaml', 'head.yaml'], h)).resolves.toBe(0);
   });
 
+  it('can ignore descriptions and extensions in a material diff', async () => {
+    const revision = BASE.replace(
+      'Returns every loan.',
+      'Lists loans.',
+    ).replace(
+      'summary: List loans',
+      'summary: List loans\n      x-speccy-lifecycle: beta',
+    );
+    const h = harness({ 'base.yaml': BASE, 'head.yaml': revision });
+
+    const code = await run(['diff', 'base.yaml', 'head.yaml', '--material'], h);
+
+    expect(code).toBe(0);
+    expect(h.out.join('')).not.toContain('description changed');
+  });
+
   it('reads a base from a git ref', async () => {
     const h = harness({ 'main:openapi.yaml': BASE, 'openapi.yaml': REVISION });
     await expect(

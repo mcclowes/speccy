@@ -135,6 +135,16 @@ npx speccy-cli diff origin/main:openapi.yaml openapi.yaml
 
 Use `--format markdown` for output suitable for a pull request comment. Lint exits with code 1 when a finding reaches `--fail-on`; diff does the same for its configured change severity. Tool and parsing failures use code 2.
 
+### Focus a diff on contract changes
+
+Pass `--material` when descriptions and extension metadata are changing independently of the API contract:
+
+```sh
+npx speccy-cli diff origin/main:openapi.yaml openapi.yaml --material
+```
+
+The flag removes every `description` field and every `x-` extension property before the comparison. It keeps standard OpenAPI fields such as `summary`, request and response schemas, parameters, and security requirements.
+
 ## Action inputs
 
 | Input            | Default      | Purpose                                    |

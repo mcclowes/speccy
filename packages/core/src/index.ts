@@ -1,5 +1,6 @@
 export { adaptSpectralDiagnostics, analyzeOpenApi } from './diagnostics';
 export { diffSpecs } from './diffSpecs';
+export { stripNonMaterialFields } from './materialDiff';
 export {
   applyDiagnosticPolicy,
   PROTECTED_RULE_IDS,
