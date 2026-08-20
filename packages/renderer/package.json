@@ -1,6 +1,6 @@
 {
   "name": "speccy-renderer",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Clean, accessible OpenAPI reference rendering for React.",
   "repository": {
     "type": "git",
@@ -44,7 +44,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "speccy-core": "^0.10.1",
+    "speccy-core": "^0.10.2",
     "react-markdown": "^10.1.0",
     "remark-directive": "^3.0.1",
     "remark-gfm": "^4.0.1",

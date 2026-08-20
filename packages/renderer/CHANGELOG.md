@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.10.2
+
+### Patch Changes
+
+- [`1e1daa6`](https://github.com/mcclowes/speccy/commit/1e1daa660aea5cfd3406bdfd5cc143384b636aa9) Thanks [@mcclowes](https://github.com/mcclowes)! - Render JSON and code lines on separate rows in operation previews and live responses, instead of running them together on one line.
+
+- Updated dependencies []:
+  - speccy-core@0.10.2
+
 ## 0.10.1
 
 ### Patch Changes
