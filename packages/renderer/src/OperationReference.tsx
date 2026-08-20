@@ -17,7 +17,7 @@ import {
   CopyButton,
   TruncatedCode,
 } from './CodeBlock';
-import { ApiPath, MethodBadge } from './DesignSystem';
+import { ApiPath, DisclosureChevron, MethodBadge } from './DesignSystem';
 import type { Theme } from './ThemeToggle';
 import {
   deriveOperationPreviewDataFromOperation,
@@ -165,7 +165,15 @@ export type OperationPreviewProps = OperationReferenceProps & {
   requestExample?: unknown;
   /** Overrides the response example derived from `spec`. Objects are formatted as JSON. */
   responseExample?: unknown;
+  /**
+   * Sets the initial collapsed state for request and response sections. Query
+   * parameters and headers are collapsed by default; all other sections are open.
+   */
+  defaultCollapsed?: Partial<Record<OperationPreviewSection, boolean>>;
 };
+
+/** Individual sections that can be collapsed in an operation preview. */
+export type OperationPreviewSection = 'path' | 'query' | 'headers' | 'body';
 
 function formatExample(value: unknown): string | undefined {
   if (value === undefined) return undefined;
@@ -185,23 +193,44 @@ function hasValues(values: Record<string, unknown> | undefined): boolean {
 }
 
 interface PreviewSectionData {
+  key: OperationPreviewSection;
   label: string;
   value: string;
   rawValue?: unknown;
 }
 
-function PreviewSection({ label, value, rawValue }: PreviewSectionData) {
+function PreviewSection({
+  id,
+  label,
+  value,
+  rawValue,
+  collapsed,
+  onToggle,
+}: PreviewSectionData & {
+  id: string;
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   return (
     <section className={styles.previewSection}>
       <header>
-        <span>{label}</span>
+        <button
+          type="button"
+          className={styles.previewSectionToggle}
+          aria-expanded={!collapsed}
+          aria-controls={id}
+          onClick={onToggle}
+        >
+          <DisclosureChevron />
+          {label}
+        </button>
         <CopyButton
           value={value}
           label={`Copy ${label.toLowerCase()}`}
           compact
         />
       </header>
-      <pre>
+      <pre id={id} hidden={collapsed}>
         <code>
           {rawValue !== undefined && typeof rawValue !== 'string' ? (
             <CollapsibleJson value={rawValue} />
@@ -221,13 +250,29 @@ const PREVIEW_SECTION_HEADER_LINES = 3;
 function PreviewPanel({
   label,
   sections,
+  defaultCollapsed,
 }: {
   label: string;
   sections: PreviewSectionData[];
+  defaultCollapsed?: Partial<Record<OperationPreviewSection, boolean>>;
 }) {
+  const [collapsed, setCollapsed] = useState(
+    () =>
+      new Set(
+        sections
+          .filter(
+            (section) =>
+              defaultCollapsed?.[section.key] ??
+              (section.key === 'query' || section.key === 'headers'),
+          )
+          .map((section) => section.key),
+      ),
+  );
   const lines = sections.reduce(
     (total, section) =>
-      total + PREVIEW_SECTION_HEADER_LINES + section.value.split('\n').length,
+      total +
+      PREVIEW_SECTION_HEADER_LINES +
+      (collapsed.has(section.key) ? 0 : section.value.split('\n').length),
     0,
   );
   return (
@@ -239,8 +284,21 @@ function PreviewPanel({
         label={label}
         panel
       >
-        {sections.map((section) => (
-          <PreviewSection {...section} key={section.label} />
+        {sections.map((section, index) => (
+          <PreviewSection
+            {...section}
+            id={`${label}-${section.key}-${index}`}
+            collapsed={collapsed.has(section.key)}
+            onToggle={() =>
+              setCollapsed((current) => {
+                const next = new Set(current);
+                if (next.has(section.key)) next.delete(section.key);
+                else next.add(section.key);
+                return next;
+              })
+            }
+            key={section.key}
+          />
         ))}
       </TruncatedCode>
     </div>
@@ -252,10 +310,15 @@ function requestSections(
   values: OperationPreviewRequestValues,
 ): PreviewSectionData[] {
   return [
-    { label: 'Path', value: requestPath(path, values.path ?? {}) },
+    {
+      key: 'path',
+      label: 'Path',
+      value: requestPath(path, values.path ?? {}),
+    },
     ...(hasValues(values.query)
       ? [
           {
+            key: 'query' as const,
             label: 'Query parameters',
             value: formatExample(values.query)!,
             rawValue: values.query,
@@ -265,6 +328,7 @@ function requestSections(
     ...(hasValues(values.headers)
       ? [
           {
+            key: 'headers' as const,
             label: 'Headers',
             value: formatExample(values.headers)!,
             rawValue: values.headers,
@@ -274,6 +338,7 @@ function requestSections(
     ...('body' in values
       ? [
           {
+            key: 'body' as const,
             label: 'Body',
             value: formatExample(values.body)!,
             rawValue: values.body,
@@ -287,6 +352,7 @@ export function OperationPreview({
   requestValues,
   requestExample,
   responseExample,
+  defaultCollapsed,
   theme = 'inherit',
   className,
   onClick,
@@ -347,6 +413,7 @@ export function OperationPreview({
             key="request"
             label="request"
             sections={requestSections(path, request)}
+            defaultCollapsed={defaultCollapsed}
           />
         </div>
       ) : response !== undefined ? (
@@ -358,8 +425,14 @@ export function OperationPreview({
             key="response"
             label="response"
             sections={[
-              { label: 'Body', value: response, rawValue: responseValue },
+              {
+                key: 'body',
+                label: 'Body',
+                value: response,
+                rawValue: responseValue,
+              },
             ]}
+            defaultCollapsed={defaultCollapsed}
           />
         </div>
       ) : null}

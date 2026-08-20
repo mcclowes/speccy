@@ -134,10 +134,56 @@ describe('operation references', () => {
     expect(screen.getByText('Query parameters')).toBeInTheDocument();
     expect(screen.getByText('Headers')).toBeInTheDocument();
     expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Query parameters' }),
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: 'Headers' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.getByRole('button', { name: 'Path' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     expect(screen.queryByText('"pathParameters"')).not.toBeInTheDocument();
     expect(screen.getByText('"Custom Ltd"')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
     expect(screen.getByText('"corp-1"')).toBeInTheDocument();
+  });
+
+  it('allows every preview section default to be overridden', () => {
+    render(
+      <OperationPreview
+        {...operation}
+        requestValues={{
+          query: { expand: 'owners' },
+          headers: { 'X-Tenant': 'tenant-1' },
+          body: { name: 'Custom Ltd' },
+        }}
+        defaultCollapsed={{
+          path: true,
+          query: false,
+          headers: false,
+          body: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Path' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(
+      screen.getByRole('button', { name: 'Query parameters' }),
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Headers' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    const body = screen.getByRole('button', { name: 'Body' });
+    expect(body).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(body);
+    expect(body).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('merges structured request overrides over derived values', () => {

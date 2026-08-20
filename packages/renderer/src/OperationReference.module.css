@@ -220,6 +220,26 @@
   text-transform: uppercase;
 }
 
+.previewSectionToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.previewSectionToggle:focus-visible {
+  outline: 2px solid var(--sp-accent);
+  outline-offset: 3px;
+}
+
 .previewSection > pre {
   margin: 0;
   padding: 8px 18px 16px;

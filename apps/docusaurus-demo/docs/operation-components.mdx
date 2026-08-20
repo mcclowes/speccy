@@ -93,7 +93,7 @@ Call <OperationLink method="post" path="/orchards" href="../api/createorchard" /
 
 ## Operation preview
 
-`OperationPreview` puts a layered request and optional response beside an operation link. The request always shows its path, then adds query parameters, headers, and a body when they exist. Readers can copy each request section separately. When a response is available, readers can switch between request and response tabs.
+`OperationPreview` puts a layered request and optional response beside an operation link. The request always shows its path, then adds query parameters, headers, and a body when they exist. Query parameters and headers start collapsed; readers can open any section or copy it separately. When a response is available, readers can switch between request and response tabs.
 
 <OperationPreview
   method="post"
@@ -180,23 +180,43 @@ For a request without a body, pass structured values alone. The path is always r
 
 If no spec or request values are supplied, the request preview contains the unresolved path. If neither an explicit nor derived response exists, the response tab is omitted.
 
+### Set section disclosure defaults
+
+Use `defaultCollapsed` to change the initial state of any section. Its keys are `path`, `query`, `headers`, and `body`; unspecified keys retain their defaults. By default, `query` and `headers` are collapsed, while `path` and `body` are open.
+
+```tsx
+<OperationPreview
+  method="post"
+  path="/orchards/{orchardId}"
+  href="/api/updateorchard"
+  requestValues={{
+    path: { orchardId: 'orch_01J7' },
+    query: { dryRun: true },
+    headers: { 'X-Tenant-ID': 'tenant_456' },
+    body: { name: 'Nightingale Farm' },
+  }}
+  defaultCollapsed={{ path: true, query: false, headers: false, body: true }}
+/>
+```
+
 ### Preview props
 
-| Prop              | Required | Purpose                                                                                                                     |
-| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `method`          | Yes\*    | HTTP method used for the badge and operation lookup.                                                                        |
-| `path`            | Yes\*    | OpenAPI path used for display and operation lookup. May end in a `#variant` fragment to pick between variants.              |
-| `operationId`     | No       | Looks the operation up by id instead of by method and path. `method` and `path` become optional.                            |
-| `href`            | No       | Link to the full operation reference. Derived from the operation when a spec is available.                                  |
-| `spec`            | No       | OpenAPI object, JSON string, or YAML string used to derive `href`, request values, and a response.                          |
-| `basePath`        | No       | Route where the reference for `spec` is mounted. Defaults to `/api`.                                                        |
-| `api`             | No       | Name of the provider source to look the operation up in.                                                                    |
-| `requestValues`   | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec.                              |
-| `requestExample`  | No       | Request body string or object. Overrides a body supplied by `spec` or `requestValues`.                                      |
-| `responseExample` | No       | Explicit response string or object. Overrides a response derived from `spec`.                                               |
-| `theme`           | No       | `inherit` (default), `light`, `dark`, or `system`. `inherit` follows the host page's theme, including Docusaurus dark mode. |
-| `className`       | No       | Adds a class without replacing Speccy's component classes.                                                                  |
-| `onClick`         | No       | Lets a host intercept clicks on the full operation reference link.                                                          |
+| Prop               | Required | Purpose                                                                                                                     |
+| ------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `method`           | Yes\*    | HTTP method used for the badge and operation lookup.                                                                        |
+| `path`             | Yes\*    | OpenAPI path used for display and operation lookup. May end in a `#variant` fragment to pick between variants.              |
+| `operationId`      | No       | Looks the operation up by id instead of by method and path. `method` and `path` become optional.                            |
+| `href`             | No       | Link to the full operation reference. Derived from the operation when a spec is available.                                  |
+| `spec`             | No       | OpenAPI object, JSON string, or YAML string used to derive `href`, request values, and a response.                          |
+| `basePath`         | No       | Route where the reference for `spec` is mounted. Defaults to `/api`.                                                        |
+| `api`              | No       | Name of the provider source to look the operation up in.                                                                    |
+| `requestValues`    | No       | Structured `path`, `query`, `headers`, and `body` values merged over values derived from spec.                              |
+| `requestExample`   | No       | Request body string or object. Overrides a body supplied by `spec` or `requestValues`.                                      |
+| `responseExample`  | No       | Explicit response string or object. Overrides a response derived from `spec`.                                               |
+| `defaultCollapsed` | No       | Initial collapsed state by section: `path`, `query`, `headers`, or `body`. Query and headers default to collapsed.          |
+| `theme`            | No       | `inherit` (default), `light`, `dark`, or `system`. `inherit` follows the host page's theme, including Docusaurus dark mode. |
+| `className`        | No       | Adds a class without replacing Speccy's component classes.                                                                  |
+| `onClick`          | No       | Lets a host intercept clicks on the full operation reference link.                                                          |
 
 \* Either `method` and `path`, or `operationId`, must be given.
 
