@@ -12,3 +12,8 @@ apps/macos/.build/
 apps/macos/Speccy.app/
 apps/macos/Sources/SpeccyMac/Resources/Web/*
 !apps/macos/Sources/SpeccyMac/Resources/Web/.gitkeep
+
+# Added by saggar — local files that shouldn't be committed
+.saggar/**/*.local.*
+.saggar/scratchpad.md
+.saggar/jobs/
