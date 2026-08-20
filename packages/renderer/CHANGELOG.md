@@ -1,5 +1,16 @@
 # speccy-renderer
 
+## 0.10.3
+
+### Patch Changes
+
+- [`8513236`](https://github.com/mcclowes/speccy/commit/8513236b3495905afd670701164a199760cf2fbc) Thanks [@mcclowes](https://github.com/mcclowes)! - Operation links, strips, cards, and previews now inherit the host page's theme by default, so they switch to dark mode alongside Docusaurus instead of staying light. Pass `theme` to pin a colour scheme.
+
+- [`3838e7b`](https://github.com/mcclowes/speccy/commit/3838e7bce636b1c7dee1a1a3bf239883506e9b60) Thanks [@mcclowes](https://github.com/mcclowes)! - Render operation preview responses with the same sectioned, foldable treatment as requests, and clip long previews behind a single "Show full request/response" toggle that accounts for path, parameters, and headers as well as the body.
+
+- Updated dependencies []:
+  - speccy-core@0.10.3
+
 ## 0.10.2
 
 ### Patch Changes
