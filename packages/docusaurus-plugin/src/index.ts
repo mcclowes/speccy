@@ -57,8 +57,24 @@ function joinUrlPath(...parts: string[]): string {
     .join('/')}`;
 }
 
-export function publicSpecUrl(baseUrl: string, route: string): string {
-  return joinUrlPath(baseUrl, route, 'openapi.yaml');
+export function publicSpecFilename(
+  spec?: string | OpenAPIDocument,
+): 'openapi.json' | 'openapi.yaml' {
+  if (typeof spec !== 'string') return spec ? 'openapi.json' : 'openapi.yaml';
+  try {
+    JSON.parse(spec);
+    return 'openapi.json';
+  } catch {
+    return 'openapi.yaml';
+  }
+}
+
+export function publicSpecUrl(
+  baseUrl: string,
+  route: string,
+  spec?: string | OpenAPIDocument,
+): string {
+  return joinUrlPath(baseUrl, route, publicSpecFilename(spec));
 }
 
 export async function writePublicSpec(
@@ -66,7 +82,11 @@ export async function writePublicSpec(
   route: string,
   spec: string | OpenAPIDocument,
 ): Promise<string> {
-  const path = resolve(outDir, `.${normalizeRoute(route)}`, 'openapi.yaml');
+  const path = resolve(
+    outDir,
+    `.${normalizeRoute(route)}`,
+    publicSpecFilename(spec),
+  );
   await mkdir(dirname(path), { recursive: true });
   await writeFile(
     path,
@@ -167,7 +187,7 @@ export default function speccyPlugin(
       const spec = await loadSpec(options, context.siteDir);
       const route = normalizeRoute(options.route);
       const renderer = { ...options.renderer };
-      renderer.openApiUrl ??= publicSpecUrl(context.baseUrl, route);
+      renderer.openApiUrl ??= publicSpecUrl(context.baseUrl, route, spec);
       if (
         process.env.NODE_ENV !== 'production' &&
         renderer.showDeveloperHints !== false

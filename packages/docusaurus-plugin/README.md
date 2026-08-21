@@ -27,7 +27,7 @@ export default {
 };
 ```
 
-The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL. The plugin also publishes the source document unchanged at `/api/openapi.yaml` (the link respects the site's `baseUrl`) and links to it from the overview. The filename is fixed, so a JSON source is served with JSON syntax under the `.yaml` name.
+The reference is now available at `/api`. Use `specUrl` in place of `spec` to fetch a remote document at build time; the build environment must be able to reach that URL. The plugin also publishes the source document unchanged and links to it from the overview. JSON sources use `/api/openapi.json`, while YAML sources use `/api/openapi.yaml`. The link respects the site's `baseUrl`.
 
 Register the plugin more than once to publish several references. Every instance needs a unique Docusaurus `id`:
 

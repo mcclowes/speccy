@@ -50,6 +50,8 @@ Use `specUrl` in place of `spec` to fetch a remote document at build time:
 
 The build environment must be able to reach that URL.
 
+The plugin publishes the source document beside the generated reference and links to it from the overview. JSON sources use `/api/openapi.json`, while YAML sources use `/api/openapi.yaml`. The link includes the site's `baseUrl`. Set `renderer.openApiUrl` only when the document is hosted somewhere else.
+
 ## Embed in MDX
 
 Use the client component when the reference belongs inside a guide or a custom docs layout:

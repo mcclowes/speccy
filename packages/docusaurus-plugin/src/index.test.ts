@@ -6,6 +6,7 @@ import {
   default as speccyPlugin,
   loadSpec,
   normalizeRoute,
+  publicSpecFilename,
   publicSpecUrl,
   referenceRoutes,
   writePublicSpec,
@@ -21,6 +22,15 @@ describe('normalizeRoute', () => {
 describe('public OpenAPI description', () => {
   it('builds a URL under the Docusaurus base and API route', () => {
     expect(publicSpecUrl('/docs/', '/api')).toBe('/docs/api/openapi.yaml');
+    expect(publicSpecUrl('/docs/', '/api', '{"openapi":"3.1.0"}')).toBe(
+      '/docs/api/openapi.json',
+    );
+  });
+
+  it('chooses the filename from the source syntax', () => {
+    expect(publicSpecFilename('openapi: 3.1.0\n')).toBe('openapi.yaml');
+    expect(publicSpecFilename(' {"openapi":"3.1.0"}\n')).toBe('openapi.json');
+    expect(publicSpecFilename({ openapi: '3.1.0' })).toBe('openapi.json');
   });
 
   it('writes the rendered description under the API route', async () => {
@@ -29,6 +39,31 @@ describe('public OpenAPI description', () => {
 
     expect(path).toBe(join(outDir, 'api', 'openapi.yaml'));
     await expect(readFile(path, 'utf8')).resolves.toBe('openapi: 3.1.0\n');
+  });
+
+  it('writes JSON sources with a JSON extension without changing them', async () => {
+    const outDir = await mkdtemp(join(tmpdir(), 'speccy-build-'));
+    const source = '{"openapi":"3.1.0"}\n';
+    const path = await writePublicSpec(outDir, '/api', source);
+
+    expect(path).toBe(join(outDir, 'api', 'openapi.json'));
+    await expect(readFile(path, 'utf8')).resolves.toBe(source);
+  });
+
+  it('links JSON references to the emitted JSON file', async () => {
+    const siteDir = await mkdtemp(join(tmpdir(), 'speccy-site-'));
+    await writeFile(
+      join(siteDir, 'openapi.json'),
+      '{"openapi":"3.1.0","info":{"title":"Test API"},"paths":{}}',
+    );
+    const plugin = speccyPlugin({ siteDir, baseUrl: '/docs/' } as never, {
+      spec: 'openapi.json',
+      renderer: { showDeveloperHints: false },
+    });
+
+    await expect(plugin.loadContent?.()).resolves.toMatchObject({
+      renderer: { openApiUrl: '/docs/api/openapi.json' },
+    });
   });
 });
 
