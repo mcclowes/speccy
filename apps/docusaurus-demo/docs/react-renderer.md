@@ -35,6 +35,8 @@ export function Reference() {
 
 The renderer fills its parent. Give the surrounding layout enough height for the sidebar and content. When a route opens an endpoint, Speccy scrolls its own sidebar to the active item without changing the host page's scroll position.
 
+Object schemas use a field explorer. Selecting a field opens its description, constraints, examples, and accepted `oneOf` or `anyOf` shapes. Expand an accepted shape to inspect its fields without leaving the parent schema.
+
 Use the [operation components](./operation-components.mdx) when a guide or tutorial needs to link readers to individual endpoints without embedding the full reference.
 
 ## Loading a document

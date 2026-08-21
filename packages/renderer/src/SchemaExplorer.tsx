@@ -42,10 +42,64 @@ function schemaLabel(schema?: Schema): string {
     .join(' · ');
 }
 
+function alternativeName(schema: Schema, index: number): string {
+  if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';
+  const name = schema.title ?? schema.$ref?.split('/').pop();
+  if (!name) return `Option ${index + 1}`;
+  return name
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ');
+}
+
 function ExplorerExample({ value }: { value: unknown }) {
   const serialized =
     typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   return <CodeBlock className="sp-example" value={serialized} />;
+}
+
+function ExplorerAlternatives({ alternatives }: { alternatives: Schema[] }) {
+  return (
+    <section className={scoped('sp-schema-explorer-detail-section')}>
+      <h4>Accepted shapes</h4>
+      <div className={scoped('sp-schema-explorer-alternatives')}>
+        {alternatives.map((alternative, index) => {
+          const structuralSchema = structuralObjectSchema(alternative);
+          const properties = structuralSchema.properties ?? {};
+          return (
+            <details key={index} open={index === 0}>
+              <summary>
+                <strong>{alternativeName(alternative, index)}</strong>
+                <code>{schemaTypeLabel(alternative)}</code>
+              </summary>
+              <Markdown
+                className={scoped('sp-schema-explorer-alternative-description')}
+              >
+                {structuralSchema.description}
+              </Markdown>
+              {Object.keys(properties).length > 0 && (
+                <dl className={scoped('sp-schema-explorer-alternative-fields')}>
+                  {Object.entries(properties).map(([name, property]) => (
+                    <div key={name}>
+                      <dt>
+                        <code>{name}</code>
+                        {structuralSchema.required?.includes(name) && (
+                          <span className="sp-required" title="Required">
+                            *
+                          </span>
+                        )}
+                      </dt>
+                      <dd>{schemaTypeLabel(property)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </details>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 type ExplorerField = {
@@ -251,6 +305,7 @@ function ExplorerFieldDetails({
     (objectSchema.type === 'array' && typeof objectSchema.items === 'object'
       ? objectSchema.items.enum
       : undefined);
+  const alternatives = objectSchema.oneOf ?? objectSchema.anyOf;
   const constraints: Array<{ label: string; value: string | number }> = [];
   if (objectSchema.minimum !== undefined)
     constraints.push({ label: 'Minimum', value: objectSchema.minimum });
@@ -320,6 +375,9 @@ function ExplorerFieldDetails({
             ))}
           </div>
         </section>
+      )}
+      {alternatives && alternatives.length > 0 && (
+        <ExplorerAlternatives alternatives={alternatives} />
       )}
       {constraints.length > 0 && (
         <section className={scoped('sp-schema-explorer-detail-section')}>

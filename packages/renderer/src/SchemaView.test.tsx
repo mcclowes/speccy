@@ -198,6 +198,44 @@ describe('SchemaView composition', () => {
     expect(screen.getByRole('button', { name: 'name string' })).toBeVisible();
   });
 
+  it('shows accepted shapes for a composed field in the explorer inspector', () => {
+    render(
+      <SchemaView
+        schema={{
+          title: 'OutgoingWireTransfer',
+          type: 'object',
+          properties: {
+            destination: {
+              oneOf: [
+                {
+                  title: 'SEPABeneficiary',
+                  type: 'object',
+                  properties: { iban: { type: 'string' } },
+                },
+                {
+                  title: 'FasterPaymentsBeneficiary',
+                  type: 'object',
+                  properties: { sortCode: { type: 'string' } },
+                },
+              ],
+            },
+          },
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'destination object' }));
+
+    expect(screen.getByText('Accepted shapes')).toBeVisible();
+    expect(screen.getByText('SEPA Beneficiary')).toBeVisible();
+    expect(screen.getByText('Faster Payments Beneficiary')).toBeVisible();
+    expect(screen.getByText('iban')).toBeVisible();
+    fireEvent.click(
+      screen.getByText('Faster Payments Beneficiary').closest('summary')!,
+    );
+    expect(screen.getByText('sortCode')).toBeVisible();
+  });
+
   it('does not repeat primitive array items beneath the array type', () => {
     render(
       <SchemaView
