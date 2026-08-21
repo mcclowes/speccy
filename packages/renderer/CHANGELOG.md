@@ -1,5 +1,36 @@
 # speccy-renderer
 
+## 0.13.0
+
+### Minor Changes
+
+- [#62](https://github.com/mcclowes/speccy/pull/62) [`54e9a75`](https://github.com/mcclowes/speccy/commit/54e9a75688cb3f46ecbd5ab91f3599be2433ce32) Thanks [@mcclowes](https://github.com/mcclowes)! - Add a Webhooks reference page listing every webhook the API delivers.
+
+  Webhooks still appear under their tag in the sidebar, but the Reference group now also links to `/reference/webhooks`, a single list of every webhook in the spec. The entry and its generated route appear only when the document declares webhooks.
+
+- [#62](https://github.com/mcclowes/speccy/pull/62) [`eb610fc`](https://github.com/mcclowes/speccy/commit/eb610fc94281a40352b093746f2084c9368da817) Thanks [@mcclowes](https://github.com/mcclowes)! - Fix a set of OpenAPI constructs that rendered incorrectly or not at all.
+
+  Operation parameters now replace the path-level parameters they repeat, as OpenAPI specifies. They previously rendered twice and were serialized twice into the generated request. An operation listed under several tags now appears under each of them instead of only the first.
+
+  Request and response bodies route through the schema explorer, which understood only declared properties and `allOf`. A `oneOf` body rendered as a single object built from a generated example, so every branch but the first disappeared, and `additionalProperties` and `patternProperties` were dropped. The explorer now renders root alternatives, pattern properties, additional properties, and a closed-object note, and schemas using keywords it cannot express fall back to the recursive schema view rather than losing them.
+
+  `discriminator` is rendered for the first time: both schema surfaces name the property that selects the shape and label each alternative with the mapped value that chooses it.
+
+  A schema with no explicit `type` was labelled `object` and `const` was ignored entirely, so `{ const: 'card' }` displayed as an object whose example was the string `"string"`. Types now come from the const literal, the structural keywords, or a shared composed type, and read `any` only when nothing constrains the value.
+
+  Parameters declared with `content` rather than `schema` are described instead of showing an empty object — the Swagger 2 normalizer no longer fabricates a stand-in schema for OpenAPI 3 parameters. Parameter deprecation, serialization style, and named examples now render, as do a reusable header's required flag, deprecation, and examples, a reusable example's summary, and a Path Item's summary and description. An example's `externalValue` is presented as a link rather than as the payload, and field-level XML and external documentation are reachable again.
+
+### Patch Changes
+
+- [#62](https://github.com/mcclowes/speccy/pull/62) [`ac83fee`](https://github.com/mcclowes/speccy/commit/ac83fee12fcf9b6575d88fa669980f59fa789859) Thanks [@mcclowes](https://github.com/mcclowes)! - Serve the published OpenAPI description under `docusaurus start`. The file was only emitted from `postBuild`, so the overview's link to it 404ed for the whole time an author worked locally. The plugin now writes the description into its generated files directory and mounts that directory on the dev server at the same URL.
+
+  The overview card also shows the description's URL instead of a second "Open OpenAPI description" label, and opens it in a new tab rather than navigating the reader out of the docs.
+
+- [`1e75c06`](https://github.com/mcclowes/speccy/commit/1e75c06c9d473c264140c2404ed89f70c5507832) Thanks [@mcclowes](https://github.com/mcclowes)! - Give each schema explorer constraint row a unique key, so a field with unequal `minLength` and `maxLength` no longer renders two siblings keyed `Length`.
+
+- Updated dependencies [[`eb610fc`](https://github.com/mcclowes/speccy/commit/eb610fc94281a40352b093746f2084c9368da817)]:
+  - speccy-core@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes
