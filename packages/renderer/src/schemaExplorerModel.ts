@@ -25,15 +25,52 @@ export interface ExplorerConstraint {
 
 export type EnumValue = NonNullable<SchemaObject['enum']>[number];
 
+function constTypeName(value: unknown): string | undefined {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  const primitive = typeof value;
+  return primitive === 'object' ? 'object' : primitive;
+}
+
+/**
+ * JSON Schema leaves `type` optional, so the label falls back to whatever the schema's other
+ * keywords imply and only says `any` when nothing constrains the value at all.
+ */
+/** Reports the type shared by every member of a composition, so `oneOf` still reads as one type. */
+function composedTypeName(members: Schema[]): string | undefined {
+  const names = members.map((member) =>
+    typeof member === 'object' ? declaredTypeName(member) : undefined,
+  );
+  const [first] = names;
+  return first && names.every((name) => name === first) ? first : undefined;
+}
+
+function declaredTypeName(schema: SchemaObject): string | undefined {
+  if (Array.isArray(schema.type)) return schema.type.join(' | ');
+  if (schema.type) return schema.type;
+  if (schema.const !== undefined) return constTypeName(schema.const);
+  if (
+    schema.properties ||
+    schema.required ||
+    schema.additionalProperties !== undefined ||
+    schema.patternProperties ||
+    schema.propertyNames !== undefined
+  )
+    return 'object';
+  if (schema.items !== undefined || schema.prefixItems) return 'array';
+  const members = schema.oneOf ?? schema.anyOf ?? schema.allOf;
+  return members ? composedTypeName(members) : undefined;
+}
+
 export function schemaTypeLabel(schema?: Schema): string {
   if (schema === undefined || schema === true) return 'any';
   if (schema === false) return 'never';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  return schema.type === 'array'
-    ? `array<${schemaTypeLabel(schema.items)}>`
-    : schema.enum
-      ? 'enum'
-      : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+  const declaredType = declaredTypeName(schema);
+  if (declaredType === 'array')
+    return `array<${schemaLabel(schema.items ?? true)}>`;
+  if (schema.enum) return 'enum';
+  return [declaredType ?? 'any', schema.format].filter(Boolean).join(' · ');
 }
 
 export function schemaLabel(schema?: Schema): string {
@@ -143,6 +180,7 @@ export function findExplorerField(
 
 export function enumValues(schema: SchemaObject): EnumValue[] | undefined {
   if (schema.enum) return schema.enum;
+  if (schema.const !== undefined) return [schema.const];
   return schema.type === 'array' && typeof schema.items === 'object'
     ? schema.items.enum
     : undefined;

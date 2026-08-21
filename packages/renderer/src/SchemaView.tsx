@@ -13,24 +13,8 @@ import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
-import { structuralObjectSchema } from './schemaExplorerModel';
+import { schemaLabel, structuralObjectSchema } from './schemaExplorerModel';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
-
-function schemaLabel(schema?: Schema): string {
-  if (schema === undefined || schema === true) return 'any';
-  if (schema === false) return 'never';
-  if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  const declaredType = Array.isArray(schema.type)
-    ? schema.type.join(' | ')
-    : schema.type;
-  const type =
-    declaredType === 'array'
-      ? `array<${schemaLabel(schema.items)}>`
-      : schema.enum
-        ? 'enum'
-        : [declaredType ?? 'object', schema.format].filter(Boolean).join(' · ');
-  return [schema.title, type].filter(Boolean).join(' · ');
-}
 
 function alternativeName(schema: Schema, index: number): string {
   if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';

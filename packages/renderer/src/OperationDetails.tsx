@@ -523,6 +523,7 @@ function schemaExample(
 ): unknown {
   if (typeof schema === 'boolean') return schema ? {} : undefined;
   const isObject = schema.type === 'object' || Boolean(schema.properties);
+  if (schema.const !== undefined) return schema.const;
   if (schema.example !== undefined && (!requiredOnly || !isObject))
     return schema.example;
   if (schema.default !== undefined && (!requiredOnly || !isObject))

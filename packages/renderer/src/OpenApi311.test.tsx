@@ -490,6 +490,42 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(document.body.textContent).not.toContain('path-default');
   });
 
+  it('generates examples from const values instead of a placeholder type', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'pay' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Const API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/payments': {
+              post: {
+                operationId: 'pay',
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          kind: { const: 'card' },
+                          amount: { type: 'integer' },
+                        },
+                      },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(document.body.textContent).toContain('"card"');
+  });
+
   it('lists a multi-tag operation under each of its tags', () => {
     render(
       <Speccy

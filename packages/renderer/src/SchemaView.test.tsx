@@ -736,4 +736,48 @@ describe('SchemaView composition', () => {
       screen.getByRole('button', { name: 'values array<any>' }),
     ).toBeVisible();
   });
+
+  it('types a const field from its literal instead of calling it an object', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            kind: { const: 'cat' },
+            legs: { const: 4 },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'kind string' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'legs number' })).toBeVisible();
+  });
+
+  it('labels a schema with no type information as any', () => {
+    render(
+      <SchemaView schema={{ format: 'date-time', description: 'A moment.' }} />,
+    );
+
+    expect(screen.getByText('any · date-time')).toBeVisible();
+  });
+
+  it('still infers object and array from structural keywords', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            nested: { properties: { a: { type: 'string' } } },
+            list: { items: { type: 'string' } },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'nested object' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'list array<string>' }),
+    ).toBeVisible();
+  });
 });
