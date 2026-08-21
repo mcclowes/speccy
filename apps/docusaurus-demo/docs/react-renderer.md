@@ -37,6 +37,10 @@ The renderer fills its parent. Give the surrounding layout enough height for the
 
 Object schemas use a field explorer. Selecting a field opens its description, constraints, examples, and accepted `oneOf` or `anyOf` shapes. Expand an accepted shape to inspect its fields without leaving the parent schema.
 
+A schema that accepts several shapes lists them at its root too, so a polymorphic request or response body never presents one branch as the whole contract. When a `discriminator` is present, the explorer names the property that selects the shape and labels each shape with the mapped value that chooses it. Open-ended objects show their `patternProperties` and `additionalProperties` beside the declared ones, and a closed object says so. Schemas that use conditional keywords — `if`, `then`, `else`, `not`, `$defs`, `prefixItems`, `contains`, `propertyNames`, `dependentSchemas`, or the `unevaluated*` pair — render as a nested schema tree instead of the explorer, which keeps every keyword visible.
+
+Operation parameters replace the path-level parameters they repeat, matching the OpenAPI rule that a path parameter can be overridden but not removed. An operation listed under several tags appears under each of them.
+
 Use the [operation components](./operation-components.mdx) when a guide or tutorial needs to link readers to individual endpoints without embedding the full reference.
 
 ## Loading a document
