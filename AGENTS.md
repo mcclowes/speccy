@@ -1,3 +1,16 @@
+# Automatic commits
+
+- After completing each coherent unit of work, run the relevant checks and commit it before moving to the next unit.
+- Commit automatically without asking for confirmation. A request to avoid commits overrides this rule.
+- Use a concise, imperative commit message that describes the completed change.
+- Keep commits focused. Stage only files and hunks you changed, and inspect the staged diff before committing.
+- Treat pre-existing and concurrent changes as belonging to the user or another agent. Never include, discard, hide, or overwrite them.
+- Never amend, squash, rebase, push, or otherwise rewrite history unless explicitly requested.
+- If unrelated changes make it unsafe to isolate your work, leave your changes uncommitted and report the obstruction.
+- Do not create an empty commit when the task produces no file changes.
+
+---
+
 # Repository instructions
 
 ## Project identity
