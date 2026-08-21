@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MediaContent, SchemaView } from './SchemaView';
 
 afterEach(cleanup);
@@ -503,6 +503,36 @@ describe('SchemaView composition', () => {
     expect(
       container.querySelector('.sp-schema-explorer-constraints'),
     ).toHaveTextContent('LengthExactly 2 characters');
+  });
+
+  it('lists unequal length bounds as separate rows with distinct keys', () => {
+    const errors: string[] = [];
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation((...args) => {
+        errors.push(args.join(' '));
+      });
+
+    const { container } = render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            reference: { type: 'string', minLength: 3, maxLength: 50 },
+          },
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'reference string' }));
+    expect(
+      container.querySelector('.sp-schema-explorer-constraints'),
+    ).toHaveTextContent(
+      'LengthAt least 3 charactersLengthAt most 50 characters',
+    );
+    expect(errors.join(' ')).not.toContain('same key');
+
+    consoleError.mockRestore();
   });
 
   it('toggles structure and details from an object row while keeping its icon actions separate', () => {

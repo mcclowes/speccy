@@ -60,7 +60,7 @@ function Constraints({ constraints }: { constraints: ExplorerConstraint[] }) {
   return (
     <dl className={scoped('sp-schema-explorer-constraints')}>
       {constraints.map((constraint) => (
-        <div key={constraint.label}>
+        <div key={`${constraint.label} ${constraint.value}`}>
           <dt>{constraint.label}</dt>
           <dd>
             <code>{constraint.value}</code>
