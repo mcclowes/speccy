@@ -22,6 +22,8 @@ export { serializeParameter } from './parameterSerialization';
 export type { SerializedParameter } from './parameterSerialization';
 export { serializeRequestBody } from './requestBodySerialization';
 export type { SerializedRequestBody } from './requestBodySerialization';
+export { deriveOperationPreviewDataFromOperation } from './operationPreviewData';
+export type { OperationPreviewData } from './operationPreviewData';
 export type { RoutePathOptions } from './routing';
 export {
   adaptOasdiffChangelog,

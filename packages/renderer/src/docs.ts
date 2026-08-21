@@ -13,6 +13,7 @@ export type {
   OperationReferenceLookup,
   OperationReferenceProps,
   OperationReferenceProviderProps,
+  OperationReferenceCatalogEntry,
   OperationReferenceSource,
   ResolvedOperationReference,
 } from './OperationReference';

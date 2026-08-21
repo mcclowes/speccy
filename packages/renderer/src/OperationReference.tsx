@@ -35,6 +35,7 @@ export {
   OperationReferenceProvider,
   resolveOperationReference,
   type OperationReferenceLookup,
+  type OperationReferenceCatalogEntry,
   type OperationReferenceProviderProps,
   type OperationReferenceSource,
   type ResolvedOperationReference,
@@ -359,11 +360,14 @@ export function OperationPreview({
   ...lookup
 }: OperationPreviewProps) {
   const [tab, setTab] = useState<'request' | 'response'>('request');
-  const { method, path, href, operation } = useOperationReference(lookup);
-  const derived = deriveOperationPreviewDataFromOperation(
-    operation?.pathItem,
-    operation?.operation,
-  );
+  const { method, path, href, operation, preview } =
+    useOperationReference(lookup);
+  const derived =
+    preview ??
+    deriveOperationPreviewDataFromOperation(
+      operation?.pathItem,
+      operation?.operation,
+    );
   const request = mergeOperationPreviewRequestValues(
     derived.request,
     requestValues,

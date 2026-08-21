@@ -3,6 +3,6 @@
   "include": ["src", "vitest.config.ts", "../renderer/src/css.d.ts"],
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "@docusaurus/module-type-aliases"]
   }
 }

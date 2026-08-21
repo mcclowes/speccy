@@ -14,9 +14,11 @@ import { fileURLToPath } from 'node:url';
 import type { LoadContext, Plugin } from '@docusaurus/types';
 import {
   createReferenceModel,
+  deriveOperationPreviewDataFromOperation,
   parseSpec,
   routePath,
   type OpenAPIDocument,
+  type OperationPreviewData,
   type SpeccyProps,
   type SpeccyRoute,
 } from 'speccy-renderer';
@@ -43,11 +45,42 @@ export interface SpeccyPluginOptions {
 }
 
 export interface SpeccyPluginContent {
+  name: string;
   spec: string | OpenAPIDocument;
   route: string;
   routeGeneration: 'static' | 'client';
   layout: false | { noFooter: boolean };
   renderer: Omit<SpeccyProps, 'spec'>;
+}
+
+export interface SpeccyOperationCatalogEntry {
+  id: string;
+  operationId?: string;
+  method: string;
+  path: string;
+  preview: OperationPreviewData;
+}
+
+export interface SpeccyPluginGlobalData {
+  name: string;
+  route: string;
+  operations: SpeccyOperationCatalogEntry[];
+}
+
+export function operationCatalog(
+  spec: string | OpenAPIDocument,
+): SpeccyOperationCatalogEntry[] {
+  const model = createReferenceModel(parseSpec(spec));
+  return [...model.operations, ...model.webhooks].map((operation) => ({
+    id: operation.id,
+    operationId: operation.operation.operationId,
+    method: operation.method,
+    path: operation.path,
+    preview: deriveOperationPreviewDataFromOperation(
+      operation.pathItem,
+      operation.operation,
+    ),
+  }));
 }
 
 function joinUrlPath(...parts: string[]): string {
@@ -198,6 +231,7 @@ export default function speccyPlugin(
         ];
       }
       return {
+        name: options.id ?? 'default',
         spec,
         route,
         routeGeneration: options.routeGeneration ?? 'static',
@@ -209,6 +243,11 @@ export default function speccyPlugin(
       };
     },
     async contentLoaded({ content, actions }) {
+      actions.setGlobalData({
+        name: content.name,
+        route: content.route,
+        operations: operationCatalog(content.spec),
+      } satisfies SpeccyPluginGlobalData);
       const component = fileURLToPath(new URL('./page.js', import.meta.url));
       const dataName =
         content.route.split('/').filter(Boolean).join('-') || 'root';

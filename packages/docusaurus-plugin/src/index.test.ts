@@ -6,6 +6,7 @@ import {
   default as speccyPlugin,
   loadSpec,
   normalizeRoute,
+  operationCatalog,
   publicSpecFilename,
   publicSpecUrl,
   referenceRoutes,
@@ -148,6 +149,52 @@ describe('referenceRoutes', () => {
   });
 });
 
+describe('operationCatalog', () => {
+  it('emits compact lookup and preview data without the full document', () => {
+    const catalog = operationCatalog({
+      openapi: '3.1.0',
+      info: { title: 'Test API' },
+      paths: {
+        '/companies/{id}': {
+          get: {
+            operationId: 'getCompany',
+            parameters: [
+              {
+                in: 'path',
+                name: 'id',
+                required: true,
+                schema: { type: 'string', example: 'company-1' },
+              },
+            ],
+            responses: {
+              '200': {
+                description: 'Company',
+                content: {
+                  'application/json': { example: { id: 'company-1' } },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(catalog).toEqual([
+      expect.objectContaining({
+        id: 'getcompany',
+        operationId: 'getCompany',
+        method: 'get',
+        path: '/companies/{id}',
+        preview: {
+          request: { path: { id: 'company-1' }, query: {}, headers: {} },
+          response: { id: 'company-1' },
+        },
+      }),
+    ]);
+    expect(JSON.stringify(catalog)).not.toContain('Test API');
+  });
+});
+
 describe('route generation', () => {
   const spec = {
     openapi: '3.1.0',
@@ -164,6 +211,7 @@ describe('route generation', () => {
       async (name: string, _data: string) => `/data/${name}`,
     );
     const addRoute = vi.fn();
+    const setGlobalData = vi.fn();
     const plugin = speccyPlugin({ siteDir: '/site', baseUrl: '/' } as never, {
       spec,
       routeGeneration,
@@ -171,16 +219,17 @@ describe('route generation', () => {
 
     await plugin.contentLoaded?.({
       content: {
+        name: 'default',
         spec,
         route: '/api',
         routeGeneration: routeGeneration ?? 'static',
         layout: { noFooter: true },
         renderer: {},
       },
-      actions: { createData, addRoute },
+      actions: { createData, addRoute, setGlobalData },
     } as never);
 
-    return { createData, addRoute };
+    return { createData, addRoute, setGlobalData };
   }
 
   it('shares one spec module across static routes', async () => {
@@ -233,6 +282,7 @@ describe('route generation', () => {
       });
       await plugin.contentLoaded?.({
         content: {
+          name: id,
           spec,
           route,
           routeGeneration: 'static',
@@ -240,6 +290,7 @@ describe('route generation', () => {
           renderer: {},
         },
         actions: {
+          setGlobalData: vi.fn(),
           createData: async (name: string) => `/data/${id}/${name}`,
           addRoute: ({ path }: { path: string }) => routes.push(path),
         },

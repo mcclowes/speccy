@@ -397,6 +397,40 @@ describe('operation references resolved from an OpenAPI document', () => {
     expect(named).toHaveAttribute('href', '/api/backoffice/requestaccesstoken');
   });
 
+  it('resolves links and examples from a compact operation catalog', () => {
+    render(
+      <OperationReferenceProvider
+        apis={[
+          {
+            name: 'orchards',
+            basePath: '/api/orchards',
+            catalog: [
+              {
+                id: 'getorchard',
+                operationId: 'getOrchard',
+                method: 'get',
+                path: '/orchards/{id}',
+                preview: {
+                  request: { path: { id: 'orchard-1' } },
+                  response: { id: 'orchard-1' },
+                },
+              },
+            ],
+          },
+        ]}
+      >
+        <OperationPreview operationId="getOrchard" api="orchards" />
+      </OperationReferenceProvider>,
+    );
+
+    expect(
+      screen.getByRole('link', { name: /Open API reference/ }),
+    ).toHaveAttribute('href', '/api/orchards/getorchard');
+    expect(screen.getByText('/orchards/orchard-1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Response' }));
+    expect(screen.getByText('"orchard-1"')).toBeInTheDocument();
+  });
+
   it('formats object examples as JSON', () => {
     render(
       <OperationPreview

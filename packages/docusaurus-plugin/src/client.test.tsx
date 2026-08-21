@@ -5,6 +5,7 @@ import {
   OperationCard,
   OperationLink,
   OperationPreview,
+  SpeccyOperationReferenceProvider,
 } from './client';
 
 const spec = { openapi: '3.1.0', info: { title: 'Test API', version: '1' } };
@@ -49,5 +50,6 @@ describe('documentation components', () => {
     expect(EndpointStrip).toBeTypeOf('function');
     expect(OperationCard).toBeTypeOf('function');
     expect(OperationPreview).toBeTypeOf('function');
+    expect(SpeccyOperationReferenceProvider).toBeTypeOf('function');
   });
 });

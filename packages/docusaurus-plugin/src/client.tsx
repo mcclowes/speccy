@@ -7,7 +7,14 @@
  * ---
  */
 
+import { useAllPluginInstancesData } from '@docusaurus/useGlobalData';
+import type { ReactNode } from 'react';
 import { Speccy, type SpeccyProps } from 'speccy-renderer';
+import {
+  OperationReferenceProvider,
+  type OperationReferenceSource,
+} from 'speccy-renderer/docs';
+import type { SpeccyPluginGlobalData } from './index';
 
 export type OpenAPIProps = SpeccyProps;
 
@@ -26,6 +33,27 @@ export function OpenAPI({
       theme={theme}
       {...props}
     />
+  );
+}
+
+export function SpeccyOperationReferenceProvider({
+  children,
+}: {
+  children?: ReactNode;
+}) {
+  const instances = useAllPluginInstancesData('docusaurus-plugin-speccy') ?? {};
+  const apis = Object.values(instances).map((value) => {
+    const data = value as SpeccyPluginGlobalData;
+    return {
+      name: data.name,
+      basePath: data.route,
+      catalog: data.operations,
+    } satisfies OperationReferenceSource;
+  });
+  return (
+    <OperationReferenceProvider apis={apis}>
+      {children}
+    </OperationReferenceProvider>
   );
 }
 

@@ -17,11 +17,22 @@ import {
   type OperationModel,
   type ReferenceModel,
 } from 'speccy-core';
+import type { OperationPreviewData } from './operationPreviewData';
 import { routePath } from './routing';
+
+export interface OperationReferenceCatalogEntry {
+  id: string;
+  operationId?: string;
+  method: string;
+  path: string;
+  preview: OperationPreviewData;
+}
 
 export interface OperationReferenceSource {
   /** OpenAPI document, or a JSON or YAML string, that the components look operations up in. */
-  spec: OpenAPIDocument | string;
+  spec?: OpenAPIDocument | string;
+  /** Compact build-generated operation data. Prefer this in documentation-site integrations. */
+  catalog?: OperationReferenceCatalogEntry[];
   /** Route where the reference for `spec` is mounted, such as `/api`. */
   basePath?: string;
   /** Route segment placed between `basePath` and the operation id. Defaults to none. */
@@ -41,6 +52,7 @@ export interface ResolvedOperationReference {
   path: string;
   href?: string;
   operation?: OperationModel;
+  preview?: OperationPreviewData;
 }
 
 const SourcesContext = createContext<OperationReferenceSource[]>([]);
@@ -98,6 +110,30 @@ function modelFor(spec: OpenAPIDocument | string): ReferenceModel {
   return model;
 }
 
+function findCatalogEntry(
+  items: OperationReferenceCatalogEntry[],
+  lookup: OperationReferenceLookup,
+): OperationReferenceCatalogEntry | undefined {
+  if (lookup.operationId) {
+    const id = lookup.operationId;
+    const slug = slugify(id);
+    return items.find(
+      (item) =>
+        item.operationId === id ||
+        item.id === slug ||
+        item.id === `webhook-${slug}`,
+    );
+  }
+  const method = lookup.method!.toLowerCase();
+  const path = lookup.path!;
+  return (
+    items.find((item) => item.method === method && item.path === path) ??
+    items.find(
+      (item) => item.method === method && stripVariant(item.path) === path,
+    )
+  );
+}
+
 function stripVariant(path: string): string {
   return path.replace(/#.*$/, '');
 }
@@ -139,6 +175,22 @@ export function resolveOperationReference(
     ? sources.filter((source) => source.name === lookup.api)
     : sources;
   for (const source of candidates) {
+    const catalogMatch = source.catalog
+      ? findCatalogEntry(source.catalog, lookup)
+      : undefined;
+    if (catalogMatch) {
+      return {
+        method: lookup.method ?? catalogMatch.method,
+        path: stripVariant(lookup.path ?? catalogMatch.path),
+        href: routePath(
+          { page: 'operation', operationId: catalogMatch.id },
+          source.basePath ?? '/api',
+          { operationSegment: source.operationSegment ?? '' },
+        ),
+        preview: catalogMatch.preview,
+      };
+    }
+    if (!source.spec) continue;
     const model = modelFor(source.spec);
     const match = findOperation(
       [...model.operations, ...model.webhooks],
