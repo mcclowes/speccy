@@ -264,3 +264,39 @@ export const LongEndpointPath: Story = {
     },
   },
 };
+
+export const WebhookPayload: Story = {
+  args: {
+    spec: {
+      ...exampleSpec,
+      paths: {},
+      webhooks: {
+        'payment-link.settled': {
+          post: {
+            summary: 'Payment link settled',
+            description: 'Sent once funds for a payment link reach settlement.',
+            requestBody: {
+              required: true,
+              content: {
+                'application/vnd.northstar.settlement.v2+json': {
+                  schema: { $ref: '#/components/schemas/PaymentLink' },
+                  example: {
+                    amount: 4200,
+                    currency: 'GBP',
+                    reference: 'INV-2048',
+                  },
+                },
+              },
+            },
+            responses: { '204': { description: 'The webhook was accepted.' } },
+          },
+        },
+      },
+    },
+    theme: 'light',
+    route: {
+      page: 'operation',
+      operationId: 'webhook-post-payment-link-settled',
+    },
+  },
+};

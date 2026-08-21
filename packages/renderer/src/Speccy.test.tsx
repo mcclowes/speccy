@@ -1223,9 +1223,13 @@ describe('Speccy navigation', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByTitle('Webhook')).toHaveLength(2);
     expect(screen.queryByText('POST')).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { level: 2, name: 'Payload' }),
-    ).toBeInTheDocument();
+    const payloadHeading = screen.getByRole('heading', {
+      level: 2,
+      name: 'Payload',
+    });
+    expect(payloadHeading.closest('.sp-media-heading')).toHaveTextContent(
+      'application/json',
+    );
     const payloadToggle = screen.getByRole('button', {
       name: 'Expand payload',
     });
@@ -1267,6 +1271,42 @@ describe('Speccy navigation', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: 'Responses' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps the media type selector and required marker in the payload heading', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Webhook API' },
+          paths: {},
+          webhooks: {
+            'ledger-posted': {
+              post: {
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': { schema: { type: 'object' } },
+                    'application/vnd.speccy.v2+json': {
+                      schema: { type: 'object' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+        route={{ page: 'operation', operationId: 'webhook-post-ledger-posted' }}
+      />,
+    );
+
+    const headingRow = screen
+      .getByRole('heading', { level: 2, name: 'Payload' })
+      .closest('.sp-media-heading') as HTMLElement;
+    expect(headingRow).not.toBeNull();
+    const row = within(headingRow);
+    expect(row.getByRole('combobox', { name: 'Media type' })).toBeVisible();
+    expect(row.getAllByLabelText('Required')).toHaveLength(1);
   });
 
   it('identifies the target server when webhook delivery fails', async () => {

@@ -38,7 +38,6 @@ import {
   DisclosureContent,
   httpMethodLabel,
   MethodBadge,
-  RequiredMark,
 } from './DesignSystem';
 import {
   DeveloperDiagnostics,
@@ -368,12 +367,9 @@ function EndpointPage({
           )}
           {isWebhook && item.operation.requestBody && (
             <section className="sp-endpoint-section sp-request-body">
-              <h2>
-                Payload{' '}
-                {item.operation.requestBody.required && <RequiredMark />}
-              </h2>
               <RequestBodyDetails
                 body={item.operation.requestBody}
+                title={<h2>Payload</h2>}
                 collapseObjects
               />
             </section>

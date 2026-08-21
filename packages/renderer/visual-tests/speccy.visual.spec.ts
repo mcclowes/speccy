@@ -125,6 +125,52 @@ test('request body heading aligns with its media type', async ({ page }) => {
   expect(Math.abs(headingCenter - mediaTypeCenter)).toBeLessThan(1);
 });
 
+test('webhook payload heading shares a row with its media type', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(
+    '/iframe.html?id=renderer-speccy--webhook-payload&viewMode=story',
+  );
+
+  const heading = page.getByRole('heading', { level: 2, name: 'Payload' });
+  const responsesHeading = page.getByRole('heading', {
+    level: 2,
+    name: 'Responses',
+  });
+  const mediaType = page.locator('.sp-media-type');
+  await expect(heading).toBeVisible();
+  await expect(mediaType).toBeVisible();
+
+  const [headingBox, mediaTypeBox] = await Promise.all([
+    heading.boundingBox(),
+    mediaType.boundingBox(),
+  ]);
+  const headingCenter = headingBox!.y + headingBox!.height / 2;
+  const mediaTypeCenter = mediaTypeBox!.y + mediaTypeBox!.height / 2;
+  expect(Math.abs(headingCenter - mediaTypeCenter)).toBeLessThan(1);
+  expect(mediaTypeBox!.x).toBeGreaterThan(headingBox!.x + headingBox!.width);
+
+  await expect(heading).toHaveCSS(
+    'font-size',
+    await responsesHeading.evaluate(
+      (element) => getComputedStyle(element).fontSize,
+    ),
+  );
+
+  for (const width of [320, 390, 768]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [rowBox, chipBox] = await Promise.all([
+      page.locator('.sp-media-heading').first().boundingBox(),
+      mediaType.boundingBox(),
+    ]);
+    expect(chipBox!.x).toBeGreaterThanOrEqual(rowBox!.x);
+    expect(chipBox!.x + chipBox!.width).toBeLessThanOrEqual(
+      rowBox!.x + rowBox!.width + 1,
+    );
+  }
+});
+
 test('long server details stay contained at every responsive size', async ({
   page,
 }) => {
