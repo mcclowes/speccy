@@ -21,6 +21,7 @@ import {
 import {
   analyzeOpenApi,
   createReferenceModel,
+  effectiveParameters,
   expandServerUrl,
   operationsInDeclarationOrder,
   parseSpec,
@@ -268,10 +269,7 @@ function EndpointPage({
     null,
   );
   const compactLayout = useCompactEndpointLayout(endpointElement);
-  const parameters = [
-    ...(item.pathItem.parameters ?? []),
-    ...(item.operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(item.pathItem, item.operation);
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
   const servers = effectiveServers(item, document);
@@ -494,10 +492,7 @@ function OperationCard({
   context?: 'operation' | 'callback';
 }) {
   const [open, setOpen] = useState(defaultExpanded);
-  const parameters = [
-    ...(item.pathItem.parameters ?? []),
-    ...(item.operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(item.pathItem, item.operation);
   const scopedServer =
     item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
   const effectiveServer = scopedServer?.url
@@ -609,6 +604,7 @@ function CallbackList({
                           operation,
                           pathItem,
                           tag: 'Callbacks',
+                          tags: ['Callbacks'],
                           source: 'webhook',
                         };
                         return (

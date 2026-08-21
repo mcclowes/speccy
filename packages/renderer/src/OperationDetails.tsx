@@ -9,6 +9,7 @@
 
 import { Fragment, type ReactNode, useEffect, useRef, useState } from 'react';
 import {
+  effectiveParameters,
   type MediaType,
   type OperationModel,
   type Parameter,
@@ -1017,10 +1018,7 @@ export function RequestRail({
   storageScope: string;
   parameterPrototype?: boolean;
 }) {
-  const parameters = [
-    ...(item.pathItem.parameters ?? []),
-    ...(item.operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(item.pathItem, item.operation);
   const parameterDefaults = Object.fromEntries(
     parameters.map((parameter) => [
       `${parameter.in}-${parameter.name}`,

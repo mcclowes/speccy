@@ -446,4 +446,73 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(screen.getByText('$response.body#/owner')).toBeInTheDocument();
     expect(screen.getByText('https://owners.example.com')).toBeInTheDocument();
   });
+
+  it('lets an operation parameter override the path parameter it repeats', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'search' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Override API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/search': {
+              parameters: [
+                {
+                  name: 'limit',
+                  in: 'query',
+                  required: true,
+                  description: 'Path level limit',
+                  schema: { type: 'string', default: 'path-default' },
+                },
+              ],
+              get: {
+                operationId: 'search',
+                parameters: [
+                  {
+                    name: 'limit',
+                    in: 'query',
+                    required: true,
+                    description: 'Operation level limit',
+                    schema: { type: 'string', default: 'operation-default' },
+                  },
+                ],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByLabelText(/limit/)).toHaveLength(1);
+    expect(document.body.textContent).toContain('operation-default');
+    expect(document.body.textContent).not.toContain('path-default');
+  });
+
+  it('lists a multi-tag operation under each of its tags', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Tagged API', version: '1.0.0' },
+          tags: [{ name: 'Pets' }, { name: 'Search' }],
+          paths: {
+            '/pets': {
+              get: {
+                operationId: 'listPets',
+                summary: 'List pets',
+                tags: ['Pets', 'Search'],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    const navigation = screen.getByLabelText('API reference');
+    expect(navigation).toHaveTextContent('Pets');
+    expect(navigation).toHaveTextContent('Search');
+  });
 });
