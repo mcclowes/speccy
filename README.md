@@ -143,7 +143,7 @@ The generated project keeps its OpenAPI source, branding, and base path in `spec
 npx speccy-cli diff origin/main:openapi.yaml openapi.yaml
 ```
 
-Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` checks nine rule categories covering OpenAPI conformance, documentation, operations, resource design, errors, auth, pagination, data modeling, and lifecycle, the same Speccy rules the renderer shows in its developer view; `--against` adds the tenth, change safety, by comparing with a previous revision. Add `--format markdown` for output ready to post as a pull request comment.
+Exits 1 on a breaking change, 0 otherwise, and 2 if the tool itself could not run. `speccy lint openapi.yaml` checks nine rule categories covering OpenAPI conformance, documentation, operations, resource design, errors, auth, pagination, data modeling, and lifecycle, the same Speccy rules the renderer shows in its developer view; `--against` adds the tenth, change safety, by comparing with a previous revision. Add `--format markdown` for output ready to post as a pull request comment. Add `--material` to ignore description and `x-` extension changes when reviewing the contract alone.
 
 Each spec argument accepts a file path, a git ref, or an http or https URL. See [`packages/cli`](packages/cli/README.md) for the full options.
 
