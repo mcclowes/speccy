@@ -1,5 +1,16 @@
 # speccy-cli
 
+## 0.11.0
+
+### Minor Changes
+
+- [`88925b9`](https://github.com/mcclowes/speccy/commit/88925b96a3f8b27d11341bbab880a3a155d3d3fd) Thanks [@mcclowes](https://github.com/mcclowes)! - Add `speccy diff --material` to exclude descriptions and extension metadata from contract comparisons.
+
+### Patch Changes
+
+- Updated dependencies [[`88925b9`](https://github.com/mcclowes/speccy/commit/88925b96a3f8b27d11341bbab880a3a155d3d3fd)]:
+  - speccy-core@0.11.0
+
 ## 0.10.4
 
 ### Patch Changes
