@@ -12,7 +12,8 @@ import { CodeBlock } from './CodeBlock';
 import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
-import { SchemaExplorer, structuralObjectSchema } from './SchemaExplorer';
+import { SchemaExplorer } from './SchemaExplorer';
+import { structuralObjectSchema } from './schemaExplorerModel';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
 
 function schemaLabel(schema?: Schema): string {
