@@ -110,7 +110,7 @@ function Alternative({ schema, index }: { schema: Schema; index: number }) {
   );
 }
 
-function AcceptedShapes({ alternatives }: { alternatives: Schema[] }) {
+export function AcceptedShapes({ alternatives }: { alternatives: Schema[] }) {
   return (
     <DetailSection title="Accepted shapes">
       <div className={scoped('sp-schema-explorer-alternatives')}>

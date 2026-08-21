@@ -320,6 +320,11 @@
   background: var(--sp-code);
   font-size: 0.5625rem;
 }
+.sp-schema-explorer-closed {
+  margin: 8px 0 0;
+  color: var(--sp-muted);
+  font-size: 0.6875rem;
+}
 .sp-schema-explorer-alternatives {
   display: grid;
   gap: 6px;

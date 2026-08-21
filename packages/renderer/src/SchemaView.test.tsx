@@ -737,6 +737,126 @@ describe('SchemaView composition', () => {
     ).toBeVisible();
   });
 
+  it('shows every accepted shape for a root oneOf instead of only the first', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            {
+              title: 'CardPayment',
+              type: 'object',
+              properties: { pan: { type: 'string' } },
+            },
+            {
+              title: 'BankPayment',
+              type: 'object',
+              properties: { iban: { type: 'string' } },
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Card Payment')).toBeVisible();
+    expect(screen.getByText('Bank Payment')).toBeVisible();
+  });
+
+  it('keeps root alternatives visible alongside shared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          oneOf: [
+            { title: 'Alpha', properties: { alpha: { type: 'string' } } },
+            { title: 'Beta', properties: { beta: { type: 'string' } } },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Alpha')).toBeVisible();
+    expect(screen.getByText('Beta')).toBeVisible();
+  });
+
+  it('does not invent fields from a generated example when the schema is composed', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            { title: 'Alpha', properties: { alpha: { type: 'string' } } },
+            { title: 'Beta', properties: { beta: { type: 'string' } } },
+          ],
+        }}
+        exampleValue={{ alpha: 'only from the first branch' }}
+      />,
+    );
+
+    expect(screen.getByText('Beta')).toBeVisible();
+  });
+
+  it('shows additional properties beside declared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          additionalProperties: { type: 'number' },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /additionalProperties number/ }),
+    ).toBeVisible();
+  });
+
+  it('reports a closed object', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          additionalProperties: false,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/No other properties/i)).toBeVisible();
+  });
+
+  it('shows pattern properties beside declared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          patternProperties: { '^x-': { type: 'string' } },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /\^x- string/ })).toBeVisible();
+  });
+
+  it('keeps conditional applicators visible on a schema that also has properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          if: { required: ['id'] },
+          then: { required: ['name'] },
+          not: { type: 'null' },
+          unevaluatedProperties: false,
+        }}
+      />,
+    );
+
+    for (const label of ['If', 'Then', 'Not', 'Unevaluated properties'])
+      expect(screen.getByText(label)).toBeVisible();
+  });
+
   it('types a const field from its literal instead of calling it an object', () => {
     render(
       <SchemaView

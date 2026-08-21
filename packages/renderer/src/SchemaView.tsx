@@ -13,7 +13,12 @@ import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
-import { schemaLabel, structuralObjectSchema } from './schemaExplorerModel';
+import {
+  rootFields,
+  schemaLabel,
+  structuralObjectSchema,
+  unsupportedByExplorer,
+} from './schemaExplorerModel';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
 
 function alternativeName(schema: Schema, index: number): string {
@@ -131,8 +136,15 @@ export function SchemaView({
     !Array.isArray(exampleValue)
       ? schemaFromExample(exampleValue)
       : undefined;
+  // An example only stands in for a schema that describes no shape of its own; borrowing its
+  // keys for a composed schema would present one branch as if it were the whole contract.
   const schemaWithExampleFields =
-    Object.keys(explorerSchema.properties ?? {}).length === 0 && exampleSchema
+    Object.keys(explorerSchema.properties ?? {}).length === 0 &&
+    exampleSchema &&
+    !explorerSchema.oneOf &&
+    !explorerSchema.anyOf &&
+    explorerSchema.additionalProperties === undefined &&
+    !explorerSchema.patternProperties
       ? { ...schema, properties: exampleSchema.properties }
       : schema;
   const displayExplorerSchema = structuralObjectSchema(schemaWithExampleFields);
@@ -142,7 +154,8 @@ export function SchemaView({
     !summaryOnly &&
     !schema.xml &&
     !schema.externalDocs &&
-    Object.keys(displayExplorerSchema.properties ?? {}).length > 0
+    !unsupportedByExplorer(displayExplorerSchema) &&
+    rootFields(displayExplorerSchema, exampleValue).length > 0
   ) {
     return (
       <SchemaExplorer
@@ -203,6 +216,11 @@ export function SchemaView({
     constraints.push({
       label: 'dependent required',
       value: schema.dependentRequired,
+    });
+  if (schema.additionalProperties === false)
+    constraints.push({
+      label: 'additional properties',
+      value: 'not allowed',
     });
   if (schema.const !== undefined)
     constraints.push({ label: 'const', value: schema.const });

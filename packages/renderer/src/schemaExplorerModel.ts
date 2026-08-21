@@ -123,8 +123,8 @@ export function structuralObjectSchema(schema: Schema): SchemaObject {
 }
 
 /** Unwraps one more level so an array-of-array field still exposes its leaf properties. */
-function childProperties(schema: SchemaObject): Record<string, Schema> {
-  return structuralObjectSchema(schema).properties ?? {};
+function childProperties(schema: SchemaObject): SchemaObject {
+  return structuralObjectSchema(schema);
 }
 
 function propertyExample(value: unknown, name: string): unknown {
@@ -133,17 +133,52 @@ function propertyExample(value: unknown, name: string): unknown {
   return (value as Record<string, unknown>)[name];
 }
 
-export function fieldChildren(field: ExplorerField): ExplorerField[] {
-  const structuralSchema = structuralObjectSchema(field.schema);
-  const required = structuralSchema.required;
-  return Object.entries(childProperties(structuralSchema)).map(
-    ([name, schema]) => ({
+/**
+ * Declared properties come first, then the open-ended shapes — pattern and additional
+ * properties — so a map-shaped schema is never reported as having no fields.
+ */
+function schemaFields(
+  schema: SchemaObject,
+  basePath: string[],
+  sample: unknown,
+): ExplorerField[] {
+  const declared = Object.entries(schema.properties ?? {}).map(
+    ([name, property]) => ({
       name,
-      schema,
-      required: required?.includes(name) ?? false,
-      path: [...field.path, name],
-      exampleValue: propertyExample(field.exampleValue, name),
+      schema: property,
+      required: schema.required?.includes(name) ?? false,
+      path: [...basePath, name],
+      exampleValue: propertyExample(sample, name),
     }),
+  );
+  const patterned = Object.entries(schema.patternProperties ?? {}).map(
+    ([pattern, property]) => ({
+      name: pattern,
+      schema: property,
+      required: false,
+      path: [...basePath, pattern],
+    }),
+  );
+  const additional =
+    typeof schema.additionalProperties === 'object' &&
+    !schema.properties?.additionalProperties
+      ? [
+          {
+            name: 'additionalProperties',
+            schema: schema.additionalProperties,
+            required: false,
+            path: [...basePath, 'additionalProperties'],
+          },
+        ]
+      : [];
+  return [...declared, ...patterned, ...additional];
+}
+
+export function fieldChildren(field: ExplorerField): ExplorerField[] {
+  return schemaFields(
+    childProperties(structuralObjectSchema(field.schema)),
+    field.path,
+    field.exampleValue,
   );
 }
 
@@ -153,14 +188,30 @@ export function rootFields(
   exampleValue: unknown,
 ): ExplorerField[] {
   const sample = Array.isArray(exampleValue) ? exampleValue[0] : exampleValue;
-  return Object.entries(structuralSchema.properties ?? {}).map(
-    ([name, schema]) => ({
-      name,
-      schema,
-      required: structuralSchema.required?.includes(name) ?? false,
-      path: [name],
-      exampleValue: propertyExample(sample, name),
-    }),
+  return schemaFields(structuralSchema, [], sample);
+}
+
+/**
+ * Keywords the explorer's field tree cannot express. Schemas using them fall back to the
+ * recursive schema view so nothing is dropped from the rendered reference.
+ */
+const EXPLORER_BLIND_KEYWORDS = [
+  '$defs',
+  'contains',
+  'dependentSchemas',
+  'else',
+  'if',
+  'not',
+  'prefixItems',
+  'propertyNames',
+  'then',
+  'unevaluatedItems',
+  'unevaluatedProperties',
+] as const;
+
+export function unsupportedByExplorer(schema: SchemaObject): boolean {
+  return EXPLORER_BLIND_KEYWORDS.some(
+    (keyword) => schema[keyword] !== undefined,
   );
 }
 
@@ -212,5 +263,8 @@ export function schemaConstraints(schema: SchemaObject): ExplorerConstraint[] {
       : []),
     ...lengthConstraints(schema),
     ...(schema.pattern ? [{ label: 'Pattern', value: schema.pattern }] : []),
+    ...(schema.additionalProperties === false
+      ? [{ label: 'Properties', value: 'No other properties are allowed' }]
+      : []),
   ];
 }
