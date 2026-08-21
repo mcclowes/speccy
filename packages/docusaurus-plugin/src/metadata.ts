@@ -64,6 +64,13 @@ export function referenceMetadata(
     };
   }
 
+  if (route.section === 'webhooks') {
+    return {
+      title: `Webhooks | ${apiTitle}`,
+      description: `Webhook events ${apiTitle} delivers.`,
+    };
+  }
+
   const sectionTitle = route.section
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .toLowerCase()

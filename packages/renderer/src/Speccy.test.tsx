@@ -3226,6 +3226,76 @@ describe('Speccy navigation', () => {
     expect(screen.getByText('https://two.example')).toBeInTheDocument();
   });
 
+  it('lists every webhook on the reference webhooks page', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Webhook API' },
+          paths: {},
+          webhooks: {
+            'book.indexed': {
+              post: {
+                summary: 'Book indexed',
+                responses: { '204': { description: 'Accepted' } },
+              },
+            },
+            'book.removed': {
+              post: {
+                summary: 'Book removed',
+                tags: ['Books'],
+                responses: { '204': { description: 'Accepted' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    const navigation = within(
+      screen.getByRole('navigation', { name: 'API reference' }),
+    );
+    fireEvent.click(navigation.getByRole('button', { name: 'Reference' }));
+    fireEvent.click(navigation.getByRole('link', { name: 'Webhooks' }));
+
+    expect(window.location.pathname).toBe('/reference/webhooks');
+    const page = within(
+      screen.getByRole('heading', { name: 'Webhooks' }).closest('section')!,
+    );
+    expect(
+      page.getByRole('link', { name: /Book indexed/ }),
+    ).toBeInTheDocument();
+    expect(
+      page.getByRole('link', { name: /Book removed/ }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(page.getByRole('link', { name: /Book indexed/ }));
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Book indexed' }),
+    ).toBeInTheDocument();
+  });
+
+  it('omits the webhooks reference entry when the spec has no webhooks', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.0',
+          info: { title: 'Quiet API' },
+          paths: {},
+          components: { schemas: { Pet: { type: 'object' } } },
+        }}
+      />,
+    );
+
+    const navigation = within(
+      screen.getByRole('navigation', { name: 'API reference' }),
+    );
+    fireEvent.click(navigation.getByRole('button', { name: 'Reference' }));
+    expect(
+      navigation.queryByRole('link', { name: 'Webhooks' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('restores a reference page from the URL', () => {
     window.history.replaceState({}, '', '/docs/reference/schemas');
     const referenceSpec = {

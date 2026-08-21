@@ -41,7 +41,11 @@ export const REFERENCE_GROUPS = [
   ['securitySchemes', 'Security schemes'],
 ] as const;
 
-export type ReferenceKey = (typeof REFERENCE_GROUPS)[number][0];
+/** Webhooks live beside `components` in the document, so they get their own reference entry. */
+const WEBHOOKS_GROUP = ['webhooks', 'Webhooks'] as const;
+
+export type ComponentReferenceKey = (typeof REFERENCE_GROUPS)[number][0];
+export type ReferenceKey = ComponentReferenceKey | 'webhooks';
 
 function entries<T>(value: Record<string, T> | undefined): Array<[string, T]> {
   return value ? Object.entries(value) : [];
@@ -61,9 +65,14 @@ export function ReferenceNavigation({
   storageKey: string;
 }) {
   const [open, setOpen] = useLocalState(storageKey, false);
-  const available = REFERENCE_GROUPS.filter(
-    ([key]) => Object.keys(document.components?.[key] ?? {}).length > 0,
-  );
+  const available: ReadonlyArray<readonly [ReferenceKey, string]> = [
+    ...(Object.keys(document.webhooks ?? {}).length > 0
+      ? [WEBHOOKS_GROUP]
+      : []),
+    ...REFERENCE_GROUPS.filter(
+      ([key]) => Object.keys(document.components?.[key] ?? {}).length > 0,
+    ),
+  ];
   if (available.length === 0) return null;
   return (
     <div className="sp-nav-group sp-reference-nav">
@@ -328,7 +337,7 @@ export function DocumentReference({
 }) {
   const components = document.components ?? {};
   const renderCards = <T,>(
-    key: ReferenceKey,
+    key: ComponentReferenceKey,
     values: Record<string, T> | undefined,
     render: (name: string, value: T) => ReactNode,
   ) => {

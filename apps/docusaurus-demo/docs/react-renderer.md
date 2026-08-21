@@ -70,9 +70,14 @@ Speccy uses the browser history API and creates routes beneath `basePath`:
 /api/list-books          Operation, from the slugified operationId
 /api/tags/books          Tag overview
 /api/reference/schemas   Reusable schemas section
+/api/reference/webhooks  Every webhook in one list
 ```
 
 Operation URLs use the slugified `operationId` (or an ID derived from the method and path). Individual reusable components are anchors within their section page rather than routes of their own.
+
+## Webhooks
+
+Webhooks declared under the document's top-level `webhooks` key appear in the sidebar under their tag, alongside the operations that share it, and untagged webhooks group under **Other webhooks**. They also get a page of their own at `/reference/webhooks`, listing every webhook the API delivers in one place. The page and its sidebar entry only appear when the spec declares webhooks.
 
 Configure your host to serve the React application for these routes. Static hosts usually call this an SPA fallback or rewrite.
 

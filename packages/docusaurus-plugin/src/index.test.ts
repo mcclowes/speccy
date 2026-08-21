@@ -191,6 +191,33 @@ describe('referenceRoutes', () => {
     );
   });
 
+  it('creates a webhooks reference route only when the spec declares webhooks', () => {
+    const withoutWebhooks = referenceRoutes(
+      { openapi: '3.1.0', info: { title: 'Test API' }, paths: {} },
+      '/api',
+    );
+    expect(withoutWebhooks).not.toContainEqual({
+      path: '/api/reference/webhooks',
+      route: { page: 'reference', section: 'webhooks' },
+    });
+
+    const withWebhooks = referenceRoutes(
+      {
+        openapi: '3.1.0',
+        info: { title: 'Test API' },
+        paths: {},
+        webhooks: {
+          'book.indexed': { post: { operationId: 'bookIndexed' } },
+        },
+      },
+      '/api',
+    );
+    expect(withWebhooks).toContainEqual({
+      path: '/api/reference/webhooks',
+      route: { page: 'reference', section: 'webhooks' },
+    });
+  });
+
   it('rejects generated route collisions', () => {
     expect(() =>
       referenceRoutes(

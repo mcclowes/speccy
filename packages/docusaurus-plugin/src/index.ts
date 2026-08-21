@@ -201,6 +201,9 @@ export function referenceRoutes(
       page: 'tag' as const,
       tag: slugifyReferenceName(tag.name) || tag.name,
     })),
+    ...(model.webhooks.length > 0
+      ? [{ page: 'reference' as const, section: 'webhooks' }]
+      : []),
     ...REFERENCE_SECTIONS.filter(
       (section) =>
         Object.keys(model.document.components?.[section] ?? {}).length > 0,
