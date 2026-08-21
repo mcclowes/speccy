@@ -425,3 +425,13 @@ describe('endpoint parameter layout', () => {
     expect(within(parameter).queryByText('items')).not.toBeInTheDocument();
   });
 });
+
+describe('api information layout', () => {
+  it('lets a lone trailing entry span the full metadata box', () => {
+    const css = readFileSync('src/styles.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-api-meta > div:last-child:nth-child\(odd\) \{[^}]*grid-column: 1 \/ -1;[^}]*border-right: 0;/,
+    );
+  });
+});

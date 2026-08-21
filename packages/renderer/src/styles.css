@@ -705,6 +705,10 @@ related:
 .sp-api-meta > div:last-child {
   border-bottom: 0;
 }
+.sp-api-meta > div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  border-right: 0;
+}
 .sp-api-meta > div:nth-last-child(2):nth-child(odd) {
   border-bottom: 0;
 }
