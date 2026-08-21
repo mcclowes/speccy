@@ -9,7 +9,7 @@
  * ---
  */
 
-import { useState, type MouseEventHandler } from 'react';
+import { useState, type MouseEventHandler, type ReactNode } from 'react';
 import type { OpenAPIDocument } from 'speccy-core';
 import {
   CodeLines,
@@ -75,6 +75,32 @@ function referenceClassName(
     .trim();
 }
 
+function ReferenceAnchor({
+  theme,
+  style,
+  className,
+  href,
+  onClick,
+  children,
+}: {
+  theme: Theme;
+  style?: string;
+  className?: string;
+  href?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      className={referenceClassName(theme, style, className)}
+      href={href}
+      onClick={onClick}
+    >
+      {children}
+    </a>
+  );
+}
+
 function EndpointIdentity({
   method,
   path,
@@ -100,14 +126,16 @@ export function OperationLink({
 }: OperationReferenceProps) {
   const { method, path, href } = useOperationReference(lookup);
   return (
-    <a
-      className={referenceClassName(theme, styles.inlineLink, className)}
+    <ReferenceAnchor
+      theme={theme}
+      style={styles.inlineLink}
+      className={className}
       href={href}
       onClick={onClick}
     >
       <MethodBadge method={method} compact />
       <ApiPath value={path} wrap />
-    </a>
+    </ReferenceAnchor>
   );
 }
 
@@ -119,8 +147,10 @@ export function EndpointStrip({
 }: OperationReferenceProps) {
   const { method, path, href } = useOperationReference(lookup);
   return (
-    <a
-      className={referenceClassName(theme, styles.endpointStrip, className)}
+    <ReferenceAnchor
+      theme={theme}
+      style={styles.endpointStrip}
+      className={className}
       href={href}
       onClick={onClick}
     >
@@ -128,7 +158,7 @@ export function EndpointStrip({
       <span className={styles.action}>
         Open reference <span aria-hidden="true">→</span>
       </span>
-    </a>
+    </ReferenceAnchor>
   );
 }
 
@@ -142,8 +172,10 @@ export function OperationCard({
 }: DescribedOperationReferenceProps) {
   const { method, path, href } = useOperationReference(lookup);
   return (
-    <a
-      className={referenceClassName(theme, styles.referenceCard, className)}
+    <ReferenceAnchor
+      theme={theme}
+      style={styles.referenceCard}
+      className={className}
       href={href}
       onClick={onClick}
     >
@@ -155,7 +187,7 @@ export function OperationCard({
       <span className={styles.cardAction}>
         View operation <span aria-hidden="true">→</span>
       </span>
-    </a>
+    </ReferenceAnchor>
   );
 }
 
@@ -306,6 +338,12 @@ function PreviewPanel({
   );
 }
 
+/** Request sections that are shown only when the operation supplies values for them. */
+const OPTIONAL_REQUEST_SECTIONS = [
+  { key: 'query', label: 'Query parameters' },
+  { key: 'headers', label: 'Headers' },
+] as const;
+
 function requestSections(
   path: string,
   values: OperationPreviewRequestValues,
@@ -316,26 +354,14 @@ function requestSections(
       label: 'Path',
       value: requestPath(path, values.path ?? {}),
     },
-    ...(hasValues(values.query)
-      ? [
-          {
-            key: 'query' as const,
-            label: 'Query parameters',
-            value: formatExample(values.query)!,
-            rawValue: values.query,
-          },
-        ]
-      : []),
-    ...(hasValues(values.headers)
-      ? [
-          {
-            key: 'headers' as const,
-            label: 'Headers',
-            value: formatExample(values.headers)!,
-            rawValue: values.headers,
-          },
-        ]
-      : []),
+    ...OPTIONAL_REQUEST_SECTIONS.filter((section) =>
+      hasValues(values[section.key]),
+    ).map((section) => ({
+      key: section.key,
+      label: section.label,
+      value: formatExample(values[section.key])!,
+      rawValue: values[section.key],
+    })),
     ...('body' in values
       ? [
           {
@@ -349,6 +375,72 @@ function requestSections(
   ];
 }
 
+type PreviewTab = 'request' | 'response';
+
+interface PreviewPanelData {
+  key: PreviewTab;
+  title: string;
+  sections: PreviewSectionData[];
+}
+
+/** A request panel is always available; the response panel appears only when there is an example. */
+function previewPanels(
+  path: string,
+  request: OperationPreviewRequestValues,
+  responseValue: unknown,
+  response: string | undefined,
+): PreviewPanelData[] {
+  return [
+    {
+      key: 'request',
+      title: 'Request',
+      sections: requestSections(path, request),
+    },
+    ...(response === undefined
+      ? []
+      : [
+          {
+            key: 'response' as const,
+            title: 'Response',
+            sections: [
+              {
+                key: 'body' as const,
+                label: 'Body',
+                value: response,
+                rawValue: responseValue,
+              },
+            ],
+          },
+        ]),
+  ];
+}
+
+function PreviewTabs({
+  panels,
+  active,
+  onSelect,
+}: {
+  panels: PreviewPanelData[];
+  active: PreviewTab;
+  onSelect: (tab: PreviewTab) => void;
+}) {
+  return (
+    <div className={styles.previewTabs} role="tablist" aria-label="Example">
+      {panels.map((panel) => (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={active === panel.key}
+          onClick={() => onSelect(panel.key)}
+          key={panel.key}
+        >
+          {panel.title}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function OperationPreview({
   requestValues,
   requestExample,
@@ -359,7 +451,7 @@ export function OperationPreview({
   onClick,
   ...lookup
 }: OperationPreviewProps) {
-  const [tab, setTab] = useState<'request' | 'response'>('request');
+  const [tab, setTab] = useState<PreviewTab>('request');
   const { method, path, href, operation, preview } =
     useOperationReference(lookup);
   const derived =
@@ -374,14 +466,14 @@ export function OperationPreview({
   );
   if (requestExample !== undefined) request.body = requestExample;
   const responseValue = responseExample ?? derived.response;
-  const response = formatExample(responseValue);
-  const hasRequest = true;
-  const hasResponse = response !== undefined;
-  const tabs = [
-    ...(hasRequest ? (['request'] as const) : []),
-    ...(hasResponse ? (['response'] as const) : []),
-  ];
-  const activeTab = tab === 'response' && hasResponse ? 'response' : tabs[0];
+  const panels = previewPanels(
+    path,
+    request,
+    responseValue,
+    formatExample(responseValue),
+  );
+  const active = panels.find((panel) => panel.key === tab) ?? panels[0]!;
+  const tabbed = panels.length > 1;
 
   return (
     <section
@@ -393,53 +485,20 @@ export function OperationPreview({
           Open API reference <span aria-hidden="true">→</span>
         </a>
       </header>
-      {tabs.length > 1 && (
-        <div className={styles.previewTabs} role="tablist" aria-label="Example">
-          {tabs.map((name) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === name}
-              onClick={() => setTab(name)}
-              key={name}
-            >
-              {name[0]!.toUpperCase() + name.slice(1)}
-            </button>
-          ))}
-        </div>
+      {tabbed && (
+        <PreviewTabs panels={panels} active={active.key} onSelect={setTab} />
       )}
-      {activeTab === 'request' ? (
-        <div
-          className={styles.previewCode}
-          role={tabs.length > 1 ? 'tabpanel' : undefined}
-        >
-          <PreviewPanel
-            key="request"
-            label="request"
-            sections={requestSections(path, request)}
-            defaultCollapsed={defaultCollapsed}
-          />
-        </div>
-      ) : response !== undefined ? (
-        <div
-          className={styles.previewCode}
-          role={tabs.length > 1 ? 'tabpanel' : undefined}
-        >
-          <PreviewPanel
-            key="response"
-            label="response"
-            sections={[
-              {
-                key: 'body',
-                label: 'Body',
-                value: response,
-                rawValue: responseValue,
-              },
-            ]}
-            defaultCollapsed={defaultCollapsed}
-          />
-        </div>
-      ) : null}
+      <div
+        className={styles.previewCode}
+        role={tabbed ? 'tabpanel' : undefined}
+      >
+        <PreviewPanel
+          key={active.key}
+          label={active.key}
+          sections={active.sections}
+          defaultCollapsed={defaultCollapsed}
+        />
+      </div>
     </section>
   );
 }

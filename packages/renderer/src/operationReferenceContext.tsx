@@ -110,44 +110,28 @@ function modelFor(spec: OpenAPIDocument | string): ReferenceModel {
   return model;
 }
 
-function findCatalogEntry(
-  items: OperationReferenceCatalogEntry[],
-  lookup: OperationReferenceLookup,
-): OperationReferenceCatalogEntry | undefined {
-  if (lookup.operationId) {
-    const id = lookup.operationId;
-    const slug = slugify(id);
-    return items.find(
-      (item) =>
-        item.operationId === id ||
-        item.id === slug ||
-        item.id === `webhook-${slug}`,
-    );
-  }
-  const method = lookup.method!.toLowerCase();
-  const path = lookup.path!;
-  return (
-    items.find((item) => item.method === method && item.path === path) ??
-    items.find(
-      (item) => item.method === method && stripVariant(item.path) === path,
-    )
-  );
-}
-
 function stripVariant(path: string): string {
   return path.replace(/#.*$/, '');
 }
 
-function findOperation(
-  items: OperationModel[],
+/** Shape shared by catalog entries and modelled operations, keyed the same way. */
+interface ReferenceCandidate {
+  id: string;
+  method: string;
+  path: string;
+}
+
+function findCandidate<T extends ReferenceCandidate>(
+  items: T[],
   lookup: OperationReferenceLookup,
-): OperationModel | undefined {
+  operationIdOf: (item: T) => string | undefined,
+): T | undefined {
   if (lookup.operationId) {
     const id = lookup.operationId;
     const slug = slugify(id);
     return items.find(
       (item) =>
-        item.operation.operationId === id ||
+        operationIdOf(item) === id ||
         item.id === slug ||
         item.id === `webhook-${slug}`,
     );
@@ -160,6 +144,23 @@ function findOperation(
       (item) => item.method === method && stripVariant(item.path) === path,
     )
   );
+}
+
+/** The lookup wins over the match so callers keep the casing and variant they asked for. */
+function referenceFor(
+  source: OperationReferenceSource,
+  lookup: OperationReferenceLookup,
+  match: ReferenceCandidate,
+): ResolvedOperationReference {
+  return {
+    method: lookup.method ?? match.method,
+    path: stripVariant(lookup.path ?? match.path),
+    href: routePath(
+      { page: 'operation', operationId: match.id },
+      source.basePath ?? '/api',
+      { operationSegment: source.operationSegment ?? '' },
+    ),
+  };
 }
 
 /**
@@ -175,38 +176,20 @@ export function resolveOperationReference(
     ? sources.filter((source) => source.name === lookup.api)
     : sources;
   for (const source of candidates) {
-    const catalogMatch = source.catalog
-      ? findCatalogEntry(source.catalog, lookup)
+    const entry = source.catalog
+      ? findCandidate(source.catalog, lookup, (item) => item.operationId)
       : undefined;
-    if (catalogMatch) {
-      return {
-        method: lookup.method ?? catalogMatch.method,
-        path: stripVariant(lookup.path ?? catalogMatch.path),
-        href: routePath(
-          { page: 'operation', operationId: catalogMatch.id },
-          source.basePath ?? '/api',
-          { operationSegment: source.operationSegment ?? '' },
-        ),
-        preview: catalogMatch.preview,
-      };
-    }
+    if (entry)
+      return { ...referenceFor(source, lookup, entry), preview: entry.preview };
     if (!source.spec) continue;
     const model = modelFor(source.spec);
-    const match = findOperation(
+    const match = findCandidate(
       [...model.operations, ...model.webhooks],
       lookup,
+      (item) => item.operation.operationId,
     );
     if (!match) continue;
-    return {
-      method: lookup.method ?? match.method,
-      path: stripVariant(lookup.path ?? match.path),
-      href: routePath(
-        { page: 'operation', operationId: match.id },
-        source.basePath ?? '/api',
-        { operationSegment: source.operationSegment ?? '' },
-      ),
-      operation: match,
-    };
+    return { ...referenceFor(source, lookup, match), operation: match };
   }
   return {
     method: lookup.method ?? '',
