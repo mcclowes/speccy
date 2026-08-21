@@ -250,6 +250,9 @@ export function SchemaView({
     (schema.description ||
       enumValues ||
       constraints.length > 0 ||
+      schema.xml ||
+      schema.externalDocs?.url ||
+      schema.examples ||
       schema.default !== undefined ||
       (exampleValue !== undefined &&
         (exampleValue === null || typeof exampleValue !== 'object')) ||

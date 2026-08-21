@@ -761,6 +761,38 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('Bank Payment')).toBeVisible();
   });
 
+  it('reaches XML and external documentation on a field that has nothing else', () => {
+    render(
+      <SchemaView
+        collapseObjects
+        schema={{
+          type: 'object',
+          properties: {
+            tagged: {
+              type: 'string',
+              xml: { name: 'TaggedXml', attribute: true },
+              externalDocs: {
+                url: 'https://example.com/field',
+                description: 'Field guide',
+              },
+            },
+          },
+          xml: { name: 'Root' },
+        }}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /details for tagged/i }),
+    );
+
+    expect(screen.getByText(/TaggedXml/)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Field guide' })).toHaveAttribute(
+      'href',
+      'https://example.com/field',
+    );
+  });
+
   it('names the discriminator property and its mapped values', () => {
     render(
       <SchemaView

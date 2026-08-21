@@ -10,11 +10,18 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 import { Markdown } from './Markdown';
-import { DisclosureChevron, DisclosureContent } from './DesignSystem';
 import {
+  DisclosureChevron,
+  DisclosureContent,
+  RequiredMark,
+} from './DesignSystem';
+import {
+  NamedExamples,
   ParameterDetails,
   RequestBodyDetails,
   ResponseDetails,
+  resourceSchema,
+  SerializationNote,
 } from './ResourceDetails';
 import { JsonValue, SchemaView } from './SchemaView';
 import type { OpenAPIDocument, SecurityScheme } from 'speccy-core';
@@ -364,15 +371,35 @@ export function DocumentReference({
       {activeKey === 'headers' &&
         renderCards('headers', components.headers, (_name, header) => (
           <>
+            <div className="sp-resource-heading">
+              {header.required && <RequiredMark />}
+              {header.deprecated && (
+                <span className="sp-deprecated">deprecated</span>
+              )}
+            </div>
             <Markdown>{header.description}</Markdown>
-            <SchemaView schema={header.schema} />
+            <SchemaView schema={resourceSchema(header)} />
+            <SerializationNote parameter={header} />
+            {header.example !== undefined && (
+              <JsonValue value={header.example} />
+            )}
+            {header.examples && <NamedExamples examples={header.examples} />}
           </>
         ))}
       {activeKey === 'examples' &&
         renderCards('examples', components.examples, (_name, example) => (
           <>
+            {example.summary && (
+              <p className="sp-resource-summary">{example.summary}</p>
+            )}
             <Markdown>{example.description}</Markdown>
-            <JsonValue value={example.value ?? example.externalValue} />
+            {example.externalValue ? (
+              <p>
+                <a href={example.externalValue}>{example.externalValue}</a>
+              </p>
+            ) : (
+              <JsonValue value={example.value} />
+            )}
           </>
         ))}
       {activeKey === 'links' &&

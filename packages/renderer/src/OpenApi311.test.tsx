@@ -447,6 +447,163 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(screen.getByText('https://owners.example.com')).toBeInTheDocument();
   });
 
+  it('describes parameters that carry content instead of a schema', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'parameters' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Content parameters', version: '1.0.0' },
+          components: {
+            parameters: {
+              Filter: {
+                name: 'filter',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: { role: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('application/json')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'role string' })).toBeVisible();
+  });
+
+  it('marks deprecated parameters and states their serialization', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'parameters' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Parameter metadata', version: '1.0.0' },
+          components: {
+            parameters: {
+              Legacy: {
+                name: 'legacy',
+                in: 'query',
+                deprecated: true,
+                style: 'spaceDelimited',
+                explode: false,
+                allowEmptyValue: true,
+                schema: { type: 'array', items: { type: 'string' } },
+                examples: {
+                  pair: { summary: 'A pair', value: ['a', 'b'] },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('deprecated')).toBeVisible();
+    expect(screen.getByText(/spaceDelimited/)).toBeVisible();
+    expect(screen.getByText('A pair')).toBeVisible();
+  });
+
+  it('describes reusable headers beyond their description', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'headers' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Header metadata', version: '1.0.0' },
+          components: {
+            headers: {
+              RateLimit: {
+                description: 'Requests left in the window.',
+                required: true,
+                deprecated: true,
+                schema: { type: 'integer' },
+                example: 99,
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('deprecated')).toBeVisible();
+    expect(screen.getByTitle('Required')).toBeVisible();
+    expect(screen.getByText('99')).toBeVisible();
+  });
+
+  it('summarises reusable examples and links external values', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'examples' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Example metadata', version: '1.0.0' },
+          components: {
+            examples: {
+              Remote: {
+                summary: 'A hosted payload',
+                externalValue: 'https://example.com/payload.json',
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('A hosted payload')).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'https://example.com/payload.json' }),
+    ).toHaveAttribute('href', 'https://example.com/payload.json');
+  });
+
+  it('describes response headers declared with content', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'headers' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Response headers', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things': {
+              get: {
+                operationId: 'headers',
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    headers: {
+                      'X-Trace': {
+                        description: 'Structured trace.',
+                        content: {
+                          'application/json': {
+                            schema: {
+                              type: 'object',
+                              properties: { id: { type: 'string' } },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /X-Trace object/ }),
+    ).toBeVisible();
+  });
+
   it('lets an operation parameter override the path parameter it repeats', () => {
     render(
       <Speccy
