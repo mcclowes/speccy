@@ -1,6 +1,6 @@
 /**
  * ---
- * purpose: Offers canonical JSON and YAML downloads of the rendered OpenAPI document.
+ * purpose: Offers canonical JSON and YAML downloads of the rendered OpenAPI document, plus its published URL.
  * related:
  *   - ./Speccy.tsx - Places the download card on the API overview.
  *   - ./types.ts - Declares the OpenAPI document shape.
@@ -83,7 +83,7 @@ export function OpenApiDownload({
       className={`sp-download-card ${styles.card}`}
       aria-labelledby="sp-download-heading"
     >
-      <h2 id="sp-download-heading">Download OpenAPI description</h2>
+      <h2 id="sp-download-heading">OpenAPI description</h2>
       <div className={`sp-download-options ${styles.options}`}>
         {(['json', 'yaml'] as const).map((format) => (
           <button
@@ -102,11 +102,13 @@ export function OpenApiDownload({
         ))}
         {openApiUrl && (
           <div className={styles.urlOption}>
-            <a href={openApiUrl}>
+            <a href={openApiUrl} target="_blank" rel="noreferrer">
               <span className={`${styles.format} ${styles.openapiFormat}`}>
-                API
+                URL
               </span>
-              <strong>Open OpenAPI description</strong>
+              <strong className={styles.url} title={openApiUrl}>
+                {openApiUrl}
+              </strong>
               <ExternalIcon />
             </a>
             <CopyButton value={openApiUrl} compact />

@@ -16,6 +16,7 @@ import type {
   Parameter,
   PathItem,
   ResponseObject,
+  Schema,
   ServerVariableObject,
 } from './types';
 
@@ -36,7 +37,10 @@ export interface OperationModel {
   path: string;
   operation: Operation;
   pathItem: PathItem;
+  /** The tag that owns this operation's breadcrumb and route. */
   tag: string;
+  /** Every tag the operation is listed under, in declaration order. */
+  tags: string[];
   source: 'path' | 'webhook';
 }
 
@@ -71,6 +75,30 @@ export function operationsInDeclarationOrder(
     const operation = pathItem[method];
     return operation ? [[method, operation]] : [];
   });
+}
+
+/**
+ * Merges path-level and operation-level parameters the way OpenAPI defines it: an operation
+ * parameter replaces the path parameter that shares its name and location.
+ */
+export function effectiveParameters(
+  pathItem: PathItem | undefined,
+  operation: Operation | undefined,
+): Parameter[] {
+  const inherited = pathItem?.parameters ?? [];
+  const declared = operation?.parameters ?? [];
+  const identity = (parameter: Parameter) =>
+    `${parameter.in ?? 'query'}\u0000${parameter.name ?? ''}`;
+  const overrides = new Map(
+    declared.map((parameter) => [identity(parameter), parameter]),
+  );
+  const inheritedIds = new Set(inherited.map(identity));
+  return [
+    ...inherited.map(
+      (parameter) => overrides.get(identity(parameter)) ?? parameter,
+    ),
+    ...declared.filter((parameter) => !inheritedIds.has(identity(parameter))),
+  ];
 }
 
 export function parseSpec(input: OpenAPIDocument | string): OpenAPIDocument {
@@ -279,15 +307,28 @@ function removeInternalNodes(
   return filtered;
 }
 
-function swaggerSchema(parameter: Parameter) {
-  return (
-    parameter.schema ?? {
-      type: parameter.type,
-      format: parameter.format,
-      items: parameter.items,
-      enum: parameter.enum,
-    }
+/**
+ * Rebuilds a schema from Swagger 2 parameter typing. OpenAPI 3 parameters already carry a
+ * schema or a `content` map, so they must be left alone rather than given an empty stand-in.
+ */
+function swaggerSchema(parameter: Parameter): Schema | undefined {
+  if (parameter.schema) return parameter.schema;
+  const swaggerTyping = Object.fromEntries(
+    (
+      [
+        ['type', parameter.type],
+        ['format', parameter.format],
+        ['items', parameter.items],
+        ['enum', parameter.enum],
+      ] as const
+    ).filter(([, value]) => value !== undefined),
   );
+  return Object.keys(swaggerTyping).length > 0 ? swaggerTyping : undefined;
+}
+
+function withSwaggerSchema(parameter: Parameter): Parameter {
+  const schema = swaggerSchema(parameter);
+  return schema ? { ...parameter, schema } : parameter;
 }
 
 function normalizeSwaggerOperation(
@@ -302,7 +343,7 @@ function normalizeSwaggerOperation(
     .filter(
       (parameter) => parameter.in !== 'body' && parameter.in !== 'formData',
     )
-    .map((parameter) => ({ ...parameter, schema: swaggerSchema(parameter) }));
+    .map(withSwaggerSchema);
   const consumes = operation.consumes ??
     document.consumes ?? ['application/json'];
   let requestBody = operation.requestBody;
@@ -313,7 +354,7 @@ function normalizeSwaggerOperation(
       content: Object.fromEntries(
         consumes.map((mediaType) => [
           mediaType,
-          { schema: swaggerSchema(body) },
+          { schema: swaggerSchema(body) ?? {} },
         ]),
       ),
     };
@@ -334,7 +375,7 @@ function normalizeSwaggerOperation(
                   .filter((parameter) => parameter.name)
                   .map((parameter) => [
                     parameter.name as string,
-                    swaggerSchema(parameter),
+                    swaggerSchema(parameter) ?? {},
                   ]),
               ),
             },
@@ -389,10 +430,13 @@ export function normalizeDocument(document: OpenAPIDocument): OpenAPIDocument {
   const paths = Object.fromEntries(
     Object.entries(document.paths ?? {}).map(([path, pathItem]) => {
       const normalized: PathItem = { ...pathItem };
-      normalized.parameters = (pathItem.parameters ?? []).map((parameter) => ({
-        ...parameter,
-        schema: swaggerSchema(parameter),
-      }));
+      if (pathItem.parameters)
+        normalized.parameters = pathItem.parameters
+          .filter(
+            (parameter) =>
+              parameter.in !== 'body' && parameter.in !== 'formData',
+          )
+          .map(withSwaggerSchema);
       for (const method of HTTP_METHODS) {
         if (pathItem[method])
           normalized[method] = normalizeSwaggerOperation(
@@ -451,7 +495,7 @@ export function createReferenceModel(
 
   for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
     for (const [method, operation] of operationsInDeclarationOrder(pathItem)) {
-      const tag = operation.tags?.[0] ?? 'Other';
+      const tags = operation.tags?.length ? operation.tags : ['Other'];
       const baseId =
         slugify(operation.operationId ?? `${method}-${path}`) || 'operation';
       const count = usedIds.get(baseId) ?? 0;
@@ -462,7 +506,8 @@ export function createReferenceModel(
         path,
         operation,
         pathItem,
-        tag,
+        tag: tags[0]!,
+        tags,
         source: 'path',
       });
     }
@@ -474,13 +519,15 @@ export function createReferenceModel(
       const baseId =
         slugify(`webhook-${operation.operationId ?? `${method}-${path}`}`) ||
         'webhook';
+      const tags = operation.tags?.length ? operation.tags : ['Other webhooks'];
       webhooks.push({
         id: baseId,
         method,
         path,
         operation,
         pathItem,
-        tag: operation.tags?.[0] ?? 'Other webhooks',
+        tag: tags[0]!,
+        tags,
         source: 'webhook',
       });
     }
@@ -489,7 +536,7 @@ export function createReferenceModel(
   const taggedOperations = [...operations, ...webhooks];
   const tagNames = [
     ...declaredTags.keys(),
-    ...taggedOperations.map((operation) => operation.tag),
+    ...taggedOperations.flatMap((operation) => operation.tags),
   ].filter((name, index, all) => all.indexOf(name) === index);
 
   const tags: TagModel[] = tagNames
@@ -502,8 +549,8 @@ export function createReferenceModel(
         longDescription: declaredTag?.['x-longDescription'],
         externalDocs: declaredTag?.externalDocs,
         icon: icon?.url ? { url: icon.url, alt: icon.alt } : undefined,
-        operations: taggedOperations.filter(
-          (operation) => operation.tag === name,
+        operations: taggedOperations.filter((operation) =>
+          operation.tags.includes(name),
         ),
       };
     })

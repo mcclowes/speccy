@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createReferenceModel, parseSpec, slugify } from './model';
-import type { SchemaObject } from './types';
+import {
+  createReferenceModel,
+  effectiveParameters,
+  parseSpec,
+  slugify,
+} from './model';
+import type { PathItem, SchemaObject } from './types';
 
 describe('parseSpec', () => {
   it('parses YAML and JSON input', () => {
@@ -737,6 +742,121 @@ paths:
       },
     ]);
     expect(model.webhooks).toHaveLength(2);
+  });
+
+  it('lists an operation under every tag it declares', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      tags: [{ name: 'Pets' }, { name: 'Search' }],
+      paths: {
+        '/pets': {
+          get: { operationId: 'listPets', tags: ['Pets', 'Search'] },
+        },
+      },
+    });
+
+    expect(model.tags.map((tag) => tag.name)).toEqual(['Pets', 'Search']);
+    expect(model.tags.every((tag) => tag.operations.length === 1)).toBe(true);
+    expect(model.operations).toHaveLength(1);
+  });
+});
+
+describe('effectiveParameters', () => {
+  it('lets an operation parameter override the path parameter it repeats', () => {
+    const pathItem: PathItem = {
+      parameters: [
+        { name: 'shared', in: 'query', description: 'path level' },
+        { name: 'kept', in: 'query' },
+      ],
+      get: {
+        parameters: [
+          { name: 'shared', in: 'query', description: 'operation level' },
+        ],
+      },
+    };
+
+    expect(effectiveParameters(pathItem, pathItem.get!)).toEqual([
+      { name: 'shared', in: 'query', description: 'operation level' },
+      { name: 'kept', in: 'query' },
+    ]);
+  });
+
+  it('keeps same-named parameters that sit in different locations', () => {
+    const pathItem: PathItem = {
+      parameters: [{ name: 'id', in: 'path' }],
+      get: { parameters: [{ name: 'id', in: 'query' }] },
+    };
+
+    expect(effectiveParameters(pathItem, pathItem.get!)).toHaveLength(2);
+  });
+});
+
+describe('parameter content', () => {
+  it('leaves a content-typed parameter without a fabricated schema', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/things': {
+          get: {
+            operationId: 'listThings',
+            parameters: [
+              {
+                name: 'filter',
+                in: 'query',
+                content: {
+                  'application/json': { schema: { type: 'object' } },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const parameter = model.operations[0]?.operation.parameters?.[0];
+    expect(parameter?.schema).toBeUndefined();
+    expect(parameter?.content?.['application/json']?.schema).toEqual({
+      type: 'object',
+    });
+  });
+
+  it('leaves an untyped OpenAPI 3 parameter without a fabricated schema', () => {
+    const model = createReferenceModel({
+      openapi: '3.1.0',
+      paths: {
+        '/things': {
+          get: {
+            operationId: 'listThings',
+            parameters: [{ name: 'anything', in: 'query' }],
+          },
+        },
+      },
+    });
+
+    expect(
+      model.operations[0]?.operation.parameters?.[0]?.schema,
+    ).toBeUndefined();
+  });
+
+  it('still derives a schema from Swagger 2 parameter typing', () => {
+    const model = createReferenceModel({
+      swagger: '2.0',
+      paths: {
+        '/things': {
+          get: {
+            operationId: 'listThings',
+            parameters: [
+              { name: 'limit', in: 'query', type: 'integer', format: 'int32' },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(model.operations[0]?.operation.parameters?.[0]?.schema).toEqual({
+      type: 'integer',
+      format: 'int32',
+    });
   });
 });
 

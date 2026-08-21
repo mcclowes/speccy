@@ -47,6 +47,15 @@ describe('referenceMetadata', () => {
     });
   });
 
+  it('describes the webhooks section as delivered events', () => {
+    expect(
+      referenceMetadata(spec, { page: 'reference', section: 'webhooks' }),
+    ).toEqual({
+      title: 'Webhooks | Payments API',
+      description: 'Webhook events Payments API delivers.',
+    });
+  });
+
   it('describes reusable component sections', () => {
     expect(
       referenceMetadata(spec, {

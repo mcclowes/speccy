@@ -76,6 +76,15 @@
   color: var(--sp-accent);
 }
 
+.url {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
+  font-weight: 400;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .urlOption {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

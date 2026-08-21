@@ -2006,6 +2006,28 @@ related:
   color: var(--sp-muted);
   font-size: 0.5625rem;
 }
+.sp-endpoint-path-summary {
+  margin: 8px 0 0;
+  color: var(--sp-muted);
+  font-size: 0.8125rem;
+}
+.sp-resource-serialization,
+.sp-resource-summary {
+  margin: 6px 0;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+}
+.sp-resource-examples {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.sp-resource-examples strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--sp-text);
+  font-size: 0.6875rem;
+}
 .sp-resource-details > .sp-markdown,
 .sp-schema-description,
 .sp-schema-meta {
@@ -2202,6 +2224,15 @@ related:
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+.sp-schema-discriminator,
+.sp-schema-discriminator-value {
+  margin: 6px 0 0 4px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+}
+.sp-schema-discriminator-value {
+  margin-bottom: -4px;
 }
 .sp-type {
   color: var(--sp-muted);

@@ -25,15 +25,52 @@ export interface ExplorerConstraint {
 
 export type EnumValue = NonNullable<SchemaObject['enum']>[number];
 
+function constTypeName(value: unknown): string | undefined {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  const primitive = typeof value;
+  return primitive === 'object' ? 'object' : primitive;
+}
+
+/**
+ * JSON Schema leaves `type` optional, so the label falls back to whatever the schema's other
+ * keywords imply and only says `any` when nothing constrains the value at all.
+ */
+/** Reports the type shared by every member of a composition, so `oneOf` still reads as one type. */
+function composedTypeName(members: Schema[]): string | undefined {
+  const names = members.map((member) =>
+    typeof member === 'object' ? declaredTypeName(member) : undefined,
+  );
+  const [first] = names;
+  return first && names.every((name) => name === first) ? first : undefined;
+}
+
+function declaredTypeName(schema: SchemaObject): string | undefined {
+  if (Array.isArray(schema.type)) return schema.type.join(' | ');
+  if (schema.type) return schema.type;
+  if (schema.const !== undefined) return constTypeName(schema.const);
+  if (
+    schema.properties ||
+    schema.required ||
+    schema.additionalProperties !== undefined ||
+    schema.patternProperties ||
+    schema.propertyNames !== undefined
+  )
+    return 'object';
+  if (schema.items !== undefined || schema.prefixItems) return 'array';
+  const members = schema.oneOf ?? schema.anyOf ?? schema.allOf;
+  return members ? composedTypeName(members) : undefined;
+}
+
 export function schemaTypeLabel(schema?: Schema): string {
   if (schema === undefined || schema === true) return 'any';
   if (schema === false) return 'never';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  return schema.type === 'array'
-    ? `array<${schemaTypeLabel(schema.items)}>`
-    : schema.enum
-      ? 'enum'
-      : [schema.type ?? 'object', schema.format].filter(Boolean).join(' · ');
+  const declaredType = declaredTypeName(schema);
+  if (declaredType === 'array')
+    return `array<${schemaLabel(schema.items ?? true)}>`;
+  if (schema.enum) return 'enum';
+  return [declaredType ?? 'any', schema.format].filter(Boolean).join(' · ');
 }
 
 export function schemaLabel(schema?: Schema): string {
@@ -43,6 +80,40 @@ export function schemaLabel(schema?: Schema): string {
   ]
     .filter(Boolean)
     .join(' · ');
+}
+
+export interface DiscriminatorModel {
+  propertyName?: string;
+  /** Maps each alternative's index onto the discriminator value that selects it. */
+  valueFor: (alternative: Schema, index: number) => string | undefined;
+}
+
+/**
+ * Mapping targets are `$ref` strings before resolution and inlined schemas after it, so the
+ * mapped value is matched back to an alternative by the schema name the resolver preserves.
+ */
+export function discriminatorModel(
+  schema: SchemaObject,
+): DiscriminatorModel | undefined {
+  const { discriminator } = schema;
+  if (!discriminator) return undefined;
+  if (typeof discriminator === 'string')
+    return { propertyName: discriminator, valueFor: () => undefined };
+
+  const mapping = Object.entries(discriminator.mapping ?? {});
+  return {
+    propertyName: discriminator.propertyName,
+    valueFor: (alternative) => {
+      const name =
+        typeof alternative === 'object'
+          ? (alternative.title ?? alternative.$ref?.split('/').pop())
+          : undefined;
+      if (!name) return undefined;
+      return mapping.find(
+        ([, target]) => target === name || target.split('/').pop() === name,
+      )?.[0];
+    },
+  };
 }
 
 export function alternativeName(schema: Schema, index: number): string {
@@ -86,8 +157,8 @@ export function structuralObjectSchema(schema: Schema): SchemaObject {
 }
 
 /** Unwraps one more level so an array-of-array field still exposes its leaf properties. */
-function childProperties(schema: SchemaObject): Record<string, Schema> {
-  return structuralObjectSchema(schema).properties ?? {};
+function childProperties(schema: SchemaObject): SchemaObject {
+  return structuralObjectSchema(schema);
 }
 
 function propertyExample(value: unknown, name: string): unknown {
@@ -96,17 +167,52 @@ function propertyExample(value: unknown, name: string): unknown {
   return (value as Record<string, unknown>)[name];
 }
 
-export function fieldChildren(field: ExplorerField): ExplorerField[] {
-  const structuralSchema = structuralObjectSchema(field.schema);
-  const required = structuralSchema.required;
-  return Object.entries(childProperties(structuralSchema)).map(
-    ([name, schema]) => ({
+/**
+ * Declared properties come first, then the open-ended shapes — pattern and additional
+ * properties — so a map-shaped schema is never reported as having no fields.
+ */
+function schemaFields(
+  schema: SchemaObject,
+  basePath: string[],
+  sample: unknown,
+): ExplorerField[] {
+  const declared = Object.entries(schema.properties ?? {}).map(
+    ([name, property]) => ({
       name,
-      schema,
-      required: required?.includes(name) ?? false,
-      path: [...field.path, name],
-      exampleValue: propertyExample(field.exampleValue, name),
+      schema: property,
+      required: schema.required?.includes(name) ?? false,
+      path: [...basePath, name],
+      exampleValue: propertyExample(sample, name),
     }),
+  );
+  const patterned = Object.entries(schema.patternProperties ?? {}).map(
+    ([pattern, property]) => ({
+      name: pattern,
+      schema: property,
+      required: false,
+      path: [...basePath, pattern],
+    }),
+  );
+  const additional =
+    typeof schema.additionalProperties === 'object' &&
+    !schema.properties?.additionalProperties
+      ? [
+          {
+            name: 'additionalProperties',
+            schema: schema.additionalProperties,
+            required: false,
+            path: [...basePath, 'additionalProperties'],
+          },
+        ]
+      : [];
+  return [...declared, ...patterned, ...additional];
+}
+
+export function fieldChildren(field: ExplorerField): ExplorerField[] {
+  return schemaFields(
+    childProperties(structuralObjectSchema(field.schema)),
+    field.path,
+    field.exampleValue,
   );
 }
 
@@ -116,14 +222,30 @@ export function rootFields(
   exampleValue: unknown,
 ): ExplorerField[] {
   const sample = Array.isArray(exampleValue) ? exampleValue[0] : exampleValue;
-  return Object.entries(structuralSchema.properties ?? {}).map(
-    ([name, schema]) => ({
-      name,
-      schema,
-      required: structuralSchema.required?.includes(name) ?? false,
-      path: [name],
-      exampleValue: propertyExample(sample, name),
-    }),
+  return schemaFields(structuralSchema, [], sample);
+}
+
+/**
+ * Keywords the explorer's field tree cannot express. Schemas using them fall back to the
+ * recursive schema view so nothing is dropped from the rendered reference.
+ */
+const EXPLORER_BLIND_KEYWORDS = [
+  '$defs',
+  'contains',
+  'dependentSchemas',
+  'else',
+  'if',
+  'not',
+  'prefixItems',
+  'propertyNames',
+  'then',
+  'unevaluatedItems',
+  'unevaluatedProperties',
+] as const;
+
+export function unsupportedByExplorer(schema: SchemaObject): boolean {
+  return EXPLORER_BLIND_KEYWORDS.some(
+    (keyword) => schema[keyword] !== undefined,
   );
 }
 
@@ -143,6 +265,7 @@ export function findExplorerField(
 
 export function enumValues(schema: SchemaObject): EnumValue[] | undefined {
   if (schema.enum) return schema.enum;
+  if (schema.const !== undefined) return [schema.const];
   return schema.type === 'array' && typeof schema.items === 'object'
     ? schema.items.enum
     : undefined;
@@ -174,5 +297,8 @@ export function schemaConstraints(schema: SchemaObject): ExplorerConstraint[] {
       : []),
     ...lengthConstraints(schema),
     ...(schema.pattern ? [{ label: 'Pattern', value: schema.pattern }] : []),
+    ...(schema.additionalProperties === false
+      ? [{ label: 'Properties', value: 'No other properties are allowed' }]
+      : []),
   ];
 }

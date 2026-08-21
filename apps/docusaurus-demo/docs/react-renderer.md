@@ -37,6 +37,10 @@ The renderer fills its parent. Give the surrounding layout enough height for the
 
 Object schemas use a field explorer. Selecting a field opens its description, constraints, examples, and accepted `oneOf` or `anyOf` shapes. Expand an accepted shape to inspect its fields without leaving the parent schema.
 
+A schema that accepts several shapes lists them at its root too, so a polymorphic request or response body never presents one branch as the whole contract. When a `discriminator` is present, the explorer names the property that selects the shape and labels each shape with the mapped value that chooses it. Open-ended objects show their `patternProperties` and `additionalProperties` beside the declared ones, and a closed object says so. Schemas that use conditional keywords — `if`, `then`, `else`, `not`, `$defs`, `prefixItems`, `contains`, `propertyNames`, `dependentSchemas`, or the `unevaluated*` pair — render as a nested schema tree instead of the explorer, which keeps every keyword visible.
+
+Operation parameters replace the path-level parameters they repeat, matching the OpenAPI rule that a path parameter can be overridden but not removed. An operation listed under several tags appears under each of them.
+
 Use the [operation components](./operation-components.mdx) when a guide or tutorial needs to link readers to individual endpoints without embedding the full reference.
 
 ## Loading a document
@@ -66,9 +70,14 @@ Speccy uses the browser history API and creates routes beneath `basePath`:
 /api/list-books          Operation, from the slugified operationId
 /api/tags/books          Tag overview
 /api/reference/schemas   Reusable schemas section
+/api/reference/webhooks  Every webhook in one list
 ```
 
 Operation URLs use the slugified `operationId` (or an ID derived from the method and path). Individual reusable components are anchors within their section page rather than routes of their own.
+
+## Webhooks
+
+Webhooks declared under the document's top-level `webhooks` key appear in the sidebar under their tag, alongside the operations that share it, and untagged webhooks group under **Other webhooks**. They also get a page of their own at `/reference/webhooks`, listing every webhook the API delivers in one place. The page and its sidebar entry only appear when the spec declares webhooks.
 
 Configure your host to serve the React application for these routes. Static hosts usually call this an SPA fallback or rewrite.
 

@@ -21,6 +21,7 @@ import {
 import {
   analyzeOpenApi,
   createReferenceModel,
+  effectiveParameters,
   expandServerUrl,
   operationsInDeclarationOrder,
   parseSpec,
@@ -268,10 +269,7 @@ function EndpointPage({
     null,
   );
   const compactLayout = useCompactEndpointLayout(endpointElement);
-  const parameters = [
-    ...(item.pathItem.parameters ?? []),
-    ...(item.operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(item.pathItem, item.operation);
   const requirements = item.operation.security ?? document.security;
   const isWebhook = item.source === 'webhook';
   const servers = effectiveServers(item, document);
@@ -311,6 +309,10 @@ function EndpointPage({
             <ApiPath value={item.path} wrap />
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
+          {item.pathItem.summary && (
+            <p className="sp-endpoint-path-summary">{item.pathItem.summary}</p>
+          )}
+          <Markdown>{item.pathItem.description}</Markdown>
           <Markdown>{item.operation.description}</Markdown>
           {item.operation.externalDocs?.url && (
             <a href={item.operation.externalDocs.url}>
@@ -494,10 +496,7 @@ function OperationCard({
   context?: 'operation' | 'callback';
 }) {
   const [open, setOpen] = useState(defaultExpanded);
-  const parameters = [
-    ...(item.pathItem.parameters ?? []),
-    ...(item.operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(item.pathItem, item.operation);
   const scopedServer =
     item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
   const effectiveServer = scopedServer?.url
@@ -609,6 +608,7 @@ function CallbackList({
                           operation,
                           pathItem,
                           tag: 'Callbacks',
+                          tags: ['Callbacks'],
                           source: 'webhook',
                         };
                         return (
@@ -947,6 +947,53 @@ function TagOverview({
   );
 }
 
+function WebhookReference({
+  webhooks,
+  diagnostics = [],
+  onViewAllDiagnostics,
+  onNavigate,
+  hrefForRoute,
+}: {
+  webhooks: OperationModel[];
+  diagnostics?: ReturnType<typeof analyzeOpenApi>;
+  onViewAllDiagnostics: () => void;
+  onNavigate: (operationId: string) => void;
+  hrefForRoute: (route: SpeccyRoute) => string;
+}) {
+  return (
+    <section className="sp-tag sp-reference-section" id="reference-webhooks">
+      <div className="sp-tag-heading">
+        <div>
+          <span className="sp-tag-kicker">Reference</span>
+          <h2>Webhooks</h2>
+        </div>
+        <Markdown>
+          Events this API delivers to a URL you register, rather than requests
+          you send.
+        </Markdown>
+      </div>
+      <InlineDiagnostics
+        diagnostics={diagnostics}
+        onViewAll={onViewAllDiagnostics}
+      />
+      {webhooks.length === 0 ? (
+        <div className="sp-empty">This spec doesn’t define any webhooks.</div>
+      ) : (
+        <div className="sp-operation-list">
+          {webhooks.map((item) => (
+            <OperationLink
+              item={item}
+              onNavigate={onNavigate}
+              hrefForRoute={hrefForRoute}
+              key={item.id}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ErrorState({ error }: { error: Error }) {
   return (
     <div className="sp-error" role="alert">
@@ -1139,13 +1186,15 @@ export function Speccy({
       )
     : activeTag
       ? diagnostics.filter((diagnostic) => diagnostic.tag === activeTag.name)
-      : activeReference
-        ? diagnostics.filter(
-            (diagnostic) =>
-              diagnostic.path[0] === 'components' &&
-              diagnostic.path[1] === activeReference,
-          )
-        : undefined;
+      : activeReference === 'webhooks'
+        ? diagnostics.filter((diagnostic) => diagnostic.path[0] === 'webhooks')
+        : activeReference
+          ? diagnostics.filter(
+              (diagnostic) =>
+                diagnostic.path[0] === 'components' &&
+                diagnostic.path[1] === activeReference,
+            )
+          : undefined;
   const normalizedFilter = filterQuery.trim().toLowerCase();
   const matchesFilter = (item: OperationModel) =>
     !normalizedFilter ||
@@ -1256,6 +1305,18 @@ export function Speccy({
       terms: ['api overview', model.document.info?.title ?? ''],
       navigate: () => navigate(),
     },
+    ...(model.webhooks.length > 0
+      ? [
+          {
+            id: 'reference-webhooks',
+            group: 'Pages' as const,
+            label: 'Webhooks',
+            detail: `${model.webhooks.length} event${model.webhooks.length === 1 ? '' : 's'}`,
+            terms: ['webhooks', 'events'],
+            navigate: () => navigateReference('webhooks'),
+          },
+        ]
+      : []),
     ...model.tags.map((tag) => ({
       id: `tag-${tagSlug(tag)}`,
       group: 'Tags' as const,
@@ -1704,10 +1765,20 @@ export function Speccy({
             >
               ← API overview
             </button>
-            <DocumentReference
-              activeKey={activeReference}
-              document={model.document}
-            />
+            {activeReference === 'webhooks' ? (
+              <WebhookReference
+                webhooks={model.webhooks}
+                diagnostics={currentPageDiagnostics}
+                onViewAllDiagnostics={viewAllDiagnostics}
+                onNavigate={navigate}
+                hrefForRoute={hrefForRoute}
+              />
+            ) : (
+              <DocumentReference
+                activeKey={activeReference}
+                document={model.document}
+              />
+            )}
           </section>
         )}
       </main>

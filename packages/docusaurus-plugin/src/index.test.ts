@@ -1,9 +1,10 @@
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   default as speccyPlugin,
+  devSpecDir,
   loadSpec,
   normalizeRoute,
   operationCatalog,
@@ -12,6 +13,10 @@ import {
   referenceRoutes,
   writePublicSpec,
 } from './index';
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe('normalizeRoute', () => {
   it('adds a leading slash and strips trailing slashes', () => {
@@ -51,16 +56,73 @@ describe('public OpenAPI description', () => {
     await expect(readFile(path, 'utf8')).resolves.toBe(source);
   });
 
+  it('serves the description from the dev server, where postBuild never runs', async () => {
+    const siteDir = await mkdtemp(join(tmpdir(), 'speccy-site-'));
+    const generatedFilesDir = await mkdtemp(
+      join(tmpdir(), 'speccy-generated-'),
+    );
+    await writeFile(join(siteDir, 'openapi.yaml'), 'openapi: 3.1.0\n');
+    const plugin = speccyPlugin(
+      { siteDir, generatedFilesDir, baseUrl: '/docs/' } as never,
+      {
+        id: 'backoffice',
+        route: '/api/backoffice',
+        spec: 'openapi.yaml',
+        renderer: { showDeveloperHints: false },
+      },
+    );
+
+    await plugin.loadContent?.();
+    const directory = devSpecDir(generatedFilesDir, 'backoffice');
+
+    await expect(
+      readFile(join(directory, 'openapi.yaml'), 'utf8'),
+    ).resolves.toBe('openapi: 3.1.0\n');
+    expect(
+      plugin.configureWebpack?.({}, false, {} as never, {} as never),
+    ).toEqual({
+      devServer: {
+        static: [{ publicPath: '/docs/api/backoffice', directory }],
+      },
+    });
+  });
+
+  it('leaves the dev copy out of production builds', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const siteDir = await mkdtemp(join(tmpdir(), 'speccy-site-'));
+    const generatedFilesDir = await mkdtemp(
+      join(tmpdir(), 'speccy-generated-'),
+    );
+    await writeFile(join(siteDir, 'openapi.yaml'), 'openapi: 3.1.0\n');
+    const plugin = speccyPlugin(
+      { siteDir, generatedFilesDir, baseUrl: '/' } as never,
+      { spec: 'openapi.yaml' },
+    );
+
+    await plugin.loadContent?.();
+
+    expect(
+      plugin.configureWebpack?.({}, false, {} as never, {} as never),
+    ).toEqual({});
+    await expect(
+      readFile(join(devSpecDir(generatedFilesDir, 'default'), 'openapi.yaml')),
+    ).rejects.toThrow('ENOENT');
+  });
+
   it('links JSON references to the emitted JSON file', async () => {
     const siteDir = await mkdtemp(join(tmpdir(), 'speccy-site-'));
     await writeFile(
       join(siteDir, 'openapi.json'),
       '{"openapi":"3.1.0","info":{"title":"Test API"},"paths":{}}',
     );
-    const plugin = speccyPlugin({ siteDir, baseUrl: '/docs/' } as never, {
-      spec: 'openapi.json',
-      renderer: { showDeveloperHints: false },
-    });
+    const plugin = speccyPlugin(
+      {
+        siteDir,
+        generatedFilesDir: await mkdtemp(join(tmpdir(), 'speccy-generated-')),
+        baseUrl: '/docs/',
+      } as never,
+      { spec: 'openapi.json', renderer: { showDeveloperHints: false } },
+    );
 
     await expect(plugin.loadContent?.()).resolves.toMatchObject({
       renderer: { openApiUrl: '/docs/api/openapi.json' },
@@ -127,6 +189,33 @@ describe('referenceRoutes', () => {
         },
       ]),
     );
+  });
+
+  it('creates a webhooks reference route only when the spec declares webhooks', () => {
+    const withoutWebhooks = referenceRoutes(
+      { openapi: '3.1.0', info: { title: 'Test API' }, paths: {} },
+      '/api',
+    );
+    expect(withoutWebhooks).not.toContainEqual({
+      path: '/api/reference/webhooks',
+      route: { page: 'reference', section: 'webhooks' },
+    });
+
+    const withWebhooks = referenceRoutes(
+      {
+        openapi: '3.1.0',
+        info: { title: 'Test API' },
+        paths: {},
+        webhooks: {
+          'book.indexed': { post: { operationId: 'bookIndexed' } },
+        },
+      },
+      '/api',
+    );
+    expect(withWebhooks).toContainEqual({
+      path: '/api/reference/webhooks',
+      route: { page: 'reference', section: 'webhooks' },
+    });
   });
 
   it('rejects generated route collisions', () => {

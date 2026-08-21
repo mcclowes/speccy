@@ -21,6 +21,7 @@ export type { OpenApiDocumentLoader } from './externalRefs';
 export {
   HTTP_METHODS,
   createReferenceModel,
+  effectiveParameters,
   expandServerUrl,
   normalizeDocument,
   operationsInDeclarationOrder,

@@ -736,4 +736,258 @@ describe('SchemaView composition', () => {
       screen.getByRole('button', { name: 'values array<any>' }),
     ).toBeVisible();
   });
+
+  it('shows every accepted shape for a root oneOf instead of only the first', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            {
+              title: 'CardPayment',
+              type: 'object',
+              properties: { pan: { type: 'string' } },
+            },
+            {
+              title: 'BankPayment',
+              type: 'object',
+              properties: { iban: { type: 'string' } },
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Card Payment')).toBeVisible();
+    expect(screen.getByText('Bank Payment')).toBeVisible();
+  });
+
+  it('reaches XML and external documentation on a field that has nothing else', () => {
+    render(
+      <SchemaView
+        collapseObjects
+        schema={{
+          type: 'object',
+          properties: {
+            tagged: {
+              type: 'string',
+              xml: { name: 'TaggedXml', attribute: true },
+              externalDocs: {
+                url: 'https://example.com/field',
+                description: 'Field guide',
+              },
+            },
+          },
+          xml: { name: 'Root' },
+        }}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /details for tagged/i }),
+    );
+
+    expect(screen.getByText(/TaggedXml/)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Field guide' })).toHaveAttribute(
+      'href',
+      'https://example.com/field',
+    );
+  });
+
+  it('names the discriminator property and its mapped values', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            {
+              title: 'Cat',
+              type: 'object',
+              properties: { kind: { const: 'cat' } },
+            },
+            {
+              title: 'Dog',
+              type: 'object',
+              properties: { kind: { const: 'dog' } },
+            },
+          ],
+          discriminator: {
+            propertyName: 'kind',
+            mapping: {
+              feline: '#/components/schemas/Cat',
+              canine: '#/components/schemas/Dog',
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Selected by/)).toBeVisible();
+    expect(screen.getByText('feline')).toBeVisible();
+    expect(screen.getByText('canine')).toBeVisible();
+  });
+
+  it('names the discriminator property in the explorer', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          oneOf: [
+            {
+              title: 'Cat',
+              type: 'object',
+              properties: { kind: { const: 'cat' } },
+            },
+            {
+              title: 'Dog',
+              type: 'object',
+              properties: { kind: { const: 'dog' } },
+            },
+          ],
+          discriminator: { propertyName: 'kind' },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Selected by/)).toHaveTextContent('kind');
+  });
+
+  it('keeps root alternatives visible alongside shared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          oneOf: [
+            { title: 'Alpha', properties: { alpha: { type: 'string' } } },
+            { title: 'Beta', properties: { beta: { type: 'string' } } },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Alpha')).toBeVisible();
+    expect(screen.getByText('Beta')).toBeVisible();
+  });
+
+  it('does not invent fields from a generated example when the schema is composed', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            { title: 'Alpha', properties: { alpha: { type: 'string' } } },
+            { title: 'Beta', properties: { beta: { type: 'string' } } },
+          ],
+        }}
+        exampleValue={{ alpha: 'only from the first branch' }}
+      />,
+    );
+
+    expect(screen.getByText('Beta')).toBeVisible();
+  });
+
+  it('shows additional properties beside declared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          additionalProperties: { type: 'number' },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /additionalProperties number/ }),
+    ).toBeVisible();
+  });
+
+  it('reports a closed object', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          additionalProperties: false,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/No other properties/i)).toBeVisible();
+  });
+
+  it('shows pattern properties beside declared properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          patternProperties: { '^x-': { type: 'string' } },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /\^x- string/ })).toBeVisible();
+  });
+
+  it('keeps conditional applicators visible on a schema that also has properties', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          if: { required: ['id'] },
+          then: { required: ['name'] },
+          not: { type: 'null' },
+          unevaluatedProperties: false,
+        }}
+      />,
+    );
+
+    for (const label of ['If', 'Then', 'Not', 'Unevaluated properties'])
+      expect(screen.getByText(label)).toBeVisible();
+  });
+
+  it('types a const field from its literal instead of calling it an object', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            kind: { const: 'cat' },
+            legs: { const: 4 },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'kind string' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'legs number' })).toBeVisible();
+  });
+
+  it('labels a schema with no type information as any', () => {
+    render(
+      <SchemaView schema={{ format: 'date-time', description: 'A moment.' }} />,
+    );
+
+    expect(screen.getByText('any · date-time')).toBeVisible();
+  });
+
+  it('still infers object and array from structural keywords', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: {
+            nested: { properties: { a: { type: 'string' } } },
+            list: { items: { type: 'string' } },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'nested object' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'list array<string>' }),
+    ).toBeVisible();
+  });
 });

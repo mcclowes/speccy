@@ -8,6 +8,7 @@
  */
 
 import {
+  effectiveParameters,
   parseSpec,
   resolveRefs,
   type MediaType,
@@ -100,10 +101,7 @@ export function deriveOperationPreviewDataFromOperation(
 ): OperationPreviewData {
   if (!operation || typeof operation !== 'object') return { request: {} };
 
-  const parameters = [
-    ...(pathItem?.parameters ?? []),
-    ...(operation.parameters ?? []),
-  ];
+  const parameters = effectiveParameters(pathItem, operation);
   const valuesFor = (location: string) =>
     Object.fromEntries(
       parameters

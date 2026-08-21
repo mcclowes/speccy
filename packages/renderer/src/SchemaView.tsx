@@ -13,24 +13,14 @@ import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
-import { structuralObjectSchema } from './schemaExplorerModel';
+import {
+  discriminatorModel,
+  rootFields,
+  schemaLabel,
+  structuralObjectSchema,
+  unsupportedByExplorer,
+} from './schemaExplorerModel';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
-
-function schemaLabel(schema?: Schema): string {
-  if (schema === undefined || schema === true) return 'any';
-  if (schema === false) return 'never';
-  if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
-  const declaredType = Array.isArray(schema.type)
-    ? schema.type.join(' | ')
-    : schema.type;
-  const type =
-    declaredType === 'array'
-      ? `array<${schemaLabel(schema.items)}>`
-      : schema.enum
-        ? 'enum'
-        : [declaredType ?? 'object', schema.format].filter(Boolean).join(' · ');
-  return [schema.title, type].filter(Boolean).join(' · ');
-}
 
 function alternativeName(schema: Schema, index: number): string {
   if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';
@@ -147,8 +137,15 @@ export function SchemaView({
     !Array.isArray(exampleValue)
       ? schemaFromExample(exampleValue)
       : undefined;
+  // An example only stands in for a schema that describes no shape of its own; borrowing its
+  // keys for a composed schema would present one branch as if it were the whole contract.
   const schemaWithExampleFields =
-    Object.keys(explorerSchema.properties ?? {}).length === 0 && exampleSchema
+    Object.keys(explorerSchema.properties ?? {}).length === 0 &&
+    exampleSchema &&
+    !explorerSchema.oneOf &&
+    !explorerSchema.anyOf &&
+    explorerSchema.additionalProperties === undefined &&
+    !explorerSchema.patternProperties
       ? { ...schema, properties: exampleSchema.properties }
       : schema;
   const displayExplorerSchema = structuralObjectSchema(schemaWithExampleFields);
@@ -158,7 +155,8 @@ export function SchemaView({
     !summaryOnly &&
     !schema.xml &&
     !schema.externalDocs &&
-    Object.keys(displayExplorerSchema.properties ?? {}).length > 0
+    !unsupportedByExplorer(displayExplorerSchema) &&
+    rootFields(displayExplorerSchema, exampleValue).length > 0
   ) {
     return (
       <SchemaExplorer
@@ -171,6 +169,7 @@ export function SchemaView({
   }
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
+  const discriminator = discriminatorModel(schema);
   const isObject =
     schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues =
@@ -220,6 +219,11 @@ export function SchemaView({
       label: 'dependent required',
       value: schema.dependentRequired,
     });
+  if (schema.additionalProperties === false)
+    constraints.push({
+      label: 'additional properties',
+      value: 'not allowed',
+    });
   if (schema.const !== undefined)
     constraints.push({ label: 'const', value: schema.const });
   if (schema.contentEncoding)
@@ -246,6 +250,9 @@ export function SchemaView({
     (schema.description ||
       enumValues ||
       constraints.length > 0 ||
+      schema.xml ||
+      schema.externalDocs?.url ||
+      schema.examples ||
       schema.default !== undefined ||
       (exampleValue !== undefined &&
         (exampleValue === null || typeof exampleValue !== 'object')) ||
@@ -519,21 +526,38 @@ export function SchemaView({
           {alternatives.length > 1 && (
             <div className="sp-schema-alternatives-label">Accepted shapes</div>
           )}
+          {discriminator?.propertyName && (
+            <p className="sp-schema-meta sp-schema-discriminator">
+              Selected by <code>{discriminator.propertyName}</code>
+            </p>
+          )}
           <div className="sp-schema-properties">
-            {alternatives.map((alternative, index) => (
-              <SchemaView
-                key={index}
-                name={
-                  alternatives.length > 1
-                    ? alternativeName(alternative, index)
-                    : undefined
-                }
-                schema={alternative}
-                depth={depth + 1}
-                collapseObjects={collapseObjects}
-                showExample={showExample}
-              />
-            ))}
+            {alternatives.map((alternative, index) => {
+              const discriminatorValue = discriminator?.valueFor(
+                alternative,
+                index,
+              );
+              return (
+                <div key={index} className="sp-schema-alternative">
+                  {discriminatorValue && (
+                    <p className="sp-schema-meta sp-schema-discriminator-value">
+                      <code>{discriminatorValue}</code>
+                    </p>
+                  )}
+                  <SchemaView
+                    name={
+                      alternatives.length > 1
+                        ? alternativeName(alternative, index)
+                        : undefined
+                    }
+                    schema={alternative}
+                    depth={depth + 1}
+                    collapseObjects={collapseObjects}
+                    showExample={showExample}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

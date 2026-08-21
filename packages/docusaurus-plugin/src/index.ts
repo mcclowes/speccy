@@ -115,11 +115,57 @@ export async function writePublicSpec(
   route: string,
   spec: string | OpenAPIDocument,
 ): Promise<string> {
-  const path = resolve(
-    outDir,
-    `.${normalizeRoute(route)}`,
-    publicSpecFilename(spec),
+  return writeSpecFile(resolve(outDir, `.${normalizeRoute(route)}`), spec);
+}
+
+/**
+ * Directory mounted by the dev server so the published description resolves
+ * under `docusaurus start`, where postBuild never runs.
+ */
+export function devSpecDir(
+  generatedFilesDir: string,
+  pluginId: string,
+): string {
+  return resolve(
+    generatedFilesDir,
+    'docusaurus-plugin-speccy',
+    pluginId,
+    'public',
   );
+}
+
+export async function writeDevSpec(
+  generatedFilesDir: string,
+  pluginId: string,
+  spec: string | OpenAPIDocument,
+): Promise<string> {
+  return writeSpecFile(devSpecDir(generatedFilesDir, pluginId), spec);
+}
+
+type WebpackConfigOverride = ReturnType<
+  NonNullable<Plugin['configureWebpack']>
+>;
+
+/**
+ * Mounts a directory on the dev server. `static` is a webpack-dev-server option
+ * the exposed webpack Configuration type does not declare, and webpack-merge
+ * concatenates the array, so this composes with the site's own static
+ * directories instead of replacing them.
+ */
+function devServerStatic(
+  publicPath: string,
+  directory: string,
+): WebpackConfigOverride {
+  return {
+    devServer: { static: [{ publicPath, directory }] },
+  } as WebpackConfigOverride;
+}
+
+async function writeSpecFile(
+  dir: string,
+  spec: string | OpenAPIDocument,
+): Promise<string> {
+  const path = resolve(dir, publicSpecFilename(spec));
   await mkdir(dirname(path), { recursive: true });
   await writeFile(
     path,
@@ -155,6 +201,9 @@ export function referenceRoutes(
       page: 'tag' as const,
       tag: slugifyReferenceName(tag.name) || tag.name,
     })),
+    ...(model.webhooks.length > 0
+      ? [{ page: 'reference' as const, section: 'webhooks' }]
+      : []),
     ...REFERENCE_SECTIONS.filter(
       (section) =>
         Object.keys(model.document.components?.[section] ?? {}).length > 0,
@@ -211,27 +260,34 @@ export default function speccyPlugin(
   context: LoadContext,
   options: SpeccyPluginOptions,
 ): Plugin<SpeccyPluginContent> {
+  const pluginId = options.id ?? 'default';
+  const isDev = process.env.NODE_ENV !== 'production';
   return {
     name: 'docusaurus-plugin-speccy',
     getClientModules() {
       return [require.resolve('speccy-renderer/styles.css')];
+    },
+    configureWebpack() {
+      if (!isDev) return {};
+      return devServerStatic(
+        joinUrlPath(context.baseUrl, normalizeRoute(options.route)),
+        devSpecDir(context.generatedFilesDir, pluginId),
+      );
     },
     async loadContent() {
       const spec = await loadSpec(options, context.siteDir);
       const route = normalizeRoute(options.route);
       const renderer = { ...options.renderer };
       renderer.openApiUrl ??= publicSpecUrl(context.baseUrl, route, spec);
-      if (
-        process.env.NODE_ENV !== 'production' &&
-        renderer.showDeveloperHints !== false
-      ) {
+      if (isDev) await writeDevSpec(context.generatedFilesDir, pluginId, spec);
+      if (isDev && renderer.showDeveloperHints !== false) {
         renderer.spectralDiagnostics = [
           ...(renderer.spectralDiagnostics ?? []),
           ...(await runSpectral(spec)),
         ];
       }
       return {
-        name: options.id ?? 'default',
+        name: pluginId,
         spec,
         route,
         routeGeneration: options.routeGeneration ?? 'static',

@@ -9,6 +9,7 @@
 
 import {
   HTTP_METHODS,
+  effectiveParameters,
   normalizeDocument,
   operationsInDeclarationOrder,
   parseSpec,
@@ -109,7 +110,7 @@ function parametersFor(
   pathItem: PathItem | undefined,
   operation: Operation,
 ): Parameter[] {
-  return [...(pathItem?.parameters ?? []), ...(operation.parameters ?? [])];
+  return effectiveParameters(pathItem, operation);
 }
 
 function parameterKey(parameter: Parameter) {

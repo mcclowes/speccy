@@ -12,9 +12,10 @@
 import { useState } from 'react';
 import type { SchemaObject } from 'speccy-core';
 import { Markdown } from './Markdown';
-import { ExplorerFieldDetails } from './SchemaExplorerDetails';
+import { AcceptedShapes, ExplorerFieldDetails } from './SchemaExplorerDetails';
 import { ExplorerTree } from './SchemaExplorerTree';
 import {
+  discriminatorModel,
   findExplorerField,
   rootFields,
   schemaLabel,
@@ -62,11 +63,13 @@ export function SchemaExplorer({
   const rootName = structuralSchema.title ?? schema.title ?? 'object';
   const rootDescription = schema.description ?? structuralSchema.description;
   const fields = rootFields(structuralSchema, exampleValue);
+  const alternatives = structuralSchema.oneOf ?? structuralSchema.anyOf;
+  const closedObject = structuralSchema.additionalProperties === false;
   const [selectedPath, setSelectedPath] = useState<string[]>([]);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const selected = findExplorerField(fields, selectedPath);
 
-  if (fields.length === 0) return null;
+  if (fields.length === 0 && !alternatives?.length) return null;
 
   const toggle = (path: string) => {
     setExpandedPaths((current) => {
@@ -115,6 +118,17 @@ export function SchemaExplorer({
               onToggle={toggle}
             />
           </div>
+          {closedObject && (
+            <p className={scoped('sp-schema-explorer-closed')}>
+              No other properties are allowed.
+            </p>
+          )}
+          {alternatives && alternatives.length > 0 && (
+            <AcceptedShapes
+              alternatives={alternatives}
+              discriminator={discriminatorModel(structuralSchema)}
+            />
+          )}
         </section>
         {selected && (
           <aside className={scoped('sp-schema-explorer-inspector')}>

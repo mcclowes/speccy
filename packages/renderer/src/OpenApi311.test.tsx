@@ -446,4 +446,340 @@ describe('OpenAPI 3.1.1 conformance', () => {
     expect(screen.getByText('$response.body#/owner')).toBeInTheDocument();
     expect(screen.getByText('https://owners.example.com')).toBeInTheDocument();
   });
+
+  it('describes parameters that carry content instead of a schema', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'parameters' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Content parameters', version: '1.0.0' },
+          components: {
+            parameters: {
+              Filter: {
+                name: 'filter',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: { role: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('application/json')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'role string' })).toBeVisible();
+  });
+
+  it('marks deprecated parameters and states their serialization', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'parameters' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Parameter metadata', version: '1.0.0' },
+          components: {
+            parameters: {
+              Legacy: {
+                name: 'legacy',
+                in: 'query',
+                deprecated: true,
+                style: 'spaceDelimited',
+                explode: false,
+                allowEmptyValue: true,
+                schema: { type: 'array', items: { type: 'string' } },
+                examples: {
+                  pair: { summary: 'A pair', value: ['a', 'b'] },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('deprecated')).toBeVisible();
+    expect(screen.getByText(/spaceDelimited/)).toBeVisible();
+    expect(screen.getByText('A pair')).toBeVisible();
+  });
+
+  it('describes reusable headers beyond their description', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'headers' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Header metadata', version: '1.0.0' },
+          components: {
+            headers: {
+              RateLimit: {
+                description: 'Requests left in the window.',
+                required: true,
+                deprecated: true,
+                schema: { type: 'integer' },
+                example: 99,
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('deprecated')).toBeVisible();
+    expect(screen.getByTitle('Required')).toBeVisible();
+    expect(screen.getByText('99')).toBeVisible();
+  });
+
+  it('summarises reusable examples and links external values', () => {
+    render(
+      <Speccy
+        route={{ page: 'reference', section: 'examples' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Example metadata', version: '1.0.0' },
+          components: {
+            examples: {
+              Remote: {
+                summary: 'A hosted payload',
+                externalValue: 'https://example.com/payload.json',
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('A hosted payload')).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'https://example.com/payload.json' }),
+    ).toHaveAttribute('href', 'https://example.com/payload.json');
+  });
+
+  it('describes response headers declared with content', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'headers' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Response headers', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things': {
+              get: {
+                operationId: 'headers',
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    headers: {
+                      'X-Trace': {
+                        description: 'Structured trace.',
+                        content: {
+                          'application/json': {
+                            schema: {
+                              type: 'object',
+                              properties: { id: { type: 'string' } },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /X-Trace object/ }),
+    ).toBeVisible();
+  });
+
+  it('marks a deprecated parameter and types a content parameter in an operation', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'listthings' }}
+        parameterPrototype={false}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Operation parameters', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things': {
+              get: {
+                operationId: 'listThings',
+                parameters: [
+                  {
+                    name: 'legacy',
+                    in: 'query',
+                    deprecated: true,
+                    schema: { type: 'string' },
+                  },
+                  {
+                    name: 'filter',
+                    in: 'query',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          properties: { role: { type: 'string' } },
+                          example: { role: 'admin' },
+                        },
+                      },
+                    },
+                  },
+                ],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByText('deprecated').length).toBeGreaterThan(0);
+    expect(document.body.textContent).toContain('admin');
+  });
+
+  it('shows the path item summary and description on its operations', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'getthing' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Path item API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things/{id}': {
+              summary: 'A single thing',
+              description: 'Applies to every operation on this path.',
+              get: {
+                operationId: 'getThing',
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('A single thing')).toBeVisible();
+    expect(
+      screen.getByText('Applies to every operation on this path.'),
+    ).toBeVisible();
+  });
+
+  it('lets an operation parameter override the path parameter it repeats', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'search' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Override API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/search': {
+              parameters: [
+                {
+                  name: 'limit',
+                  in: 'query',
+                  required: true,
+                  description: 'Path level limit',
+                  schema: { type: 'string', default: 'path-default' },
+                },
+              ],
+              get: {
+                operationId: 'search',
+                parameters: [
+                  {
+                    name: 'limit',
+                    in: 'query',
+                    required: true,
+                    description: 'Operation level limit',
+                    schema: { type: 'string', default: 'operation-default' },
+                  },
+                ],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByLabelText(/limit/)).toHaveLength(1);
+    expect(document.body.textContent).toContain('operation-default');
+    expect(document.body.textContent).not.toContain('path-default');
+  });
+
+  it('generates examples from const values instead of a placeholder type', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'pay' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Const API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/payments': {
+              post: {
+                operationId: 'pay',
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          kind: { const: 'card' },
+                          amount: { type: 'integer' },
+                        },
+                      },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(document.body.textContent).toContain('"card"');
+  });
+
+  it('lists a multi-tag operation under each of its tags', () => {
+    render(
+      <Speccy
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Tagged API', version: '1.0.0' },
+          tags: [{ name: 'Pets' }, { name: 'Search' }],
+          paths: {
+            '/pets': {
+              get: {
+                operationId: 'listPets',
+                summary: 'List pets',
+                tags: ['Pets', 'Search'],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    const navigation = screen.getByLabelText('API reference');
+    expect(navigation).toHaveTextContent('Pets');
+    expect(navigation).toHaveTextContent('Search');
+  });
 });
