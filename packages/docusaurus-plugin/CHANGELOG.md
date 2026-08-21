@@ -1,5 +1,15 @@
 # docusaurus-plugin-speccy
 
+## 0.11.0
+
+### Patch Changes
+
+- [`966be33`](https://github.com/mcclowes/speccy/commit/966be332f2286985d81c1f886cebaed89b0efafb) Thanks [@mcclowes](https://github.com/mcclowes)! - Publish JSON OpenAPI sources as `openapi.json` and point the overview download link at the matching filename.
+
+- Updated dependencies []:
+  - speccy-renderer@0.11.0
+  - speccy-spectral@0.11.0
+
 ## 0.10.4
 
 ### Patch Changes
