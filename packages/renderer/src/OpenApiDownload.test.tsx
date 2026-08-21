@@ -54,9 +54,15 @@ describe('OpenApiDownload', () => {
       />,
     );
 
-    expect(
-      screen.getByRole('link', { name: /open openapi description/i }),
-    ).toHaveAttribute('href', 'https://api.example.com/openapi.yaml');
+    const link = screen.getByRole('link', {
+      name: /https:\/\/api\.example\.com\/openapi\.yaml/,
+    });
+    expect(link).toHaveAttribute(
+      'href',
+      'https://api.example.com/openapi.yaml',
+    );
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noreferrer');
     fireEvent.click(screen.getByRole('button', { name: /copy/i }));
     expect(writeText).toHaveBeenCalledWith(
       'https://api.example.com/openapi.yaml',

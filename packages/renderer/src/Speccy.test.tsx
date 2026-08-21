@@ -1593,7 +1593,7 @@ describe('Speccy navigation', () => {
 
     const aside = screen.getByRole('complementary');
     expect(aside).toContainElement(
-      screen.getByRole('heading', { name: 'Download OpenAPI description' }),
+      screen.getByRole('heading', { name: 'OpenAPI description' }),
     );
     expect(aside).toContainElement(screen.getByText('https://api.example.com'));
     expect(aside).toContainElement(
