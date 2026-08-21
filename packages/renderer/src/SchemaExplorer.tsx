@@ -15,6 +15,7 @@ import { Markdown } from './Markdown';
 import { AcceptedShapes, ExplorerFieldDetails } from './SchemaExplorerDetails';
 import { ExplorerTree } from './SchemaExplorerTree';
 import {
+  discriminatorModel,
   findExplorerField,
   rootFields,
   schemaLabel,
@@ -123,7 +124,10 @@ export function SchemaExplorer({
             </p>
           )}
           {alternatives && alternatives.length > 0 && (
-            <AcceptedShapes alternatives={alternatives} />
+            <AcceptedShapes
+              alternatives={alternatives}
+              discriminator={discriminatorModel(structuralSchema)}
+            />
           )}
         </section>
         {selected && (

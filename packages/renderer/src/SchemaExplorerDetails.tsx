@@ -13,10 +13,12 @@ import { CodeBlock } from './CodeBlock';
 import { Markdown } from './Markdown';
 import {
   alternativeName,
+  discriminatorModel,
   enumValues,
   schemaConstraints,
   schemaTypeLabel,
   structuralObjectSchema,
+  type DiscriminatorModel,
   type EnumValue,
   type ExplorerConstraint,
   type ExplorerField,
@@ -91,13 +93,26 @@ function AlternativeFields({ schema }: { schema: SchemaObject }) {
   );
 }
 
-function Alternative({ schema, index }: { schema: Schema; index: number }) {
+function Alternative({
+  schema,
+  index,
+  discriminatorValue,
+}: {
+  schema: Schema;
+  index: number;
+  discriminatorValue?: string;
+}) {
   const structuralSchema = structuralObjectSchema(schema);
   const hasFields = Object.keys(structuralSchema.properties ?? {}).length > 0;
   return (
     <details open={index === 0}>
       <summary>
         <strong>{alternativeName(schema, index)}</strong>
+        {discriminatorValue && (
+          <code className={scoped('sp-schema-explorer-discriminator-value')}>
+            {discriminatorValue}
+          </code>
+        )}
         <code>{schemaTypeLabel(schema)}</code>
       </summary>
       <Markdown
@@ -110,12 +125,28 @@ function Alternative({ schema, index }: { schema: Schema; index: number }) {
   );
 }
 
-export function AcceptedShapes({ alternatives }: { alternatives: Schema[] }) {
+export function AcceptedShapes({
+  alternatives,
+  discriminator,
+}: {
+  alternatives: Schema[];
+  discriminator?: DiscriminatorModel;
+}) {
   return (
     <DetailSection title="Accepted shapes">
+      {discriminator?.propertyName && (
+        <p className={scoped('sp-schema-explorer-discriminator')}>
+          Selected by <code>{discriminator.propertyName}</code>
+        </p>
+      )}
       <div className={scoped('sp-schema-explorer-alternatives')}>
         {alternatives.map((alternative, index) => (
-          <Alternative key={index} schema={alternative} index={index} />
+          <Alternative
+            key={index}
+            schema={alternative}
+            index={index}
+            discriminatorValue={discriminator?.valueFor(alternative, index)}
+          />
         ))}
       </div>
     </DetailSection>
@@ -172,7 +203,10 @@ export function ExplorerFieldDetails({
         </DetailSection>
       )}
       {alternatives && alternatives.length > 0 && (
-        <AcceptedShapes alternatives={alternatives} />
+        <AcceptedShapes
+          alternatives={alternatives}
+          discriminator={discriminatorModel(objectSchema)}
+        />
       )}
       {constraints.length > 0 && (
         <DetailSection title="Constraints">

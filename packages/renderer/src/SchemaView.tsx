@@ -14,6 +14,7 @@ import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
 import {
+  discriminatorModel,
   rootFields,
   schemaLabel,
   structuralObjectSchema,
@@ -168,6 +169,7 @@ export function SchemaView({
   }
   const properties = schema.properties ?? {};
   const alternatives = schema.oneOf ?? schema.anyOf;
+  const discriminator = discriminatorModel(schema);
   const isObject =
     schema.type === 'object' || Object.keys(properties).length > 0;
   const enumValues =
@@ -521,21 +523,38 @@ export function SchemaView({
           {alternatives.length > 1 && (
             <div className="sp-schema-alternatives-label">Accepted shapes</div>
           )}
+          {discriminator?.propertyName && (
+            <p className="sp-schema-meta sp-schema-discriminator">
+              Selected by <code>{discriminator.propertyName}</code>
+            </p>
+          )}
           <div className="sp-schema-properties">
-            {alternatives.map((alternative, index) => (
-              <SchemaView
-                key={index}
-                name={
-                  alternatives.length > 1
-                    ? alternativeName(alternative, index)
-                    : undefined
-                }
-                schema={alternative}
-                depth={depth + 1}
-                collapseObjects={collapseObjects}
-                showExample={showExample}
-              />
-            ))}
+            {alternatives.map((alternative, index) => {
+              const discriminatorValue = discriminator?.valueFor(
+                alternative,
+                index,
+              );
+              return (
+                <div key={index} className="sp-schema-alternative">
+                  {discriminatorValue && (
+                    <p className="sp-schema-meta sp-schema-discriminator-value">
+                      <code>{discriminatorValue}</code>
+                    </p>
+                  )}
+                  <SchemaView
+                    name={
+                      alternatives.length > 1
+                        ? alternativeName(alternative, index)
+                        : undefined
+                    }
+                    schema={alternative}
+                    depth={depth + 1}
+                    collapseObjects={collapseObjects}
+                    showExample={showExample}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -2203,6 +2203,15 @@ related:
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+.sp-schema-discriminator,
+.sp-schema-discriminator-value {
+  margin: 6px 0 0 4px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+}
+.sp-schema-discriminator-value {
+  margin-bottom: -4px;
+}
 .sp-type {
   color: var(--sp-muted);
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);

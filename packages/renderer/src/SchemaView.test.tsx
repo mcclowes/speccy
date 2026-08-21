@@ -761,6 +761,64 @@ describe('SchemaView composition', () => {
     expect(screen.getByText('Bank Payment')).toBeVisible();
   });
 
+  it('names the discriminator property and its mapped values', () => {
+    render(
+      <SchemaView
+        schema={{
+          oneOf: [
+            {
+              title: 'Cat',
+              type: 'object',
+              properties: { kind: { const: 'cat' } },
+            },
+            {
+              title: 'Dog',
+              type: 'object',
+              properties: { kind: { const: 'dog' } },
+            },
+          ],
+          discriminator: {
+            propertyName: 'kind',
+            mapping: {
+              feline: '#/components/schemas/Cat',
+              canine: '#/components/schemas/Dog',
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Selected by/)).toBeVisible();
+    expect(screen.getByText('feline')).toBeVisible();
+    expect(screen.getByText('canine')).toBeVisible();
+  });
+
+  it('names the discriminator property in the explorer', () => {
+    render(
+      <SchemaView
+        schema={{
+          type: 'object',
+          properties: { id: { type: 'string' } },
+          oneOf: [
+            {
+              title: 'Cat',
+              type: 'object',
+              properties: { kind: { const: 'cat' } },
+            },
+            {
+              title: 'Dog',
+              type: 'object',
+              properties: { kind: { const: 'dog' } },
+            },
+          ],
+          discriminator: { propertyName: 'kind' },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Selected by/)).toHaveTextContent('kind');
+  });
+
   it('keeps root alternatives visible alongside shared properties', () => {
     render(
       <SchemaView

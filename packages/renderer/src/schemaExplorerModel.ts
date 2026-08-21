@@ -82,6 +82,40 @@ export function schemaLabel(schema?: Schema): string {
     .join(' · ');
 }
 
+export interface DiscriminatorModel {
+  propertyName?: string;
+  /** Maps each alternative's index onto the discriminator value that selects it. */
+  valueFor: (alternative: Schema, index: number) => string | undefined;
+}
+
+/**
+ * Mapping targets are `$ref` strings before resolution and inlined schemas after it, so the
+ * mapped value is matched back to an alternative by the schema name the resolver preserves.
+ */
+export function discriminatorModel(
+  schema: SchemaObject,
+): DiscriminatorModel | undefined {
+  const { discriminator } = schema;
+  if (!discriminator) return undefined;
+  if (typeof discriminator === 'string')
+    return { propertyName: discriminator, valueFor: () => undefined };
+
+  const mapping = Object.entries(discriminator.mapping ?? {});
+  return {
+    propertyName: discriminator.propertyName,
+    valueFor: (alternative) => {
+      const name =
+        typeof alternative === 'object'
+          ? (alternative.title ?? alternative.$ref?.split('/').pop())
+          : undefined;
+      if (!name) return undefined;
+      return mapping.find(
+        ([, target]) => target === name || target.split('/').pop() === name,
+      )?.[0];
+    },
+  };
+}
+
 export function alternativeName(schema: Schema, index: number): string {
   if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';
   const name = schema.title ?? schema.$ref?.split('/').pop();

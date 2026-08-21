@@ -320,6 +320,14 @@
   background: var(--sp-code);
   font-size: 0.5625rem;
 }
+.sp-schema-explorer-discriminator {
+  margin: 0 0 6px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+}
+.sp-schema-explorer-discriminator-value {
+  margin-left: auto;
+}
 .sp-schema-explorer-closed {
   margin: 8px 0 0;
   color: var(--sp-muted);
