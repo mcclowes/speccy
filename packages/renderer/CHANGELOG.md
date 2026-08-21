@@ -1,5 +1,20 @@
 # speccy-renderer
 
+## 0.12.0
+
+### Minor Changes
+
+- [`008b7be`](https://github.com/mcclowes/speccy/commit/008b7bef867a7b8d7ca8f223ddf4a231e1ad23f2) Thanks [@mcclowes](https://github.com/mcclowes)! - Generate compact operation catalogs for Docusaurus and expose an automatic provider that resolves embedded operation links and previews without bundling complete OpenAPI documents into every documentation page.
+
+### Patch Changes
+
+- [`68ce3b5`](https://github.com/mcclowes/speccy/commit/68ce3b595a4c5b24114b9cd9b220585d09e30dba) Thanks [@mcclowes](https://github.com/mcclowes)! - Place the webhook payload heading on the same row as its media type, keeping the heading at section weight and wrapping long media types instead of overflowing on narrow viewports.
+
+- [`5931c56`](https://github.com/mcclowes/speccy/commit/5931c5647d3c8d9a45698de896f42a9099142ecf) Thanks [@mcclowes](https://github.com/mcclowes)! - Show `oneOf` and `anyOf` alternatives, including their fields, in the schema explorer inspector.
+
+- Updated dependencies []:
+  - speccy-core@0.12.0
+
 ## 0.11.0
 
 ### Patch Changes
