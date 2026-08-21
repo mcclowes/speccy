@@ -604,6 +604,52 @@ describe('OpenAPI 3.1.1 conformance', () => {
     ).toBeVisible();
   });
 
+  it('marks a deprecated parameter and types a content parameter in an operation', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'listthings' }}
+        parameterPrototype={false}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Operation parameters', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things': {
+              get: {
+                operationId: 'listThings',
+                parameters: [
+                  {
+                    name: 'legacy',
+                    in: 'query',
+                    deprecated: true,
+                    schema: { type: 'string' },
+                  },
+                  {
+                    name: 'filter',
+                    in: 'query',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          properties: { role: { type: 'string' } },
+                          example: { role: 'admin' },
+                        },
+                      },
+                    },
+                  },
+                ],
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByText('deprecated').length).toBeGreaterThan(0);
+    expect(document.body.textContent).toContain('admin');
+  });
+
   it('shows the path item summary and description on its operations', () => {
     render(
       <Speccy

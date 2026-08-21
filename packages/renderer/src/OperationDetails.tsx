@@ -41,7 +41,11 @@ import { Markdown } from './Markdown';
 import { serializeParameter } from './parameterSerialization';
 import { serializeRequestBody } from './requestBodySerialization';
 import { RequestSample } from './RequestSample';
-import { RequestBodyDetails, ResponseDetails } from './ResourceDetails';
+import {
+  RequestBodyDetails,
+  ResponseDetails,
+  resourceSchema,
+} from './ResourceDetails';
 import { SchemaExplorer } from './SchemaExplorer';
 import { JsonValue, SchemaView } from './SchemaView';
 import { SendIcon } from './SendIcon';
@@ -283,7 +287,7 @@ function ParameterCard({
   parameter: Parameter;
   index: number;
 }) {
-  const parameterSchema = objectSchema(parameter.schema);
+  const parameterSchema = objectSchema(resourceSchema(parameter));
   const example =
     parameter.example !== undefined
       ? parameter.example
@@ -291,6 +295,7 @@ function ParameterCard({
   const schema = {
     ...parameterSchema,
     description: parameter.description ?? parameterSchema?.description,
+    ...(parameter.deprecated ? { deprecated: true } : {}),
   };
 
   return (
@@ -326,7 +331,7 @@ function ParameterExplorer({
   const title = PARAMETER_GROUP_LABELS[location] ?? 'Parameters';
   const properties = Object.fromEntries(
     items.map((parameter) => {
-      const schema = objectSchema(parameter.schema);
+      const schema = objectSchema(resourceSchema(parameter));
       return [
         parameter.name ?? 'unnamed',
         {
@@ -339,7 +344,7 @@ function ParameterExplorer({
   const examples = Object.fromEntries(
     items.flatMap((parameter) => {
       const example =
-        parameter.example ?? objectSchema(parameter.schema)?.example;
+        parameter.example ?? objectSchema(resourceSchema(parameter))?.example;
       return parameter.name && example !== undefined
         ? [[parameter.name, example]]
         : [];
@@ -682,7 +687,7 @@ function ResponseExamplePanel({
 }
 
 function parameterExample(parameter: Parameter): unknown {
-  const schema = objectSchema(parameter.schema);
+  const schema = objectSchema(resourceSchema(parameter));
   return (
     parameter.example ??
     schema?.example ??
@@ -1023,7 +1028,7 @@ export function RequestRail({
   const parameterDefaults = Object.fromEntries(
     parameters.map((parameter) => [
       `${parameter.in}-${parameter.name}`,
-      String(objectSchema(parameter.schema)?.default ?? ''),
+      String(objectSchema(resourceSchema(parameter))?.default ?? ''),
     ]),
   );
   const [storedValues, setStoredValues] = useLocalState<Record<string, string>>(
@@ -1176,7 +1181,7 @@ export function RequestRail({
     )
       continue;
     let parsedValue: unknown = value;
-    const schema = objectSchema(parameter.schema);
+    const schema = objectSchema(resourceSchema(parameter));
     if (
       schema?.type === 'array' ||
       schema?.type === 'object' ||
