@@ -2006,6 +2006,11 @@ related:
   color: var(--sp-muted);
   font-size: 0.5625rem;
 }
+.sp-endpoint-path-summary {
+  margin: 8px 0 0;
+  color: var(--sp-muted);
+  font-size: 0.8125rem;
+}
 .sp-resource-serialization,
 .sp-resource-summary {
   margin: 6px 0;

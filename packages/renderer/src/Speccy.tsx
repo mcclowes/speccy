@@ -309,6 +309,10 @@ function EndpointPage({
             <ApiPath value={item.path} wrap />
             <CopyButton value={item.path} label="Copy endpoint path" compact />
           </div>
+          {item.pathItem.summary && (
+            <p className="sp-endpoint-path-summary">{item.pathItem.summary}</p>
+          )}
+          <Markdown>{item.pathItem.description}</Markdown>
           <Markdown>{item.operation.description}</Markdown>
           {item.operation.externalDocs?.url && (
             <a href={item.operation.externalDocs.url}>

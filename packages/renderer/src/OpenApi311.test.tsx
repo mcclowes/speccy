@@ -604,6 +604,34 @@ describe('OpenAPI 3.1.1 conformance', () => {
     ).toBeVisible();
   });
 
+  it('shows the path item summary and description on its operations', () => {
+    render(
+      <Speccy
+        route={{ page: 'operation', operationId: 'getthing' }}
+        spec={{
+          openapi: '3.1.1',
+          info: { title: 'Path item API', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/things/{id}': {
+              summary: 'A single thing',
+              description: 'Applies to every operation on this path.',
+              get: {
+                operationId: 'getThing',
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('A single thing')).toBeVisible();
+    expect(
+      screen.getByText('Applies to every operation on this path.'),
+    ).toBeVisible();
+  });
+
   it('lets an operation parameter override the path parameter it repeats', () => {
     render(
       <Speccy
