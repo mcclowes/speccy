@@ -32,7 +32,6 @@ import { ExampleSelect } from './ExampleSelect';
 import {
   DisclosureChevron,
   DisclosureContent,
-  HTTP_METHOD_LABELS,
   RequiredMark,
   httpMethodLabel,
 } from './DesignSystem';
@@ -173,6 +172,10 @@ export function SecurityRequirements({
   );
   const onlyEntry = entries.length === 1 ? entries[0] : undefined;
   const onlyScheme = onlyEntry ? schemes?.[onlyEntry[0]] : undefined;
+  const headingSuffix = onlyScheme
+    ? `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`
+    : undefined;
+  const showSchemeNames = !onlyScheme;
   return (
     <section className="sp-section sp-security-section">
       <h4 className="sp-security-heading">
@@ -197,8 +200,7 @@ export function SecurityRequirements({
           </svg>
           <span>
             Authorization
-            {onlyScheme &&
-              `: ${securitySchemeLabel(onlyScheme) ?? onlyEntry?.[0]}`}
+            {headingSuffix}
           </span>
           <span
             className="sp-security-info"
@@ -227,7 +229,7 @@ export function SecurityRequirements({
                         {schemeIndex > 0 && (
                           <span className="sp-security-operator">and</span>
                         )}
-                        {!onlyScheme && (
+                        {showSchemeNames && (
                           <span>
                             <code>{securitySchemeLabel(scheme) ?? name}</code>
                             {scopes.length > 0 && ` - ${scopes.join(', ')}`}
@@ -389,62 +391,89 @@ function ParameterGroup({
   items: Parameter[];
   parameterPrototype?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const title = PARAMETER_GROUP_LABELS[location] ?? 'Parameters';
+  if (parameterPrototype)
+    return (
+      <PrototypeParameterGroup
+        location={location}
+        items={items}
+        title={title}
+      />
+    );
+  return <CardParameterGroup location={location} items={items} title={title} />;
+}
+
+function PrototypeParameterGroup({
+  location,
+  items,
+  title,
+}: {
+  location: string;
+  items: Parameter[];
+  title: string;
+}) {
+  const [optionalExpanded, setOptionalExpanded] = useState(false);
   const requiredItems = items.filter((parameter) => parameter.required);
   const optionalItems = items.filter((parameter) => !parameter.required);
+  const collapsibleOptional =
+    optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS;
+  const explorerItems = collapsibleOptional ? requiredItems : items;
+
+  return (
+    <section className="sp-endpoint-section sp-parameter-prototype">
+      <h3>{title}</h3>
+      {explorerItems.length > 0 && (
+        <ParameterExplorer location={location} items={explorerItems} />
+      )}
+      {collapsibleOptional && (
+        <div
+          className={`sp-optional-parameter-docs ${styles.optionalParameterDocs}`}
+        >
+          <button
+            type="button"
+            className={`sp-optional-parameter-summary ${styles.optionalParameterSummary}`}
+            onClick={() => setOptionalExpanded(!optionalExpanded)}
+            aria-expanded={optionalExpanded}
+          >
+            <span>
+              <strong>Pagination, filtering, sorting, and related data</strong>
+              <small>Optional {location} parameters</small>
+            </span>
+            <span>
+              {optionalItems.length}
+              <DisclosureChevron />
+            </span>
+          </button>
+          {optionalExpanded && (
+            <DisclosureContent>
+              <ParameterExplorer location={location} items={optionalItems} />
+            </DisclosureContent>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CardParameterGroup({
+  location,
+  items,
+  title,
+}: {
+  location: string;
+  items: Parameter[];
+  title: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
   const collapsible = items.length > DEFAULT_VISIBLE_PARAMETERS;
   const visibleItems = expanded
     ? items
     : items.slice(0, DEFAULT_VISIBLE_PARAMETERS);
   const hiddenCount = items.length - visibleItems.length;
 
-  if (parameterPrototype) {
-    const visibleTogether =
-      optionalItems.length < MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS;
-    return (
-      <section className="sp-endpoint-section sp-parameter-prototype">
-        <h3>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h3>
-        {visibleTogether && (
-          <ParameterExplorer location={location} items={items} />
-        )}
-        {!visibleTogether && requiredItems.length > 0 && (
-          <ParameterExplorer location={location} items={requiredItems} />
-        )}
-        {optionalItems.length >= MIN_COLLAPSIBLE_OPTIONAL_PARAMETERS && (
-          <div
-            className={`sp-optional-parameter-docs ${styles.optionalParameterDocs}`}
-          >
-            <button
-              type="button"
-              className={`sp-optional-parameter-summary ${styles.optionalParameterSummary}`}
-              onClick={() => setExpanded(!expanded)}
-              aria-expanded={expanded}
-            >
-              <span>
-                <strong>
-                  Pagination, filtering, sorting, and related data
-                </strong>
-                <small>Optional {location} parameters</small>
-              </span>
-              <span>
-                {optionalItems.length}
-                <DisclosureChevron />
-              </span>
-            </button>
-            {expanded && (
-              <DisclosureContent>
-                <ParameterExplorer location={location} items={optionalItems} />
-              </DisclosureContent>
-            )}
-          </div>
-        )}
-      </section>
-    );
-  }
-
   return (
     <section className="sp-endpoint-section">
-      <h3>{PARAMETER_GROUP_LABELS[location] ?? 'Parameters'}</h3>
+      <h3>{title}</h3>
       <div className="sp-endpoint-parameters">
         {visibleItems.map((parameter, index) => (
           <ParameterCard
@@ -528,13 +557,11 @@ function schemaExample(
 ): unknown {
   if (typeof schema === 'boolean') return schema ? {} : undefined;
   const isObject = schema.type === 'object' || Boolean(schema.properties);
+  const preferLiteral = !requiredOnly || !isObject;
   if (schema.const !== undefined) return schema.const;
-  if (schema.example !== undefined && (!requiredOnly || !isObject))
-    return schema.example;
-  if (schema.default !== undefined && (!requiredOnly || !isObject))
-    return schema.default;
-  if (schema.enum?.length && (!requiredOnly || !isObject))
-    return schema.enum[0];
+  if (schema.example !== undefined && preferLiteral) return schema.example;
+  if (schema.default !== undefined && preferLiteral) return schema.default;
+  if (schema.enum?.length && preferLiteral) return schema.enum[0];
   if (schema.allOf?.length) {
     return Object.assign(
       {},
@@ -577,16 +604,12 @@ function schemaExample(
   return 'string';
 }
 
-function requiredRequestBodyValue(
+function requiredRequestBodyExample(
   contentType: string | undefined,
   media: MediaType | undefined,
-): string {
-  const value = media?.schema
-    ? schemaExample(media.schema, 'request', true)
-    : contentType === 'application/json'
-      ? {}
-      : undefined;
-  return formatRequestBodyValue(value);
+): unknown {
+  if (media?.schema) return schemaExample(media.schema, 'request', true);
+  return contentType === 'application/json' ? {} : undefined;
 }
 
 function requestBodyExampleValue(
@@ -635,14 +658,30 @@ function requestBuilderBodyExamples(
   return [
     {
       label: 'Required fields',
-      value: media?.schema
-        ? schemaExample(media.schema, 'request', true)
-        : contentType === 'application/json'
-          ? {}
-          : undefined,
+      value: requiredRequestBodyExample(contentType, media),
     },
     ...examples,
   ];
+}
+
+function exampleTitle(
+  label: string,
+  examples: { label: string; value: unknown }[],
+  activeIndex: number,
+  onChange: (index: number) => void,
+): ReactNode {
+  if (examples.length <= 1) return label;
+  return (
+    <>
+      <span>{label}</span>
+      <ExampleSelect
+        label={label}
+        value={activeIndex}
+        onChange={onChange}
+        options={examples}
+      />
+    </>
+  );
 }
 
 function ResponseExamplePanel({
@@ -657,25 +696,15 @@ function ResponseExamplePanel({
   const activeExample = examples[activeIndex];
   if (!activeExample) return null;
 
-  const title =
-    examples.length > 1 ? (
-      <>
-        <span>Response example</span>
-        <ExampleSelect
-          label="Response example"
-          value={activeIndex}
-          onChange={setActiveIndex}
-          options={examples}
-        />
-      </>
-    ) : (
-      'Response example'
-    );
-
   return (
     <CodeBlock
       className="sp-rail-code sp-response-example"
-      title={title}
+      title={exampleTitle(
+        'Response example',
+        examples,
+        activeIndex,
+        setActiveIndex,
+      )}
       value={JSON.stringify(activeExample.value, null, 2)}
       copyPlacement="body"
       copyLabel="Copy response"
@@ -713,22 +742,20 @@ function RequestExampleSection({
   truncateLabel?: string;
   children?: ReactNode;
 }) {
+  const body = () => {
+    if (children != null) return children;
+    if (collapsibleValue !== undefined)
+      return <CollapsibleJson value={collapsibleValue} />;
+    if (code) return value;
+    return <CodeLines value={value} />;
+  };
   const content = (
     <pre
       className={
         code ? undefined : `sp-code-numbered ${codeBlockStyles.numbered}`
       }
     >
-      <code>
-        {children ??
-          (collapsibleValue !== undefined ? (
-            <CollapsibleJson value={collapsibleValue} />
-          ) : code ? (
-            value
-          ) : (
-            <CodeLines value={value} />
-          ))}
-      </code>
+      <code>{body()}</code>
     </pre>
   );
 
@@ -751,6 +778,18 @@ function RequestExampleSection({
       )}
     </section>
   );
+}
+
+function requestBodyDisplayExamples(
+  body: RequestBody | undefined,
+): { label: string; value: unknown }[] {
+  if (!body) return [];
+  const [contentType, media] = firstMedia(body.content) ?? [];
+  const namedExamples = requestBodyExamples(media);
+  if (namedExamples.length) return namedExamples;
+  return [
+    { label: 'Example', value: requestBodyExampleValue(contentType, media) },
+  ];
 }
 
 function highlightedResolvedPath(path: string, parameters: Parameter[]) {
@@ -817,34 +856,19 @@ export function EndpointRequestDetails({
         parameterExample(parameter),
       ]),
     );
-  const bodyMedia = firstMedia(body?.content);
-  const namedExamples = requestBodyExamples(bodyMedia?.[1]);
-  const examples = body
-    ? namedExamples.length
-      ? namedExamples
-      : [
-          {
-            label: 'Example',
-            value: requestBodyExampleValue(bodyMedia?.[0], bodyMedia?.[1]),
-          },
-        ]
-    : [];
+  const examples = requestBodyDisplayExamples(body);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeExample = examples[activeIndex];
-  const title =
-    examples.length > 1 ? (
-      <>
-        <span>Request example</span>
-        <ExampleSelect
-          label="Request example"
-          value={activeIndex}
-          onChange={setActiveIndex}
-          options={examples}
-        />
-      </>
-    ) : (
-      'Request example'
-    );
+  const title = exampleTitle(
+    'Request example',
+    examples,
+    activeIndex,
+    setActiveIndex,
+  );
+  const parameterSections = [
+    ['Query parameters', queryParameters],
+    ['Headers', headerParameters],
+  ] as const;
 
   return (
     <div className="sp-endpoint-request-grid">
@@ -889,20 +913,18 @@ export function EndpointRequestDetails({
         <RequestExampleSection label="Path" value={resolvedPath} code>
           {highlightedResolvedPath(path, pathParameters)}
         </RequestExampleSection>
-        {queryParameters.length > 0 && (
-          <RequestExampleSection
-            label="Query parameters"
-            value={JSON.stringify(parameterObject(queryParameters), null, 2)}
-            collapsibleValue={parameterObject(queryParameters)}
-          />
-        )}
-        {headerParameters.length > 0 && (
-          <RequestExampleSection
-            label="Headers"
-            value={JSON.stringify(parameterObject(headerParameters), null, 2)}
-            collapsibleValue={parameterObject(headerParameters)}
-          />
-        )}
+        {parameterSections.map(([label, items]) => {
+          if (items.length === 0) return null;
+          const example = parameterObject(items);
+          return (
+            <RequestExampleSection
+              label={label}
+              value={JSON.stringify(example, null, 2)}
+              collapsibleValue={example}
+              key={label}
+            />
+          );
+        })}
         {activeExample && (
           <RequestExampleSection
             label="Body"
@@ -915,6 +937,8 @@ export function EndpointRequestDetails({
     </div>
   );
 }
+
+const isSuccessCode = (code: string) => code.startsWith('2');
 
 function EndpointResponseBody({
   code,
@@ -935,7 +959,7 @@ function EndpointResponseBody({
     <div className="sp-endpoint-response-grid">
       <div className="sp-response-content">
         <div
-          className={`sp-response-summary ${code.startsWith('2') ? 'is-success' : ''}`}
+          className={`sp-response-summary ${isSuccessCode(code) ? 'is-success' : ''}`}
         >
           <div className="sp-response-label">
             <span className="sp-response-code">{code}</span>
@@ -969,7 +993,7 @@ export function EndpointResponses({
 }) {
   const entries = Object.entries(responses);
   const [activeCode, setActiveCode] = useState(
-    entries.find(([code]) => code.startsWith('2'))?.[0] ?? entries[0]?.[0],
+    entries.find(([code]) => isSuccessCode(code))?.[0] ?? entries[0]?.[0],
   );
   const activeEntry = entries.find(([code]) => code === activeCode);
   const activeResponse = activeEntry?.[1];
@@ -990,7 +1014,7 @@ export function EndpointResponses({
               type="button"
               role="tab"
               aria-selected={code === activeCode}
-              className={`sp-response-tab ${code.startsWith('2') ? 'is-success' : ''}`}
+              className={`sp-response-tab ${isSuccessCode(code) ? 'is-success' : ''}`}
               onClick={() => setActiveCode(code)}
               key={code}
             >
@@ -1005,6 +1029,121 @@ export function EndpointResponses({
         response={activeResponse}
         key={activeCode}
       />
+    </section>
+  );
+}
+
+const CREDENTIAL_MASK = '••••••••';
+
+/** One request header line; `secret` is the credential part masked in samples. */
+type RequestHeader = { name: string; text: string; secret?: string };
+type QueryEntry = {
+  name: string;
+  value: string;
+  allowReserved: boolean;
+  secret?: boolean;
+};
+
+interface RailTarget {
+  label: string;
+  initialBodyExample: number;
+  targetField: ReactNode;
+  requestUrl: (path: string, queryValue: string) => string;
+  validationError: () => string | undefined;
+  sendLabel: string;
+  failureLabel: string;
+  serverHint: string;
+}
+
+function webhookUrl(target: string, queryValue: string): string {
+  if (!queryValue) return target.trim();
+  return `${target.trim()}${target.includes('?') ? '&' : '?'}${queryValue}`;
+}
+
+function webhookTargetError(target: string): string | undefined {
+  let protocol: string | undefined;
+  try {
+    protocol = new URL(target).protocol;
+  } catch {
+    protocol = undefined;
+  }
+  return protocol === 'http:' || protocol === 'https:'
+    ? undefined
+    : 'Enter a valid HTTP or HTTPS target URL.';
+}
+
+function encodePathValue(value: unknown): unknown {
+  if (Array.isArray(value))
+    return value.map((item) => encodeURIComponent(String(item)));
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([name, item]) => [
+        encodeURIComponent(name),
+        encodeURIComponent(String(item)),
+      ]),
+    );
+  return encodeURIComponent(String(value));
+}
+
+function queryString(entries: QueryEntry[], mask: boolean): string {
+  return entries
+    .map(({ name, value, allowReserved, secret }) => {
+      const encoded = encodeURIComponent(
+        mask && secret ? CREDENTIAL_MASK : value,
+      );
+      const encodedValue = allowReserved
+        ? encoded.replace(
+            /%3A|%2F|%3F|%23|%5B|%5D|%40|%21|%24|%26|%27|%28|%29|%2A|%2B|%2C|%3B|%3D/gi,
+            (part) => decodeURIComponent(part),
+          )
+        : encoded;
+      return `${encodeURIComponent(name)}=${encodedValue}`;
+    })
+    .join('&');
+}
+
+function headerLines(headers: RequestHeader[], mask: boolean): string[] {
+  return headers.map(({ name, text, secret }) => {
+    const secretPart =
+      secret === undefined ? '' : mask ? CREDENTIAL_MASK : secret;
+    return `${name}: ${text}${secretPart}`;
+  });
+}
+
+function headerRecord(lines: string[]): Record<string, string> {
+  return lines.reduce<Record<string, string>>((result, header) => {
+    const separator = header.indexOf(':');
+    const name = header.slice(0, separator);
+    const value = header.slice(separator + 1).trim();
+    result[name] = result[name]
+      ? `${result[name]}${name === 'Cookie' ? '; ' : ', '}${value}`
+      : value;
+    return result;
+  }, {});
+}
+
+function WebhookTargetField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <section className="sp-rail-card">
+      <label className="sp-field">
+        <span>
+          Target URL <RequiredMark />
+        </span>
+        <input
+          type="url"
+          aria-label="Webhook target URL"
+          required
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="https://example.com/webhooks"
+        />
+      </label>
     </section>
   );
 }
@@ -1061,19 +1200,49 @@ export function RequestRail({
   const [optionalPickerQuery, setOptionalPickerQuery] = useState('');
   const optionalPickerRef = useRef<HTMLDivElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
-  const isWebhook = item.source === 'webhook';
   const bodyMedia = firstMedia(item.operation.requestBody?.content);
   const bodyExamples = requestBuilderBodyExamples(
     bodyMedia?.[0],
     bodyMedia?.[1],
   );
-  const initialBodyExample = isWebhook && bodyExamples.length > 1 ? 1 : 0;
-  const [activeBodyExample, setActiveBodyExample] =
-    useState(initialBodyExample);
+  const [webhookTarget, setWebhookTarget] = useLocalState(
+    `${storageScope}:webhook-target:${item.id}`,
+    '',
+  );
+  const rail: RailTarget =
+    item.source === 'webhook'
+      ? {
+          label: 'Webhook tester',
+          initialBodyExample: bodyExamples.length > 1 ? 1 : 0,
+          targetField: (
+            <WebhookTargetField
+              value={webhookTarget}
+              onChange={setWebhookTarget}
+            />
+          ),
+          requestUrl: (_path, queryValue) =>
+            webhookUrl(webhookTarget, queryValue),
+          validationError: () => webhookTargetError(webhookTarget),
+          sendLabel: 'Send test webhook',
+          failureLabel: 'Webhook failed',
+          serverHint: 'target server URL',
+        }
+      : {
+          label: 'Request builder',
+          initialBodyExample: 0,
+          targetField: null,
+          requestUrl: (path, queryValue) =>
+            `${server.replace(/\/$/, '')}${path}${queryValue ? `?${queryValue}` : ''}`,
+          validationError: () => undefined,
+          sendLabel: 'Send request',
+          failureLabel: 'Request failed',
+          serverHint: 'server URL',
+        };
+  const [activeBodyExample, setActiveBodyExample] = useState(
+    rail.initialBodyExample,
+  );
   const [body, setBody] = useState(() =>
-    isWebhook && bodyExamples[initialBodyExample]
-      ? formatRequestBodyValue(bodyExamples[initialBodyExample].value)
-      : requiredRequestBodyValue(bodyMedia?.[0], bodyMedia?.[1]),
+    formatRequestBodyValue(bodyExamples[rail.initialBodyExample]?.value),
   );
   const [result, setResult] = useState<{
     status?: number;
@@ -1082,15 +1251,11 @@ export function RequestRail({
     error?: string;
   }>();
   const [executing, setExecuting] = useState(false);
-  const [webhookTarget, setWebhookTarget] = useLocalState(
-    `${storageScope}:webhook-target:${item.id}`,
-    '',
-  );
+  const method = httpMethodLabel(item.method);
+  const allowsBody = item.method !== 'get' && item.method !== 'head';
   let requestPath = item.path;
-  const query: Array<[string, string, boolean]> = [];
-  const headers: string[] = [];
-  const maskedQuery: Array<[string, string, boolean]> = [];
-  const maskedHeaders: string[] = [];
+  const query: QueryEntry[] = [];
+  const headers: RequestHeader[] = [];
   const requiredParameters = parameters.filter(
     (parameter) => parameter.required,
   );
@@ -1193,56 +1358,63 @@ export function RequestRail({
         parsedValue = value;
       }
     }
-    const pathValue =
-      parameter.in === 'path'
-        ? Array.isArray(parsedValue)
-          ? parsedValue.map((item) => encodeURIComponent(String(item)))
-          : parsedValue && typeof parsedValue === 'object'
-            ? Object.fromEntries(
-                Object.entries(parsedValue).map(([name, item]) => [
-                  encodeURIComponent(name),
-                  encodeURIComponent(String(item)),
-                ]),
-              )
-            : encodeURIComponent(String(parsedValue))
-        : parsedValue;
-    const serialized = serializeParameter(parameter, pathValue);
-    if (parameter.in === 'path' && typeof serialized === 'string')
-      requestPath = requestPath.replace(`{${parameter.name}}`, serialized);
-    if (parameter.in === 'query' && Array.isArray(serialized))
-      for (const [name, item] of serialized) {
-        query.push([name, item, parameter.allowReserved === true]);
-        maskedQuery.push([name, item, parameter.allowReserved === true]);
-      }
-    if (parameter.in === 'header' && typeof serialized === 'string') {
-      headers.push(`${parameter.name}: ${serialized}`);
-      maskedHeaders.push(`${parameter.name}: ${serialized}`);
-    }
-    if (parameter.in === 'cookie' && typeof serialized === 'string') {
-      headers.push(`Cookie: ${serialized}`);
-      maskedHeaders.push(`Cookie: ${serialized}`);
+    const serialized = serializeParameter(
+      parameter,
+      parameter.in === 'path' ? encodePathValue(parsedValue) : parsedValue,
+    );
+    switch (parameter.in) {
+      case 'path':
+        if (typeof serialized === 'string')
+          requestPath = requestPath.replace(`{${parameter.name}}`, serialized);
+        break;
+      case 'query':
+        if (Array.isArray(serialized))
+          for (const [name, value] of serialized)
+            query.push({
+              name,
+              value,
+              allowReserved: parameter.allowReserved === true,
+            });
+        break;
+      case 'header':
+        if (typeof serialized === 'string')
+          headers.push({ name: parameter.name, text: serialized });
+        break;
+      case 'cookie':
+        if (typeof serialized === 'string')
+          headers.push({ name: 'Cookie', text: serialized });
+        break;
     }
   }
   for (const { name: schemeName, scheme } of activeSchemes) {
     const credential = credentials[schemeName] ?? '';
     if (!credential || !scheme) continue;
-    const mask = '••••••••';
-    if (scheme.type === 'apiKey' && scheme.in === 'header') {
-      headers.push(`${scheme.name ?? schemeName}: ${credential}`);
-      maskedHeaders.push(`${scheme.name ?? schemeName}: ${mask}`);
-    }
-    if (scheme.type === 'apiKey' && scheme.in === 'query') {
-      query.push([scheme.name ?? schemeName ?? 'api_key', credential, false]);
-      maskedQuery.push([scheme.name ?? schemeName ?? 'api_key', mask, false]);
-    }
-    if (scheme.type === 'apiKey' && scheme.in === 'cookie') {
-      headers.push(`Cookie: ${scheme.name ?? schemeName}=${credential}`);
-      maskedHeaders.push(`Cookie: ${scheme.name ?? schemeName}=${mask}`);
-    }
+    const name = scheme.name ?? schemeName;
     if (scheme.type === 'http') {
       const prefix = scheme.scheme === 'basic' ? 'Basic' : 'Bearer';
-      headers.push(`Authorization: ${prefix} ${credential}`);
-      maskedHeaders.push(`Authorization: ${prefix} ${mask}`);
+      headers.push({
+        name: 'Authorization',
+        text: `${prefix} `,
+        secret: credential,
+      });
+      continue;
+    }
+    if (scheme.type !== 'apiKey') continue;
+    switch (scheme.in) {
+      case 'header':
+        headers.push({ name, text: '', secret: credential });
+        break;
+      case 'query':
+        query.push({
+          name,
+          value: credential,
+          allowReserved: false,
+          secret: true,
+        });
+        break;
+      case 'cookie':
+        headers.push({ name: 'Cookie', text: `${name}=`, secret: credential });
+        break;
     }
   }
   const contentType = bodyMedia?.[0];
@@ -1250,55 +1422,25 @@ export function RequestRail({
     contentType && bodyMedia?.[1]
       ? serializeRequestBody(contentType, bodyMedia[1], body)
       : undefined;
-  if (contentType) {
-    headers.push(`Content-Type: ${wireBody?.contentType ?? contentType}`);
-    maskedHeaders.push(`Content-Type: ${wireBody?.contentType ?? contentType}`);
-  }
-  const queryString = (items: Array<[string, string, boolean]>) =>
-    items
-      .map(([name, value, allowReserved]) => {
-        const encoded = encodeURIComponent(value);
-        const encodedValue = allowReserved
-          ? encoded.replace(
-              /%3A|%2F|%3F|%23|%5B|%5D|%40|%21|%24|%26|%27|%28|%29|%2A|%2B|%2C|%3B|%3D/gi,
-              (part) => decodeURIComponent(part),
-            )
-          : encoded;
-        return `${encodeURIComponent(name)}=${encodedValue}`;
-      })
-      .join('&');
-  const serializedQuery = queryString(query);
-  const serializedMaskedQuery = queryString(maskedQuery);
-  const webhookUrl = (target: string, queryValue: string) =>
-    `${target.trim()}${queryValue ? `${target.includes('?') ? '&' : '?'}${queryValue}` : ''}`;
-  const requestUrl = isWebhook
-    ? webhookUrl(webhookTarget, serializedQuery)
-    : `${server.replace(/\/$/, '')}${requestPath}${serializedQuery ? `?${serializedQuery}` : ''}`;
-  const maskedRequestUrl = isWebhook
-    ? webhookUrl(webhookTarget, serializedMaskedQuery)
-    : `${server.replace(/\/$/, '')}${requestPath}${serializedMaskedQuery ? `?${serializedMaskedQuery}` : ''}`;
-  const requestHeaders = headers.reduce<Record<string, string>>(
-    (result, header) => {
-      const separator = header.indexOf(':');
-      const name = header.slice(0, separator);
-      const value = header.slice(separator + 1).trim();
-      result[name] = result[name]
-        ? `${result[name]}${name === 'Cookie' ? '; ' : ', '}${value}`
-        : value;
-      return result;
-    },
-    {},
-  );
+  if (contentType)
+    headers.push({
+      name: 'Content-Type',
+      text: wireBody?.contentType ?? contentType,
+    });
+  const sendBody = allowsBody && body ? (wireBody?.body ?? body) : undefined;
+  const buildRequest = (mask: boolean) => ({
+    method,
+    url: rail.requestUrl(requestPath, queryString(query, mask)),
+    headers: headerLines(headers, mask),
+    body: sendBody,
+  });
+  const request = buildRequest(false);
+  const maskedRequest = buildRequest(true);
   async function executeRequest() {
-    if (isWebhook) {
-      try {
-        const target = new URL(webhookTarget);
-        if (target.protocol !== 'http:' && target.protocol !== 'https:')
-          throw new Error();
-      } catch {
-        setResult({ error: 'Enter a valid HTTP or HTTPS target URL.' });
-        return;
-      }
+    const targetError = rail.validationError();
+    if (targetError) {
+      setResult({ error: targetError });
+      return;
     }
 
     if (!authorizationComplete) {
@@ -1322,13 +1464,10 @@ export function RequestRail({
     setExecuting(true);
     setResult(undefined);
     try {
-      const response = await fetch(requestUrl, {
-        method: HTTP_METHOD_LABELS[item.method],
-        headers: requestHeaders,
-        body:
-          item.method === 'get' || item.method === 'head' || !body
-            ? undefined
-            : (wireBody?.body ?? body),
+      const response = await fetch(request.url, {
+        method: request.method,
+        headers: headerRecord(request.headers),
+        body: request.body,
       });
       const responseBody = await response.text();
       let formattedBody = responseBody;
@@ -1348,7 +1487,7 @@ export function RequestRail({
       const detail =
         cause instanceof Error ? cause.message : 'The request failed.';
       setResult({
-        error: `${detail}${detail.endsWith('.') ? '' : '.'} Check the ${isWebhook ? 'target server URL' : 'server URL'}, network connection, and CORS policy.`,
+        error: `${detail}${detail.endsWith('.') ? '' : '.'} Check the ${rail.serverHint}, network connection, and CORS policy.`,
       });
     } finally {
       setExecuting(false);
@@ -1356,27 +1495,8 @@ export function RequestRail({
   }
 
   return (
-    <aside
-      className="sp-request-rail"
-      aria-label={isWebhook ? 'Webhook tester' : 'Request builder'}
-    >
-      {isWebhook && (
-        <section className="sp-rail-card">
-          <label className="sp-field">
-            <span>
-              Target URL <RequiredMark />
-            </span>
-            <input
-              type="url"
-              aria-label="Webhook target URL"
-              required
-              value={webhookTarget}
-              onChange={(event) => setWebhookTarget(event.target.value)}
-              placeholder="https://example.com/webhooks"
-            />
-          </label>
-        </section>
-      )}
+    <aside className="sp-request-rail" aria-label={rail.label}>
+      {rail.targetField}
       {activeSchemes.length > 0 && (
         <section
           className={`sp-rail-card sp-authorization-card${authorizationWarning ? ' is-warning' : ''}`}
@@ -1596,7 +1716,7 @@ export function RequestRail({
           )}
         </section>
       )}
-      {bodyMedia && item.method !== 'get' && item.method !== 'head' && (
+      {bodyMedia && allowsBody && (
         <section className="sp-rail-card">
           <div className="sp-rail-card-heading">
             <h3>
@@ -1635,24 +1755,8 @@ export function RequestRail({
       <RequestSample
         className="sp-rail-code"
         storageKey="speccy:request-language"
-        request={{
-          method: httpMethodLabel(item.method),
-          url: maskedRequestUrl,
-          headers: maskedHeaders,
-          body:
-            body && item.method !== 'get' && item.method !== 'head'
-              ? (wireBody?.body ?? body)
-              : undefined,
-        }}
-        copyRequest={{
-          method: httpMethodLabel(item.method),
-          url: requestUrl,
-          headers,
-          body:
-            body && item.method !== 'get' && item.method !== 'head'
-              ? (wireBody?.body ?? body)
-              : undefined,
-        }}
+        request={maskedRequest}
+        copyRequest={request}
       />
       <button
         type="button"
@@ -1660,14 +1764,7 @@ export function RequestRail({
         disabled={executing}
         onClick={() => void executeRequest()}
       >
-        <SendIcon />{' '}
-        <span>
-          {executing
-            ? 'Sending…'
-            : isWebhook
-              ? 'Send test webhook'
-              : 'Send request'}
-        </span>
+        <SendIcon /> <span>{executing ? 'Sending…' : rail.sendLabel}</span>
       </button>
       {result && (
         <section
@@ -1675,13 +1772,7 @@ export function RequestRail({
           aria-live="polite"
         >
           <div className="sp-live-response-head">
-            <strong>
-              {result.error
-                ? isWebhook
-                  ? 'Webhook failed'
-                  : 'Request failed'
-                : 'Response'}
-            </strong>
+            <strong>{result.error ? rail.failureLabel : 'Response'}</strong>
             {result.status !== undefined && (
               <span>
                 {result.status} {result.statusText}
