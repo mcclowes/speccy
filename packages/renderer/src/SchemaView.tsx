@@ -2,55 +2,26 @@
  * ---
  * purpose: Renders recursive schema trees, per-field detail disclosure, and every declared media type's examples.
  * related:
+ *   - ./schemaViewModel.ts - Derives constraints, applicators, and example facts for each schema.
  *   - ./Speccy.tsx - Uses these primitives for parameters, requests, and responses.
  *   - ./ReferenceSections.tsx - Uses them for reusable component catalogues.
  * ---
  */
 
-import { type ReactNode, useState } from 'react';
+import { type MouseEvent, type ReactNode, useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { DisclosureContent } from './DesignSystem';
 import { ExampleSelect } from './ExampleSelect';
 import { Markdown } from './Markdown';
 import { SchemaExplorer } from './SchemaExplorer';
+import { schemaLabel } from './schemaExplorerModel';
 import {
-  discriminatorModel,
-  rootFields,
-  schemaLabel,
-  structuralObjectSchema,
-  unsupportedByExplorer,
-} from './schemaExplorerModel';
+  alternativeName,
+  explorableSchema,
+  schemaViewModel,
+  type SchemaViewModel,
+} from './schemaViewModel';
 import type { MediaType, Schema, SchemaObject } from 'speccy-core';
-
-function alternativeName(schema: Schema, index: number): string {
-  if (typeof schema === 'boolean') return schema ? 'Any value' : 'No value';
-  if (!schema.title) return `Option ${index + 1}`;
-  return schema.title
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ');
-}
-
-function schemaFromExample(value: unknown): SchemaObject {
-  if (Array.isArray(value)) {
-    return {
-      type: 'array',
-      items: value.length > 0 ? schemaFromExample(value[0]) : {},
-    };
-  }
-  if (value !== null && typeof value === 'object') {
-    return {
-      type: 'object',
-      properties: Object.fromEntries(
-        Object.entries(value).map(([name, fieldValue]) => [
-          name,
-          schemaFromExample(fieldValue),
-        ]),
-      ),
-    };
-  }
-  if (value === null) return { nullable: true };
-  return { type: typeof value };
-}
 
 export function JsonValue({ value }: { value: unknown }) {
   if (value === undefined) return null;
@@ -99,6 +70,28 @@ function NamedMediaExamples({
   );
 }
 
+interface SchemaViewProps {
+  schema?: Schema;
+  name?: string;
+  required?: boolean;
+  depth?: number;
+  collapseObjects?: boolean;
+  showExample?: boolean;
+  showRootDescription?: boolean;
+  summaryOnly?: boolean;
+  exampleValue?: unknown;
+}
+
+interface ResolvedSchemaViewProps {
+  schema: SchemaObject;
+  required: boolean;
+  depth: number;
+  collapseObjects: boolean;
+  showExample: boolean;
+  summaryOnly: boolean;
+  exampleValue: unknown;
+}
+
 export function SchemaView({
   schema,
   name,
@@ -109,19 +102,7 @@ export function SchemaView({
   showRootDescription = true,
   summaryOnly = false,
   exampleValue,
-}: {
-  schema?: Schema;
-  name?: string;
-  required?: boolean;
-  depth?: number;
-  collapseObjects?: boolean;
-  showExample?: boolean;
-  showRootDescription?: boolean;
-  summaryOnly?: boolean;
-  exampleValue?: unknown;
-}) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [structureOpen, setStructureOpen] = useState(!name);
+}: SchemaViewProps) {
   if (schema === undefined) return null;
   if (typeof schema === 'boolean') {
     return (
@@ -130,150 +111,39 @@ export function SchemaView({
       </p>
     );
   }
-  const explorerSchema = structuralObjectSchema(schema);
-  const exampleSchema =
-    exampleValue !== null &&
-    typeof exampleValue === 'object' &&
-    !Array.isArray(exampleValue)
-      ? schemaFromExample(exampleValue)
-      : undefined;
-  // An example only stands in for a schema that describes no shape of its own; borrowing its
-  // keys for a composed schema would present one branch as if it were the whole contract.
-  const schemaWithExampleFields =
-    Object.keys(explorerSchema.properties ?? {}).length === 0 &&
-    exampleSchema &&
-    !explorerSchema.oneOf &&
-    !explorerSchema.anyOf &&
-    explorerSchema.additionalProperties === undefined &&
-    !explorerSchema.patternProperties
-      ? { ...schema, properties: exampleSchema.properties }
-      : schema;
-  const displayExplorerSchema = structuralObjectSchema(schemaWithExampleFields);
-  if (
-    depth === 0 &&
-    !name &&
-    !summaryOnly &&
-    !schema.xml &&
-    !schema.externalDocs &&
-    !unsupportedByExplorer(displayExplorerSchema) &&
-    rootFields(displayExplorerSchema, exampleValue).length > 0
-  ) {
-    return (
-      <SchemaExplorer
-        schema={schemaWithExampleFields}
-        showExample={showExample}
-        showRootDescription={showRootDescription}
-        exampleValue={exampleValue}
-      />
-    );
-  }
-  const properties = schema.properties ?? {};
-  const alternatives = schema.oneOf ?? schema.anyOf;
-  const discriminator = discriminatorModel(schema);
-  const isObject =
-    schema.type === 'object' || Object.keys(properties).length > 0;
-  const enumValues =
-    schema.enum ??
-    (schema.type === 'array' && typeof schema.items === 'object'
-      ? schema.items.enum
-      : undefined);
-  const constraints: Array<{ label: string; value: unknown }> = [];
-  if (schema.minimum !== undefined)
-    constraints.push({ label: 'min', value: schema.minimum });
-  if (schema.maximum !== undefined)
-    constraints.push({ label: 'max', value: schema.maximum });
-  if (schema.exclusiveMinimum !== undefined)
-    constraints.push({
-      label: 'exclusive min',
-      value: schema.exclusiveMinimum,
-    });
-  if (schema.exclusiveMaximum !== undefined)
-    constraints.push({
-      label: 'exclusive max',
-      value: schema.exclusiveMaximum,
-    });
-  if (schema.multipleOf !== undefined)
-    constraints.push({ label: 'multiple of', value: schema.multipleOf });
-  if (schema.minLength !== undefined)
-    constraints.push({ label: 'min length', value: schema.minLength });
-  if (schema.maxLength !== undefined)
-    constraints.push({ label: 'max length', value: schema.maxLength });
-  if (schema.pattern)
-    constraints.push({ label: 'pattern', value: schema.pattern });
-  if (schema.minItems !== undefined)
-    constraints.push({ label: 'min items', value: schema.minItems });
-  if (schema.maxItems !== undefined)
-    constraints.push({ label: 'max items', value: schema.maxItems });
-  if (schema.minContains !== undefined)
-    constraints.push({ label: 'min contains', value: schema.minContains });
-  if (schema.maxContains !== undefined)
-    constraints.push({ label: 'max contains', value: schema.maxContains });
-  if (schema.uniqueItems !== undefined)
-    constraints.push({ label: 'unique items', value: schema.uniqueItems });
-  if (schema.minProperties !== undefined)
-    constraints.push({ label: 'min properties', value: schema.minProperties });
-  if (schema.maxProperties !== undefined)
-    constraints.push({ label: 'max properties', value: schema.maxProperties });
-  if (schema.dependentRequired)
-    constraints.push({
-      label: 'dependent required',
-      value: schema.dependentRequired,
-    });
-  if (schema.additionalProperties === false)
-    constraints.push({
-      label: 'additional properties',
-      value: 'not allowed',
-    });
-  if (schema.const !== undefined)
-    constraints.push({ label: 'const', value: schema.const });
-  if (schema.contentEncoding)
-    constraints.push({
-      label: 'content encoding',
-      value: schema.contentEncoding,
-    });
-  if (schema.contentMediaType)
-    constraints.push({
-      label: 'content media type',
-      value: schema.contentMediaType,
-    });
-  for (const [label, value] of [
-    ['schema dialect', schema.$schema],
-    ['schema id', schema.$id],
-    ['anchor', schema.$anchor],
-    ['dynamic anchor', schema.$dynamicAnchor],
-    ['dynamic reference', schema.$dynamicRef],
-  ] as const) {
-    if (value) constraints.push({ label, value });
-  }
-  const hasFieldDetails = Boolean(
-    name &&
-    (schema.description ||
-      enumValues ||
-      constraints.length > 0 ||
-      schema.xml ||
-      schema.externalDocs?.url ||
-      schema.examples ||
-      schema.default !== undefined ||
-      (exampleValue !== undefined &&
-        (exampleValue === null || typeof exampleValue !== 'object')) ||
-      (exampleValue === undefined &&
-        showExample &&
-        schema.example !== undefined)),
+  const resolved: ResolvedSchemaViewProps = {
+    schema,
+    required,
+    depth,
+    collapseObjects,
+    showExample,
+    summaryOnly,
+    exampleValue,
+  };
+  if (name) return <FieldSchemaView {...resolved} name={name} />;
+  return (
+    <RootSchemaView {...resolved} showRootDescription={showRootDescription} />
   );
+}
 
-  const toggleDetails = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setDetailsOpen((open) => !open);
-  };
+function schemaClassName(depth: number): string {
+  return `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
+}
 
-  const toggleStructure = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setStructureOpen((open) => !open);
-  };
+function schemaHeadClassName(schema: SchemaObject, named: boolean): string {
+  return `sp-schema-head${named ? ' sp-schema-head-named' : ''}${schema.deprecated ? ' sp-schema-head-deprecated' : ''}`;
+}
 
-  const headerContents = (
+function SchemaHeadContents({
+  schema,
+  name,
+  required,
+}: {
+  schema: SchemaObject;
+  name?: string;
+  required: boolean;
+}) {
+  return (
     <>
       {name && <code className="sp-property">{name}</code>}
       {required && (
@@ -288,57 +158,24 @@ export function SchemaView({
       {schema.deprecated && <span className="sp-deprecated">deprecated</span>}
     </>
   );
-  const headerClassName = `sp-schema-head${name ? ' sp-schema-head-named' : ''}${schema.deprecated ? ' sp-schema-head-deprecated' : ''}`;
-  const detailsToggle = name && hasFieldDetails && (
-    <button
-      type="button"
-      className="sp-schema-details-toggle"
-      data-tooltip={detailsOpen ? 'Hide field details' : 'Show field details'}
-      aria-expanded={detailsOpen}
-      aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
-      onClick={toggleDetails}
-    >
-      <span />
-    </button>
-  );
-  const namedHeader = (hasStructure: boolean) => (
-    <div className={headerClassName}>
-      {hasStructure && (
-        <button
-          type="button"
-          className="sp-schema-structure-toggle"
-          aria-expanded={structureOpen}
-          aria-label={`${structureOpen ? 'Collapse' : 'Expand'} ${name}`}
-          onClick={toggleStructure}
-        >
-          <span />
-        </button>
-      )}
-      {!hasStructure && (
-        <span className="sp-schema-structure-spacer" aria-hidden="true" />
-      )}
-      <button
-        type="button"
-        className="sp-schema-head-action"
-        aria-label={`Toggle field ${name}`}
-        onClick={() => {
-          if (hasStructure) setStructureOpen((open) => !open);
-          if (hasFieldDetails) setDetailsOpen((open) => !open);
-        }}
-      >
-        {headerContents}
-      </button>
-      {detailsToggle}
-    </div>
-  );
-  const header = name ? (
-    namedHeader(false)
-  ) : (
-    <div className={headerClassName}>{headerContents}</div>
-  );
-  const fieldDetails = (
+}
+
+function SchemaFieldDetails({
+  schema,
+  model,
+  exampleValue,
+  named,
+  showScalarExample,
+}: {
+  schema: SchemaObject;
+  model: SchemaViewModel;
+  exampleValue: unknown;
+  named: boolean;
+  showScalarExample: boolean;
+}) {
+  return (
     <div
-      className={`sp-schema-field-details${name ? ' sp-schema-field-details-named' : ''}`}
+      className={`sp-schema-field-details${named ? ' sp-schema-field-details-named' : ''}`}
     >
       <Markdown className="sp-schema-description">
         {schema.description}
@@ -359,19 +196,19 @@ export function SchemaView({
           {schema.xml.wrapped && '; wrapped'}
         </p>
       )}
-      {enumValues && (
+      {model.enumValues && (
         <p className="sp-schema-meta sp-schema-enum">
           <span>Enum:</span>
-          {enumValues.map((value, index) => (
+          {model.enumValues.map((value, index) => (
             <code key={index}>
               {typeof value === 'string' ? value : JSON.stringify(value)}
             </code>
           ))}
         </p>
       )}
-      {constraints.length > 0 && (
+      {model.constraints.length > 0 && (
         <p className="sp-schema-meta sp-schema-constraints">
-          {constraints.map((constraint) => (
+          {model.constraints.map((constraint) => (
             <span className="sp-schema-constraint" key={constraint.label}>
               <span>{constraint.label}</span>{' '}
               <code>
@@ -395,75 +232,50 @@ export function SchemaView({
           <JsonValue value={schema.examples} />
         </div>
       )}
-      {(name || depth === 0) &&
-        exampleValue !== undefined &&
-        (exampleValue === null || typeof exampleValue !== 'object') && (
-          <p className="sp-schema-meta sp-schema-example">
-            <span>Example</span>
-            <code>
-              {typeof exampleValue === 'string'
-                ? exampleValue
-                : JSON.stringify(exampleValue)}
-            </code>
-          </p>
-        )}
-      {exampleValue === undefined &&
-        showExample &&
-        schema.example !== undefined && (
-          <>
-            <div className="sp-schema-meta">Example</div>
-            <JsonValue value={schema.example} />
-          </>
-        )}
+      {showScalarExample && model.scalarExample && (
+        <p className="sp-schema-meta sp-schema-example">
+          <span>Example</span>
+          <code>
+            {typeof exampleValue === 'string'
+              ? exampleValue
+              : JSON.stringify(exampleValue)}
+          </code>
+        </p>
+      )}
+      {model.inlineExample && (
+        <>
+          <div className="sp-schema-meta">Example</div>
+          <JsonValue value={schema.example} />
+        </>
+      )}
     </div>
   );
-  const applicators: Array<[string, Schema]> = [
-    ...Object.entries(schema.$defs ?? {}).map(
-      ([definition, value]) =>
-        [`Definition ${definition}`, value] as [string, Schema],
-    ),
-    ...(schema.prefixItems ?? []).map(
-      (item, index) => [`Prefix item ${index + 1}`, item] as [string, Schema],
-    ),
-    ...(schema.contains === undefined
-      ? []
-      : ([['Contains', schema.contains]] as Array<[string, Schema]>)),
-    ...Object.entries(schema.patternProperties ?? {}).map(
-      ([pattern, value]) => [`Pattern ${pattern}`, value] as [string, Schema],
-    ),
-    ...Object.entries(schema.dependentSchemas ?? {}).map(
-      ([property, value]) =>
-        [`Depends on ${property}`, value] as [string, Schema],
-    ),
-    ...(schema.propertyNames === undefined
-      ? []
-      : ([['Property names', schema.propertyNames]] as Array<
-          [string, Schema]
-        >)),
-    ...(schema.if === undefined
-      ? []
-      : ([['If', schema.if]] as Array<[string, Schema]>)),
-    ...(schema.then === undefined
-      ? []
-      : ([['Then', schema.then]] as Array<[string, Schema]>)),
-    ...(schema.else === undefined
-      ? []
-      : ([['Else', schema.else]] as Array<[string, Schema]>)),
-    ...(schema.not === undefined
-      ? []
-      : ([['Not', schema.not]] as Array<[string, Schema]>)),
-    ...(schema.unevaluatedProperties === undefined
-      ? []
-      : ([['Unevaluated properties', schema.unevaluatedProperties]] as Array<
-          [string, Schema]
-        >)),
-    ...(schema.unevaluatedItems === undefined
-      ? []
-      : ([['Unevaluated items', schema.unevaluatedItems]] as Array<
-          [string, Schema]
-        >)),
-  ];
-  const structuralBody = (
+}
+
+function SchemaStructure({
+  schema,
+  model,
+  depth,
+  collapseObjects,
+  showExample,
+  exampleValue,
+}: {
+  schema: SchemaObject;
+  model: SchemaViewModel;
+  depth: number;
+  collapseObjects: boolean;
+  showExample: boolean;
+  exampleValue: unknown;
+}) {
+  const { properties, alternatives, discriminator, applicators } = model;
+  const childProps = { depth: depth + 1, collapseObjects, showExample };
+  const exampleFields =
+    exampleValue &&
+    typeof exampleValue === 'object' &&
+    !Array.isArray(exampleValue)
+      ? (exampleValue as Record<string, unknown>)
+      : undefined;
+  return (
     <>
       {Object.entries(properties).length > 0 && (
         <div className="sp-schema-properties">
@@ -473,16 +285,8 @@ export function SchemaView({
               name={propertyName}
               schema={property}
               required={schema.required?.includes(propertyName)}
-              depth={depth + 1}
-              collapseObjects={collapseObjects}
-              showExample={showExample}
-              exampleValue={
-                exampleValue &&
-                typeof exampleValue === 'object' &&
-                !Array.isArray(exampleValue)
-                  ? (exampleValue as Record<string, unknown>)[propertyName]
-                  : undefined
-              }
+              exampleValue={exampleFields?.[propertyName]}
+              {...childProps}
             />
           ))}
         </div>
@@ -491,33 +295,23 @@ export function SchemaView({
         <SchemaView
           name="items"
           schema={schema.items}
-          depth={depth + 1}
-          collapseObjects={collapseObjects}
-          showExample={showExample}
           exampleValue={
             Array.isArray(exampleValue) ? exampleValue[0] : undefined
           }
+          {...childProps}
         />
       )}
       {typeof schema.additionalProperties === 'object' && (
         <SchemaView
           name="additional property"
           schema={schema.additionalProperties}
-          depth={depth + 1}
-          collapseObjects={collapseObjects}
-          showExample={showExample}
+          {...childProps}
         />
       )}
       {schema.allOf && (
         <div className="sp-schema-properties">
           {schema.allOf.map((member, index) => (
-            <SchemaView
-              key={index}
-              schema={member}
-              depth={depth + 1}
-              collapseObjects={collapseObjects}
-              showExample={showExample}
-            />
+            <SchemaView key={index} schema={member} {...childProps} />
           ))}
         </div>
       )}
@@ -551,9 +345,7 @@ export function SchemaView({
                         : undefined
                     }
                     schema={alternative}
-                    depth={depth + 1}
-                    collapseObjects={collapseObjects}
-                    showExample={showExample}
+                    {...childProps}
                   />
                 </div>
               );
@@ -566,96 +358,235 @@ export function SchemaView({
           {applicators.map(([label, value]) => (
             <div key={label}>
               <strong>{label}</strong>
-              <SchemaView
-                schema={value}
-                depth={depth + 1}
-                collapseObjects={collapseObjects}
-                showExample={showExample}
-              />
+              <SchemaView schema={value} {...childProps} />
             </div>
           ))}
         </div>
       )}
     </>
   );
-  const className = `sp-schema sp-schema-depth-${Math.min(depth, 3)}`;
-  const hasRootDetails = Boolean(
-    schema.description ||
-    enumValues ||
-    constraints.length > 0 ||
-    schema.default !== undefined ||
-    (exampleValue !== undefined &&
-      (exampleValue === null || typeof exampleValue !== 'object')) ||
-    (showExample && schema.example !== undefined),
-  );
+}
 
-  if (
+function RootSchemaView({
+  schema,
+  required,
+  depth,
+  collapseObjects,
+  showExample,
+  showRootDescription,
+  summaryOnly,
+  exampleValue,
+}: ResolvedSchemaViewProps & { showRootDescription: boolean }) {
+  const explorable =
+    depth === 0 && !summaryOnly
+      ? explorableSchema(schema, exampleValue)
+      : undefined;
+  if (explorable) {
+    return (
+      <SchemaExplorer
+        schema={explorable}
+        showExample={showExample}
+        showRootDescription={showRootDescription}
+        exampleValue={exampleValue}
+      />
+    );
+  }
+  const model = schemaViewModel(schema, exampleValue, showExample);
+  const className = schemaClassName(depth);
+  const head = (
+    <div className={schemaHeadClassName(schema, false)}>
+      <SchemaHeadContents schema={schema} required={required} />
+    </div>
+  );
+  const details = (
+    <SchemaFieldDetails
+      schema={schema}
+      model={model}
+      exampleValue={exampleValue}
+      named={false}
+      showScalarExample={depth === 0}
+    />
+  );
+  const structure = (
+    <SchemaStructure
+      schema={schema}
+      model={model}
+      depth={depth}
+      collapseObjects={collapseObjects}
+      showExample={showExample}
+      exampleValue={exampleValue}
+    />
+  );
+  const primitive =
     depth === 0 &&
-    !name &&
-    !isObject &&
-    !alternatives?.length &&
-    !schema.allOf?.length &&
-    !summaryOnly
-  ) {
+    !summaryOnly &&
+    !model.isObject &&
+    !model.alternatives?.length &&
+    !schema.allOf?.length;
+
+  if (primitive) {
+    const hasDetails = Boolean(
+      schema.description ||
+      model.enumValues ||
+      model.constraints.length > 0 ||
+      schema.default !== undefined ||
+      model.scalarExample ||
+      (showExample && schema.example !== undefined),
+    );
     return (
       <section className={`${className} sp-schema-primitive`}>
         <header className="sp-schema-primitive-header">
           <span className="sp-schema-primitive-icon" aria-hidden="true">
             Aa
           </span>
-          <div>{header}</div>
+          <div>{head}</div>
         </header>
-        {hasRootDetails && (
-          <div className="sp-schema-primitive-details">{fieldDetails}</div>
+        {hasDetails && (
+          <div className="sp-schema-primitive-details">{details}</div>
         )}
-        {structuralBody}
+        {structure}
       </section>
     );
   }
 
-  if (collapseObjects && isObject) {
-    if (name) {
-      return (
-        <div className={`${className} sp-schema-object-shell`}>
-          <div className="sp-schema-field-card">
-            {namedHeader(true)}
-            {detailsOpen && fieldDetails}
-          </div>
-          <DisclosureContent
-            hidden={!structureOpen}
-            key={structureOpen ? 'open' : 'closed'}
-          >
-            {structuralBody}
-          </DisclosureContent>
-        </div>
-      );
-    }
-
+  if (collapseObjects && model.isObject) {
     return (
-      <>
-        <details className={`${className} sp-schema-object`} open>
-          <summary>{header}</summary>
-          {fieldDetails}
-          {structuralBody}
-        </details>
-      </>
+      <details className={`${className} sp-schema-object`} open>
+        <summary>{head}</summary>
+        {details}
+        {structure}
+      </details>
     );
   }
 
   return (
     <div className={className}>
-      {name ? (
-        <div className="sp-schema-field-card">
-          {header}
-          {detailsOpen && fieldDetails}
-        </div>
-      ) : (
-        <>
-          {header}
-          {fieldDetails}
-        </>
+      {head}
+      {details}
+      {!summaryOnly && structure}
+    </div>
+  );
+}
+
+function FieldSchemaView({
+  schema,
+  name,
+  required,
+  depth,
+  collapseObjects,
+  showExample,
+  summaryOnly,
+  exampleValue,
+}: ResolvedSchemaViewProps & { name: string }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [structureOpen, setStructureOpen] = useState(false);
+  const model = schemaViewModel(schema, exampleValue, showExample);
+  const hasDetails = Boolean(
+    schema.description ||
+    model.enumValues ||
+    model.constraints.length > 0 ||
+    schema.xml ||
+    schema.externalDocs?.url ||
+    schema.examples ||
+    schema.default !== undefined ||
+    model.scalarExample ||
+    model.inlineExample,
+  );
+  const collapsible = collapseObjects && model.isObject;
+  const toggleDetails = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDetailsOpen((open) => !open);
+  };
+  const toggleStructure = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setStructureOpen((open) => !open);
+  };
+
+  const card = (
+    <div className="sp-schema-field-card">
+      <div className={schemaHeadClassName(schema, true)}>
+        {collapsible ? (
+          <button
+            type="button"
+            className="sp-schema-structure-toggle"
+            aria-expanded={structureOpen}
+            aria-label={`${structureOpen ? 'Collapse' : 'Expand'} ${name}`}
+            onClick={toggleStructure}
+          >
+            <span />
+          </button>
+        ) : (
+          <span className="sp-schema-structure-spacer" aria-hidden="true" />
+        )}
+        <button
+          type="button"
+          className="sp-schema-head-action"
+          aria-label={`Toggle field ${name}`}
+          onClick={() => {
+            if (collapsible) setStructureOpen((open) => !open);
+            if (hasDetails) setDetailsOpen((open) => !open);
+          }}
+        >
+          <SchemaHeadContents schema={schema} name={name} required={required} />
+        </button>
+        {hasDetails && (
+          <button
+            type="button"
+            className="sp-schema-details-toggle"
+            data-tooltip={
+              detailsOpen ? 'Hide field details' : 'Show field details'
+            }
+            aria-expanded={detailsOpen}
+            aria-label={`${detailsOpen ? 'Hide' : 'Show'} details for ${name}`}
+            onClick={toggleDetails}
+          >
+            <span />
+          </button>
+        )}
+      </div>
+      {detailsOpen && (
+        <SchemaFieldDetails
+          schema={schema}
+          model={model}
+          exampleValue={exampleValue}
+          named
+          showScalarExample
+        />
       )}
-      {!summaryOnly && structuralBody}
+    </div>
+  );
+  const structure = (
+    <SchemaStructure
+      schema={schema}
+      model={model}
+      depth={depth}
+      collapseObjects={collapseObjects}
+      showExample={showExample}
+      exampleValue={exampleValue}
+    />
+  );
+  const className = schemaClassName(depth);
+
+  if (collapsible) {
+    return (
+      <div className={`${className} sp-schema-object-shell`}>
+        {card}
+        <DisclosureContent
+          hidden={!structureOpen}
+          key={structureOpen ? 'open' : 'closed'}
+        >
+          {structure}
+        </DisclosureContent>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {card}
+      {!summaryOnly && structure}
     </div>
   );
 }
@@ -735,11 +666,11 @@ export function MediaContent({
             ))}
           </div>
         )}
-        {showExamples && media.example !== undefined && (
-          <JsonValue value={media.example} />
-        )}
-        {showExamples && media.examples && (
-          <NamedMediaExamples examples={media.examples} />
+        {showExamples && (
+          <>
+            {media.example !== undefined && <JsonValue value={media.example} />}
+            {media.examples && <NamedMediaExamples examples={media.examples} />}
+          </>
         )}
       </section>
     </div>

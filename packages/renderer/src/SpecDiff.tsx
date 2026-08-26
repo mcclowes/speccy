@@ -175,33 +175,33 @@ export function createSideBySideDiff(
   return rows;
 }
 
+const DIFF_SIDES = {
+  before: { heading: 'Before', marker: '−', label: 'Removed line' },
+  after: { heading: 'After', marker: '+', label: 'Added line' },
+} as const;
+type DiffSide = keyof typeof DIFF_SIDES;
+
 function DiffLine({
   side,
   line,
 }: {
-  side: 'before' | 'after';
+  side: DiffSide;
   line?: NonNullable<DiffRow['before']>;
 }) {
-  const changeLabel = line?.changed
-    ? side === 'before'
-      ? 'Removed line'
-      : 'Added line'
-    : undefined;
+  const change = line?.changed ? DIFF_SIDES[side] : undefined;
   return (
     <div
       className={scoped(
-        ['sp-diff-line', line?.changed && `is-${side}`, !line && 'is-empty']
+        ['sp-diff-line', change && `is-${side}`, !line && 'is-empty']
           .filter(Boolean)
           .join(' '),
       )}
     >
       <span className={scoped('sp-diff-line-number')}>{line?.number}</span>
       <span className={scoped('sp-diff-line-marker')} aria-hidden="true">
-        {line?.changed ? (side === 'before' ? '−' : '+') : ' '}
+        {change?.marker ?? ' '}
       </span>
-      {changeLabel && (
-        <span className="sp-visually-hidden">{changeLabel}: </span>
-      )}
+      {change && <span className="sp-visually-hidden">{change.label}: </span>}
       <code>{line?.text ?? ' '}</code>
     </div>
   );
@@ -213,21 +213,26 @@ function ChangeValues({ before, after }: Pick<ApiChange, 'before' | 'after'>) {
     [before, after],
   );
   if (before === undefined && after === undefined) return null;
+  const sides = Object.keys(DIFF_SIDES) as DiffSide[];
   return (
     <div className={scoped('sp-diff-values-scroll')}>
       <div className={scoped('sp-diff-values')}>
-        <div className={scoped('sp-diff-value-heading')}>Before</div>
-        <div className={scoped('sp-diff-value-heading')}>After</div>
-        <div className={scoped('sp-diff-code')} aria-label="Before value">
-          {rows.map((row, index) => (
-            <DiffLine key={index} side="before" line={row.before} />
-          ))}
-        </div>
-        <div className={scoped('sp-diff-code')} aria-label="After value">
-          {rows.map((row, index) => (
-            <DiffLine key={index} side="after" line={row.after} />
-          ))}
-        </div>
+        {sides.map((side) => (
+          <div key={side} className={scoped('sp-diff-value-heading')}>
+            {DIFF_SIDES[side].heading}
+          </div>
+        ))}
+        {sides.map((side) => (
+          <div
+            key={side}
+            className={scoped('sp-diff-code')}
+            aria-label={`${DIFF_SIDES[side].heading} value`}
+          >
+            {rows.map((row, index) => (
+              <DiffLine key={index} side={side} line={row[side]} />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -237,14 +242,19 @@ function inferredArea(change: ApiChange): DiffArea {
   if (change.scope) return change.scope.area;
   if (change.severity === 'documentation') return 'documentation';
   const [root, , method, member] = change.location;
-  if (root === 'paths' && method && member === 'requestBody')
-    return 'request-body';
-  if (root === 'paths' && method && member === 'responses')
-    return change.location[5] === 'headers' ? 'headers' : 'response-body';
-  if (root === 'paths' && method && member === 'parameters')
-    return 'parameters';
-  if (root === 'paths' && method && member === 'security') return 'security';
-  return 'operation';
+  if (root !== 'paths' || !method) return 'operation';
+  switch (member) {
+    case 'requestBody':
+      return 'request-body';
+    case 'responses':
+      return change.location[5] === 'headers' ? 'headers' : 'response-body';
+    case 'parameters':
+      return 'parameters';
+    case 'security':
+      return 'security';
+    default:
+      return 'operation';
+  }
 }
 
 function areaLabel(area: DiffArea) {
@@ -306,6 +316,7 @@ function ChangeDetails({
   onExpandedChange: (expanded: boolean) => void;
 }) {
   const area = inferredArea(change);
+  const affected = change.affectedOperations ?? [];
   const sources = [
     change.source?.base && (['Base', change.source.base] as const),
     change.source?.revision && (['Revision', change.source.revision] as const),
@@ -372,25 +383,22 @@ function ChangeDetails({
               ))}
             </div>
           )}
-          {change.affectedOperations &&
-            change.affectedOperations.length > 0 && (
-              <div className={scoped('sp-diff-affected-operations')}>
-                <strong>
-                  Affects {change.affectedOperations.length}{' '}
-                  {change.affectedOperations.length === 1
-                    ? 'operation'
-                    : 'operations'}
-                </strong>
-                <ul>
-                  {change.affectedOperations.map((operation) => (
-                    <li key={`${operation.method}:${operation.path}`}>
-                      <MethodBadge method={operation.method.toLowerCase()} />{' '}
-                      <code>{operation.path}</code>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {affected.length > 0 && (
+            <div className={scoped('sp-diff-affected-operations')}>
+              <strong>
+                Affects {affected.length}{' '}
+                {affected.length === 1 ? 'operation' : 'operations'}
+              </strong>
+              <ul>
+                {affected.map((operation) => (
+                  <li key={`${operation.method}:${operation.path}`}>
+                    <MethodBadge method={operation.method.toLowerCase()} />{' '}
+                    <code>{operation.path}</code>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {expanded && (
             <ChangeValues before={change.before} after={change.after} />
           )}
@@ -412,62 +420,41 @@ function OperationChanges({
   onExpandedChange: (id: string, expanded: boolean) => void;
 }) {
   const first = changes[0]!;
-  const isOperation = Boolean(first.method && first.path);
-  const wholeOperation = changes.find(
-    (change) =>
-      inferredArea(change) === 'operation' &&
-      (change.kind === 'added' || change.kind === 'removed'),
-  );
   const severity = changes.reduce(
     (worst, change) =>
       SEVERITY_ORDER.get(change.severity)! < SEVERITY_ORDER.get(worst)!
         ? change.severity
         : worst,
-    changes[0]!.severity,
+    first.severity,
+  );
+
+  const { areaCounts, wholeOperation } = summarizeChanges(changes);
+  const heading = first.method && first.path && (
+    <header className={scoped('sp-diff-operation-heading')}>
+      <div>
+        <MethodBadge method={first.method.toLowerCase()} />
+        <code className={scoped('sp-diff-path')}>{first.path}</code>
+      </div>
+      <span>
+        {changes.length} {changes.length === 1 ? 'change' : 'changes'}
+      </span>
+    </header>
+  );
+  // The whole-operation note is deliberately not gated on `heading`, matching prior output.
+  const impact = wholeOperation ? (
+    <div className={scoped('sp-diff-whole-operation')}>
+      The entire operation was {wholeOperation.kind}.
+    </div>
+  ) : (
+    heading && <OperationImpact areaCounts={areaCounts} />
   );
 
   return (
     <article
       className={scoped(`sp-diff-operation sp-diff-operation-${severity}`)}
     >
-      {isOperation && (
-        <header className={scoped('sp-diff-operation-heading')}>
-          <div>
-            <MethodBadge method={first.method!.toLowerCase()} />
-            <code className={scoped('sp-diff-path')}>{first.path}</code>
-          </div>
-          <span>
-            {changes.length} {changes.length === 1 ? 'change' : 'changes'}
-          </span>
-        </header>
-      )}
-      {isOperation && !wholeOperation && (
-        <div className={scoped('sp-diff-impact')} aria-label="Operation impact">
-          {OPERATION_AREAS.map(({ value, label }) => {
-            const affected = changes.filter(
-              (change) => inferredArea(change) === value,
-            );
-            return (
-              <div
-                className={scoped(
-                  affected.length ? 'is-affected' : 'is-unchanged',
-                )}
-                key={value}
-              >
-                <span>{label}</span>
-                <strong>
-                  {affected.length ? `${affected.length} changed` : 'Unchanged'}
-                </strong>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {wholeOperation && (
-        <div className={scoped('sp-diff-whole-operation')}>
-          The entire operation was {wholeOperation.kind}.
-        </div>
-      )}
+      {heading}
+      {impact}
       <div className={scoped('sp-diff-change-list')}>
         {changes.map((change) => (
           <ChangeDetails
@@ -482,6 +469,45 @@ function OperationChanges({
         ))}
       </div>
     </article>
+  );
+}
+
+function summarizeChanges(changes: ApiChange[]) {
+  const areaCounts = new Map<DiffArea, number>();
+  let wholeOperation: ApiChange | undefined;
+  for (const change of changes) {
+    const area = inferredArea(change);
+    areaCounts.set(area, (areaCounts.get(area) ?? 0) + 1);
+    if (
+      !wholeOperation &&
+      area === 'operation' &&
+      (change.kind === 'added' || change.kind === 'removed')
+    )
+      wholeOperation = change;
+  }
+  return { areaCounts, wholeOperation };
+}
+
+function OperationImpact({
+  areaCounts,
+}: {
+  areaCounts: Map<DiffArea, number>;
+}) {
+  return (
+    <div className={scoped('sp-diff-impact')} aria-label="Operation impact">
+      {OPERATION_AREAS.map(({ value, label }) => {
+        const count = areaCounts.get(value) ?? 0;
+        return (
+          <div
+            className={scoped(count ? 'is-affected' : 'is-unchanged')}
+            key={value}
+          >
+            <span>{label}</span>
+            <strong>{count ? `${count} changed` : 'Unchanged'}</strong>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
