@@ -2,6 +2,37 @@ import { describe, expect, it } from 'vitest';
 import { serializeRequestBody } from './requestBodySerialization';
 
 describe('OpenAPI request body serialization', () => {
+  it('preserves reserved characters for URL-encoded properties that allow them', () => {
+    expect(
+      serializeRequestBody(
+        'application/x-www-form-urlencoded',
+        {
+          schema: { type: 'object' },
+          encoding: { callback: { allowReserved: true } },
+        },
+        '{"callback":"https://client.example/callback?state=ready"}',
+      ),
+    ).toEqual({
+      body: 'callback=https://client.example/callback?state=ready',
+      contentType: 'application/x-www-form-urlencoded',
+    });
+  });
+
+  it('applies allowReserved to every pair from an exploded object property', () => {
+    expect(
+      serializeRequestBody(
+        'application/x-www-form-urlencoded',
+        {
+          schema: { type: 'object' },
+          encoding: {
+            filter: { style: 'form', explode: true, allowReserved: true },
+          },
+        },
+        '{"filter":{"next":"https://client.example/next","state":"ready"}}',
+      ).body,
+    ).toBe('next=https://client.example/next&state=ready');
+  });
+
   it('serializes URL-encoded bodies using property encoding rules', () => {
     expect(
       serializeRequestBody(

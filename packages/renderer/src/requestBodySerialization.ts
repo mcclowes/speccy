@@ -29,6 +29,15 @@ function scalar(value: unknown): string {
     : String(value ?? '');
 }
 
+function encodeFormValue(value: string, allowReserved: boolean): string {
+  const encoded = encodeURIComponent(value);
+  if (!allowReserved) return encoded;
+  return encoded.replace(
+    /%3A|%2F|%3F|%23|%5B|%5D|%40|%21|%24|%26|%27|%28|%29|%2A|%2B|%2C|%3B|%3D/gi,
+    (part) => decodeURIComponent(part),
+  );
+}
+
 export function serializeRequestBody(
   mediaType: string,
   media: MediaType,
@@ -47,7 +56,7 @@ export function serializeRequestBody(
 
   const fields = Object.entries(value);
   if (mediaType === 'application/x-www-form-urlencoded') {
-    const pairs = fields.reduce<Array<[string, string]>>(
+    const pairs = fields.reduce<Array<[string, string, boolean]>>(
       (result, [name, fieldValue]) => {
         const encoding = media.encoding?.[name];
         const serialized = serializeParameter(
@@ -61,8 +70,21 @@ export function serializeRequestBody(
         );
         result.push(
           ...(Array.isArray(serialized)
-            ? serialized
-            : [[name, serialized] satisfies [string, string]]),
+            ? serialized.map(
+                ([pairName, item]) =>
+                  [pairName, item, encoding?.allowReserved === true] satisfies [
+                    string,
+                    string,
+                    boolean,
+                  ],
+              )
+            : [
+                [name, serialized, encoding?.allowReserved === true] satisfies [
+                  string,
+                  string,
+                  boolean,
+                ],
+              ]),
         );
         return result;
       },
@@ -70,10 +92,9 @@ export function serializeRequestBody(
     );
     return {
       body: pairs
-        .map(
-          ([name, item]) =>
-            `${encodeURIComponent(name)}=${encodeURIComponent(item)}`,
-        )
+        .map(([name, item, allowReserved]) => {
+          return `${encodeURIComponent(name)}=${encodeFormValue(item, allowReserved)}`;
+        })
         .join('&'),
       contentType: mediaType,
     };

@@ -37,6 +37,8 @@ The visible request sample masks credentials. Copying the sample includes the va
 
 Required path, query, header, and cookie parameters appear first. Select **Add optional parameter** to include an optional value. Speccy follows the parameter location, style, and explode rules in the OpenAPI document when it builds the URL, headers, and cookies.
 
+Query parameters and URL-encoded request-body properties also honor `allowReserved`. When it is `true`, OpenAPI reserved characters such as `/`, `?`, and `:` remain readable in the wire value. Other values are percent-encoded.
+
 When `parameterPrototype` is `false`, the builder shows the first optional parameters immediately and lets readers expand the rest. The default prototype keeps optional values out of the request until the reader adds them.
 
 For operations with a request body, Speccy selects the first declared media type and starts with the best available example. Named examples can be selected from the request body card. If the document has no example, Speccy creates an initial value from the schema.

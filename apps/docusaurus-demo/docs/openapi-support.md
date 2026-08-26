@@ -28,7 +28,7 @@ Coverage has three levels:
 | Multi-file and URL references                                                                    | Focused in core    | Focused in core   |
 | Schema composition, constraints, examples, formats, and discriminators                           | Focused            | Focused           |
 | Boolean schemas and JSON Schema 2020-12 keywords                                                 | Not defined by 3.0 | Fixture + focused |
-| Parameter styles and explode combinations                                                        | Focused, partial   | Focused, partial  |
+| Parameter styles, value shapes, explode combinations, and reserved characters                    | Focused            | Focused           |
 | JSON, URL-encoded, multipart, and alternate response media types                                 | Focused, partial   | Focused, partial  |
 | Malformed YAML and missing version metadata                                                      | Focused            | Focused           |
 
