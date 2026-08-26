@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.13.1
+
+### Patch Changes
+
+- [`8b053f3`](https://github.com/mcclowes/speccy/commit/8b053f31940b938779c4c5cb64279321bb9b0af5) Thanks [@mcclowes](https://github.com/mcclowes)! - Preserve reserved characters in URL-encoded request-body properties when their OpenAPI encoding enables `allowReserved`.
+
+- Updated dependencies []:
+  - speccy-core@0.13.1
+
 ## 0.13.0
 
 ### Minor Changes
