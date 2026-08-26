@@ -13,6 +13,43 @@ tags:
   - name: Pets
     description: Pet operations.
 paths:
+  /method-coverage:
+    put:
+      operationId: replaceCoverage
+      summary: Replace method coverage
+      responses:
+        '204':
+          description: Replaced.
+    patch:
+      operationId: patchCoverage
+      summary: Patch method coverage
+      responses:
+        '204':
+          description: Patched.
+    delete:
+      operationId: deleteCoverage
+      summary: Delete method coverage
+      responses:
+        '204':
+          description: Deleted.
+    options:
+      operationId: optionsCoverage
+      summary: Inspect method options
+      responses:
+        '204':
+          description: Options returned.
+    head:
+      operationId: headCoverage
+      summary: Inspect method headers
+      responses:
+        '204':
+          description: Headers returned.
+    trace:
+      operationId: traceCoverage
+      summary: Trace method coverage
+      responses:
+        '200':
+          description: Trace returned.
   /pets/{petId}:
     parameters:
       - $ref: '#/components/parameters/PetId'

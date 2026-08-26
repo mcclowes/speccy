@@ -11,19 +11,28 @@ Speccy accepts YAML or JSON. Local references are resolved before rendering, and
 
 ## Coverage
 
-The compatibility fixtures exercise the following parts of an OpenAPI document through the public renderer:
+Coverage has three levels:
 
-| Area                                                                                             | OpenAPI 3.0        | OpenAPI 3.1 |
-| ------------------------------------------------------------------------------------------------ | ------------------ | ----------- |
-| Document metadata, servers, variables, tags, paths, and operations                               | Tested             | Tested      |
-| Parameters, request bodies, responses, headers, examples, links, callbacks, and security schemes | Tested             | Tested      |
-| Reusable path items and top-level webhooks                                                       | Not defined by 3.0 | Tested      |
-| Local `$ref` pointers and reusable component references                                          | Tested             | Tested      |
-| Schema composition, constraints, examples, formats, and discriminators                           | Tested             | Tested      |
-| Boolean schemas and JSON Schema 2020-12 keywords                                                 | Not defined by 3.0 | Tested      |
-| Request parameter and body serialization                                                         | Tested             | Tested      |
+- **Fixture** means a complete versioned YAML document exercises the behavior through the public renderer.
+- **Focused** means smaller tests cover the behavior or its combinations directly.
+- **Partial** means representative cases are covered, but the specification allows more combinations than the suite enumerates.
 
-The suite renders overview, operation, component, and webhook routes from complete YAML fixtures. Smaller regression tests cover reference cycles, escaped JSON pointers, parameter styles, request media types, Markdown, security alternatives, and malformed input.
+| Area                                                                                             | OpenAPI 3.0        | OpenAPI 3.1       |
+| ------------------------------------------------------------------------------------------------ | ------------------ | ----------------- |
+| Document metadata, servers, variables, tags, paths, and operations                               | Fixture + focused  | Fixture + focused |
+| GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD, and TRACE routes                                   | Fixture            | Shared model      |
+| Parameters, request bodies, responses, headers, examples, links, callbacks, and security schemes | Fixture + focused  | Fixture + focused |
+| API key, HTTP, OAuth 2, OpenID Connect, and mutual TLS schemes                                   | Fixture + focused  | Fixture + focused |
+| Reusable path items and top-level webhooks                                                       | Not defined by 3.0 | Fixture + focused |
+| Local `$ref`, escaped JSON Pointer tokens, siblings, and circular schemas                        | Focused            | Focused           |
+| Multi-file and URL references                                                                    | Focused in core    | Focused in core   |
+| Schema composition, constraints, examples, formats, and discriminators                           | Focused            | Focused           |
+| Boolean schemas and JSON Schema 2020-12 keywords                                                 | Not defined by 3.0 | Fixture + focused |
+| Parameter styles and explode combinations                                                        | Focused, partial   | Focused, partial  |
+| JSON, URL-encoded, multipart, and alternate response media types                                 | Focused, partial   | Focused, partial  |
+| Malformed YAML and missing version metadata                                                      | Focused            | Focused           |
+
+The suite renders overview, operation, component, and webhook routes from the versioned fixtures. It also checks accessible names for the rendered controls and fields. This is broad behavioral coverage, not a claim that every legal combination in the OpenAPI schemas is enumerated.
 
 ## Rendering and validation
 
