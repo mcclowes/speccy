@@ -3,7 +3,9 @@
  * purpose: Renders a complete, searchable OpenAPI reference from the normalized model.
  * related:
  *   - ../../core/src/model.ts - Parses input and builds tag and operation groups.
- *   - ./OperationDetails.tsx - Owns request execution and operation detail presentation.
+ *   - ./SidebarNavigation.tsx - Owns the sidebar, endpoint filter, and tag groups.
+ *   - ./OverviewPage.tsx - Owns the API overview page.
+ *   - ./EndpointPage.tsx - Owns the endpoint and webhook detail page.
  *   - ./QuickSearch.tsx - Owns searchable keyboard navigation.
  *   - ./Speccy.module.css - Owns component-specific renderer styles.
  *   - ./styles.css - Owns the visual system and responsive layout.
@@ -13,6 +15,7 @@
 
 import {
   type CSSProperties,
+  type ReactNode,
   useEffect,
   useMemo,
   useRef,
@@ -21,619 +24,42 @@ import {
 import {
   analyzeOpenApi,
   createReferenceModel,
-  effectiveParameters,
   expandServerUrl,
-  operationsInDeclarationOrder,
   parseSpec,
   slugify,
+  type ApiDiagnostic,
   type OpenAPIDocument,
   type OperationModel,
-  type ResponseObject,
-  type ServerObject,
   type TagModel,
 } from 'speccy-core';
-import { CopyButton } from './CodeBlock';
-import {
-  ApiPath,
-  DisclosureChevron,
-  DisclosureContent,
-  httpMethodLabel,
-  MethodBadge,
-} from './DesignSystem';
-import {
-  DeveloperDiagnostics,
-  InlineDiagnostics,
-} from './DeveloperDiagnostics';
-import { Markdown } from './Markdown';
-import { OpenApiDownload } from './OpenApiDownload';
-import { OperationRelationships } from './OperationRelationships';
-import {
-  CodeSample,
-  EndpointResponses,
-  EndpointRequestDetails,
-  RequestRail,
-  SecurityRequirements,
-} from './OperationDetails';
+import { httpMethodLabel } from './DesignSystem';
+import { DeveloperDiagnostics } from './DeveloperDiagnostics';
+import { EndpointPage } from './EndpointPage';
+import { OverviewPage } from './OverviewPage';
 import { QuickSearch, type SearchResult } from './QuickSearch';
 import {
   componentAnchorId,
   DocumentReference,
-  ReferenceNavigation,
   REFERENCE_GROUPS,
   type ReferenceKey,
 } from './ReferenceSections';
-import {
-  ParameterDetails,
-  RequestBodyDetails,
-  ResponseDetails,
-} from './ResourceDetails';
 import { parseRoutePath, routePath } from './routing';
+import { SidebarNavigation } from './SidebarNavigation';
 import styles from './Speccy.module.css';
-import type { SpeccyProps, SpeccyRoute } from './types';
+import { TagOverview } from './TagOverview';
 import { ThemeToggle, type Theme } from './ThemeToggle';
+import type { SpeccyProps, SpeccyRoute } from './types';
 import { useLocalState } from './useLocalState';
+import { tagSlug } from './operationSummary';
+import { WebhookReference } from './WebhookReference';
 
-function operationTitle(item: OperationModel): string {
-  return (
-    item.operation.summary ??
-    item.operation.operationId ??
-    (item.source === 'webhook' ? item.path : 'Untitled operation')
-  );
-}
+type ReferenceModel = ReturnType<typeof createReferenceModel>;
 
-const COMPACT_ENDPOINT_WIDTH = 900;
-
-function scrollWithinContainer(
-  container: HTMLElement,
-  element: HTMLElement,
-): void {
-  const containerRect = container.getBoundingClientRect();
-  const elementRect = element.getBoundingClientRect();
-
-  if (elementRect.top < containerRect.top)
-    container.scrollTop -= containerRect.top - elementRect.top;
-  else if (elementRect.bottom > containerRect.bottom)
-    container.scrollTop += elementRect.bottom - containerRect.bottom;
-}
-
-function useCompactEndpointLayout(element: HTMLElement | null): boolean {
-  const [compact, setCompact] = useState(false);
-
-  useEffect(() => {
-    if (!element || typeof ResizeObserver === 'undefined') return;
-
-    const update = (width: number) => {
-      if (width > 0) setCompact(width <= COMPACT_ENDPOINT_WIDTH);
-    };
-    update(element.getBoundingClientRect().width);
-
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) update(entry.contentRect.width);
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [element]);
-
-  return compact;
-}
-
-function OperationBadge({
-  item,
-  compact = false,
-}: {
-  item: OperationModel;
-  compact?: boolean;
-}) {
-  return (
-    <MethodBadge
-      method={item.method}
-      compact={compact}
-      webhook={item.source === 'webhook'}
-    />
-  );
-}
-
-function operationLifecycle(item: OperationModel): string | undefined {
-  const lifecycle = item.operation['x-speccy-lifecycle'];
-  return typeof lifecycle === 'string' && lifecycle.trim()
-    ? lifecycle.trim()
-    : undefined;
-}
-
-function LifecycleBadge({ item }: { item: OperationModel }) {
-  const lifecycle = operationLifecycle(item);
-  if (!lifecycle) return null;
-
-  const normalized = lifecycle.toLocaleLowerCase().replace(/[\s_]+/g, '-');
-  const label = normalized
-    .split('-')
-    .filter(Boolean)
-    .map((word) => word[0]?.toLocaleUpperCase() + word.slice(1))
-    .join(' ');
-  const variant = ['new', 'coming-soon', 'beta'].includes(normalized)
-    ? normalized
-    : 'custom';
-
-  return (
-    <span className={`sp-lifecycle sp-lifecycle-${variant}`}>{label}</span>
-  );
-}
-
-function ParameterList({
-  parameters,
-}: {
-  parameters: NonNullable<OperationModel['operation']['parameters']>;
-}) {
-  if (parameters.length === 0) return null;
-  return (
-    <section className="sp-section">
-      <h4>Parameters</h4>
-      <div className="sp-parameter-list">
-        {parameters.map((parameter, index) => (
-          <ParameterDetails
-            parameter={parameter}
-            density="compact"
-            key={`${parameter.in}-${parameter.name}-${index}`}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RequestBodyView({
-  operation,
-}: {
-  operation: OperationModel['operation'];
-}) {
-  const body = operation.requestBody;
-  if (!body) return null;
-  return (
-    <section className="sp-section">
-      <RequestBodyDetails
-        body={body}
-        density="compact"
-        title={<h4>Request body</h4>}
-      />
-    </section>
-  );
-}
-
-function ResponseView({
-  code,
-  response,
-}: {
-  code: string;
-  response: ResponseObject;
-}) {
-  const [open, setOpen] = useState(code.startsWith('2'));
-  return (
-    <div className="sp-response">
-      <button
-        type="button"
-        className="sp-response-head"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-      >
-        <span
-          className={`sp-status ${code.startsWith('2') ? 'is-success' : ''}`}
-        >
-          {code}
-        </span>
-        <span>Response</span>
-        <DisclosureChevron />
-      </button>
-      {open && (
-        <div className="sp-response-body">
-          <ResponseDetails
-            response={response}
-            density="compact"
-            collapseObjects
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EndpointPage({
-  item,
-  tag,
-  server,
-  document,
-  storageScope,
-  parameterPrototype,
-  tryIt,
-  diagnostics = [],
-  onViewAllDiagnostics,
-  onNavigateTag,
-  hrefForRoute,
-  operations,
-  onNavigateOperation,
-}: {
-  item: OperationModel;
-  tag: TagModel;
-  server: string;
-  document: OpenAPIDocument;
-  storageScope: string;
-  parameterPrototype?: boolean;
-  tryIt: boolean;
-  diagnostics?: ReturnType<typeof analyzeOpenApi>;
-  onViewAllDiagnostics: () => void;
-  onNavigateTag: (tag: TagModel) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-  operations: OperationModel[];
-  onNavigateOperation: (operationId: string) => void;
-}) {
-  const [endpointElement, setEndpointElement] = useState<HTMLElement | null>(
-    null,
-  );
-  const compactLayout = useCompactEndpointLayout(endpointElement);
-  const parameters = effectiveParameters(item.pathItem, item.operation);
-  const requirements = item.operation.security ?? document.security;
-  const isWebhook = item.source === 'webhook';
-  const servers = effectiveServers(item, document);
-  const primaryServer = servers[0];
-  const effectiveServer = primaryServer?.url
-    ? expandServerUrl(primaryServer.url, primaryServer.variables)
-    : server;
-  return (
-    <article
-      id={item.id}
-      className={`sp-endpoint sp-method-${item.method}`}
-      ref={setEndpointElement}
-    >
-      <div className={`sp-endpoint-hero ${isWebhook ? 'is-webhook' : ''}`}>
-        <header className="sp-endpoint-header">
-          <a
-            className="sp-tag-kicker sp-tag-link"
-            href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
-            onClick={(event) => {
-              event.preventDefault();
-              onNavigateTag(tag);
-            }}
-          >
-            {item.tag}
-          </a>
-          <div
-            className={`sp-endpoint-title${item.operation.deprecated ? ' is-deprecated' : ''}`}
-          >
-            <h1>{operationTitle(item)}</h1>
-            <LifecycleBadge item={item} />
-          </div>
-          <div className="sp-endpoint-address">
-            {item.operation.deprecated && (
-              <span className="sp-deprecated">deprecated</span>
-            )}
-            <OperationBadge item={item} />
-            <ApiPath value={item.path} wrap />
-            <CopyButton value={item.path} label="Copy endpoint path" compact />
-          </div>
-          {item.pathItem.summary && (
-            <p className="sp-endpoint-path-summary">{item.pathItem.summary}</p>
-          )}
-          <Markdown>{item.pathItem.description}</Markdown>
-          <Markdown>{item.operation.description}</Markdown>
-          {item.operation.externalDocs?.url && (
-            <a href={item.operation.externalDocs.url}>
-              {item.operation.externalDocs.description ??
-                'External documentation'}
-            </a>
-          )}
-          <InlineDiagnostics
-            diagnostics={diagnostics.filter(
-              (diagnostic) => diagnostic.operationId === item.id,
-            )}
-            onViewAll={onViewAllDiagnostics}
-          />
-          <OperationRelationships
-            item={item}
-            operations={operations}
-            hrefForOperation={(operationId) =>
-              hrefForRoute({ page: 'operation', operationId })
-            }
-            onNavigate={onNavigateOperation}
-          />
-        </header>
-        {tryIt && !compactLayout && (
-          <RequestRail
-            item={item}
-            server={effectiveServer}
-            security={document.security}
-            securitySchemes={
-              document.components?.securitySchemes ??
-              document.securityDefinitions
-            }
-            storageScope={storageScope}
-            parameterPrototype={parameterPrototype}
-          />
-        )}
-      </div>
-      {!isWebhook && (
-        <div className="sp-request-heading">
-          <h2>Request</h2>
-          <EndpointServers item={item} document={document} />
-        </div>
-      )}
-      <div className={`sp-endpoint-layout ${isWebhook ? 'is-webhook' : ''}`}>
-        <div className="sp-endpoint-main">
-          {!isWebhook && (
-            <EndpointRequestDetails
-              path={item.path}
-              parameters={parameters}
-              body={item.operation.requestBody}
-              security={requirements}
-              securitySchemes={document.components?.securitySchemes}
-              parameterPrototype={parameterPrototype}
-            />
-          )}
-          {isWebhook && item.operation.requestBody && (
-            <section className="sp-endpoint-section sp-request-body">
-              <RequestBodyDetails
-                body={item.operation.requestBody}
-                title={<h2>Payload</h2>}
-                collapseObjects
-              />
-            </section>
-          )}
-        </div>
-      </div>
-      {item.operation.responses && (
-        <EndpointResponses responses={item.operation.responses} />
-      )}
-      {item.operation.callbacks && (
-        <CallbackList
-          callbacks={item.operation.callbacks}
-          server={effectiveServer}
-        />
-      )}
-      {tryIt && compactLayout && (
-        <>
-          <div className="sp-request-heading sp-try-it-heading">
-            <h2>Try it out</h2>
-          </div>
-          <RequestRail
-            item={item}
-            server={effectiveServer}
-            security={document.security}
-            securitySchemes={
-              document.components?.securitySchemes ??
-              document.securityDefinitions
-            }
-            storageScope={storageScope}
-            parameterPrototype={parameterPrototype}
-          />
-        </>
-      )}
-    </article>
-  );
-}
-
-function effectiveServers(
-  item: OperationModel,
-  document: OpenAPIDocument,
-): ServerObject[] {
-  return (
-    item.operation.servers ?? item.pathItem.servers ?? document.servers ?? []
-  );
-}
-
-function EndpointServers({
-  item,
-  document,
-}: {
-  item: OperationModel;
-  document: OpenAPIDocument;
-}) {
-  const scopedServers = item.operation.servers ?? item.pathItem.servers;
-  const effective = effectiveServers(item, document).filter(
-    (server): server is ServerObject & { url: string } => Boolean(server.url),
-  );
-  const effectiveUrls = new Set(
-    effective.map((server) => expandServerUrl(server.url, server.variables)),
-  );
-  const rootServers = (document.servers ?? []).filter(
-    (server): server is ServerObject & { url: string } => Boolean(server.url),
-  );
-  if (scopedServers === undefined && rootServers.length <= 1) return null;
-  const rootUrls = new Set(
-    rootServers.map((server) => expandServerUrl(server.url, server.variables)),
-  );
-  const displayedServers = [
-    ...rootServers.map((server) => ({
-      server,
-      available:
-        scopedServers === undefined ||
-        effectiveUrls.has(expandServerUrl(server.url, server.variables)),
-    })),
-    ...effective
-      .filter(
-        (server) =>
-          !rootUrls.has(expandServerUrl(server.url, server.variables)),
-      )
-      .map((server) => ({ server, available: true })),
-  ];
-  if (!displayedServers.length) return null;
-
-  return (
-    <div className="sp-endpoint-servers" aria-label="Endpoint availability">
-      <span className="sp-endpoint-servers-label">Available on</span>
-      <div className="sp-endpoint-server-list">
-        {displayedServers.map(({ server, available }, index) => {
-          const url = expandServerUrl(server.url, server.variables);
-          const name = server.description ?? 'Base URL';
-          const availabilityLabel = available
-            ? `${name}: available at ${url}`
-            : `${name}: unavailable for this endpoint`;
-          return (
-            <span
-              className={`sp-endpoint-server${available ? '' : ' is-unavailable'}`}
-              key={`${server.url}-${index}`}
-              aria-label={availabilityLabel}
-              data-tooltip={available ? url : undefined}
-              tabIndex={available ? 0 : undefined}
-              title={available ? undefined : 'Unavailable for this endpoint'}
-            >
-              <span>{name}</span>
-              {!available && <code>{url}</code>}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function OperationCard({
-  item,
-  server,
-  defaultExpanded,
-  context = 'operation',
-}: {
-  item: OperationModel;
-  server: string;
-  defaultExpanded: boolean;
-  context?: 'operation' | 'callback';
-}) {
-  const [open, setOpen] = useState(defaultExpanded);
-  const parameters = effectiveParameters(item.pathItem, item.operation);
-  const scopedServer =
-    item.operation.servers?.[0] ?? item.pathItem.servers?.[0];
-  const effectiveServer = scopedServer?.url
-    ? expandServerUrl(scopedServer.url, scopedServer.variables)
-    : server;
-  return (
-    <article
-      id={item.id}
-      className={`sp-operation sp-method-${item.method}${context === 'callback' ? ' sp-callback-operation' : ''}`}
-    >
-      <button
-        type="button"
-        className="sp-operation-summary"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-      >
-        {context === 'callback' ? (
-          <MethodBadge method={item.method} />
-        ) : (
-          <OperationBadge item={item} />
-        )}
-        {context === 'operation' && <ApiPath value={item.path} />}
-        <span className="sp-operation-name">{operationTitle(item)}</span>
-        <span className="sp-operation-metadata">
-          <LifecycleBadge item={item} />
-          {item.operation.deprecated && (
-            <span className="sp-deprecated">deprecated</span>
-          )}
-        </span>
-        <DisclosureChevron />
-      </button>
-      {open && (
-        <div className="sp-operation-body">
-          <div className="sp-operation-main">
-            <Markdown>{item.operation.description}</Markdown>
-            <SecurityRequirements requirements={item.operation.security} />
-            <ParameterList parameters={parameters} />
-            <RequestBodyView operation={item.operation} />
-            {item.operation.responses && (
-              <section className="sp-section">
-                <h4>Responses</h4>
-                <div className="sp-responses">
-                  {Object.entries(item.operation.responses).map(
-                    ([code, response]) => (
-                      <ResponseView
-                        key={code}
-                        code={code}
-                        response={response}
-                      />
-                    ),
-                  )}
-                </div>
-              </section>
-            )}
-            {item.operation.callbacks && (
-              <CallbackList
-                callbacks={item.operation.callbacks}
-                server={effectiveServer}
-              />
-            )}
-          </div>
-          {context === 'operation' && (
-            <CodeSample item={item} server={effectiveServer} />
-          )}
-        </div>
-      )}
-    </article>
-  );
-}
-
-function CallbackList({
-  callbacks,
-  server,
-}: {
-  callbacks: NonNullable<OperationModel['operation']['callbacks']>;
-  server: string;
-}) {
-  return (
-    <section className="sp-section sp-callbacks">
-      <h4>Callbacks</h4>
-      <p className="sp-callbacks-intro">
-        After this operation, the API may send an HTTP request to a URL supplied
-        by the caller.
-      </p>
-      {Object.entries(callbacks).map(([name, callback]) => (
-        <div className="sp-callback" key={name}>
-          <div className="sp-callback-heading">
-            <h5>{name}</h5>
-            <span>API-initiated request</span>
-          </div>
-          {Object.entries(callback)
-            .filter(([expression]) => expression !== '$ref')
-            .map(
-              ([expression, pathItem]) =>
-                typeof pathItem !== 'string' && (
-                  <div key={expression}>
-                    <div className="sp-callback-destination">
-                      <span>Destination from the original request</span>
-                      <code>{expression}</code>
-                    </div>
-                    {operationsInDeclarationOrder(pathItem).map(
-                      ([method, operation]) => {
-                        const item: OperationModel = {
-                          id: slugify(
-                            `callback-${name}-${method}-${expression}`,
-                          ),
-                          method,
-                          path: expression,
-                          operation,
-                          pathItem,
-                          tag: 'Callbacks',
-                          tags: ['Callbacks'],
-                          source: 'webhook',
-                        };
-                        return (
-                          <OperationCard
-                            key={method}
-                            item={item}
-                            server={server}
-                            defaultExpanded={false}
-                            context="callback"
-                          />
-                        );
-                      },
-                    )}
-                  </div>
-                ),
-            )}
-        </div>
-      ))}
-    </section>
-  );
-}
-
-function tagSlug(tag: TagModel): string {
-  return slugify(tag.name) || tag.name;
-}
+type ActivePage =
+  | { kind: 'overview' }
+  | { kind: 'tag'; tag: TagModel }
+  | { kind: 'operation'; item: OperationModel }
+  | { kind: 'reference'; section: ReferenceKey };
 
 function routeKey(route: SpeccyRoute): string | undefined {
   if (route.page === 'operation') return route.operationId;
@@ -648,348 +74,79 @@ function isReferenceKey(value: string): value is ReferenceKey {
   );
 }
 
-function NavigationGroup({
-  tag,
-  operations,
-  searching,
-  singleExpanded,
-  open,
-  onOpenChange,
-  activeTag,
-  activeOperationId,
-  onNavigate,
-  onNavigateTag,
-  hrefForRoute,
-  storageKey,
-}: {
-  tag: TagModel;
-  operations: OperationModel[];
-  searching: boolean;
-  singleExpanded: boolean;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  activeTag?: TagModel;
-  activeOperationId?: string;
-  onNavigate: (operationId?: string) => void;
-  onNavigateTag: (tag: TagModel) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-  storageKey: string;
-}) {
-  const [independentlyOpen, setIndependentlyOpen] = useLocalState(
-    storageKey,
-    false,
-  );
-  const groupRef = useRef<HTMLDivElement>(null);
-  const wasActiveRouteWithinGroup = useRef(false);
-  const activeRouteIsWithinGroup =
-    activeTag === tag ||
-    operations.some((item) => item.id === activeOperationId);
-  const expanded = searching || (singleExpanded ? open : independentlyOpen);
-  const operationListId = `sp-nav-${slugify(tag.name)}`;
-  const subgroupedOperations = new Map<string, OperationModel[]>();
-  const navigationItems: Array<
-    OperationModel | { subgroup: string; operations: OperationModel[] }
-  > = [];
-  for (const item of operations) {
-    const subgroup = item.operation['x-tagSubgroup']?.trim();
-    if (!subgroup) {
-      navigationItems.push(item);
-      continue;
-    }
-    const existingSubgroup = subgroupedOperations.get(subgroup);
-    const subgroupOperations = existingSubgroup ?? [];
-    if (!existingSubgroup)
-      navigationItems.push({ subgroup, operations: subgroupOperations });
-    subgroupOperations.push(item);
-    subgroupedOperations.set(subgroup, subgroupOperations);
+function resolveActivePage(
+  activeRoute: string | undefined,
+  model: ReferenceModel,
+  operations: OperationModel[],
+): ActivePage {
+  if (activeRoute?.startsWith('reference/'))
+    return {
+      kind: 'reference',
+      section: activeRoute.slice('reference/'.length) as ReferenceKey,
+    };
+  if (activeRoute?.startsWith('tags/')) {
+    const slug = activeRoute.slice('tags/'.length);
+    const tag = model.tags.find((candidate) => tagSlug(candidate) === slug);
+    return tag ? { kind: 'tag', tag } : { kind: 'overview' };
   }
+  const item = operations.find((candidate) => candidate.id === activeRoute);
+  return item ? { kind: 'operation', item } : { kind: 'overview' };
+}
 
-  const operationLink = (item: OperationModel) => (
-    <a
-      className={`sp-nav-operation ${activeOperationId === item.id ? 'is-active ' : ''}${item.operation.deprecated ? 'is-deprecated' : ''}`}
-      href={hrefForRoute({ page: 'operation', operationId: item.id })}
-      aria-current={activeOperationId === item.id ? 'page' : undefined}
-      onClick={(event) => {
-        event.preventDefault();
-        onNavigate(item.id);
-      }}
-      key={item.id}
-    >
-      <span className="sp-nav-operation-label">
-        {item.operation.summary ?? item.path}
-      </span>
-      <span className="sp-nav-operation-meta">
-        <LifecycleBadge item={item} />
-        {item.operation.deprecated && (
-          <span className="sp-deprecated">deprecated</span>
-        )}
-        <OperationBadge item={item} compact />
-      </span>
-    </a>
-  );
+function pageRoute(page: ActivePage): SpeccyRoute {
+  switch (page.kind) {
+    case 'operation':
+      return { page: 'operation', operationId: page.item.id };
+    case 'tag':
+      return { page: 'tag', tag: tagSlug(page.tag) };
+    case 'reference':
+      return { page: 'reference', section: page.section };
+    case 'overview':
+      return { page: 'overview' };
+  }
+}
 
-  useEffect(() => {
-    if (activeRouteIsWithinGroup && !wasActiveRouteWithinGroup.current)
-      if (singleExpanded) onOpenChange(true);
-      else setIndependentlyOpen(true);
-    wasActiveRouteWithinGroup.current = activeRouteIsWithinGroup;
-  }, [
-    activeRouteIsWithinGroup,
-    onOpenChange,
-    setIndependentlyOpen,
-    singleExpanded,
-  ]);
+function pageDiagnostics(
+  page: ActivePage,
+  diagnostics: ApiDiagnostic[],
+): ApiDiagnostic[] | undefined {
+  switch (page.kind) {
+    case 'operation':
+      return diagnostics.filter(
+        (diagnostic) => diagnostic.operationId === page.item.id,
+      );
+    case 'tag':
+      return diagnostics.filter(
+        (diagnostic) => diagnostic.tag === page.tag.name,
+      );
+    case 'reference':
+      if (page.section === 'webhooks')
+        return diagnostics.filter(
+          (diagnostic) => diagnostic.path[0] === 'webhooks',
+        );
+      return diagnostics.filter(
+        (diagnostic) =>
+          diagnostic.path[0] === 'components' &&
+          diagnostic.path[1] === page.section,
+      );
+    case 'overview':
+      return undefined;
+  }
+}
 
-  useEffect(() => {
-    if (!activeRouteIsWithinGroup || !expanded) return;
-    const activeLink = groupRef.current?.querySelector<HTMLElement>(
-      '[aria-current="page"]',
-    );
-    const scrollContainer =
-      groupRef.current?.closest<HTMLElement>('.sp-nav-scroll');
-    if (activeLink && scrollContainer)
-      scrollWithinContainer(scrollContainer, activeLink);
-  }, [activeRouteIsWithinGroup, activeOperationId, activeTag, expanded]);
-
+function DetailPage({
+  onBack,
+  children,
+}: {
+  onBack: () => void;
+  children: ReactNode;
+}) {
   return (
-    <div ref={groupRef} className="sp-nav-group">
-      <button
-        type="button"
-        className={`sp-nav-tag ${tag.icon ? 'has-icon ' : ''}${activeRouteIsWithinGroup ? 'is-active' : ''}`}
-        onClick={() => {
-          if (singleExpanded) onOpenChange(!expanded);
-          else setIndependentlyOpen(!expanded);
-        }}
-        aria-expanded={expanded}
-        aria-controls={operationListId}
-      >
-        <span className="sp-tag-label">
-          <TagIcon tag={tag} />
-          {tag.name}
-        </span>
-        <DisclosureChevron />
+    <section className="sp-endpoint-page">
+      <button type="button" className="sp-back" onClick={onBack}>
+        ← API overview
       </button>
-      {expanded && (
-        <DisclosureContent className="sp-nav-operations" id={operationListId}>
-          <a
-            className={`sp-nav-operation sp-nav-overview ${activeTag === tag ? 'is-active' : ''}`}
-            href={hrefForRoute({ page: 'tag', tag: tagSlug(tag) })}
-            aria-current={activeTag === tag ? 'page' : undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              onNavigateTag(tag);
-            }}
-          >
-            Overview
-          </a>
-          {navigationItems.map((item) =>
-            'subgroup' in item ? (
-              <section
-                className="sp-nav-subgroup"
-                aria-labelledby={`${operationListId}-${slugify(item.subgroup)}`}
-                key={item.subgroup}
-              >
-                <h3 id={`${operationListId}-${slugify(item.subgroup)}`}>
-                  {item.subgroup}
-                </h3>
-                {item.operations.map(operationLink)}
-              </section>
-            ) : (
-              operationLink(item)
-            ),
-          )}
-        </DisclosureContent>
-      )}
-    </div>
-  );
-}
-
-function NavigationTags({
-  tags,
-  matches,
-  searching,
-  singleExpanded,
-  openTag,
-  onOpenTagChange,
-  activeTag,
-  activeOperationId,
-  onNavigate,
-  onNavigateTag,
-  hrefForRoute,
-  storageScope,
-}: {
-  tags: TagModel[];
-  matches: (item: OperationModel) => boolean;
-  searching: boolean;
-  singleExpanded: boolean;
-  openTag: string | null;
-  onOpenTagChange: (tag: string | null) => void;
-  activeTag?: TagModel;
-  activeOperationId?: string;
-  onNavigate: (operationId?: string) => void;
-  onNavigateTag: (tag: TagModel) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-  storageScope: string;
-}) {
-  return (
-    <>
-      {tags
-        .map((tag) => ({ tag, operations: tag.operations.filter(matches) }))
-        .filter(({ operations }) => operations.length > 0)
-        .map(({ tag, operations }) => (
-          <NavigationGroup
-            tag={tag}
-            operations={operations}
-            searching={searching}
-            singleExpanded={singleExpanded}
-            open={openTag === tag.name}
-            onOpenChange={(open) => onOpenTagChange(open ? tag.name : null)}
-            activeTag={activeTag}
-            activeOperationId={activeOperationId}
-            onNavigate={onNavigate}
-            onNavigateTag={onNavigateTag}
-            hrefForRoute={hrefForRoute}
-            storageKey={`${storageScope}:navigation:${tag.name}`}
-            key={tag.name}
-          />
-        ))}
-    </>
-  );
-}
-
-function OperationLink({
-  item,
-  onNavigate,
-  hrefForRoute,
-}: {
-  item: OperationModel;
-  onNavigate: (operationId: string) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-}) {
-  return (
-    <a
-      className="sp-operation-link"
-      href={hrefForRoute({ page: 'operation', operationId: item.id })}
-      onClick={(event) => {
-        event.preventDefault();
-        onNavigate(item.id);
-      }}
-    >
-      <span className="sp-operation-link-summary">{operationTitle(item)}</span>
-      <span className="sp-operation-link-address">
-        <OperationBadge item={item} />
-        <ApiPath value={item.path} />
-      </span>
-    </a>
-  );
-}
-
-function TagIcon({ tag }: { tag: TagModel }) {
-  if (!tag.icon) return null;
-  return (
-    <img className="sp-tag-icon" src={tag.icon.url} alt={tag.icon.alt ?? ''} />
-  );
-}
-
-function TagOverview({
-  tag,
-  operations,
-  diagnostics = [],
-  onViewAllDiagnostics,
-  onNavigate,
-  hrefForRoute,
-}: {
-  tag: TagModel;
-  operations: OperationModel[];
-  diagnostics?: ReturnType<typeof analyzeOpenApi>;
-  onViewAllDiagnostics: () => void;
-  onNavigate: (operationId: string) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-}) {
-  return (
-    <section className="sp-tag-overview">
-      <div className="sp-tag-overview-intro">
-        <h1 className="sp-tag-title">
-          <TagIcon tag={tag} />
-          {tag.name}
-        </h1>
-        <Markdown>{tag.description}</Markdown>
-        {tag.externalDocs?.url && (
-          <a href={tag.externalDocs.url}>
-            {tag.externalDocs.description ?? 'External documentation'}
-          </a>
-        )}
-        <InlineDiagnostics
-          diagnostics={diagnostics.filter(
-            (diagnostic) =>
-              diagnostic.tag === tag.name && !diagnostic.operationId,
-          )}
-          onViewAll={onViewAllDiagnostics}
-        />
-        <Markdown className="sp-tag-long-description">
-          {tag.longDescription}
-        </Markdown>
-      </div>
-      <div className="sp-tag-overview-operations">
-        <h2>Operations</h2>
-        <div className="sp-operation-list">
-          {operations.map((item) => (
-            <OperationLink
-              item={item}
-              onNavigate={onNavigate}
-              hrefForRoute={hrefForRoute}
-              key={item.id}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WebhookReference({
-  webhooks,
-  diagnostics = [],
-  onViewAllDiagnostics,
-  onNavigate,
-  hrefForRoute,
-}: {
-  webhooks: OperationModel[];
-  diagnostics?: ReturnType<typeof analyzeOpenApi>;
-  onViewAllDiagnostics: () => void;
-  onNavigate: (operationId: string) => void;
-  hrefForRoute: (route: SpeccyRoute) => string;
-}) {
-  return (
-    <section className="sp-tag sp-reference-section" id="reference-webhooks">
-      <div className="sp-tag-heading">
-        <div>
-          <span className="sp-tag-kicker">Reference</span>
-          <h2>Webhooks</h2>
-        </div>
-        <Markdown>
-          Events this API delivers to a URL you register, rather than requests
-          you send.
-        </Markdown>
-      </div>
-      <InlineDiagnostics
-        diagnostics={diagnostics}
-        onViewAll={onViewAllDiagnostics}
-      />
-      {webhooks.length === 0 ? (
-        <div className="sp-empty">This spec doesn’t define any webhooks.</div>
-      ) : (
-        <div className="sp-operation-list">
-          {webhooks.map((item) => (
-            <OperationLink
-              item={item}
-              onNavigate={onNavigate}
-              hrefForRoute={hrefForRoute}
-              key={item.id}
-            />
-          ))}
-        </div>
-      )}
+      {children}
     </section>
   );
 }
@@ -1068,12 +225,8 @@ export function Speccy({
     spectralDiagnostics,
     diagnosticsIndexState?.phase,
   ]);
-  const [filterQuery, setFilterQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
-  const [openNavigationTag, setOpenNavigationTag] = useState<string | null>(
-    null,
-  );
   const [selectedTheme, setSelectedTheme] = useLocalState<Theme>(
     'speccy:theme',
     theme,
@@ -1151,76 +304,28 @@ export function Speccy({
     );
 
   const model = result.model;
+  const title = model.document.info?.title ?? 'API reference';
   const rootServer = model.document.servers?.[0];
   const server = rootServer?.url
     ? expandServerUrl(rootServer.url, rootServer.variables)
     : '';
-  const groupedTagNames = new Set(
-    model.tagGroups.flatMap((group) => group.tags.map((tag) => tag.name)),
-  );
-  const ungroupedTags = model.tags.filter(
-    (tag) => !groupedTagNames.has(tag.name),
-  );
-  const activeReference = activeRoute?.startsWith('reference/')
-    ? (activeRoute.slice('reference/'.length) as ReferenceKey)
-    : undefined;
-  const activeTagSlug = activeRoute?.startsWith('tags/')
-    ? activeRoute.slice('tags/'.length)
-    : undefined;
-  const activeTag = activeTagSlug
-    ? model.tags.find((tag) => tagSlug(tag) === activeTagSlug)
-    : undefined;
-  const activeOperation =
-    !activeReference && !activeTag
-      ? [...model.operations, ...model.webhooks].find(
-          (item) => item.id === activeRoute,
-        )
-      : undefined;
+  const allOperations = [...model.operations, ...model.webhooks];
+  const page = resolveActivePage(activeRoute, model, allOperations);
+  const activeTag = page.kind === 'tag' ? page.tag : undefined;
+  const activeOperationId =
+    page.kind === 'operation' ? page.item.id : undefined;
+  const activeReference = page.kind === 'reference' ? page.section : undefined;
+  const currentPageDiagnostics = pageDiagnostics(page, diagnostics);
   const style = { '--sp-accent': accentColor } as CSSProperties;
-  const overviewDiagnostics = diagnostics.filter(
-    (diagnostic) => !diagnostic.operationId && !diagnostic.tag,
-  );
-  const currentPageDiagnostics = activeOperation
-    ? diagnostics.filter(
-        (diagnostic) => diagnostic.operationId === activeOperation.id,
-      )
-    : activeTag
-      ? diagnostics.filter((diagnostic) => diagnostic.tag === activeTag.name)
-      : activeReference === 'webhooks'
-        ? diagnostics.filter((diagnostic) => diagnostic.path[0] === 'webhooks')
-        : activeReference
-          ? diagnostics.filter(
-              (diagnostic) =>
-                diagnostic.path[0] === 'components' &&
-                diagnostic.path[1] === activeReference,
-            )
-          : undefined;
-  const normalizedFilter = filterQuery.trim().toLowerCase();
-  const matchesFilter = (item: OperationModel) =>
-    !normalizedFilter ||
-    [
-      item.path,
-      item.method,
-      item.operation.summary,
-      item.operation.operationId,
-      item.tag,
-      item.source,
-    ].some((value) => value?.toLowerCase().includes(normalizedFilter));
-  const filteredOperationCount = [
-    ...model.operations,
-    ...model.webhooks,
-  ].filter(matchesFilter).length;
 
-  function routeForDiagnostic(
-    diagnostic: ReturnType<typeof analyzeOpenApi>[number],
-  ): SpeccyRoute {
+  function routeForDiagnostic(diagnostic: ApiDiagnostic): SpeccyRoute {
     const [root, name, method] = diagnostic.path;
     if (
       (root === 'paths' || root === 'webhooks') &&
       typeof name === 'string' &&
       typeof method === 'string'
     ) {
-      const operation = [...model.operations, ...model.webhooks].find(
+      const operation = allOperations.find(
         (item) => item.path === name && item.method === method,
       );
       if (operation) return { page: 'operation', operationId: operation.id };
@@ -1238,35 +343,9 @@ export function Speccy({
     return { page: 'overview' };
   }
 
-  function navigate(operationId?: string) {
-    const nextRoute: SpeccyRoute = operationId
-      ? { page: 'operation', operationId }
-      : { page: 'overview' };
+  function goTo(nextRoute: SpeccyRoute, anchor?: string) {
     if (onNavigate) onNavigate(nextRoute);
     else {
-      window.history.pushState({}, '', hrefForRoute(nextRoute));
-      setInternalRoute(routeKey(nextRoute));
-    }
-    rootRef.current?.scrollIntoView({ block: 'start' });
-    setMobileNavigationOpen(false);
-  }
-
-  function navigateTag(tag: TagModel) {
-    const nextRoute: SpeccyRoute = { page: 'tag', tag: tagSlug(tag) };
-    if (onNavigate) onNavigate(nextRoute);
-    else {
-      window.history.pushState({}, '', hrefForRoute(nextRoute));
-      setInternalRoute(routeKey(nextRoute));
-    }
-    rootRef.current?.scrollIntoView({ block: 'start' });
-    setMobileNavigationOpen(false);
-  }
-
-  function navigateReference(key: ReferenceKey, component?: string) {
-    const nextRoute: SpeccyRoute = { page: 'reference', section: key };
-    if (onNavigate) onNavigate(nextRoute);
-    else {
-      const anchor = component ? componentAnchorId(key, component) : undefined;
       window.history.pushState(
         {},
         '',
@@ -1274,28 +353,25 @@ export function Speccy({
       );
       setInternalRoute(routeKey(nextRoute));
     }
-    if (component)
+    if (anchor)
       requestAnimationFrame(() =>
-        document
-          .getElementById(componentAnchorId(key, component))
-          ?.scrollIntoView({ block: 'start' }),
+        document.getElementById(anchor)?.scrollIntoView({ block: 'start' }),
       );
     else rootRef.current?.scrollIntoView({ block: 'start' });
     setMobileNavigationOpen(false);
   }
 
-  function navigateDiagnostic(nextRoute: SpeccyRoute) {
-    if (nextRoute.page === 'operation') navigate(nextRoute.operationId);
-    else if (nextRoute.page === 'tag') {
-      const tag = model.tags.find((item) => tagSlug(item) === nextRoute.tag);
-      if (tag) navigateTag(tag);
-    } else if (
-      nextRoute.page === 'reference' &&
-      isReferenceKey(nextRoute.section)
-    )
-      navigateReference(nextRoute.section);
-    else navigate();
-  }
+  const navigate = (operationId?: string) =>
+    goTo(
+      operationId ? { page: 'operation', operationId } : { page: 'overview' },
+    );
+  const navigateTag = (tag: TagModel) =>
+    goTo({ page: 'tag', tag: tagSlug(tag) });
+  const navigateReference = (key: ReferenceKey, component?: string) =>
+    goTo(
+      { page: 'reference', section: key },
+      component ? componentAnchorId(key, component) : undefined,
+    );
 
   const searchResults: SearchResult[] = [
     {
@@ -1325,7 +401,7 @@ export function Speccy({
       terms: [tag.name, tag.description ?? '', tag.longDescription ?? ''],
       navigate: () => navigateTag(tag),
     })),
-    ...[...model.operations, ...model.webhooks].map((item) => ({
+    ...allOperations.map((item) => ({
       id: `operation-${item.id}`,
       group: 'Endpoints' as const,
       label: item.operation.summary ?? item.operation.operationId ?? item.path,
@@ -1376,362 +452,52 @@ export function Speccy({
         <ThemeToggle theme={selectedTheme} onChange={setSelectedTheme} />
       )}
       {showSidebar && (
-        <>
-          <header className="sp-mobile-header">
-            <span>{model.document.info?.title ?? 'API reference'}</span>
-            <button
-              type="button"
-              className="sp-mobile-nav-toggle"
-              aria-expanded={mobileNavigationOpen}
-              aria-controls="sp-sidebar-navigation"
-              aria-label="Open navigation"
-              onClick={() => setMobileNavigationOpen(true)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              </svg>
-            </button>
-          </header>
-          <button
-            type="button"
-            className={`sp-mobile-nav-backdrop ${mobileNavigationOpen ? 'is-open' : ''}`}
-            aria-label="Close navigation"
-            onClick={() => setMobileNavigationOpen(false)}
-          />
-          <nav
-            id="sp-sidebar-navigation"
-            className={`sp-sidebar ${mobileNavigationOpen ? 'is-open' : ''}`}
-            aria-label="API reference"
-          >
-            <a
-              className={brandLogo ? 'sp-brand has-logo' : 'sp-brand'}
-              href={hrefForRoute({ page: 'overview' })}
-              onClick={(event) => {
-                event.preventDefault();
-                navigate();
-              }}
-            >
-              {brandLogo}
-              <span>{model.document.info?.title ?? 'API reference'}</span>
-            </a>
-            <div className="sp-nav-scroll">
-              <a
-                className={`sp-nav-operation sp-nav-overview ${!activeRoute ? 'is-active' : ''}`}
-                href={hrefForRoute({ page: 'overview' })}
-                aria-current={!activeRoute ? 'page' : undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigate();
-                }}
-              >
-                All operations
-              </a>
-              {model.tagGroups.length > 0 ? (
-                <>
-                  {model.tagGroups.map((group) => {
-                    const visibleTags = group.tags.filter((tag) =>
-                      tag.operations.some(matchesFilter),
-                    );
-                    if (visibleTags.length === 0) return null;
-                    return (
-                      <section
-                        className="sp-nav-tag-group"
-                        aria-labelledby={`sp-nav-tag-group-${slugify(group.name)}`}
-                        key={group.name}
-                      >
-                        <h2
-                          className="sp-nav-heading"
-                          id={`sp-nav-tag-group-${slugify(group.name)}`}
-                        >
-                          {group.name}
-                        </h2>
-                        <NavigationTags
-                          tags={visibleTags}
-                          matches={matchesFilter}
-                          searching={Boolean(normalizedFilter)}
-                          singleExpanded={singleExpandedSidebarGroup}
-                          openTag={openNavigationTag}
-                          onOpenTagChange={setOpenNavigationTag}
-                          activeTag={activeTag}
-                          activeOperationId={activeOperation?.id}
-                          onNavigate={navigate}
-                          onNavigateTag={navigateTag}
-                          hrefForRoute={hrefForRoute}
-                          storageScope={storageScope}
-                        />
-                      </section>
-                    );
-                  })}
-                  <NavigationTags
-                    tags={ungroupedTags}
-                    matches={matchesFilter}
-                    searching={Boolean(normalizedFilter)}
-                    singleExpanded={singleExpandedSidebarGroup}
-                    openTag={openNavigationTag}
-                    onOpenTagChange={setOpenNavigationTag}
-                    activeTag={activeTag}
-                    activeOperationId={activeOperation?.id}
-                    onNavigate={navigate}
-                    onNavigateTag={navigateTag}
-                    hrefForRoute={hrefForRoute}
-                    storageScope={storageScope}
-                  />
-                </>
-              ) : (
-                <NavigationTags
-                  tags={model.tags}
-                  matches={matchesFilter}
-                  searching={Boolean(normalizedFilter)}
-                  singleExpanded={singleExpandedSidebarGroup}
-                  openTag={openNavigationTag}
-                  onOpenTagChange={setOpenNavigationTag}
-                  activeTag={activeTag}
-                  activeOperationId={activeOperation?.id}
-                  onNavigate={navigate}
-                  onNavigateTag={navigateTag}
-                  hrefForRoute={hrefForRoute}
-                  storageScope={storageScope}
-                />
-              )}
-              {normalizedFilter && filteredOperationCount === 0 && (
-                <div className="sp-nav-empty">
-                  <strong>No matching endpoints</strong>
-                  <span>Try a path, method, or operation name.</span>
-                </div>
-              )}
-              {!normalizedFilter && (
-                <ReferenceNavigation
-                  document={model.document}
-                  activeKey={activeReference}
-                  storageKey={`${storageScope}:navigation:reference`}
-                  hrefFor={(key) =>
-                    hrefForRoute({ page: 'reference', section: key })
-                  }
-                  onNavigate={navigateReference}
-                />
-              )}
-            </div>
-            <div className="sp-sidebar-search">
-              <svg
-                className="sp-filter-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="6.5" />
-                <path d="m16 16 4 4" />
-              </svg>
-              <input
-                value={filterQuery}
-                onChange={(event) => setFilterQuery(event.target.value)}
-                placeholder="Filter endpoints"
-                aria-label="Filter endpoints"
-              />
-              {filterQuery && (
-                <button
-                  type="button"
-                  className="sp-search-clear"
-                  onClick={() => setFilterQuery('')}
-                  aria-label="Clear filter"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </nav>
-        </>
+        <SidebarNavigation
+          model={model}
+          title={title}
+          brandLogo={brandLogo}
+          singleExpanded={singleExpandedSidebarGroup}
+          activeRoute={activeRoute}
+          activeTag={activeTag}
+          activeOperationId={activeOperationId}
+          activeReference={activeReference}
+          mobileOpen={mobileNavigationOpen}
+          onMobileOpenChange={setMobileNavigationOpen}
+          onNavigate={navigate}
+          onNavigateTag={navigateTag}
+          onNavigateReference={navigateReference}
+          hrefForRoute={hrefForRoute}
+          storageScope={storageScope}
+        />
       )}
       <main className="sp-content">
-        {!activeOperation && !activeReference && !activeTag && (
-          <header className="sp-hero" id="sp-overview">
-            <div className="sp-hero-intro">
-              <div className="sp-eyebrow">
-                API reference
-                {showApiVersion && (
-                  <>
-                    {' '}
-                    <span>
-                      {model.document.info?.version ??
-                        model.document.openapi ??
-                        model.document.swagger}
-                    </span>
-                  </>
-                )}
-              </div>
-              <h1>{model.document.info?.title ?? 'Untitled API'}</h1>
-              <Markdown>{model.document.info?.summary}</Markdown>
-              <Markdown>{model.document.info?.description}</Markdown>
-              {(model.document.info?.termsOfService ||
-                model.document.info?.contact ||
-                model.document.info?.license ||
-                model.document.externalDocs?.url) && (
-                <dl className="sp-api-meta" aria-label="API information">
-                  {model.document.info?.termsOfService && (
-                    <div>
-                      <dt>Terms</dt>
-                      <dd>
-                        <a href={model.document.info.termsOfService}>
-                          Terms of service
-                        </a>
-                      </dd>
-                    </div>
-                  )}
-                  {model.document.info?.contact && (
-                    <div>
-                      <dt>Contact</dt>
-                      <dd>
-                        {model.document.info.contact.url ? (
-                          <a href={model.document.info.contact.url}>
-                            {model.document.info.contact.name ??
-                              model.document.info.contact.url}
-                          </a>
-                        ) : (
-                          model.document.info.contact.name
-                        )}
-                        {model.document.info.contact.email && (
-                          <a
-                            href={`mailto:${model.document.info.contact.email}`}
-                          >
-                            {model.document.info.contact.email}
-                          </a>
-                        )}
-                      </dd>
-                    </div>
-                  )}
-                  {model.document.info?.license && (
-                    <div>
-                      <dt>License</dt>
-                      <dd>
-                        {model.document.info.license.url ? (
-                          <a href={model.document.info.license.url}>
-                            {model.document.info.license.identifier ??
-                              model.document.info.license.name}
-                          </a>
-                        ) : (
-                          <span>
-                            {model.document.info.license.identifier ??
-                              model.document.info.license.name}
-                          </span>
-                        )}
-                      </dd>
-                    </div>
-                  )}
-                  {model.document.externalDocs?.url && (
-                    <div>
-                      <dt>Documentation</dt>
-                      <dd>
-                        <a href={model.document.externalDocs.url}>
-                          {model.document.externalDocs.description ??
-                            'External documentation'}
-                        </a>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              )}
-              <InlineDiagnostics
-                diagnostics={overviewDiagnostics}
-                onViewAll={viewAllDiagnostics}
-              />
-            </div>
-            <aside className="sp-hero-aside">
-              <OpenApiDownload
-                document={result.document ?? model.document}
-                openApiUrl={openApiUrl}
-                postmanCollectionUrl={postmanCollectionUrl}
-              />
-              {model.document.servers?.map(
-                (item, index) =>
-                  item.url &&
-                  (() => {
-                    const expandedUrl = expandServerUrl(
-                      item.url,
-                      item.variables,
-                    );
-                    return (
-                      <div className="sp-server" key={`${item.url}-${index}`}>
-                        <span>{item.description ?? 'Base URL'}</span>
-                        <code>{expandedUrl}</code>
-                        <CopyButton value={expandedUrl} />
-                        {Object.entries(item.variables ?? {}).map(
-                          ([name, variable]) => (
-                            <small key={name}>
-                              <code>{name}</code>
-                              {variable.enum &&
-                                ` (${variable.enum.join(', ')})`}
-                              {variable.description &&
-                                `: ${variable.description}`}
-                            </small>
-                          ),
-                        )}
-                      </div>
-                    );
-                  })(),
-              )}
-              <SecurityRequirements
-                requirements={model.document.security}
-                schemes={model.document.components?.securitySchemes}
-              />
-            </aside>
-          </header>
+        {page.kind === 'overview' && (
+          <OverviewPage
+            model={model}
+            showApiVersion={showApiVersion}
+            diagnostics={diagnostics}
+            onViewAllDiagnostics={viewAllDiagnostics}
+            openApiUrl={openApiUrl}
+            postmanCollectionUrl={postmanCollectionUrl}
+            onNavigate={navigate}
+            hrefForRoute={hrefForRoute}
+          />
         )}
-        {!activeOperation &&
-          !activeReference &&
-          !activeTag &&
-          model.tags.map((tag) => {
-            const visible = tag.operations;
-            if (visible.length === 0) return null;
-            return (
-              <section
-                className="sp-tag"
-                id={`tag-${tag.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                key={tag.name}
-              >
-                <div className="sp-tag-heading">
-                  <div>
-                    <span className="sp-tag-kicker">Resource</span>
-                    <h2 className="sp-tag-title">
-                      <TagIcon tag={tag} />
-                      {tag.name}
-                    </h2>
-                  </div>
-                  <Markdown>{tag.description}</Markdown>
-                </div>
-                <div className="sp-operation-list">
-                  {visible.map((item) => (
-                    <OperationLink
-                      item={item}
-                      onNavigate={navigate}
-                      hrefForRoute={hrefForRoute}
-                      key={item.id}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-        {activeTag && (
+        {page.kind === 'tag' && (
           <TagOverview
-            tag={activeTag}
-            operations={activeTag.operations}
+            tag={page.tag}
+            operations={page.tag.operations}
             diagnostics={diagnostics}
             onViewAllDiagnostics={viewAllDiagnostics}
             onNavigate={navigate}
             hrefForRoute={hrefForRoute}
           />
         )}
-        {activeOperation && (
-          <section className="sp-endpoint-page">
-            <button
-              type="button"
-              className="sp-back"
-              onClick={() => navigate()}
-            >
-              ← API overview
-            </button>
+        {page.kind === 'operation' && (
+          <DetailPage onBack={() => navigate()}>
             <EndpointPage
-              item={activeOperation}
-              tag={model.tags.find((tag) => tag.name === activeOperation.tag)!}
+              item={page.item}
+              tag={model.tags.find((tag) => tag.name === page.item.tag)!}
               server={server}
               document={model.document}
               storageScope={storageScope}
@@ -1741,31 +507,15 @@ export function Speccy({
               onViewAllDiagnostics={viewAllDiagnostics}
               onNavigateTag={navigateTag}
               hrefForRoute={hrefForRoute}
-              operations={[...model.operations, ...model.webhooks]}
+              operations={allOperations}
               onNavigateOperation={navigate}
-              key={activeOperation.id}
+              key={page.item.id}
             />
-          </section>
+          </DetailPage>
         )}
-        {!activeOperation &&
-          !activeReference &&
-          !activeTag &&
-          model.operations.length === 0 &&
-          model.webhooks.length === 0 && (
-            <div className="sp-empty">
-              This spec doesn’t contain any operations yet.
-            </div>
-          )}
-        {activeReference && (
-          <section className="sp-endpoint-page">
-            <button
-              type="button"
-              className="sp-back"
-              onClick={() => navigate()}
-            >
-              ← API overview
-            </button>
-            {activeReference === 'webhooks' ? (
+        {page.kind === 'reference' && (
+          <DetailPage onBack={() => navigate()}>
+            {page.section === 'webhooks' ? (
               <WebhookReference
                 webhooks={model.webhooks}
                 diagnostics={currentPageDiagnostics}
@@ -1775,11 +525,11 @@ export function Speccy({
               />
             ) : (
               <DocumentReference
-                activeKey={activeReference}
+                activeKey={page.section}
                 document={model.document}
               />
             )}
-          </section>
+          </DetailPage>
         )}
       </main>
       {searchOpen && (
@@ -1799,19 +549,9 @@ export function Speccy({
           onScopeChange={setDiagnosticsScope}
           routeForDiagnostic={routeForDiagnostic}
           hrefForRoute={hrefForRoute}
-          onNavigate={navigateDiagnostic}
+          onNavigate={goTo}
           indexState={diagnosticsIndexState}
-          onRequestDiagnostics={() =>
-            onRequestDiagnostics?.(
-              activeOperation
-                ? { page: 'operation', operationId: activeOperation.id }
-                : activeTag
-                  ? { page: 'tag', tag: tagSlug(activeTag) }
-                  : activeReference
-                    ? { page: 'reference', section: activeReference }
-                    : { page: 'overview' },
-            )
-          }
+          onRequestDiagnostics={() => onRequestDiagnostics?.(pageRoute(page))}
         />
       )}
     </div>
