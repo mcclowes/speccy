@@ -5,14 +5,16 @@
  *   - ./sample.ts - Default document used for the first-run preview.
  *   - ./recentReferences.ts - Owns recent-reference identity and persistence.
  *   - ./previewUrls.ts - Creates and parses shareable preview links.
- *   - ./apiCatalog.ts - Supplies curated public specifications for the home screen.
+ *   - ./HomeScreen.tsx - Home screen shown when no reference is open.
+ *   - ./Mark.tsx - Brand mark shown in the studio bar.
+ *   - ./scoped.ts - Class-name scoping shared with the home screen.
  *   - ./App.module.css - Viewer chrome and reference workspace styling.
  *   - ./studio.css - Document-level studio styles.
  *   - speccy-renderer - Shared reference view embedded by the studio.
  * ---
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Speccy,
   ThemeToggle,
@@ -24,8 +26,8 @@ import {
 } from 'speccy-renderer';
 import { bundleFragmentedSpec, resolveExternalRefs } from 'speccy-core';
 import { SAMPLE_SPEC } from './sample';
-import { API_CATALOG } from './apiCatalog';
 import { createApiHealthJobs } from './apiHealthIndex';
+import { HomeScreen } from './HomeScreen';
 import { parseInitialLocation, previewHref } from './previewUrls';
 import {
   addRecentReference,
@@ -35,15 +37,8 @@ import {
   writeRecentReferences,
 } from './recentReferences';
 import { parseStudioRoute, referenceHref, type StudioRoute } from './routing';
-import styles from './App.module.css';
-
-function scoped(className: string) {
-  return className
-    .split(' ')
-    .flatMap((name) => (name ? [name, styles[name]] : []))
-    .filter(Boolean)
-    .join(' ');
-}
+import { Mark } from './Mark';
+import { scoped } from './scoped';
 
 declare global {
   interface DiscoveredRepository {
@@ -70,8 +65,12 @@ declare global {
   }
 }
 
+type InitialLocation = ReturnType<typeof parseInitialLocation>;
+type HistoryMode = 'push' | 'replace';
+
 const THEME_STORAGE_KEY = 'speccy-theme';
 const URL_STORAGE_KEY = 'speccy-oas-url';
+const THEMES: Theme[] = ['system', 'dark', 'light'];
 
 function storageItem(key: string) {
   try {
@@ -96,18 +95,6 @@ function storedTheme(): Theme {
     : 'system';
 }
 
-function Mark() {
-  return (
-    <span className={scoped('studio-mark')} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M3.5 9.5 5 7.75M20.5 9.5 19 7.75M9.5 11.5h5" />
-        <circle cx="6.5" cy="13" r="3.5" />
-        <circle cx="17.5" cy="13" r="3.5" />
-      </svg>
-    </span>
-  );
-}
-
 function ShareIcon() {
   return (
     <svg
@@ -128,8 +115,8 @@ function ShareIcon() {
   );
 }
 
-export function App() {
-  const [location] = useState(() => parseInitialLocation(window.location));
+/** State and actions shared by the studio and the read-only preview. */
+function useReferenceWorkspace(location: InitialLocation) {
   const [spec, setSpec] = useState<OpenAPIDocument | string>(
     () => location.source || (location.sourceUrl ? '' : SAMPLE_SPEC),
   );
@@ -151,69 +138,10 @@ export function App() {
   const [url, setUrl] = useState(() => storageItem(URL_STORAGE_KEY) ?? '');
   const [loading, setLoading] = useState(Boolean(location.sourceUrl));
   const [message, setMessage] = useState('');
-  const [shareMessage, setShareMessage] = useState('');
   const [route, setRoute] = useState<StudioRoute>(() =>
     parseStudioRoute(window.location),
   );
-  const [spectralDiagnostics, setSpectralDiagnostics] = useState<
-    SpectralDiagnosticInput[]
-  >([]);
-  const [diagnosticsIndexState, setDiagnosticsIndexState] =
-    useState<DiagnosticsIndexState>({ phase: 'idle' });
-  const fileInput = useRef<HTMLInputElement>(null);
   const recentsRef = useRef(recents);
-  const restoredInitialRoute = useRef(false);
-  const diagnosticsRun = useRef(0);
-
-  useEffect(() => {
-    if (location.preview) {
-      const initialUrl = location.sourceUrl ?? '';
-      if (initialUrl) {
-        setUrl(initialUrl);
-        void loadUrl(initialUrl, undefined, { page: 'overview' }, false);
-      }
-      return;
-    }
-
-    const restoreLocation = () => {
-      const nextRoute = parseStudioRoute(window.location);
-      setRoute(nextRoute);
-      if (nextRoute.page === 'home') {
-        showHome();
-        return;
-      }
-      if (nextRoute.page === 'open') {
-        void loadUrl(nextRoute.url, undefined, { page: 'overview' }, 'replace');
-        return;
-      }
-
-      const reference = recentsRef.current.find(
-        (item) => item.id === nextRoute.referenceId,
-      );
-      if (reference) {
-        displayReference(reference);
-      } else if (nextRoute.sourceUrl) {
-        void loadUrl(
-          nextRoute.sourceUrl,
-          nextRoute.referenceId,
-          nextRoute.referenceRoute,
-          'replace',
-        );
-      } else {
-        showHome();
-        setMessage(
-          'That reference is only available on the device where it was opened.',
-        );
-      }
-    };
-
-    window.addEventListener('popstate', restoreLocation);
-    if (!restoredInitialRoute.current) {
-      restoredInitialRoute.current = true;
-      restoreLocation();
-    }
-    return () => window.removeEventListener('popstate', restoreLocation);
-  }, []);
 
   useEffect(() => {
     window.speccySetDiscoveredRepositories = setDiscoveredRepositories;
@@ -250,10 +178,7 @@ export function App() {
     };
   }, []);
 
-  function setBrowserRoute(
-    nextRoute: StudioRoute,
-    mode: 'push' | 'replace' = 'push',
-  ) {
+  function setBrowserRoute(nextRoute: StudioRoute, mode: HistoryMode = 'push') {
     const href =
       nextRoute.page === 'reference'
         ? referenceHref(
@@ -292,27 +217,19 @@ export function App() {
     next: string,
     name = 'Pasted spec',
     existingId?: string,
-    nextSourceUrl?: string | null,
+    nextSourceUrl?: string,
     referenceRoute: SpeccyRoute = { page: 'overview' },
-    historyMode: 'push' | 'replace' | false = 'push',
+    historyMode: HistoryMode | false = 'push',
     renderedSpec?: OpenAPIDocument,
   ) {
     const current = existingId
       ? recentsRef.current.find((item) => item.id === existingId)
       : undefined;
-    const added = addRecentReference(
+    const { reference, references: updated } = addRecentReference(
       recentsRef.current,
-      {
-        name,
-        source: next,
-        sourceUrl:
-          nextSourceUrl === null
-            ? undefined
-            : (nextSourceUrl ?? current?.sourceUrl),
-      },
+      { name, source: next, sourceUrl: nextSourceUrl ?? current?.sourceUrl },
       existingId,
     );
-    const { reference, references: updated } = added;
     displayReference(reference, renderedSpec);
     recentsRef.current = updated;
     writeRecentReferences(updated);
@@ -330,34 +247,11 @@ export function App() {
     }
   }
 
-  function openRecent(reference: RecentReference) {
-    applySource(
-      reference.source,
-      reference.name,
-      reference.id,
-      reference.sourceUrl,
-    );
-  }
-
-  function openSample() {
-    applySource(JSON.stringify(SAMPLE_SPEC, null, 2), 'Luma Library API');
-  }
-
-  function goHome() {
-    showHome();
-    setBrowserRoute({ page: 'home' });
-  }
-
-  async function loadFile(file?: File) {
-    if (!file) return;
-    applySource(await file.text(), file.name);
-  }
-
   async function loadUrl(
     nextUrl: string,
     existingId?: string,
     referenceRoute: SpeccyRoute = { page: 'overview' },
-    historyMode: 'push' | 'replace' | false = 'push',
+    historyMode: HistoryMode | false = 'push',
     displayName?: string,
   ) {
     if (!nextUrl.trim()) return;
@@ -391,11 +285,132 @@ export function App() {
     }
   }
 
+  return {
+    spec,
+    source,
+    fileName,
+    sourceUrl,
+    activeId,
+    recents,
+    recentsRef,
+    discoveredRepositories,
+    theme,
+    setTheme,
+    urlOpen,
+    setUrlOpen,
+    url,
+    setUrl,
+    loading,
+    message,
+    setMessage,
+    route,
+    setRoute,
+    setBrowserRoute,
+    showHome,
+    displayReference,
+    applySource,
+    loadUrl,
+  };
+}
+
+export function App() {
+  const [location] = useState(() => parseInitialLocation(window.location));
+  return location.preview ? (
+    <PreviewApp location={location} />
+  ) : (
+    <StudioApp location={location} />
+  );
+}
+
+function PreviewApp({ location }: { location: InitialLocation }) {
+  const {
+    spec,
+    source,
+    fileName,
+    sourceUrl,
+    theme,
+    setTheme,
+    loading,
+    route,
+    setRoute,
+    setUrl,
+    loadUrl,
+  } = useReferenceWorkspace(location);
+
+  useEffect(() => {
+    const initialUrl = location.sourceUrl ?? '';
+    if (!initialUrl) return;
+    setUrl(initialUrl);
+    void loadUrl(initialUrl, undefined, { page: 'overview' }, false);
+  }, []);
+
   const referenceRoute =
-    route.page === 'reference' &&
-    (route.referenceId === activeId || location.preview)
+    route.page === 'reference'
       ? route.referenceRoute
       : ({ page: 'overview' } satisfies SpeccyRoute);
+
+  function hrefForRoute(nextRoute: SpeccyRoute) {
+    return previewHref(
+      nextRoute,
+      {
+        source,
+        sourceUrl: sourceUrl || undefined,
+        name: fileName,
+        tryIt: location.tryIt,
+      },
+      window.location.origin,
+    );
+  }
+
+  function navigate(nextRoute: SpeccyRoute) {
+    window.history.pushState({}, '', hrefForRoute(nextRoute));
+    setRoute({
+      page: 'reference',
+      referenceId: 'preview',
+      referenceRoute: nextRoute,
+    });
+  }
+
+  return (
+    <main className={scoped(`studio studio-preview-only studio-${theme}`)}>
+      <ThemeToggle
+        className={scoped('studio-preview-theme')}
+        theme={theme}
+        onChange={setTheme}
+        themes={THEMES}
+        label="current"
+      />
+      {loading ? (
+        <div className={scoped('studio-preview-loading')}>
+          Loading API reference…
+        </div>
+      ) : (
+        <Speccy
+          spec={spec}
+          theme={theme}
+          showThemeToggle={false}
+          route={referenceRoute}
+          onNavigate={navigate}
+          hrefForRoute={hrefForRoute}
+          parameterPrototype
+          tryIt={location.tryIt}
+        />
+      )}
+    </main>
+  );
+}
+
+function useSpectralDiagnostics(
+  spec: OpenAPIDocument | string,
+  fileName: string,
+  referenceRoute: SpeccyRoute,
+) {
+  const [spectralDiagnostics, setSpectralDiagnostics] = useState<
+    SpectralDiagnosticInput[]
+  >([]);
+  const [diagnosticsIndexState, setDiagnosticsIndexState] =
+    useState<DiagnosticsIndexState>({ phase: 'idle' });
+  const diagnosticsRun = useRef(0);
   const referenceRouteRef = useRef(referenceRoute);
   referenceRouteRef.current = referenceRoute;
 
@@ -403,7 +418,7 @@ export function App() {
     const run = ++diagnosticsRun.current;
     setSpectralDiagnostics([]);
     setDiagnosticsIndexState({ phase: 'idle' });
-    if (location.preview || !fileName) return;
+    if (!fileName) return;
 
     const start = async () => {
       try {
@@ -456,33 +471,133 @@ export function App() {
       if (idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
     };
-  }, [spec, fileName, location.preview]);
+  }, [spec, fileName]);
 
-  function rendererHref(nextRoute: SpeccyRoute) {
-    if (!location.preview)
-      return referenceHref(activeId, nextRoute, sourceUrl || undefined);
-    return previewHref(
-      nextRoute,
-      {
-        source,
-        sourceUrl: sourceUrl || undefined,
-        name: fileName,
-        tryIt: location.tryIt,
-      },
-      window.location.origin,
+  return { spectralDiagnostics, diagnosticsIndexState };
+}
+
+function StudioApp({ location }: { location: InitialLocation }) {
+  const {
+    spec,
+    source,
+    fileName,
+    sourceUrl,
+    activeId,
+    recents,
+    recentsRef,
+    discoveredRepositories,
+    theme,
+    setTheme,
+    urlOpen,
+    setUrlOpen,
+    url,
+    setUrl,
+    loading,
+    message,
+    setMessage,
+    route,
+    setRoute,
+    setBrowserRoute,
+    showHome,
+    displayReference,
+    applySource,
+    loadUrl,
+  } = useReferenceWorkspace(location);
+  const [shareMessage, setShareMessage] = useState('');
+  const fileInput = useRef<HTMLInputElement>(null);
+  const restoredInitialRoute = useRef(false);
+
+  useEffect(() => {
+    const restoreReference = (
+      nextRoute: Extract<StudioRoute, { page: 'reference' }>,
+    ) => {
+      const reference = recentsRef.current.find(
+        (item) => item.id === nextRoute.referenceId,
+      );
+      if (reference) {
+        displayReference(reference);
+      } else if (nextRoute.sourceUrl) {
+        void loadUrl(
+          nextRoute.sourceUrl,
+          nextRoute.referenceId,
+          nextRoute.referenceRoute,
+          'replace',
+        );
+      } else {
+        showHome();
+        setMessage(
+          'That reference is only available on the device where it was opened.',
+        );
+      }
+    };
+
+    const restoreLocation = () => {
+      const nextRoute = parseStudioRoute(window.location);
+      setRoute(nextRoute);
+      switch (nextRoute.page) {
+        case 'home':
+          showHome();
+          return;
+        case 'open':
+          void loadUrl(
+            nextRoute.url,
+            undefined,
+            { page: 'overview' },
+            'replace',
+          );
+          return;
+        case 'reference':
+          restoreReference(nextRoute);
+          return;
+      }
+    };
+
+    window.addEventListener('popstate', restoreLocation);
+    if (!restoredInitialRoute.current) {
+      restoredInitialRoute.current = true;
+      restoreLocation();
+    }
+    return () => window.removeEventListener('popstate', restoreLocation);
+  }, []);
+
+  const referenceRoute =
+    route.page === 'reference' && route.referenceId === activeId
+      ? route.referenceRoute
+      : ({ page: 'overview' } satisfies SpeccyRoute);
+  const { spectralDiagnostics, diagnosticsIndexState } = useSpectralDiagnostics(
+    spec,
+    fileName,
+    referenceRoute,
+  );
+
+  function openRecent(reference: RecentReference) {
+    applySource(
+      reference.source,
+      reference.name,
+      reference.id,
+      reference.sourceUrl,
     );
   }
 
-  function navigateRenderer(nextRoute: SpeccyRoute) {
-    if (location.preview) {
-      window.history.pushState({}, '', rendererHref(nextRoute));
-      setRoute({
-        page: 'reference',
-        referenceId: 'preview',
-        referenceRoute: nextRoute,
-      });
-      return;
-    }
+  function openSample() {
+    applySource(JSON.stringify(SAMPLE_SPEC, null, 2), 'Luma Library API');
+  }
+
+  function goHome() {
+    showHome();
+    setBrowserRoute({ page: 'home' });
+  }
+
+  async function loadFile(file?: File) {
+    if (!file) return;
+    applySource(await file.text(), file.name);
+  }
+
+  function hrefForRoute(nextRoute: SpeccyRoute) {
+    return referenceHref(activeId, nextRoute, sourceUrl || undefined);
+  }
+
+  function navigate(nextRoute: SpeccyRoute) {
     setBrowserRoute({
       page: 'reference',
       referenceId: activeId,
@@ -491,17 +606,13 @@ export function App() {
     });
   }
 
-  function previewUrl() {
-    return previewHref(
+  async function sharePreview() {
+    const link = previewHref(
       { page: 'overview' },
       { source, sourceUrl: sourceUrl || undefined, name: fileName },
       window.location.origin,
       true,
     );
-  }
-
-  async function sharePreview() {
-    const link = previewUrl();
     try {
       await navigator.clipboard.writeText(link);
       setShareMessage('Preview link copied');
@@ -510,56 +621,9 @@ export function App() {
     }
   }
 
-  if (location.preview) {
-    return (
-      <main className={scoped(`studio studio-preview-only studio-${theme}`)}>
-        <ThemeToggle
-          className={scoped('studio-preview-theme')}
-          theme={theme}
-          onChange={setTheme}
-          themes={['system', 'dark', 'light']}
-          label="current"
-        />
-        {loading ? (
-          <div className={scoped('studio-preview-loading')}>
-            Loading API reference…
-          </div>
-        ) : (
-          <Speccy
-            spec={spec}
-            theme={theme}
-            showThemeToggle={false}
-            route={referenceRoute}
-            onNavigate={navigateRenderer}
-            hrefForRoute={rendererHref}
-            parameterPrototype
-            tryIt={location.tryIt}
-          />
-        )}
-      </main>
-    );
-  }
-
-  return (
-    <div
-      className={scoped(`studio studio-${theme}`)}
-      onDragOver={(event) => event.preventDefault()}
-      onDrop={(event) => {
-        event.preventDefault();
-        void loadFile(event.dataTransfer.files[0]);
-      }}
-    >
-      <header className={scoped('studio-bar')}>
-        <button
-          className={scoped('studio-logo')}
-          type="button"
-          onClick={goHome}
-          aria-label="Speccy home"
-        >
-          <Mark />
-          <span>Speccy</span>
-        </button>
-        {fileName ? (
+  const screen = fileName
+    ? {
+        title: (
           <label className={scoped('studio-switcher')}>
             <span className={scoped('studio-dot')} />
             <select
@@ -582,11 +646,9 @@ export function App() {
               ⌄
             </span>
           </label>
-        ) : (
-          <div className={scoped('studio-document')}>Your API references</div>
-        )}
-        <div className={scoped('studio-actions')}>
-          {fileName && (
+        ),
+        actions: (
+          <>
             <button
               className={scoped('studio-action-share')}
               type="button"
@@ -597,8 +659,6 @@ export function App() {
               <ShareIcon />
               <span className={scoped('studio-share-label')}>Share</span>
             </button>
-          )}
-          {fileName && (
             <button
               className={scoped('studio-action-url')}
               type="button"
@@ -606,8 +666,6 @@ export function App() {
             >
               <span>Load URL</span>
             </button>
-          )}
-          {fileName && (
             <button
               className={scoped('studio-action-file')}
               type="button"
@@ -615,12 +673,82 @@ export function App() {
             >
               <span>Open file</span>
             </button>
-          )}
+          </>
+        ),
+        body: (
+          <div className={scoped('studio-workspace')}>
+            <div className={scoped('studio-preview')}>
+              <Speccy
+                spec={spec}
+                theme={theme}
+                showThemeToggle={false}
+                showDeveloperHints
+                spectralDiagnostics={spectralDiagnostics}
+                diagnosticsIndexState={diagnosticsIndexState}
+                route={referenceRoute}
+                onNavigate={navigate}
+                hrefForRoute={hrefForRoute}
+                parameterPrototype
+              />
+            </div>
+          </div>
+        ),
+      }
+    : {
+        title: (
+          <div className={scoped('studio-document')}>Your API references</div>
+        ),
+        actions: null,
+        body: (
+          <HomeScreen
+            discoveredRepositories={discoveredRepositories}
+            recents={recents}
+            loading={loading}
+            message={message}
+            onOpenFile={() => fileInput.current?.click()}
+            onOpenUrl={() => setUrlOpen(true)}
+            onOpenSample={openSample}
+            onOpenCatalogApi={(api) =>
+              void loadUrl(
+                api.sourceUrl,
+                undefined,
+                { page: 'overview' },
+                'push',
+                api.name,
+              )
+            }
+            onOpenRecent={openRecent}
+          />
+        ),
+      };
+
+  return (
+    <div
+      className={scoped(`studio studio-${theme}`)}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        void loadFile(event.dataTransfer.files[0]);
+      }}
+    >
+      <header className={scoped('studio-bar')}>
+        <button
+          className={scoped('studio-logo')}
+          type="button"
+          onClick={goHome}
+          aria-label="Speccy home"
+        >
+          <Mark />
+          <span>Speccy</span>
+        </button>
+        {screen.title}
+        <div className={scoped('studio-actions')}>
+          {screen.actions}
           <ThemeToggle
             className={scoped('studio-theme')}
             theme={theme}
             onChange={setTheme}
-            themes={['system', 'dark', 'light']}
+            themes={THEMES}
             label="current"
           />
           <input
@@ -662,213 +790,7 @@ export function App() {
         </form>
       )}
 
-      {fileName ? (
-        <div className={scoped('studio-workspace')}>
-          <div className={scoped('studio-preview')}>
-            <Speccy
-              spec={spec}
-              theme={theme}
-              showThemeToggle={false}
-              showDeveloperHints
-              spectralDiagnostics={spectralDiagnostics}
-              diagnosticsIndexState={diagnosticsIndexState}
-              route={referenceRoute}
-              onNavigate={navigateRenderer}
-              hrefForRoute={rendererHref}
-              parameterPrototype
-            />
-          </div>
-        </div>
-      ) : (
-        <main className={scoped('studio-home')}>
-          <section className={scoped('studio-home-intro')}>
-            <span className={scoped('studio-eyebrow')}>
-              API reference studio
-            </span>
-            <h1>Pick up where you left off.</h1>
-            <p>
-              Open a recent API reference, or bring in an OpenAPI document to
-              start exploring.
-            </p>
-            <div className={scoped('studio-home-actions')}>
-              <button
-                className={scoped('is-primary')}
-                type="button"
-                onClick={() => fileInput.current?.click()}
-              >
-                Open a file
-              </button>
-              <button type="button" onClick={() => setUrlOpen(true)}>
-                Load from URL
-              </button>
-              <button type="button" onClick={openSample}>
-                Explore the sample
-              </button>
-            </div>
-          </section>
-          {discoveredRepositories.length > 0 && (
-            <section
-              className={scoped('studio-recents')}
-              aria-labelledby="discovered-heading"
-            >
-              <div className={scoped('studio-section-heading')}>
-                <div>
-                  <span className={scoped('studio-eyebrow')}>
-                    Found on this Mac
-                  </span>
-                  <h2 id="discovered-heading">OpenAPI repositories</h2>
-                </div>
-                <span>
-                  {discoveredRepositories.length}{' '}
-                  {discoveredRepositories.length === 1
-                    ? 'repository'
-                    : 'repositories'}
-                </span>
-              </div>
-              <div className={scoped('studio-recent-grid')}>
-                {discoveredRepositories.map((repository) => (
-                  <button
-                    className={scoped('studio-recent-card')}
-                    type="button"
-                    key={repository.path}
-                    onClick={() =>
-                      window.webkit?.messageHandlers?.speccyOpenRepository?.postMessage(
-                        repository.path,
-                      )
-                    }
-                  >
-                    <span className={scoped('studio-recent-icon')}>
-                      <Mark />
-                    </span>
-                    <span className={scoped('studio-recent-name')}>
-                      {repository.name}
-                    </span>
-                    <span className={scoped('studio-recent-meta')}>
-                      {repository.documentCount}{' '}
-                      {repository.documentCount === 1
-                        ? 'OpenAPI document'
-                        : 'OpenAPI documents'}
-                    </span>
-                    <span
-                      className={scoped('studio-recent-arrow')}
-                      aria-hidden="true"
-                    >
-                      ↗
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-          <section
-            className={scoped('studio-recents studio-catalog')}
-            aria-labelledby="catalog-heading"
-          >
-            <div className={scoped('studio-section-heading')}>
-              <div>
-                <span className={scoped('studio-eyebrow')}>Explore</span>
-                <h2 id="catalog-heading">Popular complex APIs</h2>
-              </div>
-              <span>{API_CATALOG.length} public specifications</span>
-            </div>
-            <div className={scoped('studio-catalog-grid')}>
-              {API_CATALOG.map((api) => (
-                <button
-                  className={scoped('studio-catalog-card')}
-                  type="button"
-                  key={api.name}
-                  onClick={() =>
-                    void loadUrl(
-                      api.sourceUrl,
-                      undefined,
-                      { page: 'overview' },
-                      'push',
-                      api.name,
-                    )
-                  }
-                  disabled={loading}
-                  aria-label={`Open ${api.name} API`}
-                  style={{ '--catalog-color': api.color } as CSSProperties}
-                >
-                  <span
-                    className={scoped('studio-catalog-icon')}
-                    aria-hidden="true"
-                  >
-                    {api.name.slice(0, 1)}
-                  </span>
-                  <span className={scoped('studio-catalog-copy')}>
-                    <strong>{api.name}</strong>
-                    <span>{api.description}</span>
-                  </span>
-                  <span
-                    className={scoped('studio-recent-arrow')}
-                    aria-hidden="true"
-                  >
-                    ↗
-                  </span>
-                </button>
-              ))}
-            </div>
-            {message && (
-              <p className={scoped('studio-catalog-error')} role="alert">
-                Couldn’t open that API. {message}
-              </p>
-            )}
-          </section>
-          <section
-            className={scoped('studio-recents')}
-            aria-labelledby="recent-heading"
-          >
-            <div className={scoped('studio-section-heading')}>
-              <div>
-                <span className={scoped('studio-eyebrow')}>Your workspace</span>
-                <h2 id="recent-heading">Recent references</h2>
-              </div>
-              <span>
-                {recents.length}{' '}
-                {recents.length === 1 ? 'reference' : 'references'}
-              </span>
-            </div>
-            {recents.length ? (
-              <div className={scoped('studio-recent-grid')}>
-                {recents.map((reference) => (
-                  <button
-                    className={scoped('studio-recent-card')}
-                    type="button"
-                    key={reference.id}
-                    onClick={() => openRecent(reference)}
-                  >
-                    <span className={scoped('studio-recent-icon')}>
-                      <Mark />
-                    </span>
-                    <span className={scoped('studio-recent-name')}>
-                      {reference.name}
-                    </span>
-                    <span className={scoped('studio-recent-meta')}>
-                      Opened{' '}
-                      {new Intl.DateTimeFormat(undefined, {
-                        dateStyle: 'medium',
-                      }).format(reference.openedAt)}
-                    </span>
-                    <span
-                      className={scoped('studio-recent-arrow')}
-                      aria-hidden="true"
-                    >
-                      ↗
-                    </span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className={scoped('studio-empty')}>
-                <Mark />
-                <h3>No recent references yet</h3>
-                <p>References you open will stay handy here on this device.</p>
-              </div>
-            )}
-          </section>
-        </main>
-      )}
+      {screen.body}
     </div>
   );
 }
