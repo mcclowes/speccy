@@ -1,5 +1,12 @@
 # speccy-spectral
 
+## 0.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`eb610fc`](https://github.com/mcclowes/speccy/commit/eb610fc94281a40352b093746f2084c9368da817)]:
+  - speccy-core@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes
