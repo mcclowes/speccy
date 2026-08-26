@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: OpenAPI 3.0 coverage
+  version: 1.0.0
+  description: Exercises the OpenAPI 3.0 rendering contract.
+servers:
+  - url: https://{region}.example.com/v1
+    variables:
+      region:
+        default: eu
+        enum: [eu, us]
+tags:
+  - name: Pets
+    description: Pet operations.
+paths:
+  /pets/{petId}:
+    parameters:
+      - $ref: '#/components/parameters/PetId'
+    get:
+      operationId: getPet
+      summary: Get a pet
+      tags: [Pets]
+      deprecated: true
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/PetResponse'
+        default:
+          description: Unexpected error.
+    post:
+      operationId: updatePet
+      tags: [Pets]
+      requestBody:
+        $ref: '#/components/requestBodies/PetBody'
+      callbacks:
+        changed:
+          '{$request.body#/callbackUrl}':
+            post:
+              operationId: petChanged
+              responses:
+                '204':
+                  description: Callback accepted.
+      responses:
+        '202':
+          description: Update accepted.
+components:
+  schemas:
+    Pet:
+      type: object
+      required: [id, name]
+      discriminator:
+        propertyName: kind
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+        kind:
+          type: string
+          enum: [cat, dog]
+        tag:
+          type: string
+          nullable: true
+      example:
+        id: 7
+        name: Miso
+        kind: cat
+  parameters:
+    PetId:
+      name: petId
+      in: path
+      required: true
+      description: Stable pet identifier.
+      schema:
+        type: integer
+        format: int64
+      example: 7
+  requestBodies:
+    PetBody:
+      description: Updated pet details.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+          examples:
+            cat:
+              summary: Cat update
+              value:
+                id: 7
+                name: Miso
+                kind: cat
+  responses:
+    PetResponse:
+      description: A single pet.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+          examples:
+            cat:
+              $ref: '#/components/examples/Cat'
+      links:
+        owner:
+          $ref: '#/components/links/PetOwner'
+  headers:
+    RequestId:
+      description: Request correlation identifier.
+      schema:
+        type: string
+  examples:
+    Cat:
+      summary: A cat
+      value:
+        id: 7
+        name: Miso
+        kind: cat
+  links:
+    PetOwner:
+      description: Find this pet's owner.
+      operationId: getOwner
+      parameters:
+        petId: $response.body#/id
+  callbacks:
+    PetChanged:
+      '{$request.body#/callbackUrl}':
+        post:
+          summary: Receive a pet change
+          responses:
+            '204':
+              description: Callback accepted.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    oauth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/authorize
+          tokenUrl: https://example.com/token
+          scopes:
+            pets:read: Read pets.

@@ -16,7 +16,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Customize',
-      items: ['configuration', 'openapi-extensions'],
+      items: ['configuration', 'openapi-support', 'openapi-extensions'],
     },
     'deployment',
   ],

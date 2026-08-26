@@ -6,7 +6,9 @@ description: Add Speccy to a React app or publish an OpenAPI reference with Docu
 
 # Get started
 
-Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference documentation. Use the React package inside an existing app, the Docusaurus plugin inside a documentation site, or the standalone starter when the API reference is the whole site.
+Speccy renders OpenAPI 3.x and Swagger 2 documents as searchable reference documentation. OpenAPI 3.0.3 and 3.1.1 are covered by compatibility fixtures in CI. See [OpenAPI support](./openapi-support.md) for the tested objects and schema features.
+
+Use the React package inside an existing app, the Docusaurus plugin inside a documentation site, or the standalone starter when the API reference is the whole site.
 
 ## Choose a package
 

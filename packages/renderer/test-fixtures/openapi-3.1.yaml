@@ -1,0 +1,76 @@
+openapi: 3.1.1
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: OpenAPI 3.1 coverage
+  summary: Covers 3.1-only document and schema fields.
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    identifier: Apache-2.0
+paths:
+  /events:
+    $ref: '#/components/pathItems/Events'
+webhooks:
+  eventCreated:
+    post:
+      operationId: eventCreated
+      summary: Receive an event
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '204':
+          description: Event accepted.
+components:
+  pathItems:
+    Events:
+      summary: Shared event operations
+      get:
+        operationId: listEvents
+        summary: List events
+        responses:
+          '200':
+            description: Event collection.
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Event'
+  schemas:
+    Event:
+      $id: https://example.com/schemas/event
+      type: object
+      required: [kind, payload]
+      properties:
+        kind:
+          type: [string, 'null']
+          const: created
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/TextPayload'
+            - $ref: '#/components/schemas/BinaryPayload'
+      dependentRequired:
+        payload: [kind]
+      unevaluatedProperties: false
+    TextPayload:
+      type: object
+      properties:
+        text:
+          type: string
+          examples: [hello]
+    BinaryPayload:
+      type: string
+      contentEncoding: base64
+      contentMediaType: application/octet-stream
+    Anything: true
+    Nothing: false
+  securitySchemes:
+    certificate:
+      type: mutualTLS
+      description: Client certificate authentication.
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
