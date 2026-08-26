@@ -66,6 +66,7 @@ export function schemaTypeLabel(schema?: Schema): string {
   if (schema === undefined || schema === true) return 'any';
   if (schema === false) return 'never';
   if (schema.$ref) return schema.$ref.split('/').pop() ?? 'reference';
+  if (schema.allOf) schema = structuralObjectSchema(schema);
   const declaredType = declaredTypeName(schema);
   if (declaredType === 'array')
     return `array<${schemaLabel(schema.items ?? true)}>`;
@@ -147,9 +148,28 @@ export function structuralObjectSchema(schema: Schema): SchemaObject {
       ...(base.required ?? []),
     ]),
   ];
+  const inherited: Partial<SchemaObject> = {};
+  const inheritedKeywords = [
+    'enum',
+    'format',
+    'pattern',
+    'minimum',
+    'maximum',
+    'minLength',
+    'maxLength',
+    'example',
+  ] as const satisfies readonly (keyof SchemaObject)[];
+  for (const keyword of inheritedKeywords) {
+    if (base[keyword] !== undefined) continue;
+    const member = members.find(
+      (candidate) => candidate[keyword] !== undefined,
+    );
+    if (member) Object.assign(inherited, { [keyword]: member[keyword] });
+  }
 
   return {
     ...base,
+    ...inherited,
     type: base.type ?? members.find((member) => member.type)?.type,
     properties,
     required,
