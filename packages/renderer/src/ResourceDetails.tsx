@@ -107,6 +107,7 @@ export function ParameterDetails({
   const mediaType = parameter.schema
     ? undefined
     : Object.keys(parameter.content ?? {})[0];
+  const detailed = !summaryOnly;
   return (
     <div className={`sp-resource-details sp-parameter-details is-${density}`}>
       <div className="sp-resource-heading">
@@ -121,12 +122,12 @@ export function ParameterDetails({
       {mediaType && <div className="sp-media-type">{mediaType}</div>}
       <SchemaView
         schema={schema}
-        showExample={!summaryOnly}
+        showExample={detailed}
         summaryOnly={summaryOnly}
       />
-      {!summaryOnly && <SerializationNote parameter={parameter} />}
+      {detailed && <SerializationNote parameter={parameter} />}
       {example !== undefined && <JsonValue value={example} />}
-      {!summaryOnly && parameter.examples && (
+      {detailed && parameter.examples && (
         <NamedExamples examples={parameter.examples} />
       )}
     </div>

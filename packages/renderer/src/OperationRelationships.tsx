@@ -91,6 +91,12 @@ function referenceLabel(reference: OperationReference | LinkObject): string {
   return reference.operationId ?? reference.operationRef ?? 'Unknown operation';
 }
 
+function referenceDescription(
+  reference: OperationReference | LinkObject,
+): string | undefined {
+  return typeof reference === 'string' ? undefined : reference.description;
+}
+
 function RelationshipCard({
   relationship,
   hrefForOperation,
@@ -155,8 +161,7 @@ export function OperationRelationships({
     (reference, index): Relationship => ({
       key: `prerequisite-${index}`,
       label: referenceLabel(reference),
-      description:
-        typeof reference === 'string' ? undefined : reference.description,
+      description: referenceDescription(reference),
       target: referenceTarget(reference, operations),
     }),
   );
@@ -192,8 +197,7 @@ export function OperationRelationships({
     (reference, index): Relationship => ({
       key: `emitted-webhook-${index}`,
       label: referenceLabel(reference),
-      description:
-        typeof reference === 'string' ? undefined : reference.description,
+      description: referenceDescription(reference),
       target: referenceTarget(reference, operations),
     }),
   );
@@ -210,23 +214,21 @@ export function OperationRelationships({
               .map((reference, index): Relationship => ({
                 key: `webhook-trigger-${operation.id}-${index}`,
                 label: operationLabel(operation),
-                description:
-                  typeof reference === 'string'
-                    ? undefined
-                    : reference.description,
+                description: referenceDescription(reference),
                 target: operation,
               })),
           )
       : [];
 
-  if (
-    prerequisites.length === 0 &&
-    successors.length === 0 &&
-    callbacks.length === 0 &&
-    emittedWebhooks.length === 0 &&
-    webhookTriggers.length === 0
-  )
-    return null;
+  const groups = [
+    { title: 'Before this operation', items: prerequisites },
+    { title: 'Possible next operations', items: successors },
+    { title: 'Callbacks from this operation', items: callbacks },
+    { title: 'Events emitted', items: emittedWebhooks },
+    { title: 'Triggered by operations', items: webhookTriggers },
+  ].filter((group) => group.items.length > 0);
+
+  if (groups.length === 0) return null;
 
   return (
     <details className={styles.relationships} aria-labelledby="workflow-title">
@@ -235,11 +237,11 @@ export function OperationRelationships({
         <DisclosureChevron />
       </summary>
       <div className={styles.groups}>
-        {prerequisites.length > 0 && (
-          <div className={styles.group}>
-            <h3>Before this operation</h3>
+        {groups.map((group) => (
+          <div className={styles.group} key={group.title}>
+            <h3>{group.title}</h3>
             <div className={styles.cards}>
-              {prerequisites.map((relationship) => (
+              {group.items.map((relationship) => (
                 <RelationshipCard
                   relationship={relationship}
                   hrefForOperation={hrefForOperation}
@@ -249,67 +251,7 @@ export function OperationRelationships({
               ))}
             </div>
           </div>
-        )}
-        {successors.length > 0 && (
-          <div className={styles.group}>
-            <h3>Possible next operations</h3>
-            <div className={styles.cards}>
-              {successors.map((relationship) => (
-                <RelationshipCard
-                  relationship={relationship}
-                  hrefForOperation={hrefForOperation}
-                  onNavigate={onNavigate}
-                  key={relationship.key}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        {callbacks.length > 0 && (
-          <div className={styles.group}>
-            <h3>Callbacks from this operation</h3>
-            <div className={styles.cards}>
-              {callbacks.map((relationship) => (
-                <RelationshipCard
-                  relationship={relationship}
-                  hrefForOperation={hrefForOperation}
-                  onNavigate={onNavigate}
-                  key={relationship.key}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        {emittedWebhooks.length > 0 && (
-          <div className={styles.group}>
-            <h3>Events emitted</h3>
-            <div className={styles.cards}>
-              {emittedWebhooks.map((relationship) => (
-                <RelationshipCard
-                  relationship={relationship}
-                  hrefForOperation={hrefForOperation}
-                  onNavigate={onNavigate}
-                  key={relationship.key}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        {webhookTriggers.length > 0 && (
-          <div className={styles.group}>
-            <h3>Triggered by operations</h3>
-            <div className={styles.cards}>
-              {webhookTriggers.map((relationship) => (
-                <RelationshipCard
-                  relationship={relationship}
-                  hrefForOperation={hrefForOperation}
-                  onNavigate={onNavigate}
-                  key={relationship.key}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        ))}
       </div>
     </details>
   );

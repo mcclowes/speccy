@@ -24,7 +24,11 @@ import {
   SerializationNote,
 } from './ResourceDetails';
 import { JsonValue, SchemaView } from './SchemaView';
-import type { OpenAPIDocument, SecurityScheme } from 'speccy-core';
+import {
+  operationsInDeclarationOrder,
+  type OpenAPIDocument,
+  type SecurityScheme,
+} from 'speccy-core';
 import { useLocalState } from './useLocalState';
 import styles from './ReferenceSections.module.css';
 
@@ -328,6 +332,123 @@ function SecuritySchemeView({ scheme }: { scheme: SecurityScheme }) {
   );
 }
 
+type Components = NonNullable<OpenAPIDocument['components']>;
+type ComponentValue<K extends ComponentReferenceKey> = NonNullable<
+  Components[K]
+>[string];
+
+/** One card body per component kind; `DocumentReference` looks the active kind up once. */
+const CARD_RENDERERS: {
+  [K in ComponentReferenceKey]: (
+    name: string,
+    value: ComponentValue<K>,
+  ) => ReactNode;
+} = {
+  schemas: (_name, schema) => <SchemaView schema={schema} />,
+  parameters: (name, parameter) => (
+    <ParameterDetails parameter={parameter} fallbackName={name} />
+  ),
+  requestBodies: (_name, body) => <RequestBodyDetails body={body} />,
+  responses: (_name, response) => <ResponseDetails response={response} />,
+  headers: (_name, header) => (
+    <>
+      <div className="sp-resource-heading">
+        {header.required && <RequiredMark />}
+        {header.deprecated && <span className="sp-deprecated">deprecated</span>}
+      </div>
+      <Markdown>{header.description}</Markdown>
+      <SchemaView schema={resourceSchema(header)} />
+      <SerializationNote parameter={header} />
+      {header.example !== undefined && <JsonValue value={header.example} />}
+      {header.examples && <NamedExamples examples={header.examples} />}
+    </>
+  ),
+  examples: (_name, example) => (
+    <>
+      {example.summary && (
+        <p className="sp-resource-summary">{example.summary}</p>
+      )}
+      <Markdown>{example.description}</Markdown>
+      {example.externalValue ? (
+        <p>
+          <a href={example.externalValue}>{example.externalValue}</a>
+        </p>
+      ) : (
+        <JsonValue value={example.value} />
+      )}
+    </>
+  ),
+  links: (_name, link) => (
+    <>
+      <Markdown>{link.description}</Markdown>
+      <p>
+        Operation:{' '}
+        <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code>
+      </p>
+      {entries(link.parameters).map(([parameter, value]) => (
+        <div key={parameter}>
+          <code>{parameter}</code>: <code>{JSON.stringify(value)}</code>
+        </div>
+      ))}
+      {link.requestBody !== undefined && (
+        <div>
+          Request body:{' '}
+          <code>
+            {typeof link.requestBody === 'string'
+              ? link.requestBody
+              : JSON.stringify(link.requestBody)}
+          </code>
+        </div>
+      )}
+      {link.server?.url && (
+        <div>
+          Server: <code>{link.server.url}</code>
+        </div>
+      )}
+    </>
+  ),
+  callbacks: (_name, callback) => (
+    <>
+      {entries(callback)
+        .filter(([expression]) => expression !== '$ref')
+        .map(([expression, pathItem]) =>
+          typeof pathItem === 'string' ? null : (
+            <div key={expression}>
+              <code>{expression}</code>
+              <div>
+                {operationsInDeclarationOrder(pathItem).map(
+                  ([method, operation]) => (
+                    <span
+                      className={`sp-callback-method ${styles.callbackMethod}`}
+                      key={method}
+                    >
+                      {method.toUpperCase()} {operationLabel(operation)}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+          ),
+        )}
+    </>
+  ),
+  pathItems: (_name, pathItem) => (
+    <>
+      <Markdown>{pathItem.description}</Markdown>
+      {pathItem.summary && <p>{pathItem.summary}</p>}
+      {operationsInDeclarationOrder(pathItem).map(([method, operation]) => (
+        <div
+          className={`sp-callback-method ${styles.callbackMethod}`}
+          key={method}
+        >
+          {method.toUpperCase()} {operationLabel(operation)}
+        </div>
+      ))}
+    </>
+  ),
+  securitySchemes: (_name, scheme) => <SecuritySchemeView scheme={scheme} />,
+};
+
 export function DocumentReference({
   document,
   activeKey,
@@ -335,183 +456,28 @@ export function DocumentReference({
   document: OpenAPIDocument;
   activeKey: ReferenceKey;
 }) {
-  const components = document.components ?? {};
-  const renderCards = <T,>(
-    key: ComponentReferenceKey,
-    values: Record<string, T> | undefined,
-    render: (name: string, value: T) => ReactNode,
-  ) => {
-    const items = entries(values);
-    return (
-      <Section
-        id={`components-${key}`}
-        title={REFERENCE_GROUPS.find(([item]) => item === key)?.[1] ?? key}
-        activeKey={key}
-        names={items.map(([name]) => name)}
-      >
-        {items.map(([name, value]) => (
-          <Card id={componentAnchorId(key, name)} name={name} key={name}>
-            {render(name, value)}
-          </Card>
-        ))}
-      </Section>
-    );
-  };
+  if (activeKey === 'webhooks') return null;
+  const key: ComponentReferenceKey = activeKey;
+  const items = entries(
+    document.components?.[key] as Record<string, unknown> | undefined,
+  );
+  const render = CARD_RENDERERS[key] as (
+    name: string,
+    value: unknown,
+  ) => ReactNode;
   return (
-    <>
-      {activeKey === 'schemas' &&
-        renderCards('schemas', components.schemas, (_name, schema) => (
-          <SchemaView schema={schema} />
-        ))}
-      {activeKey === 'parameters' &&
-        renderCards('parameters', components.parameters, (name, parameter) => (
-          <ParameterDetails parameter={parameter} fallbackName={name} />
-        ))}
-      {activeKey === 'requestBodies' &&
-        renderCards(
-          'requestBodies',
-          components.requestBodies,
-          (_name, body) => <RequestBodyDetails body={body} />,
-        )}
-      {activeKey === 'responses' &&
-        renderCards('responses', components.responses, (_name, response) => (
-          <ResponseDetails response={response} />
-        ))}
-      {activeKey === 'headers' &&
-        renderCards('headers', components.headers, (_name, header) => (
-          <>
-            <div className="sp-resource-heading">
-              {header.required && <RequiredMark />}
-              {header.deprecated && (
-                <span className="sp-deprecated">deprecated</span>
-              )}
-            </div>
-            <Markdown>{header.description}</Markdown>
-            <SchemaView schema={resourceSchema(header)} />
-            <SerializationNote parameter={header} />
-            {header.example !== undefined && (
-              <JsonValue value={header.example} />
-            )}
-            {header.examples && <NamedExamples examples={header.examples} />}
-          </>
-        ))}
-      {activeKey === 'examples' &&
-        renderCards('examples', components.examples, (_name, example) => (
-          <>
-            {example.summary && (
-              <p className="sp-resource-summary">{example.summary}</p>
-            )}
-            <Markdown>{example.description}</Markdown>
-            {example.externalValue ? (
-              <p>
-                <a href={example.externalValue}>{example.externalValue}</a>
-              </p>
-            ) : (
-              <JsonValue value={example.value} />
-            )}
-          </>
-        ))}
-      {activeKey === 'links' &&
-        renderCards('links', components.links, (_name, link) => (
-          <>
-            <Markdown>{link.description}</Markdown>
-            <p>
-              Operation:{' '}
-              <code>{link.operationId ?? link.operationRef ?? 'dynamic'}</code>
-            </p>
-            {entries(link.parameters).map(([parameter, value]) => (
-              <div key={parameter}>
-                <code>{parameter}</code>: <code>{JSON.stringify(value)}</code>
-              </div>
-            ))}
-            {link.requestBody !== undefined && (
-              <div>
-                Request body:{' '}
-                <code>
-                  {typeof link.requestBody === 'string'
-                    ? link.requestBody
-                    : JSON.stringify(link.requestBody)}
-                </code>
-              </div>
-            )}
-            {link.server?.url && (
-              <div>
-                Server: <code>{link.server.url}</code>
-              </div>
-            )}
-          </>
-        ))}
-      {activeKey === 'callbacks' &&
-        renderCards('callbacks', components.callbacks, (_name, callback) => (
-          <>
-            {entries(callback)
-              .filter(([expression]) => expression !== '$ref')
-              .map(([expression, pathItem]) =>
-                typeof pathItem === 'string' ? null : (
-                  <div key={expression}>
-                    <code>{expression}</code>
-                    <div>
-                      {entries(pathItem)
-                        .filter(([method]) =>
-                          [
-                            'get',
-                            'put',
-                            'post',
-                            'delete',
-                            'options',
-                            'head',
-                            'patch',
-                            'trace',
-                          ].includes(method),
-                        )
-                        .map(([method, operation]) => (
-                          <span
-                            className={`sp-callback-method ${styles.callbackMethod}`}
-                            key={method}
-                          >
-                            {method.toUpperCase()} {operationLabel(operation)}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                ),
-              )}
-          </>
-        ))}
-      {activeKey === 'pathItems' &&
-        renderCards('pathItems', components.pathItems, (_name, pathItem) => (
-          <>
-            <Markdown>{pathItem.description}</Markdown>
-            {pathItem.summary && <p>{pathItem.summary}</p>}
-            {entries(pathItem)
-              .filter(([method]) =>
-                [
-                  'get',
-                  'put',
-                  'post',
-                  'delete',
-                  'options',
-                  'head',
-                  'patch',
-                  'trace',
-                ].includes(method),
-              )
-              .map(([method, operation]) => (
-                <div
-                  className={`sp-callback-method ${styles.callbackMethod}`}
-                  key={method}
-                >
-                  {method.toUpperCase()} {operationLabel(operation)}
-                </div>
-              ))}
-          </>
-        ))}
-      {activeKey === 'securitySchemes' &&
-        renderCards(
-          'securitySchemes',
-          components.securitySchemes,
-          (_name, scheme) => <SecuritySchemeView scheme={scheme} />,
-        )}
-    </>
+    <Section
+      key={key}
+      id={`components-${key}`}
+      title={REFERENCE_GROUPS.find(([item]) => item === key)?.[1] ?? key}
+      activeKey={key}
+      names={items.map(([name]) => name)}
+    >
+      {items.map(([name, value]) => (
+        <Card id={componentAnchorId(key, name)} name={name} key={name}>
+          {render(name, value)}
+        </Card>
+      ))}
+    </Section>
   );
 }

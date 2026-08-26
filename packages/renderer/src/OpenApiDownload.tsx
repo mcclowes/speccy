@@ -7,31 +7,41 @@
  * ---
  */
 
+import type { ReactNode } from 'react';
 import { stringify as stringifyYaml } from 'yaml';
 import type { OpenAPIDocument } from 'speccy-core';
 import { CopyButton } from './CodeBlock';
+import { downloadBlob } from './downloadBlob';
 import styles from './OpenApiDownload.module.css';
 
 type DownloadFormat = 'json' | 'yaml';
 
+const FORMATS: Record<
+  DownloadFormat,
+  {
+    serialize: (document: OpenAPIDocument) => string;
+    mimeType: string;
+    className: string | undefined;
+  }
+> = {
+  json: {
+    serialize: (document) => `${JSON.stringify(document, null, 2)}\n`,
+    mimeType: 'application/json',
+    className: styles.jsonFormat,
+  },
+  yaml: {
+    serialize: (document) => stringifyYaml(document),
+    mimeType: 'application/yaml',
+    className: styles.yamlFormat,
+  },
+};
+
 function downloadDocument(document: OpenAPIDocument, format: DownloadFormat) {
-  const content =
-    format === 'json'
-      ? `${JSON.stringify(document, null, 2)}\n`
-      : stringifyYaml(document);
-  const url = URL.createObjectURL(
-    new Blob([content], {
-      type: format === 'json' ? 'application/json' : 'application/yaml',
-    }),
-  );
-  const link = window.document.createElement('a');
-  link.href = url;
-  link.download = `openapi.${format}`;
-  link.click();
-  URL.revokeObjectURL(url);
+  const { serialize, mimeType } = FORMATS[format];
+  downloadBlob(serialize(document), `openapi.${format}`, mimeType);
 }
 
-function DownloadIcon() {
+function StrokeIcon({ children }: { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -42,28 +52,28 @@ function DownloadIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
+      {children}
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <StrokeIcon>
       <path d="M12 3v12" />
       <path d="m7 10 5 5 5-5" />
       <path d="M5 21h14" />
-    </svg>
+    </StrokeIcon>
   );
 }
 
 function ExternalIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <StrokeIcon>
       <path d="M14 4h6v6" />
       <path d="m20 4-9 9" />
       <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
-    </svg>
+    </StrokeIcon>
   );
 }
 
@@ -92,7 +102,7 @@ export function OpenApiDownload({
             key={format}
           >
             <span
-              className={`sp-download-format sp-download-format-${format} ${styles.format} ${format === 'json' ? styles.jsonFormat : styles.yamlFormat}`}
+              className={`sp-download-format sp-download-format-${format} ${styles.format} ${FORMATS[format].className}`}
             >
               {format}
             </span>

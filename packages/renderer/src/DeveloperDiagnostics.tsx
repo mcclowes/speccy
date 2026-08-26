@@ -12,6 +12,8 @@ import type { ApiDiagnostic, DiagnosticSeverity } from 'speccy-core';
 import type { SpeccyRoute } from './types';
 import type { DiagnosticsIndexState } from './types';
 import { useLocalState } from './useLocalState';
+import { downloadBlob } from './downloadBlob';
+import { DisclosureContent } from './DesignSystem';
 import styles from './DeveloperDiagnostics.module.css';
 
 function scoped(className: string) {
@@ -21,7 +23,6 @@ function scoped(className: string) {
     .filter(Boolean)
     .join(' ');
 }
-import { DisclosureContent } from './DesignSystem';
 
 const SEVERITY_LABELS: Record<DiagnosticSeverity, string> = {
   issue: 'Issues',
@@ -97,16 +98,55 @@ export function diagnosticsAsCsv(diagnostics: ApiDiagnostic[]) {
 }
 
 function downloadCsv(diagnostics: ApiDiagnostic[]) {
-  const url = URL.createObjectURL(
-    new Blob([diagnosticsAsCsv(diagnostics)], {
-      type: 'text/csv;charset=utf-8',
-    }),
+  downloadBlob(
+    diagnosticsAsCsv(diagnostics),
+    'api-health-findings.csv',
+    'text/csv;charset=utf-8',
   );
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'api-health-findings.csv';
-  link.click();
-  URL.revokeObjectURL(url);
+}
+
+interface IndexStatus {
+  indexing: boolean;
+  headline: string;
+  detail: string;
+  progress?: { completed: number; total: number };
+}
+
+/** Resolves the index state machine once; `complete` has no status to show. */
+function indexStatus(state: DiagnosticsIndexState): IndexStatus | undefined {
+  const completed = state.completed ?? 0;
+  const total = state.total ?? 0;
+  const progress = total > 0 ? { completed, total } : undefined;
+  switch (state.phase) {
+    case 'idle':
+      return {
+        indexing: false,
+        headline: 'Ready to index API health',
+        detail: 'Checks start when you open API health.',
+      };
+    case 'page':
+      return {
+        indexing: true,
+        headline: 'Indexing API health',
+        detail: `Checking this page first · ${completed} of ${total} batches`,
+        progress,
+      };
+    case 'all':
+      return {
+        indexing: true,
+        headline: 'Indexing API health',
+        detail: `Checking the full API · ${completed} of ${total} batches`,
+        progress,
+      };
+    case 'error':
+      return {
+        indexing: false,
+        headline: 'Indexing paused',
+        detail: 'Some checks couldn’t finish.',
+      };
+    case 'complete':
+      return undefined;
+  }
 }
 
 function DiagnosticCard({
@@ -296,9 +336,12 @@ export function DeveloperDiagnostics({
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
   }
-  const indexing = indexState?.phase === 'page' || indexState?.phase === 'all';
-  const completedBatches = indexState?.completed ?? 0;
-  const totalBatches = indexState?.total ?? 0;
+  const status = indexState && indexStatus(indexState);
+  const indexing = status?.indexing ?? false;
+  const findingCount = `${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`;
+  const trigger = indexing
+    ? { label: `API health: indexing, ${findingCount} so far`, count: '…' }
+    : { label: `API health: ${findingCount}`, count: allVisible.length };
 
   return (
     <>
@@ -312,15 +355,11 @@ export function DeveloperDiagnostics({
           onScopeChange(currentPageDiagnostics ? 'page' : 'all');
           onOpenChange(true);
         }}
-        aria-label={
-          indexing
-            ? `API health: indexing, ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'} so far`
-            : `API health: ${allVisible.length} finding${allVisible.length === 1 ? '' : 's'}`
-        }
+        aria-label={trigger.label}
       >
         <span aria-hidden="true">!</span>
         <strong>API health</strong>
-        <small>{indexing ? '…' : allVisible.length}</small>
+        <small>{trigger.count}</small>
       </button>
       {open && (
         <div
@@ -342,40 +381,28 @@ export function DeveloperDiagnostics({
                 <span className="sp-eyebrow">Developer view</span>
                 <h2>API health</h2>
                 <p>Contract checks and design guidance. No opaque score.</p>
-                {indexState && indexState.phase !== 'complete' && (
+                {status && (
                   <div
                     className={scoped(
-                      `sp-diagnostics-index-status ${indexing ? 'is-indexing' : ''}`,
+                      `sp-diagnostics-index-status ${status.indexing ? 'is-indexing' : ''}`,
                     )}
                     role="status"
                   >
-                    {indexing && (
+                    {status.indexing && (
                       <span
                         className={scoped('sp-diagnostics-index-spinner')}
                         aria-hidden="true"
                       />
                     )}
                     <span className={scoped('sp-diagnostics-index-copy')}>
-                      <strong>
-                        {indexing
-                          ? 'Indexing API health'
-                          : indexState.phase === 'error'
-                            ? 'Indexing paused'
-                            : 'Ready to index API health'}
-                      </strong>
-                      <small>
-                        {indexState.phase === 'idle' &&
-                          'Checks start when you open API health.'}
-                        {indexState.phase === 'page' &&
-                          `Checking this page first · ${completedBatches} of ${totalBatches} batches`}
-                        {indexState.phase === 'all' &&
-                          `Checking the full API · ${completedBatches} of ${totalBatches} batches`}
-                        {indexState.phase === 'error' &&
-                          'Some checks couldn’t finish.'}
-                      </small>
+                      <strong>{status.headline}</strong>
+                      <small>{status.detail}</small>
                     </span>
-                    {indexing && totalBatches > 0 && (
-                      <progress value={completedBatches} max={totalBatches} />
+                    {status.progress && (
+                      <progress
+                        value={status.progress.completed}
+                        max={status.progress.total}
+                      />
                     )}
                   </div>
                 )}

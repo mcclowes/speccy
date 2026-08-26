@@ -29,6 +29,7 @@ import {
   type OperationReferenceLookup,
 } from './operationReferenceContext';
 import styles from './OperationReference.module.css';
+import { useToggleSet } from './useToggleSet';
 
 export type { OperationPreviewRequestValues } from './operationPreviewData';
 export {
@@ -289,17 +290,15 @@ function PreviewPanel({
   sections: PreviewSectionData[];
   defaultCollapsed?: Partial<Record<OperationPreviewSection, boolean>>;
 }) {
-  const [collapsed, setCollapsed] = useState(
+  const [collapsed, toggleCollapsed] = useToggleSet<OperationPreviewSection>(
     () =>
-      new Set(
-        sections
-          .filter(
-            (section) =>
-              defaultCollapsed?.[section.key] ??
-              (section.key === 'query' || section.key === 'headers'),
-          )
-          .map((section) => section.key),
-      ),
+      sections
+        .filter(
+          (section) =>
+            defaultCollapsed?.[section.key] ??
+            (section.key === 'query' || section.key === 'headers'),
+        )
+        .map((section) => section.key),
   );
   const lines = sections.reduce(
     (total, section) =>
@@ -322,14 +321,7 @@ function PreviewPanel({
             {...section}
             id={`${label}-${section.key}-${index}`}
             collapsed={collapsed.has(section.key)}
-            onToggle={() =>
-              setCollapsed((current) => {
-                const next = new Set(current);
-                if (next.has(section.key)) next.delete(section.key);
-                else next.add(section.key);
-                return next;
-              })
-            }
+            onToggle={() => toggleCollapsed(section.key)}
             key={section.key}
           />
         ))}

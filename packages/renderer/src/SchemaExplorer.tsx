@@ -22,6 +22,7 @@ import {
   structuralObjectSchema,
 } from './schemaExplorerModel';
 import { scoped } from './schemaExplorerStyles';
+import { useToggleSet } from './useToggleSet';
 
 function ExplorerHeader({
   rootName,
@@ -66,19 +67,10 @@ export function SchemaExplorer({
   const alternatives = structuralSchema.oneOf ?? structuralSchema.anyOf;
   const closedObject = structuralSchema.additionalProperties === false;
   const [selectedPath, setSelectedPath] = useState<string[]>([]);
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const [expandedPaths, toggle] = useToggleSet<string>();
   const selected = findExplorerField(fields, selectedPath);
 
   if (fields.length === 0 && !alternatives?.length) return null;
-
-  const toggle = (path: string) => {
-    setExpandedPaths((current) => {
-      const next = new Set(current);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  };
 
   const select = (path: string[]) => {
     setSelectedPath((current) =>

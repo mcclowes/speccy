@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import styles from './CodeBlock.module.css';
+import { useToggleSet } from './useToggleSet';
 
 const jsonClass = {
   key: styles.jsonKey,
@@ -46,24 +47,21 @@ function highlightedJsonLine(line: string): ReactNode {
   return tokens;
 }
 
-function highlightedJson(value: string): ReactNode {
+function isJsonText(value: string): boolean {
   try {
     JSON.parse(value);
+    return true;
   } catch {
-    return value;
+    return false;
   }
+}
 
-  return highlightedJsonLine(value);
+function highlightedJson(value: string): ReactNode {
+  return isJsonText(value) ? highlightedJsonLine(value) : value;
 }
 
 export function CodeLines({ value }: { value: string }) {
-  let isJson = true;
-  try {
-    JSON.parse(value);
-  } catch {
-    isJson = false;
-  }
-
+  const isJson = isJsonText(value);
   return (
     <>
       {value.split('\n').map((line, index) => (
@@ -234,17 +232,7 @@ function jsonRows({
 }
 
 export function CollapsibleJson({ value }: { value: unknown }) {
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-
-  function toggle(path: string) {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  }
-
+  const [collapsed, toggle] = useToggleSet<string>();
   return (
     <>
       {jsonRows({
@@ -348,6 +336,29 @@ export function CopyButton({
   );
 }
 
+type CodeMode = 'tree' | 'lines' | 'plain';
+
+/** A raw JSON value renders as a foldable tree; otherwise text renders with or without line numbers. */
+function codeMode(collapsibleValue: unknown, lineNumbers: boolean): CodeMode {
+  if (collapsibleValue !== undefined) return 'tree';
+  return lineNumbers ? 'lines' : 'plain';
+}
+
+function renderCode(
+  mode: CodeMode,
+  value: string,
+  collapsibleValue: unknown,
+): ReactNode {
+  switch (mode) {
+    case 'tree':
+      return <CollapsibleJson value={collapsibleValue} />;
+    case 'lines':
+      return <CodeLines value={value} />;
+    case 'plain':
+      return highlightedJson(value);
+  }
+}
+
 export function CodeBlock({
   value,
   copyValue = value,
@@ -373,34 +384,31 @@ export function CodeBlock({
   /** When set, long values start clipped behind a "Show full <label>" toggle. */
   truncateLabel?: string;
 }) {
+  const mode = codeMode(collapsibleValue, lineNumbers);
   const code = (
-    <pre className={lineNumbers ? `sp-code-numbered ${styles.numbered}` : ''}>
-      <code>
-        {collapsibleValue !== undefined ? (
-          <CollapsibleJson value={collapsibleValue} />
-        ) : lineNumbers ? (
-          <CodeLines value={value} />
-        ) : (
-          highlightedJson(value)
-        )}
-      </code>
+    <pre
+      className={mode === 'lines' ? `sp-code-numbered ${styles.numbered}` : ''}
+    >
+      <code>{renderCode(mode, value, collapsibleValue)}</code>
     </pre>
   );
+  const showTitleBar = Boolean(title) || copyable;
+  const titleBarCopyOnly = !title && copyable;
+  const copyInTitle = copyable && copyPlacement === 'title';
+  const copyInBody = copyable && copyPlacement === 'body';
 
   return (
     <div className={`sp-code-block ${styles.block} ${className}`.trim()}>
-      {(title || copyable) && (
+      {showTitleBar && (
         <div
-          className={`sp-code-title ${styles.title}${!title && copyable ? ' sp-code-title-copy-only' : ''}`}
+          className={`sp-code-title ${styles.title}${titleBarCopyOnly ? ' sp-code-title-copy-only' : ''}`}
         >
           <span>{title}</span>
-          {copyable && copyPlacement === 'title' && (
-            <CopyButton value={copyValue} label={copyLabel} />
-          )}
+          {copyInTitle && <CopyButton value={copyValue} label={copyLabel} />}
         </div>
       )}
       <div className={`sp-code-body ${styles.body}`}>
-        {copyable && copyPlacement === 'body' && (
+        {copyInBody && (
           <CopyButton value={copyValue} label={copyLabel} compact />
         )}
         {truncateLabel ? (
