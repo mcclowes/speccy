@@ -440,14 +440,14 @@ function OperationChanges({
       </span>
     </header>
   );
-  // The whole-operation note is deliberately not gated on `heading`, matching prior output.
-  const impact = wholeOperation ? (
-    <div className={scoped('sp-diff-whole-operation')}>
-      The entire operation was {wholeOperation.kind}.
-    </div>
-  ) : (
-    heading && <OperationImpact areaCounts={areaCounts} />
-  );
+  const impact =
+    heading && wholeOperation ? (
+      <div className={scoped('sp-diff-whole-operation')}>
+        The entire operation was {wholeOperation.kind}.
+      </div>
+    ) : (
+      heading && <OperationImpact areaCounts={areaCounts} />
+    );
 
   return (
     <article

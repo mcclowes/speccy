@@ -224,4 +224,27 @@ describe('SpecDiff', () => {
       screen.getByText('The entire operation was removed.'),
     ).toBeInTheDocument();
   });
+
+  it('does not describe an unscoped general change as an entire operation', () => {
+    render(
+      <SpecDiff
+        report={{
+          ...report,
+          changes: [
+            {
+              id: 'server-added',
+              severity: 'compatible',
+              kind: 'added',
+              location: ['servers', '0'],
+              message: 'Added server',
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByText(/The entire operation was/),
+    ).not.toBeInTheDocument();
+  });
 });
