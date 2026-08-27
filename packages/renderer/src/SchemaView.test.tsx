@@ -149,6 +149,19 @@ describe('SchemaView composition', () => {
     ).toHaveTextContent('ExampleThe records do not reconcile.');
   });
 
+  it('does not render empty primitive details when the active example is an object', () => {
+    const { container } = render(
+      <SchemaView
+        schema={{ type: 'string', example: 'Schema example' }}
+        exampleValue={{}}
+      />,
+    );
+
+    expect(
+      container.querySelector('.sp-schema-primitive-details'),
+    ).not.toBeInTheDocument();
+  });
+
   it('does not present allOf members as alternatives', () => {
     render(
       <SchemaView

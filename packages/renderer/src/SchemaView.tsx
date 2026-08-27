@@ -431,7 +431,7 @@ function RootSchemaView({
       model.constraints.length > 0 ||
       schema.default !== undefined ||
       model.scalarExample ||
-      (showExample && schema.example !== undefined),
+      model.inlineExample,
     );
     return (
       <section className={`${className} sp-schema-primitive`}>
