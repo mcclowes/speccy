@@ -286,7 +286,7 @@ function lintSummary(diagnostics: ApiDiagnostic[]) {
 
 function lintWhere(diagnostic: ApiDiagnostic) {
   return (
-    diagnostic.operationId ?? diagnostic.path.join(' / ') ?? diagnostic.ruleId
+    diagnostic.operationId || diagnostic.path.join(' / ') || diagnostic.ruleId
   );
 }
 

@@ -217,6 +217,14 @@ describe('formatLint', () => {
       'Add the likely 4xx responses.',
     );
   });
+
+  it('uses the rule ID when a diagnostic has no OpenAPI path', () => {
+    const diagnostic = { ...diagnostics[0]!, operationId: undefined, path: [] };
+
+    expect(formatLint([diagnostic], 'pretty', { color: false })).toContain(
+      'operation-id operation-id',
+    );
+  });
 });
 
 describe('exit codes', () => {
