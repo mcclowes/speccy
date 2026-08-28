@@ -1,3 +1,6 @@
+.sp-schema-explorer {
+  container-type: inline-size;
+}
 .sp-schema-explorer-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -426,7 +429,7 @@
   margin-top: 0;
   padding: 9px 10px;
 }
-@media (max-width: 720px) {
+@container (max-width: 640px) {
   .sp-schema-explorer-shell {
     grid-template-columns: 1fr;
   }
@@ -435,6 +438,6 @@
     border-bottom: 1px solid var(--sp-line);
   }
   .sp-schema-explorer-inspector {
-    min-height: 300px;
+    padding: 20px 16px 24px;
   }
 }

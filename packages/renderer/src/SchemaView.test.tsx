@@ -26,6 +26,17 @@ describe('SchemaView composition', () => {
     );
   });
 
+  it('stacks the field inspector when the explorer itself is narrow', () => {
+    const css = readFileSync('src/SchemaExplorer.module.css', 'utf8');
+
+    expect(css).toMatch(
+      /\.sp-schema-explorer \{[^}]*container-type: inline-size;/,
+    );
+    expect(css).toMatch(
+      /@container \(max-width: 640px\)[\s\S]*?\.sp-schema-explorer-shell \{[^}]*grid-template-columns: 1fr;/,
+    );
+  });
+
   it('shows named media examples in an example payload selector', () => {
     render(
       <MediaContent
