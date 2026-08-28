@@ -1,5 +1,14 @@
 # speccy-renderer
 
+## 0.13.2
+
+### Patch Changes
+
+- [`fe8bd04`](https://github.com/mcclowes/speccy/commit/fe8bd04d777d71348b7cd8fe976dc67f5b69d8ac) Thanks [@mcclowes](https://github.com/mcclowes)! - Stack schema field details below the tree when the explorer's host column is narrow.
+
+- Updated dependencies []:
+  - speccy-core@0.13.2
+
 ## 0.13.1
 
 ### Patch Changes
