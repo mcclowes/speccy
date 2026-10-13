@@ -115,4 +115,6 @@ jobs:
         run: node .github/scripts/publish-speccy-health.mjs
       - name: Enforce the breaking-change threshold
         if: steps.diff.outputs.exit_code != '0'
-        run: exit "${{ steps.diff.outputs.exit_code }}"
+        env:
+          DIFF_EXIT_CODE: ${{ steps.diff.outputs.exit_code }}
+        run: exit "$DIFF_EXIT_CODE"
