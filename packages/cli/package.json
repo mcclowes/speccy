@@ -1,6 +1,7 @@
 {
   "name": "speccy-cli",
   "version": "0.13.2",
+  "license": "MIT",
   "description": "Lint OpenAPI documents and report breaking changes from the command line.",
   "repository": {
     "type": "git",

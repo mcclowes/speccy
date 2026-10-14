@@ -1,6 +1,7 @@
 {
   "name": "create-speccy-reference",
   "version": "0.13.2",
+  "license": "MIT",
   "description": "Create a standalone Speccy API reference site.",
   "repository": {
     "type": "git",

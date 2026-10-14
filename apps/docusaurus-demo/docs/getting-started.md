@@ -12,6 +12,8 @@ Use the React package inside an existing app, the Docusaurus plugin inside a doc
 
 ## Choose a package
 
+Speccy packages use the [MIT license](https://github.com/mcclowes/speccy/blob/main/LICENSE).
+
 | What you’re building                         | Start with                                                                           |
 | -------------------------------------------- | ------------------------------------------------------------------------------------ |
 | A reference inside a React application       | [`speccy-renderer`](https://www.npmjs.com/package/speccy-renderer)                   |

@@ -1,6 +1,7 @@
 {
   "name": "docusaurus-plugin-speccy",
   "version": "0.13.2",
+  "license": "MIT",
   "description": "Render elegant OpenAPI reference pages in Docusaurus.",
   "repository": {
     "type": "git",

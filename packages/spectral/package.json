@@ -1,6 +1,7 @@
 {
   "name": "speccy-spectral",
   "version": "0.13.2",
+  "license": "MIT",
   "description": "Optional Spectral linting integration for Speccy.",
   "repository": {
     "type": "git",

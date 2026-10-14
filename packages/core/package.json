@@ -1,6 +1,7 @@
 {
   "name": "speccy-core",
   "version": "0.13.2",
+  "license": "MIT",
   "description": "Headless OpenAPI parsing, analysis, and diffing for Speccy.",
   "repository": {
     "type": "git",

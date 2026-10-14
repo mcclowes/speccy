@@ -1,6 +1,7 @@
 {
   "name": "speccy",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "description": "An elegant OpenAPI reference renderer for the web, macOS, and Docusaurus.",
   "workspaces": [
