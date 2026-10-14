@@ -24,6 +24,9 @@ export function packageNameFor(directory) {
 }
 
 export async function createReference(directory) {
+  const { version } = JSON.parse(
+    await readFile(join(packageDirectory, 'package.json'), 'utf8'),
+  );
   const target = resolve(directory);
   await mkdir(dirname(target), { recursive: true });
   await cp(join(packageDirectory, 'template'), target, {
@@ -36,6 +39,7 @@ export async function createReference(directory) {
   const packagePath = join(target, 'package.json');
   const packageJson = JSON.parse(await readFile(packagePath, 'utf8'));
   packageJson.name = packageNameFor(target);
+  packageJson.dependencies['speccy-renderer'] = `^${version}`;
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
   return target;
 }

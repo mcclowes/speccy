@@ -85,6 +85,9 @@ npm install
 npm run dev
 ```
 
+The generated project requests the renderer from the starter's release line; both
+packages share the same release version.
+
 Edit `speccy.config.ts`, then run `npm run build`. The generated app belongs to your project, so you can add analytics, authentication, custom headers, or other site-specific behavior without a Speccy plugin system.
 
 ## What the spec needs

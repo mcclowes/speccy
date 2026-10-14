@@ -22,6 +22,9 @@ Publish the generated `dist` directory. The starter includes rewrite configurati
 
 Set `basePath` in `speccy.config.ts` when the reference lives below the domain root. A reference published at `https://example.com/api/` should use `/api/`.
 
+The starter supports `light`, `dark`, `system`, and `inherit` for `theme` in
+`speccy.config.ts`, matching the renderer's theme options.
+
 Use `spec` for a local YAML or JSON file. Add `specUrl` to fetch a remote document at build time. Prefer a pinned or versioned URL in production so an upstream change can’t alter the next build without review.
 
 ## Docusaurus
