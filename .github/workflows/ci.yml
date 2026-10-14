@@ -39,13 +39,31 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: speccy-action/package-lock.json
+      - name: Install the checked-out workspace
+        working-directory: speccy-action
+        run: npm ci
+      - name: Build the checked-out CLI
+        working-directory: speccy-action
+        run: |
+          npm run build -w speccy-core
+          npm run build -w speccy-cli
       - name: Create a clean consumer workspace
         run: cp -R speccy-action/test-fixtures/github-action consumer
+      - name: Install the checked-out CLI for the consumer
+        id: cli
+        run: |
+          node -e 'require("node:fs").writeFileSync("package.json", JSON.stringify({ name: "speccy-action-consumer-fixture", private: true }))'
+          npm install --offline --ignore-scripts --install-links=false --package-lock=false --no-audit --no-fund ./speccy-action/packages/cli
+          echo "version=$(node -p "require('./speccy-action/packages/cli/package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Run the checked-out Action as a consumer
         uses: ./speccy-action
+        env:
+          npm_config_offline: 'true'
         with:
           specs: Fixture=consumer/base.yaml=>consumer/revision.yaml
-          version: 0.3.0
+          version: ${{ steps.cli.outputs.version }}
           comment: 'false'
 
   api-diff:
