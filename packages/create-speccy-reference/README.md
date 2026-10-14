@@ -9,4 +9,7 @@ npm install
 npm run dev
 ```
 
+The generated project requests `speccy-renderer` from the starter's release line.
+Both packages share the same release version.
+
 Edit `speccy.config.ts` to choose a local OpenAPI document or a URL fetched at build time. Run `npm run build` to produce static files in `dist`.
