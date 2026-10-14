@@ -102,6 +102,7 @@ describe('developer diagnostics layout', () => {
     render(
       <DeveloperDiagnostics
         diagnostics={findings}
+        currentPageDiagnostics={findings}
         storageScope="test"
         open
         onOpenChange={() => undefined}
@@ -115,8 +116,11 @@ describe('developer diagnostics layout', () => {
       screen.getByRole('button', { name: /API health: indexing/ }),
     ).toHaveTextContent('…');
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Indexing the rest of the API… 3 of 12',
+      'Indexing API healthChecking the full API · 3 of 12 batches',
     );
+    expect(screen.getByRole('progressbar')).toHaveAttribute('value', '3');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('max', '12');
+    expect(screen.getByRole('tab', { name: 'All API 1 so far' })).toBeVisible();
   });
 
   it('formats every finding for copying and CSV export', () => {

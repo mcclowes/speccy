@@ -676,6 +676,55 @@ related:
   font-size: 1rem;
   line-height: 1.75;
 }
+.sp-api-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 28px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--sp-line);
+  border-radius: 12px;
+  background: var(--sp-surface);
+}
+.sp-api-meta > div {
+  min-width: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-api-meta > div:nth-child(odd) {
+  border-right: 1px solid var(--sp-line);
+}
+.sp-api-meta > div:last-child {
+  border-bottom: 0;
+}
+.sp-api-meta > div:nth-last-child(2):nth-child(odd) {
+  border-bottom: 0;
+}
+.sp-api-meta dt {
+  margin-bottom: 5px;
+  color: var(--sp-muted);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sp-api-meta dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--sp-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+.sp-api-meta a {
+  color: var(--sp-text);
+  font-weight: 600;
+  text-decoration-color: color-mix(in srgb, var(--sp-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+.sp-api-meta a:hover {
+  color: var(--sp-accent);
+}
 .sp-hero-aside {
   display: grid;
   gap: 16px;
@@ -2485,6 +2534,20 @@ related:
   }
   .sp-tag-heading .sp-richtext {
     justify-self: start;
+  }
+}
+@container sp-content (max-width: 520px) {
+  .sp-api-meta {
+    grid-template-columns: 1fr;
+  }
+  .sp-api-meta > div,
+  .sp-api-meta > div:nth-child(odd),
+  .sp-api-meta > div:nth-last-child(2):nth-child(odd) {
+    border-right: 0;
+    border-bottom: 1px solid var(--sp-line);
+  }
+  .sp-api-meta > div:last-child {
+    border-bottom: 0;
   }
 }
 

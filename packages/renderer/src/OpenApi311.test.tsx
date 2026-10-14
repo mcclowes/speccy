@@ -420,6 +420,11 @@ describe('OpenAPI 3.1.1 conformance', () => {
       'https://example.com/support',
     );
     expect(screen.getByText('support@example.com')).toBeInTheDocument();
+    const apiInformation = screen.getByLabelText('API information');
+    expect(apiInformation).toContainElement(screen.getByText('Contact'));
+    expect(apiInformation).toContainElement(
+      screen.getByText('support@example.com'),
+    );
     expect(screen.getByText(/eu, us/)).toBeInTheDocument();
 
     rerender(
