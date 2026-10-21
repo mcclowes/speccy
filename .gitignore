@@ -7,6 +7,8 @@ coverage/
 storybook-static/
 playwright-report/
 test-results/
+.fettle/shots/
+.fettle/visual-results.json
 *.log
 apps/macos/.build/
 apps/macos/Speccy.app/

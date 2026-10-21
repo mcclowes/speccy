@@ -37,6 +37,8 @@ The renderer fills its parent. Give the surrounding layout enough height for the
 
 Object schemas use a field explorer. Selecting a field opens its description, constraints, examples, and accepted `oneOf` or `anyOf` shapes. Expand an accepted shape to inspect its fields without leaving the parent schema.
 
+Field rows fill the explorer card to its rounded edges, including on hover and selection. Parameter groups use the same layout.
+
 The field explorer responds to the width of its host layout. In wide content areas, field details appear beside the tree. In narrow columns, including split endpoint and response layouts, they move below it so names and types remain readable.
 
 Properties can use a single-member `allOf` wrapper to add a local description or deprecation marker to a reusable schema. The field explorer retains the referenced schema's allowed values, format, pattern, numeric bounds, length limits, and example while honoring any constraint set directly on the property.

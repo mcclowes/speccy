@@ -1,5 +1,40 @@
 import { expect, test } from '@playwright/test';
 
+for (const theme of ['light', 'dark']) {
+  test(`parameter hover fills the card in ${theme} theme`, async ({
+    page,
+  }, testInfo) => {
+    await page.goto(
+      '/iframe.html?id=renderer-data-display-schema-explorer--path-parameter&viewMode=story',
+    );
+    await page.locator('.speccy').evaluate((element, value) => {
+      element.classList.replace('sp-theme-light', `sp-theme-${value}`);
+    }, theme);
+
+    const card = page.locator('.sp-schema-explorer-shell');
+    const row = card.locator('.sp-schema-explorer-row');
+    const background = await row.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    await row.hover();
+    const [cardBox, rowBox] = await Promise.all([
+      card.boundingBox(),
+      row.boundingBox(),
+    ]);
+    expect(rowBox!.y).toBeCloseTo(cardBox!.y + 1, 0);
+    expect(rowBox!.y + rowBox!.height).toBeCloseTo(
+      cardBox!.y + cardBox!.height - 1,
+      0,
+    );
+    await expect(row).not.toHaveCSS('background-color', background);
+    await card.screenshot({
+      path: testInfo.outputPath(`parameter-hover-${theme}.png`),
+    });
+    await row.getByRole('button').click();
+    await expect(card).toHaveClass(/has-selection/);
+  });
+}
+
 const stories = [
   {
     name: 'overview-light',

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { SchemaObject } from 'speccy-core';
 import { SchemaView } from './SchemaView';
+import { SchemaExplorer } from './SchemaExplorer';
 
 const transactionCategorySchema: SchemaObject = {
   title: 'TransactionCategory',
@@ -106,3 +107,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const InteractiveTree: Story = {};
+
+export const PathParameter: Story = {
+  tags: ['visual'],
+  render: () => (
+    <SchemaExplorer
+      schema={{
+        title: 'Path parameters',
+        type: 'object',
+        required: ['bookingId'],
+        properties: { bookingId: { type: 'string' } },
+      }}
+      showHeader={false}
+      showExample
+    />
+  ),
+};

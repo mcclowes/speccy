@@ -90,9 +90,6 @@
   font-family: var(--sp-mono-font-family, 'DM Mono', ui-monospace, monospace);
   font-size: 0.5625rem;
 }
-.sp-schema-explorer-rows {
-  padding: 6px 0;
-}
 .sp-schema-explorer-branch {
   position: relative;
 }
