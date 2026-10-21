@@ -29,6 +29,22 @@
     "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build",
     "create:reference": "node packages/create-speccy-reference/index.js"
   },
+  "overrides": {
+    "@docusaurus/core": {
+      "tinypool": "2.1.2"
+    },
+    "copy-webpack-plugin": {
+      "serialize-javascript": "7.1.2"
+    },
+    "css-minimizer-webpack-plugin": {
+      "serialize-javascript": "7.1.2"
+    },
+    "sockjs": {
+      "uuid": "11.1.1"
+    },
+    "postcss-selector-parser": "^7.1.6",
+    "esbuild": "^0.28.2"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -36,6 +52,7 @@
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
+    "esbuild": "^0.28.2",
     "eslint": "^10.8.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
