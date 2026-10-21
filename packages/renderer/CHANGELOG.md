@@ -1,5 +1,15 @@
 # speccy-renderer
 
+## 0.13.2
+
+### Patch Changes
+
+- [`fe8bd04`](https://github.com/mcclowes/speccy/commit/fe8bd04d777d71348b7cd8fe976dc67f5b69d8ac) Thanks [@mcclowes](https://github.com/mcclowes)! - Stack schema field details below the tree when the explorer's host column is narrow.
+
+- [`81447cc`](https://github.com/mcclowes/speccy/commit/81447ccd1768643daf283dc39ae5310f864d6277) Thanks [@mcclowes](https://github.com/mcclowes)! - Remove the vertical inset around schema field rows so parameter hover and selection backgrounds fill the card to its rounded edges.
+- Updated dependencies []:
+  - speccy-core@0.13.2
+
 ## 0.13.1
 
 ### Patch Changes
