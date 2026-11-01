@@ -30,13 +30,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@stoplight/spectral-core": "^1.23.1",
-    "@stoplight/spectral-rulesets": "^1.22.7",
+    "@stoplight/spectral-core": "^1.24.0",
+    "@stoplight/spectral-rulesets": "^1.23.0",
     "speccy-core": "^0.13.1"
   },
   "devDependencies": {
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.5"
   }
 }
